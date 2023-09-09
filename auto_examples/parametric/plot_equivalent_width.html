@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Generate parametric galaxy SED" href="plot_sed.html" /><link rel="prev" title="Generate parametric observed SED" href="plot_observed_sed.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Particle galaxy examples" href="../particle/index.html" /><link rel="prev" title="Generate composite image example" href="plot_composite_galaxy.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2023.08.19 -->
         <title>Plot equivalent width for UV indices - synthesizer 0.1 documentation</title>
@@ -230,9 +230,9 @@
 <li class="toctree-l3"><a class="reference internal" href="plot_create_image.html">Create image example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="generate_lines.html">Generate lines from parametric galaxy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_observed_sed.html">Generate parametric observed SED</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot equivalent width for UV indices</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_sed.html">Generate parametric galaxy SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_composite_galaxy.html">Generate composite image example</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot equivalent width for UV indices</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -480,6 +480,10 @@ median age: 50.00 Myr
 mean age: 50.00 Myr
 ----------
 
+/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/numpy/core/fromnumeric.py:3504: RuntimeWarning: Mean of empty slice.
+  return _methods._mean(a, axis=axis, dtype=dtype,
+/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/numpy/core/_methods.py:129: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
 ----------
 SUMMARY OF PARAMETERISED STAR FORMATION HISTORY
 &lt;class &#39;synthesizer.parametric.sfzh.SFH.Constant&#39;&gt;
@@ -577,7 +581,7 @@ mean age: 50.00 Myr
 ----------
 
 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-/home/runner/work/synthesizer/synthesizer/examples/parametric/plot_equivalent_width.py:97: UserWarning: The figure layout has changed to tight
+/home/runner/work/synthesizer/synthesizer/examples/parametric/plot_equivalent_width.py:154: UserWarning: The figure layout has changed to tight
   plt.tight_layout()
 ----------
 SUMMARY OF PARAMETERISED STAR FORMATION HISTORY
@@ -692,10 +696,6 @@ median age: 50.00 Myr
 mean age: 50.00 Myr
 ----------
 
-/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/numpy/core/fromnumeric.py:3504: RuntimeWarning: Mean of empty slice.
-  return _methods._mean(a, axis=axis, dtype=dtype,
-/opt/hostedtoolcache/Python/3.10.12/x64/lib/python3.10/site-packages/numpy/core/_methods.py:129: RuntimeWarning: invalid value encountered in scalar divide
-  ret = ret.dtype.type(ret / rcount)
 ----------
 SUMMARY OF PARAMETERISED STAR FORMATION HISTORY
 &lt;class &#39;synthesizer.parametric.sfzh.SFH.Constant&#39;&gt;
@@ -1328,11 +1328,52 @@ mean age: 50.00 Myr
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.sfzh</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZH</span><span class="p">,</span> <span class="n">generate_sfzh</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span> <span class="k">as</span> <span class="n">Galaxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">uv_indices</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span>
 
 
+<span class="k">def</span> <span class="nf">set_index</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A function to define a dictionary of uv indices.</span>
+
+<span class="sd">    Each index has a defined absorption window.</span>
+<span class="sd">    A pseudo-continuum is defined, made up of a blue and red shifted window.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: A tuple containing the following lists:</span>
+<span class="sd">            - index (int): List of UV indices.</span>
+<span class="sd">            - index_window (int): List of absorption window bounds.</span>
+<span class="sd">            - blue_window (int): List of blue shifted window bounds.</span>
+<span class="sd">            - red_window (int): List of red shifted window bounds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1370</span><span class="p">,</span> <span class="mi">1400</span><span class="p">,</span> <span class="mi">1425</span><span class="p">,</span> <span class="mi">1460</span><span class="p">,</span> <span class="mi">1501</span><span class="p">,</span> <span class="mi">1533</span><span class="p">,</span> <span class="mi">1550</span><span class="p">,</span> <span class="mi">1719</span><span class="p">,</span> <span class="mi">1853</span><span class="p">]</span>
+    <span class="n">index_window</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1360</span><span class="p">,</span> <span class="mi">1380</span><span class="p">,</span> <span class="mi">1385</span><span class="p">,</span> <span class="mi">1410</span><span class="p">,</span> <span class="mi">1413</span><span class="p">,</span> <span class="mi">1435</span><span class="p">,</span> <span class="mi">1450</span><span class="p">,</span> <span class="mi">1470</span><span class="p">,</span> <span class="mi">1496</span><span class="p">,</span> <span class="mi">1506</span><span class="p">,</span> <span class="mi">1530</span><span class="p">,</span> <span class="mi">1537</span><span class="p">,</span> <span class="mi">1530</span><span class="p">,</span> <span class="mi">1560</span><span class="p">,</span> <span class="mi">1705</span><span class="p">,</span> <span class="mi">1729</span><span class="p">,</span> <span class="mi">1838</span><span class="p">,</span> <span class="mi">1858</span><span class="p">]</span>
+    <span class="n">blue_window</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1345</span><span class="p">,</span> <span class="mi">1354</span><span class="p">,</span> <span class="mi">1345</span><span class="p">,</span> <span class="mi">1354</span><span class="p">,</span> <span class="mi">1345</span><span class="p">,</span> <span class="mi">1354</span><span class="p">,</span> <span class="mi">1436</span><span class="p">,</span> <span class="mi">1447</span><span class="p">,</span> <span class="mi">1482</span><span class="p">,</span> <span class="mi">1491</span><span class="p">,</span> <span class="mi">1482</span><span class="p">,</span> <span class="mi">1491</span><span class="p">,</span> <span class="mi">1482</span><span class="p">,</span> <span class="mi">1491</span><span class="p">,</span> <span class="mi">1675</span><span class="p">,</span> <span class="mi">1684</span><span class="p">,</span> <span class="mi">1797</span><span class="p">,</span> <span class="mi">1807</span><span class="p">]</span>
+    <span class="n">red_window</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1436</span><span class="p">,</span> <span class="mi">1447</span><span class="p">,</span> <span class="mi">1436</span><span class="p">,</span> <span class="mi">1447</span><span class="p">,</span> <span class="mi">1436</span><span class="p">,</span> <span class="mi">1447</span><span class="p">,</span> <span class="mi">1482</span><span class="p">,</span> <span class="mi">1491</span><span class="p">,</span> <span class="mi">1583</span><span class="p">,</span> <span class="mi">1593</span><span class="p">,</span> <span class="mi">1583</span><span class="p">,</span> <span class="mi">1593</span><span class="p">,</span> <span class="mi">1583</span><span class="p">,</span> <span class="mi">1593</span><span class="p">,</span> <span class="mi">1751</span><span class="p">,</span> <span class="mi">1761</span><span class="p">,</span> <span class="mi">1871</span><span class="p">,</span> <span class="mi">1883</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_window</span><span class="p">,</span> <span class="n">blue_window</span><span class="p">,</span> <span class="n">red_window</span>
+
+
 <span class="k">def</span> <span class="nf">get_ew</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">smass</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">EqW</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate equivalent width for a specified UV index.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        index (int): The UV index for which the equivalent width is calculated.</span>
+<span class="sd">        Z (float): Metallicity.</span>
+<span class="sd">        smass (float): Stellar mass.</span>
+<span class="sd">        grid (Grid): The grid object.</span>
+<span class="sd">        EqW (float): Initial equivalent width.</span>
+<span class="sd">        mode (str): Calculation mode.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The calculated equivalent width.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If mode is invalid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">sfh_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">}</span>
 
     <span class="n">Z_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="n">Z</span><span class="p">}</span>  <span class="c1"># can also use linear metallicity e.g. {&#39;Z&#39;: 0.01}</span>
@@ -1362,9 +1403,25 @@ mean age: 50.00 Myr
     <span class="k">return</span> <span class="n">EqW</span>
 
 
-<span class="k">def</span> <span class="nf">equivalent_width</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_uv</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">equivalent_width</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span> <span class="n">uv_index</span><span class="p">,</span> <span class="n">index_window</span><span class="p">,</span> <span class="n">blue_window</span><span class="p">,</span> <span class="n">red_window</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate equivalent widths for specified UV indices.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grids (str): Grid name.</span>
+<span class="sd">        uv_index (list): List of UV indices to calculate equivalent widths for.</span>
+<span class="sd">        index_window (list): List of index window bounds.</span>
+<span class="sd">        blue_window (list): List of blue shifted window bounds.</span>
+<span class="sd">        red_window (list): List of red shifted window bounds.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># -- Calculate the equivalent width for each defined index</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uv_index</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">Sed</span><span class="o">.</span><span class="n">get_index</span><span class="p">(</span><span class="n">index_window</span><span class="p">,</span> <span class="n">blue_window</span><span class="p">,</span> <span class="n">red_window</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
         <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grids</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">)</span>
 
         <span class="c1"># --- define the parameters of the star formation and metal enrichment histories</span>
@@ -1388,10 +1445,10 @@ mean age: 50.00 Myr
         <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">index_uv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1501</span> <span class="ow">or</span> <span class="n">index_uv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1719</span><span class="p">:</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;UV_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_uv</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1501</span> <span class="ow">or</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1719</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;UV_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;F&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index_uv</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;F&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="n">_</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
 
@@ -1412,7 +1469,7 @@ mean age: 50.00 Myr
 
         <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">uv_index</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 
@@ -1420,13 +1477,12 @@ mean age: 50.00 Myr
     <span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;../../tests/test_grid&quot;</span>  <span class="c1"># Change this directory to your own.</span>
     <span class="n">grid_name</span> <span class="o">=</span> <span class="s2">&quot;test_grid&quot;</span>  <span class="c1"># Change this to the appropriate .hdf5</span>
 
-    <span class="n">indices</span> <span class="o">=</span> <span class="n">uv_indices</span><span class="p">()</span>  <span class="c1"># Retrieve UV indices</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># [i[0] for i in indices]</span>
+    <span class="n">index</span><span class="p">,</span> <span class="n">index_window</span><span class="p">,</span> <span class="n">blue_window</span><span class="p">,</span> <span class="n">red_window</span> <span class="o">=</span> <span class="n">set_index</span><span class="p">()</span>  <span class="c1"># Retrieve UV indices</span>
 
-    <span class="n">equivalent_width</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+    <span class="n">equivalent_width</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">index_window</span><span class="p">,</span> <span class="n">blue_window</span><span class="p">,</span> <span class="n">red_window</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.524 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.068 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-parametric-plot-equivalent-width-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d53e10c9d40d7a69c3a21bb58a5a7fdb/plot_equivalent_width.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_equivalent_width.py</span></code></a></p>
@@ -1443,23 +1499,23 @@ mean age: 50.00 Myr
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="plot_sed.html">
+          <a class="next-page" href="../particle/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Generate parametric galaxy SED</div>
+                <div class="title">Particle galaxy examples</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_observed_sed.html">
+          <a class="prev-page" href="plot_composite_galaxy.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Generate parametric observed SED</div>
+                <div class="title">Generate composite image example</div>
                 
               </div>
             </a>
