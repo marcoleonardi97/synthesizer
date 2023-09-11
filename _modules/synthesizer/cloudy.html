@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2023.08.19 -->
+    <!-- Generated with Sphinx 7.1.1 and Furo 2023.09.10 -->
         <title>synthesizer.cloudy - synthesizer 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -460,12 +460,42 @@
         <span class="n">shape_commands</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">shape_commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;table SED &quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">.sed&quot; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="k">return</span> <span class="n">shape_commands</span></div>
+
+
+<div class="viewcode-block" id="ShapeCommands.cloudy_agn"><a class="viewcode-back" href="../../_autosummary/synthesizer.cloudy.html#synthesizer.cloudy.ShapeCommands.cloudy_agn">[docs]</a>    <span class="k">def</span> <span class="nf">cloudy_agn</span><span class="p">(</span><span class="n">TBB</span><span class="p">,</span> <span class="n">aox</span><span class="o">=-</span><span class="mf">1.4</span><span class="p">,</span> <span class="n">auv</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">ax</span><span class="o">=-</span><span class="mf">1.35</span><span class="p">):</span> <span class="c1"># values from Calabro CEERS AGN model</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A function for specifying the cloudy AGN model. See 6.2 Hazy1.pdf.</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_name: str</span>
+<span class="sd">            User defined name of the model used for cloudy inputs and outputs.</span>
+<span class="sd">        TBB: float</span>
+<span class="sd">            The Big Bump temperature</span>
+<span class="sd">        aox: float</span>
+
+<span class="sd">        auv: float</span>
+
+<span class="sd">        ax: float</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">            a list of strings with the cloudy input commands</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># collect cloudy shape commands</span>
+        <span class="n">shape_commands</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">shape_commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;AGN T =</span><span class="si">{</span><span class="n">TBB</span><span class="si">}</span><span class="s1"> k, a(ox) = </span><span class="si">{</span><span class="n">aox</span><span class="si">}</span><span class="s1">, a(uv)= </span><span class="si">{</span><span class="n">auv</span><span class="si">}</span><span class="s1"> a(x)=</span><span class="si">{</span><span class="n">ax</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">shape_commands</span></div></div>
 
 
-<div class="viewcode-block" id="create_cloudy_input"><a class="viewcode-back" href="../../_autosummary/synthesizer.cloudy.html#synthesizer.cloudy.create_cloudy_input">[docs]</a><span class="k">def</span> <span class="nf">create_cloudy_input</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="p">,</span> <span class="n">shape_commands</span><span class="p">,</span> <span class="n">abundances</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">):</span>
+<div class="viewcode-block" id="create_cloudy_input"><a class="viewcode-back" href="../../_autosummary/synthesizer.cloudy.html#synthesizer.cloudy.create_cloudy_input">[docs]</a><span class="k">def</span> <span class="nf">create_cloudy_input</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">shape_commands</span><span class="p">,</span> <span class="n">abundances</span><span class="p">,</span>
+                        <span class="n">output_dir</span><span class="o">=</span><span class="s1">&#39;./&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A generic function for creating a cloudy input file</span>
 
@@ -576,10 +606,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">d2m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-        <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">a_nodep</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
-        <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">a_nodep</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
+        <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
+        <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
         <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
-        <span class="n">delta_Si</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">a_nodep</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
+        <span class="n">delta_Si</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
         <span class="n">orion_C_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.6259</span>
         <span class="n">orion_Si_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.5547</span>
         <span class="n">PAH_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.446</span>
