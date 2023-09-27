@@ -278,6 +278,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.filters.html">synthesizer.filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.galaxy.html">synthesizer.galaxy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.grid.html">synthesizer.grid</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.igm.html">synthesizer.igm</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -358,12 +359,14 @@
         <article role="main">
           <h1>Source code for synthesizer.parametric.galaxy</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">..base_galaxy</span> <span class="kn">import</span> <span class="n">BaseGalaxy</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">..dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
-<span class="kn">from</span> <span class="nn">..line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
-<span class="kn">from</span> <span class="nn">..imaging.images</span> <span class="kn">import</span> <span class="n">ParametricImage</span>
-<span class="kn">from</span> <span class="nn">..art</span> <span class="kn">import</span> <span class="n">Art</span>
+
+<span class="kn">from</span> <span class="nn">synthesizer.base_galaxy</span> <span class="kn">import</span> <span class="n">BaseGalaxy</span>
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
+<span class="kn">from</span> <span class="nn">synthesizer.imaging.images</span> <span class="kn">import</span> <span class="n">ParametricImage</span>
+<span class="kn">from</span> <span class="nn">synthesizer.art</span> <span class="kn">import</span> <span class="n">Art</span>
+<span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span>
 
 
 <div class="viewcode-block" id="Galaxy"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.galaxy.html#synthesizer.parametric.galaxy.Galaxy">[docs]</a><span class="k">class</span> <span class="nc">Galaxy</span><span class="p">(</span><span class="n">BaseGalaxy</span><span class="p">):</span>
@@ -375,17 +378,32 @@
         <span class="n">sfzh</span><span class="p">,</span>
         <span class="n">morph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;parametric galaxy&quot;</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;__init__ method for ParametricGalaxy</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name (string):</span>
-<span class="sd">                name of galaxy</span>
-<span class="sd">            sfzh (object, sfzh):</span>
-<span class="sd">                instance of the BinnedSFZH class containing the star formation</span>
-<span class="sd">                and metal enrichment history.</span>
-<span class="sd">            morph (object)</span>
+<span class="sd">            name (str)</span>
+<span class="sd">                A name to identify the galaxy. Only used for external labelling,</span>
+<span class="sd">                has no internal use.</span>
+<span class="sd">            sfzh (object, BinnedSFZH)</span>
+<span class="sd">                An instance of BinnedSFZH containing the combined star</span>
+<span class="sd">                formation and metallicity histories.</span>
+<span class="sd">            morph (object, morphology.* e.g. Sersic2D)</span>
+<span class="sd">                An instance of one of the morphology classes describing the</span>
+<span class="sd">                galaxy&#39;s morphology. This can be any of the family of</span>
+<span class="sd">                morphology classes from synthesizer.morphology.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InconsistentArguments</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check we haven&#39;t been given Stars</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">Stars</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Stars passed instead of SFZH object (BinnedSFZH).&quot;</span>
+                <span class="s2">&quot; Did you mean synthesizer.particle.Galaxy instead?&quot;</span>
+            <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
@@ -399,6 +417,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary holding spectra</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary holding lines</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary holding images</span>
+
+        <span class="c1"># The redshift of the galaxy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to print a basic summary of the Galaxy object.</span>
