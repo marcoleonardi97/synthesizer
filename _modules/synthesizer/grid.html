@@ -492,13 +492,40 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Grid class, containing attributes and methods for reading and manipulating spectral grids</span>
 
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-
-
-<span class="sd">    Methods</span>
-<span class="sd">    -------</span>
-
+<span class="sd">    Attributes:</span>
+<span class="sd">        grid_dir (str)</span>
+<span class="sd">            The directory containing the grid HDF5 file.</span>
+<span class="sd">        grid_name (str)</span>
+<span class="sd">            The name of the grid (as defined by the file name) with no extension.</span>
+<span class="sd">        grid_ext (str)</span>
+<span class="sd">            The grid extension. Either &quot;.hdf5&quot; or &quot;.h5&quot;. If the passed grid_name</span>
+<span class="sd">            has no extension then &quot;.hdf5&quot; is assumed.</span>
+<span class="sd">        read_lines (bool/list)</span>
+<span class="sd">            Flag for whether to read lines. If False they are not read, otherwise,</span>
+<span class="sd">            this is a list of the requested lines.</span>
+<span class="sd">        read_spectra (bool/list)</span>
+<span class="sd">            Flag for whether to read spectra.</span>
+<span class="sd">        spectra (array-like, float)</span>
+<span class="sd">            The spectra array from the grid. This is an N-dimensional grid where </span>
+<span class="sd">            N is the number of axes of the SPS grid. The final dimension is</span>
+<span class="sd">            always wavelength.</span>
+<span class="sd">        lines (array-like, float)</span>
+<span class="sd">            The lines array from the grid. This is an N-dimensional grid where </span>
+<span class="sd">            N is the number of axes of the SPS grid. The final dimension is</span>
+<span class="sd">            always wavelength.</span>
+<span class="sd">        parameters (dict)</span>
+<span class="sd">            A dictionary containing the grid&#39;s parameters used in its generation.</span>
+<span class="sd">        axes (list, str)</span>
+<span class="sd">            A list of the names of the spectral grid axes.</span>
+<span class="sd">        naxes</span>
+<span class="sd">            The number of axes the spectral grid has.</span>
+<span class="sd">        logQ10 (dict)</span>
+<span class="sd">            A dictionary of ionisation Q parameters.</span>
+<span class="sd">        &lt;grid_axis&gt; (array-like, float)</span>
+<span class="sd">            A Grid will always contain 1D arrays corresponding to the axes of the</span>
+<span class="sd">            spectral grid. These are read dynamically from the HDF5 file so can be</span>
+<span class="sd">            anything but usually contain at least stellar ages and stellar </span>
+<span class="sd">            metallicity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -509,46 +536,61 @@
         <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">read_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">grid_dir</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">grid_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="s2">&quot;data/grids&quot;</span><span class="p">)</span>
 
+        <span class="c1"># The grid directory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span> <span class="o">=</span> <span class="n">grid_dir</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span> <span class="o">=</span> <span class="n">grid_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
 
+        <span class="c1"># Have we been passed an extension?</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="s2">&quot;hdf5&quot;</span>
+
+        <span class="c1"># Strip the extension off the name (harmless if no extension)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span> <span class="o">=</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Construct the full path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Flags for reading behaviour</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_lines</span> <span class="o">=</span> <span class="n">read_lines</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_spectra</span> <span class="o">=</span> <span class="n">read_spectra</span>  <span class="c1">#  not used</span>
 
+        <span class="c1"># Set up attributes we will set later</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># convert line list into flattend list and remove duplicates</span>
+        <span class="c1"># Convert line list into flattened list and remove duplicates</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">read_lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">read_lines</span> <span class="o">=</span> <span class="n">flatten_linelist</span><span class="p">(</span><span class="n">read_lines</span><span class="p">)</span>
 
-        <span class="c1"># get basic info of the grid</span>
+        <span class="c1"># Get basic info of the grid</span>
         <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-            <span class="c1"># get list of axes</span>
+            <span class="c1"># Get list of axes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">])</span>
 
+            <span class="c1"># Loop over axes extracting their data</span>
             <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">][</span><span class="n">axis</span><span class="p">][:])</span>
 
-            <span class="c1"># number of axes</span>
+            <span class="c1"># Number of axes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">naxes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
+            <span class="c1"># Get ionisation data</span>
             <span class="k">if</span> <span class="s2">&quot;log10Q&quot;</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;log10Q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span><span class="p">[</span><span class="n">ion</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;log10Q&quot;</span><span class="p">][</span><span class="n">ion</span><span class="p">][:]</span>
 
-        <span class="c1"># read in spectra</span>
+        <span class="c1"># Read in spectra</span>
         <span class="k">if</span> <span class="n">read_spectra</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">()</span>
 
-        <span class="c1"># read in lines</span>
+        <span class="c1"># Read in lines</span>
         <span class="k">if</span> <span class="n">read_lines</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
 
