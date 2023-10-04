@@ -202,11 +202,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../auto_examples/general/index.html">General examples</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of General examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_igm.html">IGM transmission example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_dustcurves.html">Dust curves example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/sed.html">SED object example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_abundances.html">Abundances example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_filters.html">Filters example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_spectra_age.html">Plot Spectra by age</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_line_ratios.html">Plot line ratios</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_quiescent_colours.html">Plot quiescent UVJ diagram</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/general/plot_photometry.html">Photometry example</a></li>
 </ul>
@@ -355,37 +352,28 @@
         </div>
         <article role="main">
           <h1>Source code for synthesizer.grid</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Create a Grid object</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
-
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="vm">__file__</span> <span class="k">as</span> <span class="n">filepath</span>
-<span class="kn">from</span> <span class="nn">.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
-<span class="kn">from</span> <span class="nn">.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
-
-
-<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
+<span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
 
 
 <div class="viewcode-block" id="get_available_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.get_available_lines">[docs]</a><span class="k">def</span> <span class="nf">get_available_lines</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="p">,</span> <span class="n">include_wavelengths</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a list of the lines available to a grid</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    grid_name : str</span>
-<span class="sd">        list containing lists and/or strings and integers</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        grid_name (str)</span>
+<span class="sd">            The name of the grid file.</span>
 
-<span class="sd">    grid_dir : str</span>
-<span class="sd">        path to grid</span>
+<span class="sd">        grid_dir (str)</span>
+<span class="sd">            The directory to the grid file.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    list</span>
-<span class="sd">        list of lines</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (list)</span>
+<span class="sd">            List of available lines</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
@@ -402,37 +390,36 @@
 
 
 <div class="viewcode-block" id="flatten_linelist"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.flatten_linelist">[docs]</a><span class="k">def</span> <span class="nf">flatten_linelist</span><span class="p">(</span><span class="n">list_to_flatten</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten a mixed list of lists and strings and remove duplicates</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Flatten a mixed list of lists and strings and remove duplicates. Used when</span>
+<span class="sd">    converting a desired line list which may contain single lines and doublets.</span>
 
-<span class="sd">    Flattens a mixed list of lists and strings. Used when converting a desired line list which may contain single lines and doublets.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        list_to_flatten (list)</span>
+<span class="sd">            list containing lists and/or strings and integers</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    list : list</span>
-<span class="sd">        list containing lists and/or strings and integers</span>
-
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    list</span>
-<span class="sd">        flattend list</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (list)</span>
+<span class="sd">            flattened list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">flattend_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">list_to_flatten</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">list_to_flatten</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
                 <span class="n">flattend_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># --- if the line is a doublet resolve it and add each line individually</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">flattend_list</span> <span class="o">+=</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            
+            <span class="c1"># If the line is a doublet resolve it and add each line</span>
+            <span class="c1"># individually</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">flattend_list</span> <span class="o">+=</span> <span class="n">lst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">flattend_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+                <span class="n">flattend_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># raise exception</span>
+            <span class="c1"># TODO: raise exception</span>
             <span class="k">pass</span>
 
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">flattend_list</span><span class="p">))</span></div>
@@ -490,7 +477,8 @@
 
 <div class="viewcode-block" id="Grid"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid">[docs]</a><span class="k">class</span> <span class="nc">Grid</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The Grid class, containing attributes and methods for reading and manipulating spectral grids</span>
+<span class="sd">    The Grid class, containing attributes and methods for reading and</span>
+<span class="sd">    manipulating spectral grids.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        grid_dir (str)</span>
@@ -532,9 +520,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">grid_name</span><span class="p">,</span>
         <span class="n">grid_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">read_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">grid_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="s2">&quot;data/grids&quot;</span><span class="p">)</span>
@@ -562,7 +549,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># Convert line list into flattened list and remove duplicates</span>
+        <span class="c1"># Convert line list into a flattened list and remove duplicates</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">read_lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">read_lines</span> <span class="o">=</span> <span class="n">flatten_linelist</span><span class="p">(</span><span class="n">read_lines</span><span class="p">)</span>
 
@@ -573,14 +560,19 @@
             <span class="c1"># Get list of axes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">])</span>
 
-            <span class="c1"># Loop over axes extracting their data</span>
+            <span class="c1"># Put the values of each axis in a dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axes_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">axis</span><span class="p">:</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">][</span><span class="n">axis</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">axis</span>
+                                <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">}</span>
+
+            <span class="c1"># Set the values of each axis as an attribute</span>
+            <span class="c1"># e.g. self.log10age == self.axes_values[&#39;log10age&#39;]</span>
             <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">][</span><span class="n">axis</span><span class="p">][:])</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes_values</span><span class="p">[</span><span class="n">axis</span><span class="p">])</span>
 
             <span class="c1"># Number of axes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">naxes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
-            <span class="c1"># Get ionisation data</span>
+            <span class="c1"># If log10Q is available set this as an attribute as well</span>
             <span class="k">if</span> <span class="s2">&quot;log10Q&quot;</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;log10Q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -588,139 +580,125 @@
 
         <span class="c1"># Read in spectra</span>
         <span class="k">if</span> <span class="n">read_spectra</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># Read in lines</span>
-        <span class="k">if</span> <span class="n">read_lines</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+
+                <span class="c1"># Get list of available spectra</span>
+                <span class="n">spectra_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+                <span class="c1"># Remove wavelength dataset</span>
+                <span class="n">spectra_ids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;wavelength&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Remove normalisation dataset</span>
+                <span class="k">if</span> <span class="s2">&quot;normalisation&quot;</span> <span class="ow">in</span> <span class="n">spectra_ids</span><span class="p">:</span>
+                    <span class="n">spectra_ids</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;normalisation&quot;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">spectra_id</span> <span class="ow">in</span> <span class="n">spectra_ids</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra/wavelength&quot;</span><span class="p">][:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra&quot;</span><span class="p">][</span><span class="n">spectra_id</span><span class="p">][:]</span>
+
+            <span class="c1"># If a full cloudy grid is available calculate some other spectra for</span>
+            <span class="c1"># convenience.</span>
+            <span class="k">if</span> <span class="s2">&quot;linecont&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular_continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;linecont&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Save list of available spectra</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">read_lines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            
+            <span class="c1"># If read_lines is True read all available lines in the grid,</span>
+            <span class="c1"># otherwise if read_lines is a list just read the lines in the list.</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># If a list of lines is provided then only read lines in this list</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">read_lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">read_lines</span> <span class="o">=</span> <span class="n">flatten_linelist</span><span class="p">(</span><span class="n">read_lines</span><span class="p">)</span>
+                
+            <span class="c1"># If a list isn&#39;t provided then use all available lines to the grid</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">read_lines</span> <span class="o">=</span> <span class="n">get_available_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span>
+                           <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_lines</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
+                        <span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span>
+                        <span class="s2">&quot;luminosity&quot;</span><span class="p">][:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span>
+                        <span class="s2">&quot;continuum&quot;</span><span class="p">][:]</span>
+
+            <span class="c1"># Save list of available lines</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Function to print a basic summary of the Grid object.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Set up string for printing</span>
+        <span class="c1"># Set up the string for printing</span>
         <span class="n">pstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="c1"># Add the content of the summary to the string to be printed</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;SUMMARY OF GRID&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;SUMMARY OF GRID&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
             <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">axis</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;spectra: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;available lines: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
-            <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;lines: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;available spectra: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="k">return</span> <span class="n">pstr</span>
 
-<div class="viewcode-block" id="Grid.get_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Function to read in spectra from the HDF5 grid</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
-            <span class="c1"># get list of available spectra</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;wavelength&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;normalisation&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;normalisation&quot;</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">spec_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra/wavelength&quot;</span><span class="p">][:]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="mf">3e8</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">*</span> <span class="mf">1e-10</span><span class="p">)</span>  <span class="c1"># used?</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spec_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra&quot;</span><span class="p">][</span><span class="n">spec_name</span><span class="p">][:]</span>
-
-                <span class="c1"># if incident is one of the spectra also add a spectra called &quot;stellar&quot;</span>
-                <span class="k">if</span> <span class="n">spec_name</span> <span class="o">==</span> <span class="s2">&quot;incident&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;stellar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spec_name</span><span class="p">]</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; if full cloudy grid available calculate</span>
-<span class="sd">        some other spectra for convenience &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;linecont&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_names</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span>
-            <span class="p">)</span>  <span class="c1">#  assumes fesc = 0</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular_continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;linecont&quot;</span><span class="p">]</span>
-            <span class="p">)</span></div>
-
-<div class="viewcode-block" id="Grid.get_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_lines">[docs]</a>    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Function to read in lines from the HDF5 grid</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">line_list</span> <span class="o">=</span> <span class="n">flatten_linelist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_lines</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">line_list</span> <span class="o">=</span> <span class="n">get_available_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_list</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
-                    <span class="s2">&quot;wavelength&quot;</span>
-                <span class="p">]</span>  <span class="c1"># angstrom</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">][:]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">][:]</span></div>
-
 <div class="viewcode-block" id="Grid.get_nearest_index"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_nearest_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simple function for calculating the closest index in an array for a given value</span>
+<span class="sd">        Function for calculating the closest index in an array for a</span>
+<span class="sd">        given value.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : float</span>
-<span class="sd">            The target value</span>
+<span class="sd">        TODO: This could be moved to utils?</span>
 
-<span class="sd">        array : nn.ndarray</span>
-<span class="sd">            The array to search</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            value (float)</span>
+<span class="sd">                The target value.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        int</span>
-<span class="sd">             The index of the closet point in the grid (array)</span>
+<span class="sd">            array (np.ndarray)</span>
+<span class="sd">                The array to search.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int</span>
+<span class="sd">                The index of the closet point in the grid (array)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Grid.get_grid_point"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_grid_point">[docs]</a>    <span class="k">def</span> <span class="nf">get_grid_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Identify the nearest grid point for a tuple of values</span>
+<span class="sd">        Function to identify the nearest grid point for a tuple of values.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : float</span>
-<span class="sd">            The target value</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            values (tuple)</span>
+<span class="sd">                The values for which we want the grid point. These have to be </span>
+<span class="sd">                in the same order as the axes.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        int</span>
-<span class="sd">             The index of the closet point in the grid (array)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple)</span>
+<span class="sd">                A tuple of integers specifying the closest grid point.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -730,69 +708,60 @@
             <span class="p">]</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Grid.get_nearest"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_nearest">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="Grid.get_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">,</span> <span class="n">spectra_id</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simple function for calculating the closest index in an array for a given value</span>
+<span class="sd">        Function for creating an Sed object for a specific grid point.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        value : float</span>
-<span class="sd">            The target value</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            grid_point (tuple)</span>
+<span class="sd">                A tuple of integers specifying the closest grid point.</span>
+<span class="sd">            spectra_id (str)</span>
+<span class="sd">                The name of the spectra (in the grid) that is desired.</span>
 
-<span class="sd">        array : nn.ndarray</span>
-<span class="sd">            The array to search</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        int</span>
-<span class="sd">             The index of the closet point in the grid (array)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            sed (synthesizer.sed.Sed)</span>
+<span class="sd">                A synthesizer Sed object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Throw exception if the line_id not in list of available lines</span>
+        <span class="k">if</span> <span class="n">spectra_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentParameter</span><span class="p">(</span>
+                <span class="s2">&quot;Provided spectra_id is not in&quot;</span>
+                <span class="s2">&quot;list of available spectra.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nearest_index</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">idx</span><span class="p">,</span> <span class="n">array</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
-
-<div class="viewcode-block" id="Grid.get_sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_sed">[docs]</a>    <span class="k">def</span> <span class="nf">get_sed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">,</span> <span class="n">spec_name</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns an Sed object for a given spectra type for a given grid point.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        grid_point: tuple (int)</span>
-<span class="sd">            A tuple of the grid point indices</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        obj (Sed)</span>
-<span class="sd">             An Sed object at the defined grid point</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="c1"># Throw exception if the grid_point has a different shape from the grid</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_point</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">naxes</span><span class="p">:</span>
-            <span class="c1"># throw exception</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;grid point tuple should have same shape as grid&quot;</span><span class="p">)</span>
-            <span class="k">pass</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentParameter</span><span class="p">(</span>
+                <span class="s2">&quot;The grid_point tuple provided&quot;</span>
+                <span class="s2">&quot;as an argument should have same shape as the grid.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spec_name</span><span class="p">][</span><span class="n">grid_point</span><span class="p">])</span></div>
+        <span class="c1"># TODO: throw an exception if grid point is outside grid bounds</span>
 
-<div class="viewcode-block" id="Grid.get_line_info"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_line_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_line_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_id</span><span class="p">][</span><span class="n">grid_point</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Grid.get_line"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_line">[docs]</a>    <span class="k">def</span> <span class="nf">get_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">,</span> <span class="n">line_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a Line object for a given line_id and grid_point</span>
+<span class="sd">        Function for creating a Line object for a given line_id and grid_point.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        grid_point: tuple (int)</span>
-<span class="sd">            A tuple of the grid point indices</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            grid_point (tuple)</span>
+<span class="sd">                A tuple of integers specifying the closest grid point.</span>
+<span class="sd">            line_id (str)</span>
+<span class="sd">                The id of the line.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        obj (Line)</span>
-<span class="sd">             A Line object at the defined grid point</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            line (synthesizer.line.Line)</span>
+<span class="sd">                A synthesizer Line object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Throw exception if the grid_point has a different shape from the grid</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_point</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">naxes</span><span class="p">:</span>
-            <span class="c1"># throw exception</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;grid point tuple should have same shape as grid&quot;</span><span class="p">)</span>
-            <span class="k">pass</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentParameter</span><span class="p">(</span>
+                <span class="s2">&quot;The grid_point tuple provided&quot;</span>
+                <span class="s2">&quot;as an argument should have same shape as the grid.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">line_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
@@ -802,6 +771,14 @@
         <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="p">:</span>
+
+            <span class="c1"># Throw exception if tline_id not in list of available lines</span>
+            <span class="k">if</span> <span class="n">line_id_</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentParameter</span><span class="p">(</span>
+                    <span class="s2">&quot;Provided line_id is&quot;</span>
+                    <span class="s2">&quot;not in list of available lines.&quot;</span>
+                <span class="p">)</span>
+
             <span class="n">line_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">]</span>
             <span class="n">wavelength</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">])</span>
             <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">][</span><span class="n">grid_point</span><span class="p">])</span>
@@ -809,34 +786,35 @@
 
         <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Grid.get_lines_info"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_lines_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_lines_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_ids</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">):</span>
+<div class="viewcode-block" id="Grid.get_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_lines">[docs]</a>    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">,</span> <span class="n">line_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a LineCollection object for a given line and metallicity/age index</span>
+<span class="sd">        Function a LineCollection of multiple lines.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        grid_point: tuple (int)</span>
-<span class="sd">            A tuple of the grid point indices</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            grid_point (tuple)</span>
+<span class="sd">                A tuple of the grid point indices.</span>
+<span class="sd">            line_ids (list)</span>
+<span class="sd">                A list of lines, if None use all available lines.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        ------------</span>
-<span class="sd">        obj (Line)</span>
+<span class="sd">            lines (lines.LineCollection)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># line dictionary</span>
+        <span class="c1"># If no line ids are provided calculate all lines</span>
+        <span class="k">if</span> <span class="n">line_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">line_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span>
+
+        <span class="c1"># Line dictionary</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line_info</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">line_id</span><span class="p">)</span>
 
-            <span class="c1"># add to dictionary</span>
+            <span class="c1"># Add to dictionary</span>
             <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
 
-        <span class="c1"># create collection</span>
-        <span class="n">line_collection</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-
-        <span class="c1"># return collection</span>
-        <span class="k">return</span> <span class="n">line_collection</span></div></div>
+        <span class="c1"># Create and return collection</span>
+        <span class="k">return</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

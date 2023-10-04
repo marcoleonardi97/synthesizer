@@ -203,11 +203,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../general/index.html">General examples</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of General examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_igm.html">IGM transmission example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_dustcurves.html">Dust curves example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../general/sed.html">SED object example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_abundances.html">Abundances example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_filters.html">Filters example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../general/plot_spectra_age.html">Plot Spectra by age</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../general/plot_line_ratios.html">Plot line ratios</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_quiescent_colours.html">Plot quiescent UVJ diagram</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../general/plot_photometry.html">Photometry example</a></li>
 </ul>
@@ -418,7 +415,7 @@ Ne3O2: 0.35
     <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># get list of lines</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">line_list</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">available_lines</span><span class="p">)</span>
 
     <span class="c1"># choose age and metallicity</span>
     <span class="n">log10age</span> <span class="o">=</span> <span class="mf">6.0</span>  <span class="c1"># log10(age/yr)</span>
@@ -428,17 +425,16 @@ Ne3O2: 0.35
     <span class="n">grid_point</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_grid_point</span><span class="p">((</span><span class="n">log10age</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">))</span>
 
     <span class="c1"># get information on one line</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_line_info</span><span class="p">(</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_line</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
     <span class="c1"># or a combination of lines, e.g. a doublet</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines_info</span><span class="p">(</span>
-        <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span> <span class="n">grid_point</span>
-    <span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span>
+                          <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
     <span class="c1"># create a line collection from all lines</span>
-    <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines_info</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">line_list</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">available_lines</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
     <span class="c1"># we can measure line ratios</span>
@@ -458,7 +454,7 @@ Ne3O2: 0.35
     <span class="n">ratios</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">iZ</span><span class="p">,</span> <span class="n">Z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">):</span>
         <span class="n">grid_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">ia</span><span class="p">,</span> <span class="n">iZ</span><span class="p">)</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines_info</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">line_list</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">available_lines</span><span class="p">)</span>
         <span class="n">ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines</span><span class="o">.</span><span class="n">get_ratio</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">))</span>
 
     <span class="n">Zsun</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span> <span class="mf">0.0124</span>
@@ -478,7 +474,7 @@ Ne3O2: 0.35
     <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">iZ</span><span class="p">,</span> <span class="n">Z</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">):</span>
         <span class="n">grid_point</span> <span class="o">=</span> <span class="p">(</span><span class="n">ia</span><span class="p">,</span> <span class="n">iZ</span><span class="p">)</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines_info</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">line_list</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">available_lines</span><span class="p">)</span>
         <span class="n">x_</span><span class="p">,</span> <span class="n">y_</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">get_diagram</span><span class="p">(</span><span class="n">diagram_id</span><span class="p">)</span>
         <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_</span><span class="p">)</span>
         <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_</span><span class="p">)</span>
@@ -497,7 +493,7 @@ Ne3O2: 0.35
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.288 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.315 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-grids-plot-lines-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/854f46c76b0b6cdc5d03a44419793712/plot_lines.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_lines.py</span></code></a></p>
