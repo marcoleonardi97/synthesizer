@@ -396,7 +396,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;simple power law dust curve&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
-<div class="viewcode-block" id="PowerLaw.tau_x"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.tau_x">[docs]</a>    <span class="k">def</span> <span class="nf">tau_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="PowerLaw.get_tau_at_lam"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.get_tau_at_lam">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate optical depth at lam</span>
 
@@ -414,7 +414,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">lam</span> <span class="o">/</span> <span class="mf">5500.0</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;slope&quot;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PowerLaw.tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.tau">[docs]</a>    <span class="k">def</span> <span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="PowerLaw.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate V-band normalised optical depth</span>
 
@@ -427,9 +427,9 @@
         <span class="c1"># tau_x = (lam.to(&#39;Angstrom&#39;)/(5500.*Angstrom))**self.params[&#39;slope&#39;]</span>
         <span class="c1"># tau_V = np.interp(5500., lam.to(&#39;Angstrom&#39;).v, tau_x)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_x</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_x</span><span class="p">(</span><span class="mf">5500.0</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau_at_lam</span><span class="p">(</span><span class="mf">5500.0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PowerLaw.attenuate"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.attenuate">[docs]</a>    <span class="k">def</span> <span class="nf">attenuate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="PowerLaw.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.PowerLaw.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Provide the transmitted flux/luminosity fraction</span>
 
@@ -442,7 +442,7 @@
 <span class="sd">            wavelength, expected with units</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">tau_V</span> <span class="o">*</span> <span class="n">tau_x_v</span><span class="p">))</span></div></div>
 
@@ -481,7 +481,7 @@
             <span class="mf">5500.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">mw_df_lam</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">mw_df_chi</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="MW_N18.tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18.tau">[docs]</a>    <span class="k">def</span> <span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="MW_N18.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate V-band normalised optical depth</span>
 
@@ -500,7 +500,7 @@
 
         <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_lam_V</span></div>
 
-<div class="viewcode-block" id="MW_N18.attenuate"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18.attenuate">[docs]</a>    <span class="k">def</span> <span class="nf">attenuate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="MW_N18.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Provide the transmitted flux/luminosity fraction</span>
 
@@ -513,7 +513,7 @@
 <span class="sd">            wavelength, expected with units</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">tau_V</span> <span class="o">*</span> <span class="n">tau_x_v</span><span class="p">))</span></div></div>
 
@@ -568,7 +568,7 @@
 <span class="s2">                               in Noll et al. 2009&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
 
-<div class="viewcode-block" id="Calzetti2000.tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000.tau">[docs]</a>    <span class="k">def</span> <span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="Calzetti2000.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate V-band normalised optical depth</span>
 
@@ -583,7 +583,7 @@
                    <span class="n">ampl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;ampl&#39;</span><span class="p">],</span>
                    <span class="n">gamma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;gamma&#39;</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Calzetti2000.attenuate"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000.attenuate">[docs]</a>    <span class="k">def</span> <span class="nf">attenuate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="Calzetti2000.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the transmission at different wavelength for the curve</span>
 
@@ -595,7 +595,7 @@
 <span class="sd">        lam: float</span>
 <span class="sd">            wavelength, expected with units</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> 
+        <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> 
     
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">tau_V</span> <span class="o">*</span> <span class="n">tau_x_v</span><span class="p">))</span></div></div>
 
@@ -646,7 +646,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span> <span class="o">=</span> <span class="n">WD01</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="GrainsWD01.tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.tau">[docs]</a>    <span class="k">def</span> <span class="nf">tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="GrainsWD01.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate V-band normalised optical depth</span>
 
@@ -658,7 +658,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="GrainsWD01.attenuate"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.attenuate">[docs]</a>    <span class="k">def</span> <span class="nf">attenuate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="GrainsWD01.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_V</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the transmission at different wavelength for the curve</span>
 
