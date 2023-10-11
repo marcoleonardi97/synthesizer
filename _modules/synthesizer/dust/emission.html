@@ -161,7 +161,8 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../grids_example.html">Grids</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxies/galaxies.html">Galaxy Objects</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Galaxy Objects</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -356,8 +357,9 @@
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">kb</span><span class="p">,</span> <span class="n">um</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Hz</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">accepts</span>
-<span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">temperature</span>
+<span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">temperature</span> <span class="k">as</span> <span class="n">temperature_dim</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">planck</span>
 
 
@@ -365,18 +367,46 @@
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Dust emission base class for holding common methods.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        temperature (float)</span>
+<span class="sd">            The temperature of the dust.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="EmissionBase.normalise"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase.normalise">[docs]</a>    <span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Provide normalisation of lnu_ by integrating the function from 8-&gt;1000</span>
-<span class="sd">        um</span>
+<span class="sd">        Initialises the base class for dust emission models.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temperature (float)</span>
+<span class="sd">                The temperature of the dust.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+
+    <span class="k">def</span> <span class="nf">_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A prototype private method used during integration. This should be</span>
+<span class="sd">        overloaded by child classes!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
+            <span class="s2">&quot;EmissionBase should not be instantiated directly!&quot;</span>
+            <span class="s2">&quot; Instead use one to child models (Blackbody, Greybody, Casey12).&quot;</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="EmissionBase.normalisation"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase.normalisation">[docs]</a>    <span class="k">def</span> <span class="nf">normalisation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Provide normalisation of _lnu by integrating the function from 8-&gt;1000</span>
+<span class="sd">        um.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lnu_</span><span class="p">,</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span>
+            <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span>
+            <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span>
+            <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="mi">100</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-    <span class="c1"># @accepts(lam=length)</span>
 <div class="viewcode-block" id="EmissionBase.lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase.lnu">[docs]</a>    <span class="k">def</span> <span class="nf">lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the normalised lnu for the provided wavelength grid</span>
@@ -388,7 +418,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu_</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalise</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="Blackbody"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Blackbody">[docs]</a><span class="k">class</span> <span class="nc">Blackbody</span><span class="p">(</span><span class="n">EmissionBase</span><span class="p">):</span>
@@ -396,156 +426,175 @@
 <span class="sd">    A class to generate a blackbody emission spectrum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@accepts</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span>  <span class="c1"># check T has dimensions of temperature</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to generate a simple blackbody spectrum.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        T: unyt_array</span>
-<span class="sd">            Temperature</span>
+<span class="sd">        Args:</span>
+<span class="sd">            temperature (unyt_array)</span>
+<span class="sd">                The temperature of the dust.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
     <span class="c1"># @accepts(nu=1/time)</span>
-<div class="viewcode-block" id="Blackbody.lnu_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Blackbody.lnu_">[docs]</a>    <span class="k">def</span> <span class="nf">lnu_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate unnormalised spectrum for given frequency (nu) grid.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        nu: unyt_array</span>
-<span class="sd">            frequency</span>
+<span class="sd">        Args:</span>
+<span class="sd">            nu (unyt_array)</span>
+<span class="sd">                The frequency at which to calculate lnu.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lnu: unyt_array</span>
-<span class="sd">            spectral luminosity density</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            unyt_array</span>
+<span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Greybody"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Greybody">[docs]</a><span class="k">class</span> <span class="nc">Greybody</span><span class="p">(</span><span class="n">EmissionBase</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to generate a greybody emission spectrum.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        emissivity (float)</span>
+<span class="sd">            The emissivity of the dust (dimensionless).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@accepts</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span>  <span class="c1"># check T has dimensions of temperature</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">):</span>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialise class</span>
+<span class="sd">        Initialise the dust emission model.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        T: unyt_array</span>
-<span class="sd">            Temperature</span>
+<span class="sd">        Args:</span>
+<span class="sd">            temperature (unyt_array)</span>
+<span class="sd">                The temperature of the dust.</span>
 
-<span class="sd">        emissivity: float</span>
-<span class="sd">            Emissivity (dimensionless)</span>
+<span class="sd">            emissivity (float)</span>
+<span class="sd">                The Emissivity (dimensionless).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">=</span> <span class="n">emissivity</span>
 
     <span class="c1"># @accepts(nu=1/time)</span>
-<div class="viewcode-block" id="Greybody.lnu_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Greybody.lnu_">[docs]</a>    <span class="k">def</span> <span class="nf">lnu_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate unnormalised spectrum for given frequency (nu) grid.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        nu: unyt_array</span>
-<span class="sd">            frequency</span>
+<span class="sd">        Args:</span>
+<span class="sd">            nu (unyt_array)</span>
+<span class="sd">                The frequencies at which to calculate the spectral luminosity</span>
+<span class="sd">                density.</span>
 
 <span class="sd">        Returns</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lnu: unyt_array</span>
-<span class="sd">            spectral luminosity density</span>
+<span class="sd">            lnu (unyt_array)</span>
+<span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">nu</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">*</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">nu</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">*</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Casey12"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Casey12">[docs]</a><span class="k">class</span> <span class="nc">Casey12</span><span class="p">(</span><span class="n">EmissionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to generate a dust emission spectrum using the Casey (2012) model.</span>
 <span class="sd">    https://ui.adsabs.harvard.edu/abs/2012MNRAS.425.3094C/abstract</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        emissivity (float)</span>
+<span class="sd">            The emissivity of the dust (dimensionless).</span>
+
+<span class="sd">        alpha (float)</span>
+<span class="sd">            The power-law slope (dimensionless)  [good value = 2.0].</span>
+
+<span class="sd">        n_bb (float)</span>
+<span class="sd">            Normalisation of the blackbody component [default 1.0].</span>
+
+<span class="sd">        lam_0 (float)</span>
+<span class="sd">            Wavelength where the dust optical depth is unity.</span>
+
+<span class="sd">        lam_c (float)</span>
+<span class="sd">            The power law turnover wavelength.</span>
+
+<span class="sd">        n_pl (float)</span>
+<span class="sd">            The power law normalisation.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@accepts</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="n">temperature</span><span class="p">)</span>  <span class="c1"># check T has dimensions of temperature</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">N_bb</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lam_0</span><span class="o">=</span><span class="mf">200.0</span> <span class="o">*</span> <span class="n">um</span><span class="p">):</span>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span>
+                 <span class="n">N_bb</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lam_0</span><span class="o">=</span><span class="mf">200.0</span> <span class="o">*</span> <span class="n">um</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lam: unyt_array</span>
-<span class="sd">            wavelength</span>
+<span class="sd">        Args:</span>
+<span class="sd">            lam (unyt_array)</span>
+<span class="sd">                The wavelengths at which to calculate the emission.</span>
 
-<span class="sd">        T: unyt_array</span>
-<span class="sd">            Temperature</span>
+<span class="sd">            temperature (unyt_array)</span>
+<span class="sd">                The temperature of the dust.</span>
 
-<span class="sd">        emissivity: float</span>
-<span class="sd">            Emissivity (dimensionless) [good value = 1.6]</span>
+<span class="sd">            emissivity (float)</span>
+<span class="sd">                The emissivity (dimensionless) [good value = 1.6].</span>
 
-<span class="sd">        alpha: float</span>
-<span class="sd">            Power-law slope (dimensionless)  [good value = 2.0]</span>
+<span class="sd">            alpha (float)</span>
+<span class="sd">                The power-law slope (dimensionless)  [good value = 2.0].</span>
 
-<span class="sd">        N_Bb: float</span>
-<span class="sd">            Normalisation of the blackbody component [default 1.0]</span>
+<span class="sd">            n_bb (float)</span>
+<span class="sd">                Normalisation of the blackbody component [default 1.0].</span>
 
-<span class="sd">        lam_0: float</span>
-<span class="sd">            Wavelength at where the dust optical depth is unity</span>
+<span class="sd">            lam_0 (float)</span>
+<span class="sd">                Wavelength where the dust optical depth is unity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">=</span> <span class="n">emissivity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span> <span class="o">=</span> <span class="n">N_bb</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">=</span> <span class="n">lam_0</span>
 
-        <span class="c1"># calculate the powerlaw turnover wavelength</span>
-
+        <span class="c1"># Calculate the power law turnover wavelength</span>
         <span class="n">b1</span> <span class="o">=</span> <span class="mf">26.68</span>
         <span class="n">b2</span> <span class="o">=</span> <span class="mf">6.246</span>
         <span class="n">b3</span> <span class="o">=</span> <span class="mf">0.0001905</span>
         <span class="n">b4</span> <span class="o">=</span> <span class="mf">0.00007243</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="p">((</span><span class="n">b1</span> <span class="o">+</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">b3</span> <span class="o">+</span> <span class="n">b4</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">T</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">lum</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">((</span><span class="n">b1</span> <span class="o">+</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">b3</span> <span class="o">+</span> <span class="n">b4</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span>
+             <span class="o">*</span> <span class="n">temperature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">L</span> <span class="o">*</span> <span class="n">um</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">lum</span> <span class="o">*</span> <span class="n">um</span>
 
-        <span class="c1"># calculate normalisation of the power-law term</span>
+        <span class="c1"># Calculate normalisation of the power-law term</span>
 
         <span class="c1"># See Casey+2012, Table 1 for the expression</span>
         <span class="c1"># Missing factors of lam_c and c in some places</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">N_pl</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_pl</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span>
             <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="n">emissivity</span><span class="p">)))</span>
             <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
-            <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># @accepts(nu=1/time)</span>
-<div class="viewcode-block" id="Casey12.lnu_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.Casey12.lnu_">[docs]</a>    <span class="k">def</span> <span class="nf">lnu_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate unnormalised spectrum for given frequency (nu) grid.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        nu: unyt_array</span>
-<span class="sd">            frequency</span>
+<span class="sd">        Args:</span>
+<span class="sd">            nu (unyt_array)</span>
+<span class="sd">                The frequencies at which to calculate the spectral luminosity</span>
+<span class="sd">                density.</span>
 
 <span class="sd">        Returns</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lnu: unyt_array</span>
-<span class="sd">            spectral luminosity density</span>
+<span class="sd">            lnu (unyt_array)</span>
+<span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -554,28 +603,36 @@
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
             <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
 
-        <span class="k">def</span> <span class="nf">PL</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="c1"># Define a function to calcualate the power-law component.</span>
+        <span class="k">def</span> <span class="nf">_power_law</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Calcualate the power-law component.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                lam (unyt_array)</span>
+<span class="sd">                    The wavelengths at which to calculate lnu.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">N_pl</span>
-                <span class="o">*</span> <span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_pl</span> <span class="o">*</span> <span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span>
                 <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
             <span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">BB</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_blackbody</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Calcualate the blackbody component.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                lam (unyt_array)</span>
+<span class="sd">                    The wavelengths at which to calculate lnu.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span>
                 <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span><span class="p">)))</span>
                 <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
-                <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lam</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lam</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">PL</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span> <span class="o">+</span> <span class="n">BB</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">_power_law</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span> <span class="o">+</span> <span class="n">_blackbody</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span></div>
 </pre></div>
         </article>
       </div>
