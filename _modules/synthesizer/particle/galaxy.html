@@ -448,11 +448,6 @@
         <span class="c1"># What is the redshift of this galaxy?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
 
-        <span class="c1"># self.stellar_lum = None</span>
-        <span class="c1"># self.stellar_lum_array = None</span>
-        <span class="c1"># self.intrinsic_lum = None</span>
-        <span class="c1"># self.intrinsic_lum_array = None</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># integrated spectra dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># spectra arrays dictionary</span>
 
@@ -700,7 +695,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;No Gas object has been provided! We can&#39;t calculate line of &quot;</span>
-                <span class="s2">&quot;sight dust attenuation with at Gas object containing the &quot;</span>
+                <span class="s2">&quot;sight dust attenuation without a Gas object containing the &quot;</span>
                 <span class="s2">&quot;dust!&quot;</span>
             <span class="p">)</span>
 
@@ -829,6 +824,64 @@
 
         <span class="k">return</span> <span class="n">spec</span></div>
 
+<div class="viewcode-block" id="Galaxy.generate_particle_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.generate_particle_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_particle_lnu</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the luminosity for a given grid key spectra for all</span>
+<span class="sd">        stars in this galaxy object. Can optionally apply masks.</span>
+
+<span class="sd">        Base class for :func:`~particle.ParticleGalaxy.get_spectra_incident`</span>
+<span class="sd">        and other related methods</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                spectral grid object</span>
+<span class="sd">            spectra_name (string):</span>
+<span class="sd">                name of the target spectra inside the grid file</span>
+<span class="sd">            fesc (float):</span>
+<span class="sd">                fraction of stellar emission that escapes unattenuated from</span>
+<span class="sd">                the birth cloud (defaults to 0.0)</span>
+<span class="sd">            young (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles</span>
+<span class="sd">            old (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles</span>
+<span class="sd">            verbose (bool):</span>
+<span class="sd">                Flag for verbose output</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy array of integrated spectra in units of (erg / s / Hz)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure we have a total key in the grid. If not error.</span>
+        <span class="k">if</span> <span class="n">spectra_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
+                <span class="s2">&quot;The Grid does not contain the key &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">spectra_name</span>
+            <span class="p">)</span>
+
+        <span class="c1"># get particle age masks</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+
+        <span class="kn">from</span> <span class="nn">..extensions.csed</span> <span class="kn">import</span> <span class="n">compute_particle_seds</span>
+
+        <span class="c1"># Prepare the arguments for the C function.</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sed_args</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span> <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spec</span></div>
+
     <span class="k">def</span> <span class="nf">_get_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get masks for which components we are handling, if a sub-component</span>
@@ -868,162 +921,245 @@
 
         <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="Galaxy.get_particle_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Galaxy.get_particle_spectra_linecont"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_linecont">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_linecont</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate incident spectra for all *individual* stellar particles.</span>
-
-<span class="sd">        TODO: need to be able to apply masks to get young and old stars.</span>
-<span class="sd">        # young=False,</span>
-<span class="sd">        # old=False,</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            grid (object, Grid):</span>
-<span class="sd">                The SPS grid object sampled by stellar particle to make the SED.</span>
-<span class="sd">            update (bool):</span>
-<span class="sd">                Should we update the Galaxy&#39;s spectra attributes?</span>
-
-<span class="sd">            # young (bool):</span>
-<span class="sd">            #     Are we masking for only young stars?</span>
-<span class="sd">            # old (bool):</span>
-<span class="sd">            #     Are we masking for only old stars?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Sed object containing all particle stellar spectra</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        InconsistentArguments</span>
-<span class="sd">            Errors if both a young and old component is requested because these</span>
-<span class="sd">            directly contradict each other resulting in 0 particles in</span>
-<span class="sd">            the mask.</span>
+<span class="sd">        Generate the line contribution spectra. This is only invoked if</span>
+<span class="sd">        fesc_LyA &lt; 1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="kn">from</span> <span class="nn">..extensions.csed</span> <span class="kn">import</span> <span class="n">compute_particle_seds</span>
+        <span class="c1"># generate contribution of line emission alone and reduce the</span>
+        <span class="c1"># contribution of Lyman-alpha</span>
+        <span class="n">linecont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span>
+        <span class="p">)</span>
 
-        <span class="c1"># Prepare the arguments for the C function.</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sed_args</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">)</span>
+        <span class="c1"># multiply by the Lyamn-continuum escape fraction</span>
+        <span class="n">linecont</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
 
-        <span class="c1"># Get the integrated stellar SED</span>
-        <span class="n">spec_arr</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="c1"># get index of Lyman-alpha</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_nearest_index</span><span class="p">(</span><span class="mf">1216.0</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">linecont</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*=</span> <span class="n">fesc_LyA</span>  <span class="c1"># reduce the contribution of Lyman-alpha</span>
 
-        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spec_arr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">linecont</span></div>
+
+<div class="viewcode-block" id="Galaxy.get_particle_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_incident</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the incident (equivalent to pure stellar for stars) spectra</span>
+<span class="sd">        using the provided Grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                spectral grid object</span>
+<span class="sd">            update (bool):</span>
+<span class="sd">                flag for whether to update the `stellar` spectra</span>
+<span class="sd">                inside the galaxy object `spectra` dictionary.</span>
+<span class="sd">                These are the combined values of young and old.</span>
+<span class="sd">            young (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles</span>
+<span class="sd">            old (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Sed object containing the stellar spectra</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;incident&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">update</span><span class="p">:</span>
-            <span class="c1"># Store the spectra in the galaxy</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
 
         <span class="k">return</span> <span class="n">sed</span></div>
 
-<div class="viewcode-block" id="Galaxy.get_particle_spectra_reprocessed"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_reprocessed">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Galaxy.get_particle_spectra_transmitted"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_transmitted">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_transmitted</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate reprocessed spectra for all *individual* stellar particles.</span>
-
-<span class="sd">        TODO: need to be able to apply masks to get young and old stars.</span>
-<span class="sd">        # young=False,</span>
-<span class="sd">        # old=False,</span>
+<span class="sd">        Generate the transmitted spectra using the provided Grid. This is the</span>
+<span class="sd">        emission which is transmitted through the gas as calculated by the</span>
+<span class="sd">        photoionisation code.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            grid (object, Grid):</span>
-<span class="sd">                The SPS grid object sampled by stellar particle to make the SED.</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                spectral grid object</span>
 <span class="sd">            fesc (float):</span>
-<span class="sd">                The Lyc escape fraction.</span>
+<span class="sd">                fraction of stellar emission that escapeds unattenuated from</span>
+<span class="sd">                the birth cloud (defaults to 0.0)</span>
 <span class="sd">            update (bool):</span>
-<span class="sd">                Should we update the Galaxy&#39;s spectra attributes?</span>
-
-<span class="sd">            # young (bool):</span>
-<span class="sd">            #     Are we masking for only young stars?</span>
-<span class="sd">            # old (bool):</span>
-<span class="sd">            #     Are we masking for only old stars?</span>
+<span class="sd">                flag for whether to update the `stellar` spectra</span>
+<span class="sd">                inside the galaxy object `spectra` dictionary.</span>
+<span class="sd">                These are the combined values of young and old.</span>
+<span class="sd">            young (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles</span>
+<span class="sd">            old (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Sed object containing all particle stellar spectra</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        InconsistentArguments</span>
-<span class="sd">            Errors if both a young and old component is requested because these</span>
-<span class="sd">            directly contradict each other resulting in 0 particles in</span>
-<span class="sd">            the mask.</span>
+<span class="sd">            An Sed object containing the transmitted spectra</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Ensure we have an `intrinsic`` key in the grid. If not error.</span>
-        <span class="k">if</span> <span class="s2">&quot;intrinsic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
-                <span class="s2">&quot;The Grid does not contain the key &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="s2">&quot;intrinsic&quot;</span>
+        <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+        <span class="p">)</span>
+
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+
+        <span class="k">return</span> <span class="n">sed</span></div>
+
+<div class="viewcode-block" id="Galaxy.get_particle_spectra_nebular"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_nebular">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_nebular</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate nebular spectra from a grid object and star particles.</span>
+<span class="sd">        The grid object must contain a nebular component.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                spectral grid object</span>
+<span class="sd">            fesc (float):</span>
+<span class="sd">                fraction of stellar emission that escapeds unattenuated from</span>
+<span class="sd">                the birth cloud (defaults to 0.0)</span>
+<span class="sd">            update (bool):</span>
+<span class="sd">                flag for whether to update the `intrinsic` and `attenuated`</span>
+<span class="sd">                spectra inside the galaxy object `spectra` dictionary.</span>
+<span class="sd">                These are the combined values of young and old.</span>
+<span class="sd">            young (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles</span>
+<span class="sd">            old (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Sed object containing the nebular spectra</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+
+        <span class="n">lnu</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
+
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">update</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+
+        <span class="k">return</span> <span class="n">sed</span></div>
+
+<div class="viewcode-block" id="Galaxy.get_particle_spectra_reprocessed"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_reprocessed">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_reprocessed</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates the intrinsic spectra, this is the sum of the escaping</span>
+<span class="sd">        radiation (if fesc&gt;0), the transmitted emission, and the nebular</span>
+<span class="sd">        emission. The transmitted emission is the emission that is</span>
+<span class="sd">        transmitted through the gas. In addition to returning the intrinsic</span>
+<span class="sd">        spectra this saves the incident, nebular, and escaped spectra if</span>
+<span class="sd">        update is set to True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                spectral grid object</span>
+<span class="sd">            fesc (float):</span>
+<span class="sd">                fraction of stellar emission that escapeds unattenuated from</span>
+<span class="sd">                the birth cloud (defaults to 0.0)</span>
+<span class="sd">            fesc_LyA (float):</span>
+<span class="sd">                fraction of Lyman-alpha emission that can escape unimpeded</span>
+<span class="sd">                by the ISM/IGM.</span>
+<span class="sd">            update (bool):</span>
+<span class="sd">                flag for whether to update the `intrinsic`, `stellar` and</span>
+<span class="sd">                `nebular` spectra inside the galaxy object `spectra`</span>
+<span class="sd">                dictionary. These are the combined values of young and old.</span>
+<span class="sd">            young (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles</span>
+<span class="sd">            old (bool, float):</span>
+<span class="sd">                if not False, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles</span>
+
+<span class="sd">        Updates:</span>
+<span class="sd">            incident</span>
+<span class="sd">            transmitted</span>
+<span class="sd">            nebular</span>
+<span class="sd">            reprocessed</span>
+<span class="sd">            intrinsic</span>
+
+<span class="sd">            if fesc&gt;0:</span>
+<span class="sd">                escaped</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            An Sed object containing the intrinsic spectra.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># the incident emission</span>
+        <span class="n">incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_incident</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="n">update</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+        <span class="p">)</span>
+
+        <span class="c1"># the emission which escapes the gas</span>
+        <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">escaped</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">fesc</span> <span class="o">*</span> <span class="n">incident</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+
+        <span class="c1"># the stellar emission which **is** reprocessed by the gas</span>
+        <span class="n">transmitted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_transmitted</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="n">update</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+        <span class="p">)</span>
+        <span class="c1"># the nebular emission</span>
+        <span class="n">nebular</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_nebular</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="n">update</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+        <span class="p">)</span>
+
+        <span class="c1"># if the Lyman-alpha escape fraction is &lt;1.0 suppress it.</span>
+        <span class="k">if</span> <span class="n">fesc_LyA</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="c1"># get the new line contribution to the spectrum</span>
+            <span class="n">linecont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_linecont</span><span class="p">(</span>
+                <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span>
             <span class="p">)</span>
 
-        <span class="kn">from</span> <span class="nn">..extensions.csed</span> <span class="kn">import</span> <span class="n">compute_particle_seds</span>
+            <span class="c1"># get the nebular continuum emission</span>
+            <span class="n">nebular_continuum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
+                <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+            <span class="p">)</span>
+            <span class="n">nebular_continuum</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
 
-        <span class="c1"># Prepare the arguments for the C function.</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sed_args</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span> <span class="n">spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">)</span>
+            <span class="c1"># redefine the nebular emission</span>
+            <span class="n">nebular</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="n">linecont</span> <span class="o">+</span> <span class="n">nebular_continuum</span>
 
-        <span class="c1"># Get the integrated stellar SED</span>
-        <span class="n">spec_arr</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="c1"># the reprocessed emission, the sum of transmitted, and nebular</span>
+        <span class="n">reprocessed</span> <span class="o">=</span> <span class="n">nebular</span> <span class="o">+</span> <span class="n">transmitted</span>
 
-        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spec_arr</span><span class="p">)</span>
+        <span class="c1"># the intrinsic emission, the sum of escaped, transmitted, and nebular</span>
+        <span class="c1"># if escaped exists other its simply the reprocessed</span>
+        <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">reprocessed</span> <span class="o">+</span> <span class="n">escaped</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">reprocessed</span>
 
         <span class="k">if</span> <span class="n">update</span><span class="p">:</span>
-            <span class="c1"># Store the spectra in the galaxy</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+            <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;escaped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escaped</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reprocessed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intrinsic</span>
 
-        <span class="k">return</span> <span class="n">sed</span></div>
-
-<div class="viewcode-block" id="Galaxy.get_particle_spectra_screen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_particle_spectra_screen">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_screen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate attenuated spectra for all *individual* stellar</span>
-<span class="sd">        particles according to a simple screen.</span>
-
-<span class="sd">        TODO: need to be able to apply masks to get young and old stars.</span>
-<span class="sd">        # young=False,</span>
-<span class="sd">        # old=False,</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            grid (object, Grid):</span>
-<span class="sd">                The SPS grid object sampled by stellar particle to make the SED.</span>
-<span class="sd">            fesc (float):</span>
-<span class="sd">                The Lyc escape fraction.</span>
-<span class="sd">            update (bool):</span>
-<span class="sd">                Should we update the Galaxy&#39;s spectra attributes?</span>
-
-<span class="sd">            # young (bool):</span>
-<span class="sd">            #     Are we masking for only young stars?</span>
-<span class="sd">            # old (bool):</span>
-<span class="sd">            #     Are we masking for only old stars?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Sed object containing all particle stellar spectra</span>
-
-<span class="sd">        Raises</span>
-<span class="sd">        ------</span>
-<span class="sd">        InconsistentArguments</span>
-<span class="sd">            Errors if both a young and old component is requested because these</span>
-<span class="sd">            directly contradict each other resulting in 0 particles in</span>
-<span class="sd">            the mask.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># # Ensure we have an `intrinsic`` key in the grid. If not error.</span>
-        <span class="c1"># if &#39;intrinsic&#39; not in list(grid.spectra.keys()):</span>
-        <span class="c1">#     raise MissingSpectraType(</span>
-        <span class="c1">#         &quot;The Grid does not contain the key &#39;%s&#39;&quot; % &#39;intrinsic&#39;</span>
-        <span class="c1">#     )</span>
-
-        <span class="c1"># from ..extensions.csed import compute_particle_seds</span>
-
-        <span class="c1"># # Prepare the arguments for the C function.</span>
-        <span class="c1"># args = self._prepare_sed_args(grid, fesc=fesc, spectra_type=&quot;incident&quot;)</span>
-
-        <span class="c1"># # Get the integrated stellar SED</span>
-        <span class="c1"># spec_arr = compute_particle_seds(*args)</span>
-
-        <span class="c1"># sed = Sed(grid.lam, spec_arr)</span>
-
-        <span class="c1"># if update:</span>
-        <span class="c1">#     # Store the spectra in the galaxy</span>
-        <span class="c1">#     self.spectra_array[&quot;incident&quot;] = sed</span>
-
-        <span class="c1"># return sed</span>
-
-        <span class="k">pass</span></div>
+        <span class="k">return</span> <span class="n">reprocessed</span></div>
 
     <span class="k">def</span> <span class="nf">get_particle_line_intrinsic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
         <span class="c1"># &quot;&quot;&quot;</span>
@@ -1119,35 +1255,52 @@
 
         <span class="k">return</span> <span class="n">tau_v</span></div>
 
-<div class="viewcode-block" id="Galaxy.apply_los"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.apply_los">[docs]</a>    <span class="k">def</span> <span class="nf">apply_los</span><span class="p">(</span>
+<div class="viewcode-block" id="Galaxy.apply_attenuation"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.apply_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_attenuation</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tau_v</span><span class="p">,</span>
-        <span class="n">spectra_type</span><span class="p">,</span>
-        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">({</span><span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">}),</span>
-        <span class="n">integrated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">sed_object</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">incident_spectra_type</span><span class="p">,</span>
+        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate</span>
-<span class="sd">        tau_v: V-band optical depth for every star particle</span>
-<span class="sd">        dust_curve: instance of the dust class</span>
+<span class="sd">        Apply attenuation to a spectra.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            tau_v (array-like, float)</span>
+<span class="sd">                The V-band optical depth for every star particle.</span>
+
+<span class="sd">            incident_spectra_type (str)</span>
+<span class="sd">                The key for the spectra to be attenuated.</span>
+
+<span class="sd">            dust_curve (synthesizer.dust.attenuation.*)</span>
+<span class="sd">                An instance of one of the dust attenuation models. (defined in</span>
+<span class="sd">                synthesizer/dust/attenuation.py)</span>
+
+<span class="sd">            mask (array-like, bool)</span>
+<span class="sd">                A mask array with an entry for each star particle. Masked out</span>
+<span class="sd">                particles (star particles with False in the mask) will be</span>
+<span class="sd">                ignored when applying the attenuation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">T</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+        <span class="c1"># Get the wavelength grid associated to the spectra</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span>
 
-        <span class="c1"># need exception</span>
-        <span class="c1"># if not self.intrinsic_lum_array:</span>
-        <span class="c1">#     print(&#39;Must generate spectra for individual star particles&#39;)</span>
+        <span class="c1"># Compute the transmission</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">lam</span><span class="p">)</span>
 
-        <span class="c1"># these two should have the same shape so should work?</span>
-        <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> <span class="o">*</span> <span class="n">T</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">sed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="n">integrated</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span>
+        <span class="c1"># These two should have the same shape so should work?</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">transmission</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">sed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span></div>
+            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+            <span class="n">sed</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">transmission</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">sed</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Galaxy.screen_dust_gamma_parameter"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">screen_dust_gamma_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

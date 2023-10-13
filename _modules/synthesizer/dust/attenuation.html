@@ -469,7 +469,12 @@
         <span class="n">tau_x_v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="c1"># Include the V band optical depth in the exponent</span>
-        <span class="n">exponent</span> <span class="o">=</span> <span class="n">tau_v</span> <span class="o">*</span> <span class="n">tau_x_v</span>
+        <span class="c1"># For a scalar we can just multiply but for an array we need to</span>
+        <span class="c1"># broadcast</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">):</span>
+            <span class="n">exponent</span> <span class="o">=</span> <span class="n">tau_v</span> <span class="o">*</span> <span class="n">tau_x_v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">exponent</span> <span class="o">=</span> <span class="n">tau_v</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">tau_x_v</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">exponent</span><span class="p">)</span></div></div>
 
