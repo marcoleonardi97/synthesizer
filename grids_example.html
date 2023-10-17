@@ -215,6 +215,7 @@
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_lines.html">Get lines example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_interp_grid.html">Example of grid spectra interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
 </ul>
 </li>
@@ -493,7 +494,7 @@ available spectra: [&#39;incident&#39;, &#39;linecont&#39;, &#39;nebular&#39;, &
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1802: RuntimeWarning: divide by zero encountered in log10
+/Users/willroper/Documents/University/Synthesizer/synthesizer-env/lib/python3.10/site-packages/unyt/array.py:1758: RuntimeWarning: divide by zero encountered in log10
   out_arr = func(np.asarray(inp), out=out_func, **kwargs)
 </pre></div></div>
 </div>
@@ -565,14 +566,36 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<section id="Resampling-Grids">
+<h3>Resampling Grids<a class="headerlink" href="#Resampling-Grids" title="Permalink to this heading">#</a></h3>
+<p>Some of the available grids have extremely high resolution wavelength grids. In many cases this is overkill and can lead to large memory overheads, while in other situations a particular wavelength grid may be required (matching a spectroscopic survey for instance). To handle these cases a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can be passed a new wavelength array at the point of instantiation to interpolate the SPS grid spectra onto.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a new set of wavelengths</span>
+<span class="n">new_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The old grid had dimensions:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Get the grid interpolated onto the new wavelength array</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">new_lams</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The interpolated grid has dimensions:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The old grid had dimensions: (51, 13, 600)
+The interpolated grid has dimensions: (51, 13, 1000)
+</pre></div></div>
+</div>
+<p>Note that this will overwrite the spectra and wavelengths read from the file. To get them back a separate <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can be instatiated without the modified wavelength array.</p>
+</section>
 </section>
 </section>
 
@@ -634,7 +657,10 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <li><a class="reference internal" href="#">Grids</a><ul>
 <li><a class="reference internal" href="#Plot-a-single-grid-point">Plot a single grid point</a></li>
 <li><a class="reference internal" href="#Plot-ionising-luminosities">Plot ionising luminosities</a></li>
-<li><a class="reference internal" href="#3D-grids">3D grids</a></li>
+<li><a class="reference internal" href="#3D-grids">3D grids</a><ul>
+<li><a class="reference internal" href="#Resampling-Grids">Resampling Grids</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

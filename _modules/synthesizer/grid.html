@@ -213,6 +213,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_interp_grid.html">Example of grid spectra interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
 </ul>
 </li>
@@ -356,6 +357,9 @@
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="vm">__file__</span> <span class="k">as</span> <span class="n">filepath</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
@@ -515,6 +519,8 @@
 <span class="sd">            spectral grid. These are read dynamically from the HDF5 file so can be</span>
 <span class="sd">            anything but usually contain at least stellar ages and stellar </span>
 <span class="sd">            metallicity.</span>
+<span class="sd">        lam (array_like, float)</span>
+<span class="sd">            The wavelengths at which the spectra are defined.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -523,7 +529,33 @@
         <span class="n">grid_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">interp_kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initailise the grid object, open the grid file and extracting the</span>
+<span class="sd">        relevant data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid_name (str)</span>
+<span class="sd">                The file name of the grid (if no extension is provided then</span>
+<span class="sd">                hdf5 is assumed).</span>
+<span class="sd">            grid_dir (str)</span>
+<span class="sd">                The file path to the directory containing the grid file.</span>
+<span class="sd">            read_spectra (bool)</span>
+<span class="sd">                Should we read the spectra?</span>
+<span class="sd">            read_lines (bool)</span>
+<span class="sd">                Should we read the lines?</span>
+<span class="sd">            new_lam (array-like, float)</span>
+<span class="sd">                An optional user defined wavelength array the spectra will be</span>
+<span class="sd">                interpolated onto, see Grid.interp_spectra.</span>
+<span class="sd">            interp_kind (str)</span>
+<span class="sd">                The kind of interpolation to use for wavelength interpolation</span>
+<span class="sd">                if new_lam is not set to None. Can be ‘linear’, ‘nearest’,</span>
+<span class="sd">                ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,</span>
+<span class="sd">                ‘previous’, or ‘next’. See scipy.interpolate.interp1d docs for</span>
+<span class="sd">                more information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">grid_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="s2">&quot;data/grids&quot;</span><span class="p">)</span>
 
@@ -643,6 +675,59 @@
 
             <span class="c1"># Save list of available lines</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Has a new wavelength grid been passed to interpolate the spectra onto?</span>
+        <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Double check we aren&#39;t being asked to do something impossible.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">read_spectra</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="s2">&quot;Can&#39;t interpolate spectra onto a new wavelength array if&quot;</span>
+                    <span class="s2">&quot; no spectra have been read in! Set read_spectra=True.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Interpolate the spectra grid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">interp_spectra</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">interp_kind</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Grid.interp_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.interp_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">interp_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Interpolates the spectra grid onto the provided wavelength grid.</span>
+
+<span class="sd">        NOTE: this will overwrite self.lam and self.spectra, overwriting</span>
+<span class="sd">        the attributes loaded from the grid file. To get these back a new grid</span>
+<span class="sd">        will need to instantiated with no lam argument passed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_lam (array-like, float)</span>
+<span class="sd">                The new wavelength array to interpolate the spectra onto.</span>
+<span class="sd">            kind (str)</span>
+<span class="sd">                The kind of interpolation to use. Can be ‘linear’, ‘nearest’,</span>
+<span class="sd">                ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,</span>
+<span class="sd">                ‘previous’, or ‘next’. See scipy.interpolate.interp1d docs for</span>
+<span class="sd">                more information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Loop over spectra to interpolate</span>
+        <span class="k">for</span> <span class="n">spectra_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
+
+            <span class="c1"># Get the interpolation function for the wavelength axis (always -1)</span>
+            <span class="n">interp_func</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">],</span>
+                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+                <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Evaluate the function at the desired wavelengths</span>
+            <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">interp_func</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+
+            <span class="c1"># Update this spectra</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_spectra</span>
+
+
+        <span class="c1"># Update wavelength array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">new_lam</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

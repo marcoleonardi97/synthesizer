@@ -214,6 +214,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_lines.html">Get lines example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_interp_grid.html">Example of grid spectra interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
 </ul>
 </li>
@@ -419,7 +420,7 @@ version, and IMF</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="synthesizer.grid.Grid">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_spectra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/grid.html#Grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.grid.Grid" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_spectra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_lam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/grid.html#Grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.grid.Grid" title="Permalink to this definition">#</a></dt>
 <dd><p>The Grid class, containing attributes and methods for reading and
 manipulating spectral grids.</p>
 <dl class="py attribute">
@@ -558,6 +559,17 @@ metallicity.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.grid.Grid.lam">
+<span class="sig-name descname"><span class="pre">lam</span></span><a class="headerlink" href="#synthesizer.grid.Grid.lam" title="Permalink to this definition">#</a></dt>
+<dd><p>The wavelengths at which the spectra are defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like, float</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.grid.Grid.get_grid_point">
 <span class="sig-name descname"><span class="pre">get_grid_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/grid.html#Grid.get_grid_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.grid.Grid.get_grid_point" title="Permalink to this definition">#</a></dt>
@@ -659,6 +671,26 @@ given value.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.grid.Grid.interp_spectra">
+<span class="sig-name descname"><span class="pre">interp_spectra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/grid.html#Grid.interp_spectra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.grid.Grid.interp_spectra" title="Permalink to this definition">#</a></dt>
+<dd><p>Interpolates the spectra grid onto the provided wavelength grid.</p>
+<p>NOTE: this will overwrite self.lam and self.spectra, overwriting
+the attributes loaded from the grid file. To get these back a new grid
+will need to instantiated with no lam argument passed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_lam</strong> (<em>array-like</em><em>, </em><em>float</em>) – The new wavelength array to interpolate the spectra onto.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – The kind of interpolation to use. Can be ‘linear’, ‘nearest’,
+‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,
+‘previous’, or ‘next’. See scipy.interpolate.interp1d docs for
+more information.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <section id="examples-using-synthesizer-grid-grid">
@@ -684,6 +716,9 @@ given value.</p>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to: - get a list of lines associated with a grid - initialise a g..."><img alt="" src="../_images/sphx_glr_plot_lines_thumb.png" />
 <p><a class="reference internal" href="../auto_examples/grids/plot_lines.html#sphx-glr-auto-examples-grids-plot-lines-py"><span class="std std-ref">Get lines example</span></a></p>
   <div class="sphx-glr-thumbnail-title">Get lines example</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Demonstrates the interpolation of grid spectra at the point of instantiation. - Instantiates gr..."><img alt="" src="../_images/sphx_glr_plot_interp_grid_thumb.png" />
+<p><a class="reference internal" href="../auto_examples/grids/plot_interp_grid.html#sphx-glr-auto-examples-grids-plot-interp-grid-py"><span class="std std-ref">Example of grid spectra interpolation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Example of grid spectra interpolation</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example plots all the spectra for a single metallicity."><img alt="" src="../_images/sphx_glr_plot_spectra_by_age_thumb.png" />
 <p><a class="reference internal" href="../auto_examples/grids/plot_spectra_by_age.html#sphx-glr-auto-examples-grids-plot-spectra-by-age-py"><span class="std std-ref">Plot spectra by age</span></a></p>
   <div class="sphx-glr-thumbnail-title">Plot spectra by age</div>
@@ -797,11 +832,13 @@ given value.</p>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.axes"><code class="docutils literal notranslate"><span class="pre">Grid.axes</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.naxes"><code class="docutils literal notranslate"><span class="pre">Grid.naxes</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.logQ10"><code class="docutils literal notranslate"><span class="pre">Grid.logQ10</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.grid.Grid.lam"><code class="docutils literal notranslate"><span class="pre">Grid.lam</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.get_grid_point"><code class="docutils literal notranslate"><span class="pre">Grid.get_grid_point()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.get_line"><code class="docutils literal notranslate"><span class="pre">Grid.get_line()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.get_lines"><code class="docutils literal notranslate"><span class="pre">Grid.get_lines()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.get_nearest_index"><code class="docutils literal notranslate"><span class="pre">Grid.get_nearest_index()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.grid.Grid.get_spectra"><code class="docutils literal notranslate"><span class="pre">Grid.get_spectra()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.grid.Grid.interp_spectra"><code class="docutils literal notranslate"><span class="pre">Grid.interp_spectra()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#examples-using-synthesizer-grid-grid">Examples using <code class="docutils literal notranslate"><span class="pre">synthesizer.grid.Grid</span></code></a></li>
