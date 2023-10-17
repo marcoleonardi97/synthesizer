@@ -22,10 +22,10 @@ Example of grid spectra interpolation
 ====================
 
 Demonstrates the interpolation of grid spectra at the point of instantiation.
-- Instantiates grids using different interpolation schemes.
+- Instantiates grids using different resolution wavelength arrays.
 - Plots and compares them with the file version.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-78
+.. GENERATED FROM PYTHON SOURCE LINES 9-59
 
 
 
@@ -39,13 +39,10 @@ Demonstrates the interpolation of grid spectra at the point of instantiation.
 
  .. code-block:: none
 
-    Instatiating unmodified grid took 0.04 seconds
-    Instatiating very high resolution (linear) grid took 0.78 seconds
-    Instatiating high resolution (linear) grid took 0.10 seconds
-    Instatiating low resolution (linear) grid took 0.05 seconds
-    Instatiating very high resolution (cubic) grid took 0.32 seconds
-    Instatiating high resolution (cubic) grid took 0.13 seconds
-    Instatiating low resolution (cubic) grid took 0.11 seconds
+    Instatiating unmodified grid took 0.06 seconds
+    Instatiating very high resolution grid took 0.60 seconds
+    Instatiating high resolution grid took 0.27 seconds
+    Instatiating low resolution grid took 0.11 seconds
 
 
 
@@ -79,30 +76,14 @@ Demonstrates the interpolation of grid spectra at the point of instantiation.
 
         # Instantiate new grids
         start = time.time()
-        vhi_lin_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=vhi_new_lams,
-                            interp_kind="linear")
-        print(f"Instatiating very high resolution (linear) grid took {time.time() - start:.2f} seconds")
+        vhi_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=vhi_new_lams)
+        print(f"Instatiating very high resolution grid took {time.time() - start:.2f} seconds")
         start = time.time()
-        hi_lin_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=hi_new_lams,
-                           interp_kind="linear")
-        print(f"Instatiating high resolution (linear) grid took {time.time() - start:.2f} seconds")
+        hi_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=hi_new_lams)
+        print(f"Instatiating high resolution grid took {time.time() - start:.2f} seconds")
         start = time.time()
-        low_lin_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=low_new_lams,
-                            interp_kind="linear")
-        print(f"Instatiating low resolution (linear) grid took {time.time() - start:.2f} seconds")
-
-        start = time.time()
-        vhi_cub_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=vhi_new_lams,
-                            interp_kind="cubic")
-        print(f"Instatiating very high resolution (cubic) grid took {time.time() - start:.2f} seconds")
-        start = time.time()
-        hi_cub_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=hi_new_lams,
-                           interp_kind="cubic")
-        print(f"Instatiating high resolution (cubic) grid took {time.time() - start:.2f} seconds")
-        start = time.time()
-        low_cub_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=low_new_lams,
-                            interp_kind="cubic")
-        print(f"Instatiating low resolution (cubic) grid took {time.time() - start:.2f} seconds")
+        low_grid = Grid(grid_name, grid_dir=grid_dir, new_lam=low_new_lams)
+        print(f"Instatiating low resolution grid took {time.time() - start:.2f} seconds")
 
         # Set up plot
         fig = plt.figure(figsize=(5, 3.5))
@@ -112,12 +93,9 @@ Demonstrates the interpolation of grid spectra at the point of instantiation.
 
         ax.plot(grid.lam, grid.spectra["incident"][25, 5, :], label="Unmodified")
 
-        ax.plot(vhi_lin_grid.lam, vhi_lin_grid.spectra["incident"][25, 5, :], label="Very High (Linear)")
-        ax.plot(hi_lin_grid.lam, hi_lin_grid.spectra["incident"][25, 5, :], label="High (Linear)")
-        ax.plot(low_lin_grid.lam, low_lin_grid.spectra["incident"][25, 5, :], label="Low (Linear)")
-        ax.plot(vhi_cub_grid.lam, vhi_cub_grid.spectra["incident"][25, 5, :], label="Very High (Cubic)")
-        ax.plot(hi_cub_grid.lam, hi_cub_grid.spectra["incident"][25, 5, :], label="High (Cubic)")
-        ax.plot(low_cub_grid.lam, low_cub_grid.spectra["incident"][25, 5, :], label="Low (Cubic)")
+        ax.plot(vhi_grid.lam, vhi_grid.spectra["incident"][25, 5, :], label="Very High")
+        ax.plot(hi_grid.lam, hi_grid.spectra["incident"][25, 5, :], label="High")
+        ax.plot(low_grid.lam, low_grid.spectra["incident"][25, 5, :], label="Low")
 
         ax.set_xlabel(r"$\lambda/\AA$")
         ax.set_ylabel(r"$L_{\nu}/erg\ s^{-1}\ Hz^{-1} M_{\odot}^{-1}$")
@@ -129,7 +107,7 @@ Demonstrates the interpolation of grid spectra at the point of instantiation.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.837 seconds)
+   **Total running time of the script:** (0 minutes 1.405 seconds)
 
 
 .. _sphx_glr_download_auto_examples_grids_plot_interp_grid.py:
