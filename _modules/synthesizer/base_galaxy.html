@@ -795,30 +795,41 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
 
-        <span class="c1"># initialise output spectra</span>
+        <span class="c1"># Initialise output spectra</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
-        <span class="c1"># generate intrinsic spectra using full star formation and metal</span>
-        <span class="c1"># enrichment history or all particles</span>
-        <span class="c1"># generates:</span>
-        <span class="c1">#   - incident</span>
-        <span class="c1">#   - escaped</span>
-        <span class="c1">#   - transmitted</span>
-        <span class="c1">#   - nebular</span>
-        <span class="c1">#   - reprocessed = transmitted + nebular</span>
-        <span class="c1">#   - intrinsic = transmitted + reprocessed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span>
-        <span class="p">)</span>
+        <span class="c1"># Generate intrinsic spectra for young and old particles </span>
+        <span class="c1"># separately before summing them if we have been given</span>
+        <span class="c1"># a threshold</span>
+        <span class="k">if</span> <span class="n">young_old_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">young_old_thresh</span><span class="p">:</span>
+            <span class="c1"># Generates:</span>
+            <span class="c1">#   - young_incident</span>
+            <span class="c1">#   - young_escaped</span>
+            <span class="c1">#   - young_transmitted</span>
+            <span class="c1">#   - young_nebular</span>
+            <span class="c1">#   - young_reprocessed = young_transmitted + young_nebular</span>
+            <span class="c1">#   - young_intrinsic = young_transmitted + young_reprocessed</span>
+            <span class="c1">#   - old_incident</span>
+            <span class="c1">#   - old_escaped</span>
+            <span class="c1">#   - old_transmitted</span>
+            <span class="c1">#   - old_nebular</span>
+            <span class="c1">#   - old_reprocessed = old_transmitted + old_nebular</span>
+            <span class="c1">#   - old_intrinsic = old_transmitted + old_reprocessed</span>
+            <span class="c1">#   - incident</span>
+            <span class="c1">#   - escaped</span>
+            <span class="c1">#   - transmitted</span>
+            <span class="c1">#   - nebular</span>
+            <span class="c1">#   - reprocessed = transmitted + nebular</span>
+            <span class="c1">#   - intrinsic = transmitted + reprocessed</span>
+            
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
-            <span class="c1"># generate the young gas reprocessed spectra</span>
+            <span class="c1"># Generate the young gas reprocessed spectra</span>
             <span class="c1"># add a label so saves e.g. &#39;escaped_young&#39; etc.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span>
                 <span class="n">grid</span><span class="p">,</span>
@@ -829,7 +840,7 @@
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c1"># generate the old gas reprocessed spectra</span>
+            <span class="c1"># Generate the old gas reprocessed spectra</span>
             <span class="c1"># add a label so saves e.g. &#39;escaped_old&#39; etc.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span>
                 <span class="n">grid</span><span class="p">,</span>
@@ -840,24 +851,63 @@
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
+            <span class="c1"># Combine young and old spectra</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_incident&quot;</span><span class="p">]</span> 
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_incident&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_transmitted&quot;</span><span class="p">]</span> 
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_transmitted&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_nebular&quot;</span><span class="p">]</span> 
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_nebular&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">]</span> 
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_intrinsic&quot;</span><span class="p">]</span> 
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_intrinsic&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;escaped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_escaped&quot;</span><span class="p">]</span> 
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_escaped&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="c1"># Generate intrinsic spectra for all particles</span>
+            <span class="c1"># Generates:</span>
+            <span class="c1">#   - incident</span>
+            <span class="c1">#   - escaped</span>
+            <span class="c1">#   - transmitted</span>
+            <span class="c1">#   - nebular</span>
+            <span class="c1">#   - reprocessed = transmitted + nebular</span>
+            <span class="c1">#   - intrinsic = transmitted + reprocessed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span>
+                <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">):</span>
-            <span class="c1"># single screen dust, no separate birth cloud attenuation</span>
+            <span class="c1"># Single screen dust, no separate birth cloud attenuation</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span>
 
-            <span class="c1"># calculate dust attenuation</span>
+            <span class="c1"># Calculate dust attenuation</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
-            <span class="c1"># calculate the attenuated emission</span>
+            <span class="c1"># Calculate the attenuated emission</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">transmission</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
             <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Apply separate attenuation to both the young and old components.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1"># Apply separate attenuation to both the young and old components.</span>
 
-            <span class="c1"># Two screen dust, one for diffuse other for birth cloud dust.</span>
+            <span class="c1"># Two screen dust, one for diffuse ISM, the other for birth cloud </span>
+            <span class="c1"># dust.</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="p">(</span>
@@ -878,28 +928,31 @@
             <span class="k">if</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span>
 
+            <span class="c1"># Get transmission curve for ISM</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">transmission_ISM</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
+            <span class="c1"># Get transmission curve for birth cloud</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">transmission_BC</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
+            <span class="c1"># Define yound and old transmissions</span>
             <span class="n">transmission_young</span> <span class="o">=</span> <span class="n">transmission_ISM</span> <span class="o">*</span> <span class="n">transmission_BC</span>
             <span class="n">transmission_old</span> <span class="o">=</span> <span class="n">transmission_ISM</span>
 
+            <span class="c1"># Calculate attenuated spectra</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">transmission_young</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">transmission_old</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
             <span class="p">)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
                 <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
             <span class="p">)</span>
 
-            <span class="c1"># set emergent spectra</span>
+            <span class="c1"># Set emergent spectra based on fesc (for young and old particles)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
                     <span class="s2">&quot;young_attenuated&quot;</span>
@@ -915,6 +968,7 @@
                     <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
                 <span class="p">)</span>
 
+        <span class="c1"># Set emergent spectra based on fesc (for all particles)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
         <span class="k">else</span><span class="p">:</span>
