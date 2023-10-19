@@ -401,7 +401,7 @@ x is now a unyt_quantity: type(x)= &lt;class &#39;unyt.array.unyt_quantity&#39;&
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;lam&#39;: Å, &#39;obslam&#39;: Å, &#39;wavelength&#39;: Å, &#39;nu&#39;: Hz, &#39;obsnu&#39;: Hz, &#39;nuz&#39;: Hz, &#39;luminosity&#39;: erg/s, &#39;lnu&#39;: erg/(Hz*s), &#39;llam&#39;: erg/(s*Å), &#39;continuum&#39;: erg/(Hz*s), &#39;flux&#39;: erg/(cm**2*s), &#39;fnu&#39;: nJy, &#39;ew&#39;: Å, &#39;coordinates&#39;: Mpc, &#39;smoothing_lengths&#39;: Mpc, &#39;softening_length&#39;: Mpc, &#39;velocities&#39;: km/s, &#39;masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;initial_masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;current_masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;ages&#39;: yr, &#39;accretion_rate&#39;: unyt_quantity(1., &#39;Msun/yr&#39;), &#39;bol_luminosity&#39;: erg/s, &#39;bb_temperature&#39;: K}
+{&#39;lam&#39;: Å, &#39;obslam&#39;: Å, &#39;wavelength&#39;: Å, &#39;original_lam&#39;: Å, &#39;lam_min&#39;: Å, &#39;lam_max&#39;: Å, &#39;lam_eff&#39;: Å, &#39;lam_fwhm&#39;: Å, &#39;mean_lams&#39;: Å, &#39;pivot_lams&#39;: Å, &#39;nu&#39;: Hz, &#39;obsnu&#39;: Hz, &#39;nuz&#39;: Hz, &#39;original_nu&#39;: Hz, &#39;luminosity&#39;: erg/s, &#39;lnu&#39;: erg/(Hz*s), &#39;llam&#39;: erg/(s*Å), &#39;continuum&#39;: erg/(Hz*s), &#39;flux&#39;: erg/(cm**2*s), &#39;fnu&#39;: nJy, &#39;ew&#39;: Å, &#39;coordinates&#39;: Mpc, &#39;smoothing_lengths&#39;: Mpc, &#39;softening_length&#39;: Mpc, &#39;velocities&#39;: km/s, &#39;masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;initial_masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;current_masses&#39;: unyt_quantity(1., &#39;Msun&#39;), &#39;ages&#39;: yr, &#39;accretion_rate&#39;: unyt_quantity(1., &#39;Msun/yr&#39;), &#39;bol_luminosity&#39;: erg/s, &#39;bb_temperature&#39;: K}
 </pre></div></div>
 </div>
 <p>As you can see, most units are defined symbollically, however, you may notice units such as <code class="docutils literal notranslate"><span class="pre">Msun</span></code> (the default used for masses) is defined as a compound unit in terms of <code class="docutils literal notranslate"><span class="pre">kg</span></code>s. Shortly we will cover working with the quantities returned by <strong>Synthesizer</strong> and how compound units work in practice.</p>
@@ -448,9 +448,17 @@ Unit System:
 lam:                Å
 obslam:             Å
 wavelength:         Å
+original_lam:       Å
+lam_min:            Å
+lam_max:            Å
+lam_eff:            Å
+lam_fwhm:           Å
+mean_lams:          Å
+pivot_lams:         Å
 nu:                 Hz
 obsnu:              Hz
 nuz:                Hz
+original_nu:        Hz
 luminosity:         erg/s
 lnu:                erg/(Hz*s)
 llam:               erg/(s*Å)
@@ -508,9 +516,17 @@ Unit System:
 lam:                Å
 obslam:             Å
 wavelength:         Å
+original_lam:       Å
+lam_min:            Å
+lam_max:            Å
+lam_eff:            Å
+lam_fwhm:           Å
+mean_lams:          Å
+pivot_lams:         Å
 nu:                 Hz
 obsnu:              Hz
 nuz:                Hz
+original_nu:        Hz
 luminosity:         erg/s
 lnu:                erg/(Hz*s)
 llam:               erg/(s*Å)
@@ -562,9 +578,17 @@ Unit System:
 lam:                Å
 obslam:             Å
 wavelength:         Å
+original_lam:       Å
+lam_min:            Å
+lam_max:            Å
+lam_eff:            Å
+lam_fwhm:           Å
+mean_lams:          Å
+pivot_lams:         Å
 nu:                 Hz
 obsnu:              Hz
 nuz:                Hz
+original_nu:        Hz
 luminosity:         erg/s
 lnu:                erg/(Hz*s)
 llam:               erg/(s*Å)
@@ -667,8 +691,8 @@ bb_temperature:     K
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.1401543  0.20572627 0.48831283 0.42050692 0.05926668 0.6629194
- 0.81939425 0.45449312 0.02067839 0.80419783] Msun
+[0.48515515 0.42062105 0.40647219 0.73935168 0.43254766 0.11599371
+ 0.33220018 0.80703349 0.59153105 0.15821016] Msun
 </pre></div></div>
 </div>
 <p>However, if we extract the values alone we get the values we expect in <span class="math notranslate nohighlight">\(M_\odot\)</span>.</p>
@@ -685,8 +709,8 @@ bb_temperature:     K
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.1401543  0.20572627 0.48831283 0.42050692 0.05926668 0.6629194
- 0.81939425 0.45449312 0.02067839 0.80419783]
+[0.48515515 0.42062105 0.40647219 0.73935168 0.43254766 0.11599371
+ 0.33220018 0.80703349 0.59153105 0.15821016]
 </pre></div></div>
 </div>
 <p>Its worth keeping this in mind whenever extracting masses from <strong>Synthesizer</strong> objects.</p>
@@ -719,10 +743,10 @@ bb_temperature:     K
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-stars.initial_masses[0]= 2.2393050046316016 Msun = 2.239305004631602 Msun
+stars.initial_masses[0]= 2.1644270824964233 Msun = 2.164427082496424 Msun
 stars.ages[0]= 1000000.0 yr
-stars.coordinates[0]= [0.44474148 0.06255191 0.29668609] Mpc
-stars.smoothing_lengths[0]= 0.22468865307898206 Mpc
+stars.coordinates[0]= [0.60377118 0.19146392 0.69372487] Mpc
+stars.smoothing_lengths[0]= 0.18487504136750632 Mpc
 </pre></div></div>
 </div>
 </section>

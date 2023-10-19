@@ -379,9 +379,10 @@
 <span class="kn">import</span> <span class="nn">urllib.request</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">Hz</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">unyt_array</span>
 
 <span class="kn">import</span> <span class="nn">synthesizer.exceptions</span> <span class="k">as</span> <span class="nn">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
 
 <div class="viewcode-block" id="UVJ"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.UVJ">[docs]</a><span class="k">def</span> <span class="nf">UVJ</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -439,6 +440,11 @@
 <span class="sd">            The mean wavelength of each Filter in the collection.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Define Quantitys</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">mean_lams</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">pivot_lams</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filter_codes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -470,7 +476,8 @@
 <span class="sd">                    {&lt;filter_code1&gt; : {&quot;transmission&quot;: &lt;transmission_array&gt;}}.</span>
 <span class="sd">                For generic filters new_lam must be provided.</span>
 <span class="sd">            new_lam : (array-like, float)</span>
-<span class="sd">                The wavelength array to define the transmission curve on.</span>
+<span class="sd">                The wavelength array to define the transmission curve on. Can</span>
+<span class="sd">                have units but Angstrom assumed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Define lists to hold our filters and filter codes</span>
@@ -500,7 +507,7 @@
 
         <span class="c1"># Calculate mean and pivot wavelengths for each filter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_mean_lams</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">piv_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_pivot_lams</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pivot_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_pivot_lams</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_make_svo_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_codes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -773,15 +780,19 @@
             <span class="c1"># Loop over filters getting the minimum and maximum wavelengths,</span>
             <span class="c1"># and highest resolution from the individual filters.</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
-                <span class="n">this_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
-                <span class="n">this_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+                <span class="n">this_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
+                <span class="n">this_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">this_min</span> <span class="o">&lt;</span> <span class="n">min_lam</span><span class="p">:</span>
                     <span class="n">min_lam</span> <span class="o">=</span> <span class="n">this_min</span>
                 <span class="k">if</span> <span class="n">this_max</span> <span class="o">&gt;</span> <span class="n">max_lam</span><span class="p">:</span>
                     <span class="n">max_lam</span> <span class="o">=</span> <span class="n">this_max</span>
 
             <span class="c1"># Create wavelength array</span>
-            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">+</span> <span class="n">lam_resolution</span><span class="p">,</span> <span class="n">lam_resolution</span><span class="p">)</span>
+            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                <span class="n">min_lam</span><span class="p">,</span>
+                <span class="n">max_lam</span> <span class="o">+</span> <span class="n">lam_resolution</span><span class="p">,</span>
+                <span class="n">lam_resolution</span>
+            <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -815,7 +826,7 @@
         <span class="c1"># Loop over the filters plotting their curves.</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
 
         <span class="c1"># Label the axes</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm \lambda/\AA$&quot;</span><span class="p">)</span>
@@ -870,17 +881,17 @@
 <span class="sd">        FilterCollection.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            piv_lams (ndarray, float)</span>
+<span class="sd">            pivot_lams (ndarray, float)</span>
 <span class="sd">                An array containing the rest frame pivot wavelengths of each</span>
 <span class="sd">                filter in the same order as self.filter_codes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Calculate each filters pivot wavelength</span>
-        <span class="n">piv_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">pivot_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">piv_lams</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span>
+            <span class="n">pivot_lams</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">piv_lams</span></div>
+        <span class="k">return</span> <span class="n">pivot_lams</span></div>
 
 <div class="viewcode-block" id="FilterCollection.calc_mean_lams"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.calc_mean_lams">[docs]</a>    <span class="k">def</span> <span class="nf">calc_mean_lams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -950,14 +961,14 @@
         <span class="c1"># Which method are we using?</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;pivot&quot;</span><span class="p">:</span>
             <span class="c1"># Calculate each filters pivot wavelength</span>
-            <span class="n">piv_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">piv_lams</span>
+            <span class="n">pivot_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pivot_lams</span>
 
             <span class="c1"># Find the index of the closest pivot wavelength to lam</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">piv_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pivot_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
             <span class="c1"># Calculate each filters mean wavelength</span>
-            <span class="n">mean_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_lams</span>
+            <span class="n">mean_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean_lams</span>
 
             <span class="c1"># Find the index of the closest mean wavelength to lam</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
@@ -966,7 +977,7 @@
             <span class="c1"># Compute the transmission in each filter at lam</span>
             <span class="n">transmissions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="n">transmissions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
+                <span class="n">transmissions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
 
             <span class="c1"># Find the index of the filter with the peak transmission</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">transmissions</span><span class="p">)</span>
@@ -982,7 +993,7 @@
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fcode</span><span class="p">]</span>
 
         <span class="c1"># Get the transmission</span>
-        <span class="n">transmission</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
 
         <span class="c1"># Ensure the transmission is non-zero at the desired wavelength</span>
         <span class="k">if</span> <span class="n">transmission</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1014,7 +1025,10 @@
                     <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">redshift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">fcode</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lam</span><span class="p">,</span>
+                                                                        <span class="n">fcode</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom &quot;</span>
@@ -1069,13 +1083,23 @@
 <span class="sd">        original_lam : array-like (float)</span>
 <span class="sd">            The original wavelength extracted from SVO. In a non-SVO filter</span>
 <span class="sd">            self.original_lam == self.lam.</span>
-<span class="sd">        nu : array-like (float)</span>
+<span class="sd">        original_nu : array-like (float)</span>
 <span class="sd">            The original frequency derived from self.original_lam. In a non-SVO</span>
 <span class="sd">            filter self.original_nu == self.nu.</span>
 <span class="sd">        original_t : array-like (float)</span>
 <span class="sd">            The original transmission extracted from SVO. In a non-SVO filter</span>
 <span class="sd">            self.original_t == self.t.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define Quantitys</span>
+    <span class="n">lam_min</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">lam_max</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">lam_eff</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">lam_fwhm</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">nu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">original_lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">original_nu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1169,8 +1193,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
 
         <span class="c1"># Calculate frequencies</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_make_top_hat_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1192,7 +1216,7 @@
         <span class="c1"># if it hasn&#39;t been provided</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_min</span> <span class="o">-</span> <span class="mi">1000</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_max</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam_min</span> <span class="o">-</span> <span class="mi">1000</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam_max</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1</span>
             <span class="p">)</span>
 
         <span class="c1"># Define the transmission curve (1 inside, 0 outside)</span>
@@ -1242,7 +1266,7 @@
 
         <span class="c1"># If a new wavelength grid is provided, interpolate</span>
         <span class="c1"># the transmission curve on to that grid</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span>
@@ -1270,7 +1294,7 @@
 
         <span class="c1"># Perform interpolation</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Filter.apply_filter"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1286,11 +1310,11 @@
 <span class="sd">            arr (array-like, float)</span>
 <span class="sd">                The array to convolve with the filter&#39;s transmission curve. Can</span>
 <span class="sd">                be any dimension but wavelength must be the final axis.</span>
-<span class="sd">            lam (array-like, float)</span>
+<span class="sd">            lam (unyt_array/array-like, float)</span>
 <span class="sd">                The wavelength array to integrate with respect to.</span>
 <span class="sd">                Defaults to the rest frame frequency if neither lams or nus are</span>
 <span class="sd">                provided.</span>
-<span class="sd">            nu :  (array-like, float)</span>
+<span class="sd">            nu :  (unyt_array/array-like, float)</span>
 <span class="sd">                The frequency array to integrate with respect to.</span>
 <span class="sd">                Defaults to the rest frame frequency if neither lams or nus are</span>
 <span class="sd">                provided.</span>
@@ -1323,25 +1347,37 @@
         <span class="c1"># Get the correct x array to integrate w.r.t and work out if we need</span>
         <span class="c1"># to shift the transmission curve.</span>
         <span class="k">if</span> <span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Ensure the passed frequencies have units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+                <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
+
             <span class="c1"># Define the integration xs</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="n">nu</span>
 
             <span class="c1"># Do we need to shift?</span>
-            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">nu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">nu</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="c1"># To shift the transmission we need the corresponding wavelength</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="n">nu</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="c1"># with the units stripped off</span>
+            <span class="k">if</span> <span class="n">need_shift</span><span class="p">:</span>
+                <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">elif</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># Ensure the passed wavelengths have no units</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+                <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">value</span>
+
             <span class="c1"># Define the integration xs</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="n">lam</span>
 
             <span class="c1"># Do we need to shift?</span>
-            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Define the integration xs</span>
-            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span>
 
             <span class="c1"># No shift needed</span>
             <span class="n">need_shift</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1350,7 +1386,13 @@
         <span class="k">if</span> <span class="n">need_shift</span><span class="p">:</span>
             <span class="c1"># Ok, shift the tranmission curve by interpolating onto the</span>
             <span class="c1"># provided wavelengths</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+                <span class="n">lam</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span>
+                <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># We can use the standard transmission array</span>
