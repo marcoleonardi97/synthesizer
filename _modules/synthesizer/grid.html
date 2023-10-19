@@ -161,8 +161,8 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../grids_example.html">Grids</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../grids/grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../grids/grids_example.html">Grids</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../galaxies/galaxies.html">Galaxy Objects</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Galaxy Objects</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -360,11 +360,13 @@
 
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="vm">__file__</span> <span class="k">as</span> <span class="n">filepath</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
 
 <div class="viewcode-block" id="get_available_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.get_available_lines">[docs]</a><span class="k">def</span> <span class="nf">get_available_lines</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="p">,</span> <span class="n">include_wavelengths</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -523,6 +525,9 @@
 <span class="sd">        lam (array_like, float)</span>
 <span class="sd">            The wavelengths at which the spectra are defined.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Define Quantitys</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -692,9 +697,15 @@
 <span class="sd">        will need to instantiated with no lam argument passed.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            new_lam (array-like, float)</span>
+<span class="sd">            new_lam (unyt_array/array-like, float)</span>
 <span class="sd">                The new wavelength array to interpolate the spectra onto.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle and remove the units from the passed wavelengths if needed</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+                <span class="n">new_lam</span> <span class="o">=</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">value</span>
 
         <span class="c1"># Loop over spectra to interpolate</span>
         <span class="k">for</span> <span class="n">spectra_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
@@ -702,7 +713,7 @@
             <span class="c1"># Evaluate the function at the desired wavelengths</span>
             <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span>
                 <span class="n">new_lam</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
             <span class="p">)</span>
 
@@ -743,16 +754,28 @@
 <span class="sd">        TODO: This could be moved to utils?</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            value (float)</span>
+<span class="sd">            value (float/unyt_quantity)</span>
 <span class="sd">                The target value.</span>
 
-<span class="sd">            array (np.ndarray)</span>
+<span class="sd">            array (np.ndarray/unyt_array)</span>
 <span class="sd">                The array to search.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            int</span>
 <span class="sd">                The index of the closet point in the grid (array)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Handle units on both value and array</span>
+        <span class="c1"># First do we need a conversion?</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">value</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+
+        <span class="c1"># Get the values</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span> <span class="o">-</span> <span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span></div>
 
