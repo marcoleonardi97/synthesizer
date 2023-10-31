@@ -360,7 +360,6 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
@@ -371,19 +370,45 @@
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
 
-<div class="viewcode-block" id="get_available_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.get_available_lines">[docs]</a><span class="k">def</span> <span class="nf">get_available_lines</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="p">,</span> <span class="n">include_wavelengths</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="check_lines_available"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.check_lines_available">[docs]</a><span class="k">def</span> <span class="nf">check_lines_available</span><span class="p">(</span>
+    <span class="n">grid_name</span><span class="p">,</span>
+    <span class="n">grid_dir</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Check that lines are available on this grid</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        grid_name (str):</span>
+<span class="sd">            The name of the grid file.</span>
+<span class="sd">        grid_dir (str):</span>
+<span class="sd">            The directory to the grid file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">grid_filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;lines&quot;</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="get_available_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.get_available_lines">[docs]</a><span class="k">def</span> <span class="nf">get_available_lines</span><span class="p">(</span>
+    <span class="n">grid_name</span><span class="p">,</span>
+    <span class="n">grid_dir</span><span class="p">,</span>
+    <span class="n">include_wavelengths</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a list of the lines available to a grid</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        grid_name (str)</span>
+<span class="sd">        grid_name (str):</span>
 <span class="sd">            The name of the grid file.</span>
-
-<span class="sd">        grid_dir (str)</span>
+<span class="sd">        grid_dir (str):</span>
 <span class="sd">            The directory to the grid file.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        (list)</span>
+<span class="sd">        lines (list):</span>
 <span class="sd">            List of available lines</span>
+<span class="sd">        wavelengths (list)</span>
+<span class="sd">            List of associated wavelengths (if `include_wavelengths` is True)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span>
@@ -413,26 +438,26 @@
 <span class="sd">            flattened list</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">flattend_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">flattened_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">list_to_flatten</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
-                <span class="n">flattend_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+                <span class="n">flattened_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            
-            <span class="c1"># If the line is a doublet resolve it and add each line</span>
+
+            <span class="c1"># If the line is a doublet, resolve it and add each line</span>
             <span class="c1"># individually</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">flattend_list</span> <span class="o">+=</span> <span class="n">lst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="n">flattened_list</span> <span class="o">+=</span> <span class="n">lst</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">flattend_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
+                <span class="n">flattened_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># TODO: raise exception</span>
-            <span class="k">pass</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">((</span><span class="s2">&quot;Unrecognised type provided. Please provide&quot;</span>
+                             <span class="s2">&quot;a list of lists and strings&quot;</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">flattend_list</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">flattened_list</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="parse_grid_id"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.parse_grid_id">[docs]</a><span class="k">def</span> <span class="nf">parse_grid_id</span><span class="p">(</span><span class="n">grid_id</span><span class="p">):</span>
@@ -494,25 +519,27 @@
 <span class="sd">        grid_dir (str)</span>
 <span class="sd">            The directory containing the grid HDF5 file.</span>
 <span class="sd">        grid_name (str)</span>
-<span class="sd">            The name of the grid (as defined by the file name) with no extension.</span>
+<span class="sd">            The name of the grid (as defined by the file name)</span>
+<span class="sd">            with no extension.</span>
 <span class="sd">        grid_ext (str)</span>
-<span class="sd">            The grid extension. Either &quot;.hdf5&quot; or &quot;.h5&quot;. If the passed grid_name</span>
-<span class="sd">            has no extension then &quot;.hdf5&quot; is assumed.</span>
+<span class="sd">            The grid extension. Either &quot;.hdf5&quot; or &quot;.h5&quot;. If the passed </span>
+<span class="sd">            grid_name has no extension then &quot;.hdf5&quot; is assumed.</span>
 <span class="sd">        read_lines (bool/list)</span>
-<span class="sd">            Flag for whether to read lines. If False they are not read, otherwise,</span>
-<span class="sd">            this is a list of the requested lines.</span>
+<span class="sd">            Flag for whether to read lines. If False they are not read,</span>
+<span class="sd">            otherwise, this is a list of the requested lines.</span>
 <span class="sd">        read_spectra (bool/list)</span>
 <span class="sd">            Flag for whether to read spectra.</span>
 <span class="sd">        spectra (array-like, float)</span>
-<span class="sd">            The spectra array from the grid. This is an N-dimensional grid where </span>
-<span class="sd">            N is the number of axes of the SPS grid. The final dimension is</span>
-<span class="sd">            always wavelength.</span>
+<span class="sd">            The spectra array from the grid. This is an N-dimensional</span>
+<span class="sd">            grid where N is the number of axes of the SPS grid. The final</span>
+<span class="sd">            dimension is always wavelength.</span>
 <span class="sd">        lines (array-like, float)</span>
-<span class="sd">            The lines array from the grid. This is an N-dimensional grid where </span>
+<span class="sd">            The lines array from the grid. This is an N-dimensional grid where</span>
 <span class="sd">            N is the number of axes of the SPS grid. The final dimension is</span>
 <span class="sd">            always wavelength.</span>
 <span class="sd">        parameters (dict)</span>
-<span class="sd">            A dictionary containing the grid&#39;s parameters used in its generation.</span>
+<span class="sd">            A dictionary containing the grid&#39;s parameters used in its</span>
+<span class="sd">            generation.</span>
 <span class="sd">        axes (list, str)</span>
 <span class="sd">            A list of the names of the spectral grid axes.</span>
 <span class="sd">        naxes</span>
@@ -520,15 +547,15 @@
 <span class="sd">        logQ10 (dict)</span>
 <span class="sd">            A dictionary of ionisation Q parameters.</span>
 <span class="sd">        &lt;grid_axis&gt; (array-like, float)</span>
-<span class="sd">            A Grid will always contain 1D arrays corresponding to the axes of the</span>
-<span class="sd">            spectral grid. These are read dynamically from the HDF5 file so can be</span>
-<span class="sd">            anything but usually contain at least stellar ages and stellar </span>
-<span class="sd">            metallicity.</span>
+<span class="sd">            A Grid will always contain 1D arrays corresponding to the axes</span>
+<span class="sd">            of the spectral grid. These are read dynamically from the HDF5</span>
+<span class="sd">            file so can be anything but usually contain at least stellar ages</span>
+<span class="sd">            and stellar metallicity.</span>
 <span class="sd">        lam (array_like, float)</span>
 <span class="sd">            The wavelengths at which the spectra are defined.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Define Quantitys</span>
+    <span class="c1"># Define Quantities</span>
     <span class="n">lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -564,8 +591,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span> <span class="o">=</span> <span class="n">grid_dir</span>
 
         <span class="c1"># Have we been passed an extension?</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hdf5&quot;</span> 
-            <span class="ow">or</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hdf5&quot;</span> <span class="ow">or</span>
+                <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="s2">&quot;hdf5&quot;</span>
@@ -578,7 +605,7 @@
 
         <span class="c1"># Flags for reading behaviour</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_lines</span> <span class="o">=</span> <span class="n">read_lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_spectra</span> <span class="o">=</span> <span class="n">read_spectra</span>  <span class="c1">#  not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_spectra</span> <span class="o">=</span> <span class="n">read_spectra</span>  <span class="c1"># not used</span>
 
         <span class="c1"># Set up attributes we will set later</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="kc">None</span>
@@ -649,16 +676,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">read_lines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
-            
+
+            <span class="k">if</span> <span class="n">check_lines_available</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="p">(</span><span class="s2">&quot;No lines available on this grid object. &quot;</span>
+                     <span class="s2">&quot;Either set `read_lines=True`, or load a grid &quot;</span>
+                     <span class="s2">&quot;containing line information&quot;</span><span class="p">))</span>
+
             <span class="c1"># If read_lines is True read all available lines in the grid,</span>
-            <span class="c1"># otherwise if read_lines is a list just read the lines in the list.</span>
+            <span class="c1"># otherwise if read_lines is a list just read the lines</span>
+            <span class="c1"># in the list.</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
             <span class="c1"># If a list of lines is provided then only read lines in this list</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">read_lines</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">read_lines</span> <span class="o">=</span> <span class="n">flatten_linelist</span><span class="p">(</span><span class="n">read_lines</span><span class="p">)</span>
-                
+
             <span class="c1"># If a list isn&#39;t provided then use all available lines to the grid</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">read_lines</span> <span class="o">=</span> <span class="n">get_available_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="p">)</span>
