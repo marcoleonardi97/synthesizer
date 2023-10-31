@@ -692,10 +692,10 @@
         <span class="n">grid</span><span class="p">,</span>
         <span class="n">line_ids</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">tau_v_nebular</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tau_v_stellar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dust_curve_nebular</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">({</span><span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">}),</span>
-        <span class="n">dust_curve_stellar</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">({</span><span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">}),</span>
+        <span class="n">tau_v_BC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tau_v_ISM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dust_curve_BC</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">dust_curve_ISM</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
         <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -714,16 +714,16 @@
 <span class="sd">        fesc : float</span>
 <span class="sd">            The Lyman continuum escape fraction, the fraction of</span>
 <span class="sd">            ionising photons that entirely escape</span>
-<span class="sd">        tau_v_nebular : float</span>
-<span class="sd">            V-band optical depth of the nebular emission</span>
-<span class="sd">        tau_v_stellar : float</span>
-<span class="sd">            V-band optical depth of the stellar emission</span>
-<span class="sd">        dust_curve_nebular : obj (dust_curve)</span>
+<span class="sd">        tau_v_BC : float</span>
+<span class="sd">            V-band optical depth of the birth cloud</span>
+<span class="sd">        tau_v_ISM : float</span>
+<span class="sd">            V-band optical depth of the diffuse ISM</span>
+<span class="sd">        dust_curve_BC : obj (dust_curve)</span>
 <span class="sd">            A dust_curve object specifying the dust curve</span>
-<span class="sd">            for the nebular emission</span>
-<span class="sd">        dust_curve_stellar : obj (dust_curve)</span>
+<span class="sd">            for the birth cloud</span>
+<span class="sd">        dust_curve_ISM : obj (dust_curve)</span>
 <span class="sd">            A dust_curve object specifying the dust curve</span>
-<span class="sd">            for the stellar emission</span>
+<span class="sd">            for the diffuse ISM</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -743,17 +743,17 @@
         <span class="c1"># dictionary holding lines</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">intrinsic_line</span> <span class="ow">in</span> <span class="n">intrinsic_lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">intrinsic_line</span> <span class="ow">in</span> <span class="n">intrinsic_lines</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># calculate attenuation</span>
-            <span class="n">T_nebular</span> <span class="o">=</span> <span class="n">dust_curve_nebular</span><span class="o">.</span><span class="n">attenuate</span><span class="p">(</span>
-                <span class="n">tau_v_nebular</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
+            <span class="n">T_BC</span> <span class="o">=</span> <span class="n">dust_curve_BC</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
+                <span class="n">tau_v_BC</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
             <span class="p">)</span>
-            <span class="n">T_stellar</span> <span class="o">=</span> <span class="n">dust_curve_stellar</span><span class="o">.</span><span class="n">attenuate</span><span class="p">(</span>
-                <span class="n">tau_v_stellar</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
+            <span class="n">T_ISM</span> <span class="o">=</span> <span class="n">dust_curve_ISM</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
+                <span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
             <span class="p">)</span>
 
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*</span> <span class="n">T_nebular</span>
-            <span class="n">continuum</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">*</span> <span class="n">T_stellar</span>
+            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*</span> <span class="n">T_BC</span> <span class="o">*</span> <span class="n">T_ISM</span> 
+            <span class="n">continuum</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">*</span> <span class="n">T_ISM</span>
 
             <span class="n">line</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
                 <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span>
@@ -784,7 +784,7 @@
         <span class="n">line_ids</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">({</span><span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">}),</span>
+        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
         <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -818,8 +818,8 @@
             <span class="n">grid</span><span class="p">,</span>
             <span class="n">line_ids</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-            <span class="n">tau_v_nebular</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-            <span class="n">tau_v_stellar</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
+            <span class="n">tau_v_BC</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">tau_v_ISM</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">dust_curve_nebular</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
             <span class="n">dust_curve_stellar</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
         <span class="p">)</span></div>

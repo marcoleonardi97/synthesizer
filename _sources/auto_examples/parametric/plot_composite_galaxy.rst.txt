@@ -27,7 +27,7 @@ photometry. This example will:
 - calculate spectral luminosity density of each
 - make images of both
 
-.. GENERATED FROM PYTHON SOURCE LINES 11-157
+.. GENERATED FROM PYTHON SOURCE LINES 11-152
 
 
 
@@ -133,8 +133,6 @@ photometry. This example will:
     available images: []
     ----------
 
-    /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1802: RuntimeWarning: divide by zero encountered in log10
-      out_arr = func(np.asarray(inp), out=out_func, **kwargs)
 
 
 
@@ -153,10 +151,8 @@ photometry. This example will:
 
     from synthesizer.grid import Grid
     from synthesizer.parametric.morphology import Sersic2D
-    from synthesizer.parametric.sfzh import (SFH,
-                                             ZH,
-                                             generate_sfzh,
-                                             generate_instant_sfzh)
+    from synthesizer.parametric.sfzh import SFH, ZH
+    from synthesizer.parametric.sfzh import generate_sfzh, generate_instant_sfzh
     from synthesizer.parametric.galaxy import Galaxy
     from synthesizer.filters import UVJ
 
@@ -169,7 +165,7 @@ photometry. This example will:
         # Define the grid
         grid_name = "test_grid"
         grid_dir = "../../tests/test_grid/"
-        grid = Grid(grid_name, grid_dir=grid_dir)
+        grid = Grid(grid_name, grid_dir=grid_dir, new_lam=np.logspace(3, 4.2, 1000))
 
         # Get a UVJ filter collection
         filters = UVJ()
@@ -226,7 +222,7 @@ photometry. This example will:
         # Define bulge morphology
         morph = Sersic2D(r_eff_kpc=1.0 * kpc, n=4.0)
 
-        # Define the parameters of the star formation and metal enrichment 
+        # Define the parameters of the star formation and metal enrichment
         # histories
         stellar_mass = 2e10
         sfzh = generate_instant_sfzh(
@@ -270,19 +266,16 @@ photometry. This example will:
         # Plot the spectra of both components
 
         sed = disk.spectra["incident"]
-        plt.plot(np.log10(sed.lam), np.log10(sed.lnu), lw=1, alpha=0.8, c="b", 
-                 label="disk")
+        plt.plot(np.log10(sed.lam), np.log10(sed.lnu), lw=1, alpha=0.8, c="b", label="disk")
 
         sed = bulge.spectra["incident"]
         plt.plot(
-            np.log10(sed.lam), np.log10(sed.lnu), lw=1, alpha=0.8, c="r", 
-            label="bulge"
+            np.log10(sed.lam), np.log10(sed.lnu), lw=1, alpha=0.8, c="r", label="bulge"
         )
 
         sed = combined.spectra["incident"]
         plt.plot(
-            np.log10(sed.lam), np.log10(sed.lnu), lw=2, alpha=0.8, c="k", 
-            label="combined"
+            np.log10(sed.lam), np.log10(sed.lnu), lw=2, alpha=0.8, c="k", label="combined"
         )
 
         plt.xlim(3.0, 4.3)
@@ -295,7 +288,7 @@ photometry. This example will:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.679 seconds)
+   **Total running time of the script:** (0 minutes 2.614 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_composite_galaxy.py:
