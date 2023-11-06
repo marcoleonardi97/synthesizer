@@ -238,9 +238,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_create_survey_photometry.html">Create survey photometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_create_survey_imgs.html">Create survey images</a></li>
 </ul>
 </li>
 </ul>
@@ -283,11 +281,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.igm.html">synthesizer.igm</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../_autosummary/synthesizer.imaging.extensions.sph_kernel_calc.html">synthesizer.imaging.extensions.sph_kernel_calc</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.observation.html">synthesizer.imaging.observation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
 </ul>
@@ -365,154 +363,108 @@
 <section id="The-setup">
 <h2>The setup<a class="headerlink" href="#The-setup" title="Permalink to this heading">#</a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">cm</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">arcsec</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">Mpc</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">arcsec</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">Mpc</span><span class="p">,</span> <span class="n">Msun</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric.sfzh</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZH</span><span class="p">,</span> <span class="n">generate_sfzh</span>
-<span class="kn">from</span> <span class="nn">synthesizer.particle.stars</span> <span class="kn">import</span> <span class="n">sample_sfhz</span>
-<span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span>
-<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">galaxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.particle.particles</span> <span class="kn">import</span> <span class="n">CoordinateGenerator</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">FilterCollection</span> <span class="k">as</span> <span class="n">Filters</span>
-
-
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DeJavu Serif&quot;</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Times New Roman&quot;</span><span class="p">]</span>
-
-<span class="c1"># Set the seed</span>
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-</pre></div>
+<span class="kn">from</span> <span class="nn">synthesizer.load_data</span> <span class="kn">import</span> <span class="n">load_CAMELS_IllustrisTNG</span>
+<span class="kn">from</span> <span class="nn">synthesizer.kernel_functions</span> <span class="kn">import</span> <span class="n">kernel</span>
+<br/></pre></div>
 </div>
 </div>
-<p>First port of call is initilaising the SPS grid. Here we use a simple test grid with limited properties.</p>
+<p>First port of call is initilaising the SPS grid. Here we use the test grid.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the grid</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the grid</span>
 <span class="n">grid_name</span> <span class="o">=</span> <span class="s2">&quot;test_grid&quot;</span>
 <span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;../../../tests/test_grid/&quot;</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">600</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
-<section id="Creating-a-fake-galaxy">
-<h3>Creating a fake galaxy<a class="headerlink" href="#Creating-a-fake-galaxy" title="Permalink to this heading">#</a></h3>
-<p>With the grid in hand we need to define a star formation metallicity history from which to sample. In this toy example we use a constant SFH and metallicity history.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<p>For demonstration purposes we will just load one of the CAMELS galaxies from the test data. To see how to intialise your own galaxies see <a class="reference internal" href="../galaxies/galaxy_obj.html"><span class="doc">the particle galaxy docs</span></a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the metallicity history</span>
-<span class="n">Z_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Z&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">}</span>
-<span class="n">Zh</span> <span class="o">=</span> <span class="n">ZH</span><span class="o">.</span><span class="n">deltaConstant</span><span class="p">(</span><span class="n">Z_p</span><span class="p">)</span>
-
-<span class="c1"># Define the star formation history</span>
-<span class="n">sfh_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">}</span>
-<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">sfh_p</span><span class="p">)</span>
-
-<span class="c1"># Initialise the SFZH object</span>
-<span class="n">sfzh</span> <span class="o">=</span> <span class="n">generate_sfzh</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">sfh</span><span class="p">,</span> <span class="n">Zh</span><span class="p">,</span> <span class="n">stellar_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>We can now sample this SFZH for individual stellar “particles” and create a Stars object. In a real world example the Stars can be intialised from simulation data (see a <code class="docutils literal notranslate"><span class="pre">cosmo</span></code> example to see how), here we generate random coordinates from a gaussian and simulate true smoothing lengths by making them increase with increasing radius.</p>
-<p>Note that setting attributes in this way is only necessary when sampling from a SFZH. When working with data, attributes can be passed as kwargs when intialising a Stars object. Soon this will be updated.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stars_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-<span class="c1"># Define the number of stellar particles</span>
-<span class="n">n</span> <span class="o">=</span> <span class="mi">1000</span>
-
-<span class="c1"># Generate some random coordinates</span>
-<span class="n">coords</span> <span class="o">=</span> <span class="n">CoordinateGenerator</span><span class="o">.</span><span class="n">generate_3D_gaussian</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-
-<span class="c1"># Calculate the smoothing lengths from radii</span>
-<span class="n">cent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="p">)</span>
-<span class="n">rs</span><span class="p">[</span><span class="n">rs</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>  <span class="c1"># Set a lower bound on the &quot;smoothing length&quot;</span>
-
-<span class="c1"># Sample the SFZH, producing a Stars object</span>
-<span class="c1"># we will also pass some keyword arguments for attributes</span>
-<span class="c1"># we will need for imaging</span>
-<span class="n">stars</span> <span class="o">=</span> <span class="n">sample_sfhz</span><span class="p">(</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
-                    <span class="n">current_masses</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mf">8.7</span> <span class="o">/</span> <span class="n">n</span><span class="p">),</span>
-                    <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">rs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="n">initial_mass</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">))</span>
-
-<span class="c1"># Compute the width of stellar distribution, we&#39;ll use this to define the FOV later</span>
-<span class="n">width</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span> <span class="o">*</span> <span class="n">Mpc</span>
-
-<span class="c1"># Add in some buffer</span>
-<span class="n">width</span> <span class="o">+=</span> <span class="n">width</span> <span class="o">*</span> <span class="mf">0.1</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stars created, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">stars_start</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p>From the Stars object we can initialise a galaxy to make an image of. The lower level imaging toolset is readily accessible to the user (see the images docs) but here we employ the helper functionality on a galaxy object to steamline the process.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Create galaxy object</span>
-<span class="n">gal</span> <span class="o">=</span> <span class="n">galaxy</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="n">stars</span><span class="p">)</span>
+<span class="n">gal</span> <span class="o">=</span> <span class="n">load_CAMELS_IllustrisTNG</span><span class="p">(</span>
+    <span class="s1">&#39;../../../tests/data/&#39;</span><span class="p">,</span>
+    <span class="n">snap_name</span><span class="o">=</span><span class="s1">&#39;camels_snap.hdf5&#39;</span><span class="p">,</span>
+    <span class="n">fof_name</span><span class="o">=</span><span class="s1">&#39;camels_subhalo.hdf5&#39;</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Galaxy created, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">galaxy_start</span><span class="p">)</span>
-</pre></div>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Galaxy has </span><span class="si">{</span><span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">nstars</span><span class="si">}</span><span class="s2"> stellar particles&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Galaxy gas </span><span class="si">{</span><span class="n">gal</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">nparticles</span><span class="si">}</span><span class="s2"> gas particles&quot;</span><span class="p">)</span>
+<br/></pre></div>
 </div>
 </div>
-</section>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Galaxy created, took: 0.020667314529418945
+Galaxy has 120 stellar particles
+Galaxy gas 1218 gas particles
+</pre></div></div>
+</div>
 <section id="Getting-the-spectra">
 <h3>Getting the spectra<a class="headerlink" href="#Getting-the-spectra" title="Permalink to this heading">#</a></h3>
 <p>To make an image we need to map the stellar particle properties onto the SPS grid defined in the <code class="docutils literal notranslate"><span class="pre">grid</span></code> object. To do this we use the galaxy’s in built <code class="docutils literal notranslate"><span class="pre">generate_particle_spectra</span></code> method and create <code class="docutils literal notranslate"><span class="pre">&quot;total&quot;</span></code> SEDs with both stellar and nebular contributions. This returns an SED object containing lots of helper methods for working with spectra.</p>
 <p>Here we will use <code class="docutils literal notranslate"><span class="pre">get_fnu</span></code> to convert the rest frame SED into an observed SED which takes into account the previously set redshift stored on the <code class="docutils literal notranslate"><span class="pre">stars</span></code> object. By passing <code class="docutils literal notranslate"><span class="pre">igm=None</span></code> we assume the default <code class="docutils literal notranslate"><span class="pre">igm</span></code> contribution (<code class="docutils literal notranslate"><span class="pre">Inoue14</span></code>). This can be changed to <code class="docutils literal notranslate"><span class="pre">False</span></code> for no IGM or to another IGM model defined in <code class="docutils literal notranslate"><span class="pre">synthesizer.igm</span></code>.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spectra_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Calculate the stellar rest frame SEDs for all particles in erg / s / Hz</span>
 <span class="n">sed</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">get_particle_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
 <span class="c1"># Calculate the observed SED in nJy</span>
-<span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">stars</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">gal</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Spectra created, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spectra_start</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Spectra created, took: 0.0063402652740478516
+</pre></div></div>
+</div>
 </section>
 <section id="Defining-filters">
 <h3>Defining filters<a class="headerlink" href="#Defining-filters" title="Permalink to this heading">#</a></h3>
 <p>Before making photometric images we need to define a set of filters we want images for. This can be done in a number of ways using a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> object. There are a number of different ways to create filters (see the filter example). Here we will get Webb filters from the SVO database.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filter_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Define filter list</span>
 <span class="n">filter_codes</span> <span class="o">=</span> <span class="p">[</span>
@@ -528,51 +480,77 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Filters created, took: 0.8037810325622559
+</pre></div></div>
+</div>
 </section>
 </section>
 <section id="Imaging">
 <h2>Imaging<a class="headerlink" href="#Imaging" title="Permalink to this heading">#</a></h2>
 <p>Before we make any images we need to define the resolution of our images and the FOV (or width) of the images. We do this with associated units to enable the code to internally transform all quantites to a consistent unit system. We take the units of the resolution as the unit system to which all quantities should be transformed. Here we will use kpc for all spatial quantities but this is not necessary, these units can be a mixture units with the same dimension (e.g. <em>physical</em> Mpc, kpc and pc,
 or arcseconds and degrees) or a mixture of angular and cartesian units (but note that angular coordinates require a redshift to be defined even when making rest frame images to enable the transformation to a consistent unit system).</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define image resolution (here we arbitrarily set it to 100 pixels along an axis)</span>
-<span class="n">resolution</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">100</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the width of the image</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">kpc</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image width is </span><span class="si">%.2f</span><span class="s2"> Mpc with </span><span class="si">%.2f</span><span class="s2"> Mpc resolution&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">resolution</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+<span class="c1"># Define image resolution (here we arbitrarily set it to 100 pixels along an axis)</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">200</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image width is </span><span class="si">%.2f</span><span class="s2"> kpc with </span><span class="si">%.2f</span><span class="s2"> kpc resolution&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">width</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">resolution</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Image width is 30.00 kpc with 0.15 kpc resolution
+</pre></div></div>
 </div>
 <section id="Stellar-mass-maps">
 <h3>Stellar mass maps<a class="headerlink" href="#Stellar-mass-maps" title="Permalink to this heading">#</a></h3>
 <p>The base imaging classes in Synthesizer are designed to allow multiple different use cases including spectral data cubes, photometry in multiple bands, and images of arbitrary properties. Before we venture into photometry lets make a stellar mass histogram by passing the stellar masses in as <code class="docutils literal notranslate"><span class="pre">pixel_values</span></code>.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
 <span class="c1"># Get the image</span>
 <span class="n">mass_hist_img</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
     <span class="n">resolution</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
     <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
-    <span class="n">pixel_values</span><span class="o">=</span><span class="n">stars</span><span class="o">.</span><span class="n">_current_masses</span><span class="p">,</span>
+    <span class="n">pixel_values</span><span class="o">=</span><span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">_current_masses</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Histogram image took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Histogram image took: 0.0018568038940429688
+</pre></div></div>
+</div>
 <p>When making a singular image from an array passed to <code class="docutils literal notranslate"><span class="pre">pixel_values</span></code> the resultant image is stored in <code class="docutils literal notranslate"><span class="pre">Image.img</span></code>. Lets plot the resulting stellar mass histogram.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot what we&#39;ve made</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot what we&#39;ve made</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mass_hist_img</span><span class="o">.</span><span class="n">img</span><span class="p">)</span>
@@ -582,35 +560,64 @@ or arcseconds and degrees) or a mixture of angular and cartesian units (but note
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_15_0.png" src="../_images/imaging_particle_imaging_15_0.png" />
+</div>
+</div>
 <p>However, stellar particles in SPH simulations are not point sources. In fact we defined the smoothing lengths that describes each stellar particle’s SPH kernel above when we made the <code class="docutils literal notranslate"><span class="pre">Stars</span></code>. If we pass <code class="docutils literal notranslate"><span class="pre">&quot;smoothed&quot;</span></code> instead of <code class="docutils literal notranslate"><span class="pre">&quot;hist&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">img_type</span></code> we can make use of these smoothing lengths and make an image of the stellar distribution correctly smoothed of the SPH kernels.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<p>To do so we first need to get an SPH kernel from <code class="docutils literal notranslate"><span class="pre">synthesizer.kernel_functions</span></code> and pass that to <code class="docutils literal notranslate"><span class="pre">make_images</span></code> in addition to the previous properties.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the SPH kernel</span>
+<span class="n">sph_kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="p">()</span>
+<span class="n">kernel_data</span> <span class="o">=</span> <span class="n">sph_kernel</span><span class="o">.</span><span class="n">get_kernel</span><span class="p">()</span>
+
+<span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Get the image</span>
 <span class="n">mass_smooth_img</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
     <span class="n">resolution</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
     <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
-    <span class="n">pixel_values</span><span class="o">=</span><span class="n">stars</span><span class="o">.</span><span class="n">_current_masses</span><span class="p">,</span>
+    <span class="n">pixel_values</span><span class="o">=</span><span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">_current_masses</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Smoothed image took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Smoothed image took: 0.0057947635650634766
+</pre></div></div>
+</div>
 <p>We also provide helper functions for making plots from the computed image arrays. In the simplest use case the user only has to state the type of image they’d like to plot: <code class="docutils literal notranslate"><span class="pre">&quot;standard&quot;</span></code> for the images we’ve made here, and <code class="docutils literal notranslate"><span class="pre">&quot;psf&quot;</span></code> for images with PSFs and <code class="docutils literal notranslate"><span class="pre">&quot;noise&quot;</span></code> for images including nosie, both of which we will cover shortly. The user can also optionally state the colormap to use, provide a normalisation range for the image/images and provide a function to scale the pixel values but we
 will ignore those here.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot what we&#39;ve made</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot what we&#39;ve made</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">mass_smooth_img</span><span class="o">.</span><span class="n">plot_image</span><span class="p">(</span><span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;standard&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_19_0.png" src="../_images/imaging_particle_imaging_19_0.png" />
 </div>
 </div>
 </section>
@@ -624,11 +631,11 @@ will ignore those here.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">cosmo</span></code>: The astropy.cosmology object defining the employed cosmology.</p></li>
 </ul>
 <p>Internally a spectral data cube is made first and stored in the image at <code class="docutils literal notranslate"><span class="pre">Image.ifu_obj</span></code> (the data cube array itself being stored in <code class="docutils literal notranslate"><span class="pre">Image.ifu_obj.ifu</span></code>) which the filter curves are then convolved with to produce the photometric images in each band. This process is significantly more efficient than making images using the photometry of each particle, even when only using 2 filters.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Get the image</span>
 <span class="n">hist_img</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
@@ -650,24 +657,34 @@ will ignore those here.</p>
     <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
     <span class="n">rest_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Images took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Images took: 0.014683246612548828
+</pre></div></div>
+</div>
 <p>When making images in multiple bands the image arrays themselves are stored in a dictionary of the form <code class="docutils literal notranslate"><span class="pre">{f.filter_code:</span> <span class="pre">img_array}</span></code>. Below we extract this dictionary and plot each of the images we have made.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">hist_imgs</span> <span class="o">=</span> <span class="n">hist_img</span><span class="o">.</span><span class="n">imgs</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hist_imgs</span> <span class="o">=</span> <span class="n">hist_img</span><span class="o">.</span><span class="n">imgs</span>
 <span class="n">smooth_imgs</span> <span class="o">=</span> <span class="n">smooth_img</span><span class="o">.</span><span class="n">imgs</span>
 
 <span class="c1"># Lets set up a simple normalisation across all images</span>
 <span class="n">vmax</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">hist_imgs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-    <span class="n">up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mf">99.9</span><span class="p">)</span>
+    <span class="n">up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">up</span> <span class="o">&gt;</span> <span class="n">vmax</span><span class="p">:</span>
         <span class="n">vmax</span> <span class="o">=</span> <span class="n">up</span>
 <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">smooth_imgs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -719,6 +736,13 @@ will ignore those here.</p>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_23_0.png" src="../_images/imaging_particle_imaging_23_0.png" />
+</div>
+</div>
 </section>
 </section>
 <section id="Including-a-Point-Spread-Function-(PSF)">
@@ -728,11 +752,11 @@ will ignore those here.</p>
 <p>We also enable automatic super sampling of the image via the <code class="docutils literal notranslate"><span class="pre">psf_resample_factor</span></code> argument to improve the results of the convolution. The number of pixels along an axis will be increased by this factor prior to the intial image creation, the convolution is then applied at the super resolution and then all images are downsampled back to the native resolution.</p>
 <p>Note that a single call to <code class="docutils literal notranslate"><span class="pre">Galaxy.make_image</span></code> computes all types of images needed depending on the passed arguments, there is no need to create the image without the PSF first as we did above. Using the lower level interface each stage can be applied separately (see the images docs). The initial “PSF-less” image will be created at the super sampled resolution and then both <code class="docutils literal notranslate"><span class="pre">Image.imgs</span></code> and the PSF convolved images will be downsampled after convolution to the native pixel resolution. For
 finer control over resampling the user can use the base Image objects themselves.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a fake PSF for each filter</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a fake PSF for each filter</span>
 <span class="n">psf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span>
     <span class="n">signal</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">signal</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="p">)</span>
@@ -751,18 +775,28 @@ finer control over resampling the user can use the base Image objects themselves
     <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
     <span class="n">psfs</span><span class="o">=</span><span class="n">psfs</span><span class="p">,</span>
     <span class="n">psf_resample_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PSF images made, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+PSF images made, took: 0.09969544410705566
+</pre></div></div>
+</div>
 <p>After convolution the results are stored in a dictionary, <code class="docutils literal notranslate"><span class="pre">Image.imgs_psf</span></code> (or <code class="docutils literal notranslate"><span class="pre">Image.img_psf</span></code> for singular images made from an array). Here we will use the plotting helper function to plot these images with some normalisation.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">psf_imgs</span> <span class="o">=</span> <span class="n">psf_img</span><span class="o">.</span><span class="n">imgs_psf</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psf_imgs</span> <span class="o">=</span> <span class="n">psf_img</span><span class="o">.</span><span class="n">imgs_psf</span>
 
 <span class="c1"># Lets set up a simple normalisation across all images</span>
 <span class="n">vmax</span> <span class="o">=</span> <span class="mi">0</span>
@@ -774,7 +808,14 @@ finer control over resampling the user can use the base Image objects themselves
 <span class="c1"># Get the plot</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">psf_img</span><span class="o">.</span><span class="n">plot_image</span><span class="p">(</span><span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;psf&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
-</pre></div>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_27_0.png" src="../_images/imaging_particle_imaging_27_0.png" />
 </div>
 </div>
 </section>
@@ -785,14 +826,11 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
 <code class="docutils literal notranslate"><span class="pre">depths</span></code>: Either a single value or a dicitonary with a value and unit per filter defining the depth in each filter. Must be defined in the same units as the pixel values (erg / s / Hz for rest frame luminosity, nJy for flux images). There are helper functions in <code class="docutils literal notranslate"><span class="pre">synthesizer.utils</span></code> which enable easy switching between unit systems.</p>
 <p>As with the PSF images this can all be handled in a single call to <code class="docutils literal notranslate"><span class="pre">Galaxy.make_image</span></code>. If PSFs have been provided the noise will be applied to the images with a PSF, otherwise the PSF-less images will be used.</p>
 <p>Below we demonstrate the the first simple approach using the <code class="docutils literal notranslate"><span class="pre">noises</span></code> argument. Images with noise are stored in a dictionary, <code class="docutils literal notranslate"><span class="pre">Image.imgs_noise</span></code> (or <code class="docutils literal notranslate"><span class="pre">Image.img_noise</span></code> for singular images made from an array).</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Redefine image resolution (here we arbitrarily set it to 50 pixels along an axis)</span>
-<span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="mi">50</span><span class="p">)</span> <span class="o">*</span> <span class="n">Mpc</span>
-
-<span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 <span class="c1"># Get the image</span>
 <span class="n">simple_noise_img</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
@@ -806,6 +844,8 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
     <span class="n">psfs</span><span class="o">=</span><span class="n">psfs</span><span class="p">,</span>
     <span class="n">psf_resample_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="n">noises</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">nJy</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Noisy images made, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
@@ -825,16 +865,28 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Noisy images made, took: 0.4470498561859131
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_29_1.png" src="../_images/imaging_particle_imaging_29_1.png" />
+</div>
+</div>
 <p>And here we define a toy set of <code class="docutils literal notranslate"><span class="pre">depths</span></code> with a fixed SNR and aperture size.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Redefine image resolution (here we arbitrarily set it to 50 pixels along an axis)</span>
-<span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">width</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="mi">50</span><span class="p">)</span> <span class="o">*</span> <span class="n">Mpc</span>
-
-<span class="c1"># Create the dictionary of depths</span>
-<span class="n">depths</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">:</span> <span class="mi">2000</span> <span class="o">*</span> <span class="n">nJy</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the dictionary of depths</span>
+<span class="n">depths</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">nJy</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">}</span>
 
 <span class="n">img_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
@@ -852,6 +904,8 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
     <span class="n">depths</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
     <span class="n">snrs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">aperture</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Smoothed images made, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">img_start</span><span class="p">)</span>
@@ -875,12 +929,28 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Smoothed images made, took: 1.7821438312530518
+[(800, 800), (800, 800), (800, 800)]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_31_1.png" src="../_images/imaging_particle_imaging_31_1.png" />
+</div>
+</div>
 <p>Finally we can use the RGB image method on the <code class="docutils literal notranslate"><span class="pre">Image</span></code> object to make quick RGB images by simply providing a dictionary detailing which filters we want in which bands, the type of image we want (once again <code class="docutils literal notranslate"><span class="pre">&quot;standard&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;psf&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;noise&quot;</span></code>) and optional weights which we will ignore here.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the rgb image from the psf image above example using our 3 filters</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the rgb image from the psf image above example using our 3 filters</span>
 <span class="n">rgb_img</span> <span class="o">=</span> <span class="n">noise_img</span><span class="o">.</span><span class="n">make_rgb_image</span><span class="p">(</span>
     <span class="n">rgb_filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;JWST/NIRCam.F200W&quot;</span><span class="p">,],</span>
                  <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;JWST/NIRCam.F150W&quot;</span><span class="p">,],</span>
@@ -909,22 +979,227 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Scaling to: -2.425104551993539 -&gt; 621.236157162772
+(800, 800, 3)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_33_1.png" src="../_images/imaging_particle_imaging_33_1.png" />
+</div>
+</div>
+</section>
+<section id="Making-property-maps">
+<h2>Making property maps<a class="headerlink" href="#Making-property-maps" title="Permalink to this heading">#</a></h2>
+<p>Synthesizer provides some helper methods for making commonly used maps. Below are examples showing their use. Some of these are summative (e.g. mass) while others are mass weighted averages (e.g. metallicity and age).</p>
+<p>To plot them we can use the <code class="docutils literal notranslate"><span class="pre">plot_map</span></code> helper functions which can optionally include a colorbar, unlike <code class="docutils literal notranslate"><span class="pre">plot_image</span></code>.</p>
+<section id="Mass-maps">
+<h3>Mass maps<a class="headerlink" href="#Mass-maps" title="Permalink to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make the stellar mass map</span>
+<span class="n">stellar_mass_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_stellar_mass_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">stellar_mass_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;$M_\star/M_\odot$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_35_0.png" src="../_images/imaging_particle_imaging_35_0.png" />
+</div>
+</div>
+</section>
+<section id="Metallicity-maps">
+<h3>Metallicity maps<a class="headerlink" href="#Metallicity-maps" title="Permalink to this heading">#</a></h3>
+<p>For metallicity we can either plot the average metallicity in a pixel or the total metal mass in a pixel.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make the average stellar metallicity map</span>
+<span class="n">metallicity_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_stellar_metallicity_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">metallicity_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\langle Z \rangle $&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+<span class="c1"># Make the stellar metal mass map</span>
+<span class="n">metal_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_stellar_metal_mass_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">metal_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;$M_Z/M_\odot$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_37_0.png" src="../_images/imaging_particle_imaging_37_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_37_1.png" src="../_images/imaging_particle_imaging_37_1.png" />
+</div>
+</div>
+</section>
+<section id="Age-maps">
+<h3>Age maps<a class="headerlink" href="#Age-maps" title="Permalink to this heading">#</a></h3>
+<p>We can plot the average age in a pixel. Note that we can provide a normalisation function to the plotting method to scale our colormap.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span><span class="p">,</span> <span class="n">Normalize</span>
+
+
+<span class="c1"># Make the stellar age map</span>
+<span class="n">age_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_stellar_age_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Set up a normalisation</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">10.5</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">age_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$\langle \mathrm</span><span class="si">{Age}</span><span class="s2"> / [\mathrm</span><span class="si">{yr}</span><span class="s2">] \rangle$&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_39_0.png" src="../_images/imaging_particle_imaging_39_0.png" />
+</div>
+</div>
+</section>
+<section id="SFR-maps">
+<h3>SFR maps<a class="headerlink" href="#SFR-maps" title="Permalink to this heading">#</a></h3>
+<p>By taking all the recently formed stars (those younger than <code class="docutils literal notranslate"><span class="pre">age_bin</span></code>) we can plot SFR maps. By default <code class="docutils literal notranslate"><span class="pre">age_bin</span></code> is 100 Myrs.</p>
+<p>We can also pass <code class="docutils literal notranslate"><span class="pre">plot_map</span></code> a <code class="docutils literal notranslate"><span class="pre">tick_formatter</span></code> to format the color bar ticks however we desire.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FuncFormatter</span>
+
+
+<span class="c1"># Make the SFR map</span>
+<span class="n">sfr_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_sfr_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">age_bin</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span>
+<span class="p">)</span>
+
+<span class="c1"># Set up a normalisation</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">8.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">6</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Set up the tick formatter</span>
+<span class="n">tick_formatter</span> <span class="o">=</span> <span class="n">FuncFormatter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">tick_pos</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">sfr_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;$\log_</span><span class="si">{10}</span><span class="s2">(\mathrm</span><span class="si">{SFR}</span><span class="s2"> / [M_\odot/yr])$&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">tick_formatter</span><span class="o">=</span><span class="n">tick_formatter</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_3292/1155253518.py:18: RuntimeWarning: divide by zero encountered in log10
+  tick_formatter = FuncFormatter(lambda x, tick_pos: f&#34;{np.log10(x):.2f}&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_41_1.png" src="../_images/imaging_particle_imaging_41_1.png" />
+</div>
+</div>
+</section>
+<section id="sSFR-maps">
+<h3>sSFR maps<a class="headerlink" href="#sSFR-maps" title="Permalink to this heading">#</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make the sSFR map</span>
+<span class="n">ssfr_map</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">make_ssfr_map</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Set up a normalisation</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">4.75</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">15</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ssfr_map</span><span class="o">.</span><span class="n">plot_map</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">],</span> <span class="n">cbar_label</span><span class="o">=</span><span class="s2">&quot;$\log_</span><span class="si">{10}</span><span class="s2">(\mathrm</span><span class="si">{SFR}</span><span class="s2"> / [M_\odot/yr])$&quot;</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span> <span class="n">tick_formatter</span><span class="o">=</span><span class="n">tick_formatter</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/tmp/ipykernel_3292/1155253518.py:18: RuntimeWarning: divide by zero encountered in log10
+  tick_formatter = FuncFormatter(lambda x, tick_pos: f&#34;{np.log10(x):.2f}&#34;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_43_1.png" src="../_images/imaging_particle_imaging_43_1.png" />
+</div>
+</div>
+</section>
 </section>
 </section>
 
@@ -985,7 +1260,6 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
             <ul>
 <li><a class="reference internal" href="#">Creating Images From Galaxy Particle distributions</a><ul>
 <li><a class="reference internal" href="#The-setup">The setup</a><ul>
-<li><a class="reference internal" href="#Creating-a-fake-galaxy">Creating a fake galaxy</a></li>
 <li><a class="reference internal" href="#Getting-the-spectra">Getting the spectra</a></li>
 <li><a class="reference internal" href="#Defining-filters">Defining filters</a></li>
 </ul>
@@ -997,6 +1271,14 @@ calculated using an aperture, a signal to noise ratio/s (SNR/s), and depths in e
 </li>
 <li><a class="reference internal" href="#Including-a-Point-Spread-Function-(PSF)">Including a Point Spread Function (PSF)</a></li>
 <li><a class="reference internal" href="#Including-noise">Including noise</a></li>
+<li><a class="reference internal" href="#Making-property-maps">Making property maps</a><ul>
+<li><a class="reference internal" href="#Mass-maps">Mass maps</a></li>
+<li><a class="reference internal" href="#Metallicity-maps">Metallicity maps</a></li>
+<li><a class="reference internal" href="#Age-maps">Age maps</a></li>
+<li><a class="reference internal" href="#SFR-maps">SFR maps</a></li>
+<li><a class="reference internal" href="#sSFR-maps">sSFR maps</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

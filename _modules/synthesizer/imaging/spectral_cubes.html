@@ -236,9 +236,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_survey_photometry.html">Create survey photometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_survey_imgs.html">Create survey images</a></li>
 </ul>
 </li>
 </ul>
@@ -281,11 +279,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.igm.html">synthesizer.igm</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.sph_kernel_calc.html">synthesizer.imaging.extensions.sph_kernel_calc</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.observation.html">synthesizer.imaging.observation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
 </ul>
@@ -479,6 +477,8 @@
         <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the ParticleSpectralCube.</span>
@@ -511,6 +511,11 @@
 <span class="sd">        cosmo : obj (astropy.cosmology)</span>
 <span class="sd">            A cosmology object from astropy, used for cosmological calculations</span>
 <span class="sd">            when converting rest frame luminosity to flux.</span>
+<span class="sd">        kernel (array-like, float)</span>
+<span class="sd">            The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">            Only used for smoothed images.</span>
+<span class="sd">        kernel_threshold (float)</span>
+<span class="sd">            The kernel&#39;s impact parameter threshold (by default 1).</span>
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
 <span class="sd">        InconsistentArguments</span>
@@ -535,6 +540,8 @@
             <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
             <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
             <span class="n">rest_frame</span><span class="o">=</span><span class="n">rest_frame</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">SpectralCube</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
@@ -629,28 +636,27 @@
 <span class="sd">            pixels. [npix, npix, spectral_resolution]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="kn">from</span> <span class="nn">.extensions.sph_kernel_calc</span> <span class="kn">import</span> <span class="n">make_ifu</span>
+        <span class="kn">from</span> <span class="nn">.extensions.spectral_cube</span> <span class="kn">import</span> <span class="n">make_ifu</span>
 
         <span class="c1"># Prepare the inputs, we need to make sure we are passing C contiguous</span>
         <span class="c1"># arrays.</span>
-        <span class="c1"># TODO: Would be more memory efficient to pass the position array</span>
-        <span class="c1">#       and handle C extraction.</span>
         <span class="n">sed_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sed_values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">smls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ifu</span> <span class="o">=</span> <span class="n">make_ifu</span><span class="p">(</span>
             <span class="n">sed_vals</span><span class="p">,</span>
             <span class="n">smls</span><span class="p">,</span>
             <span class="n">xs</span><span class="p">,</span>
             <span class="n">ys</span><span class="p">,</span>
-            <span class="n">zs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectral_resolution</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_dim</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ifu</span></div></div>

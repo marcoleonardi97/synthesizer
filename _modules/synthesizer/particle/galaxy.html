@@ -236,9 +236,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_survey_photometry.html">Create survey photometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_survey_imgs.html">Create survey images</a></li>
 </ul>
 </li>
 </ul>
@@ -281,11 +279,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.igm.html">synthesizer.igm</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.sph_kernel_calc.html">synthesizer.imaging.extensions.sph_kernel_calc</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.observation.html">synthesizer.imaging.observation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
 </ul>
@@ -375,7 +373,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span>
@@ -526,7 +524,10 @@
 <span class="sd">        # TODO: this should be able to take a pre-existing stars object!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">initial_masses</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metals</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_integrated_stellar_properties</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_integrated_stellar_properties</span><span class="p">()</span>
+
+        <span class="c1"># Assign the redshift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span></div>
 
 <div class="viewcode-block" id="Galaxy.load_gas"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.load_gas">[docs]</a>    <span class="k">def</span> <span class="nf">load_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">metals</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1391,43 +1392,10 @@
 
         <span class="k">return</span> <span class="n">gamma</span></div>
 
-<div class="viewcode-block" id="Galaxy.create_stellarmass_hist"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.create_stellarmass_hist">[docs]</a>    <span class="k">def</span> <span class="nf">create_stellarmass_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">npix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fov</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate a 2D histogram of the galaxy&#39;s mass distribution.</span>
-
-<span class="sd">        NOTE: Either npix or fov must be defined.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        resolution : float</span>
-<span class="sd">           The size of a pixel.</span>
-<span class="sd">        npix : int</span>
-<span class="sd">            The number of pixels along an axis.</span>
-<span class="sd">        fov : float</span>
-<span class="sd">            The width of the image in image coordinates.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Image : array-like</span>
-<span class="sd">            A 2D array containing the image.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Instantiate the Image object.</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
-            <span class="n">resolution</span><span class="p">,</span>
-            <span class="n">npix</span><span class="p">,</span>
-            <span class="n">fov</span><span class="p">,</span>
-            <span class="n">stars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span>
-            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span></div>
-
 <div class="viewcode-block" id="Galaxy.make_images"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_images">[docs]</a>    <span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">resolution</span><span class="p">,</span>
-        <span class="n">fov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
         <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
         <span class="n">sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="p">(),</span>
@@ -1440,6 +1408,8 @@
         <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">psf_resample_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Makes images, either one or one per filter. This is a generic method</span>
@@ -1447,48 +1417,50 @@
 <span class="sd">        arguments allowed by the ParticleImage class. These methods can be</span>
 <span class="sd">        either a simple histogram or smoothing particles over a kernel. Either</span>
 <span class="sd">        of these operations can be done with or without a PSF and noise.</span>
-<span class="sd">        NOTE: Either npix or fov must be defined.</span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        resolution : float</span>
-<span class="sd">           The size of a pixel.</span>
-<span class="sd">           (Ignoring any supersampling defined by psf_resample_factor)</span>
-<span class="sd">        npix : int</span>
-<span class="sd">            The number of pixels along an axis.</span>
-<span class="sd">        fov : float</span>
-<span class="sd">            The width of the image in image coordinates.</span>
-<span class="sd">        img_type : str</span>
-<span class="sd">            The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
-<span class="sd">            &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
-<span class="sd">        sed : obj (SED)</span>
-<span class="sd">            An sed object containing the spectra for this image.</span>
-<span class="sd">        filters : obj (FilterCollection)</span>
-<span class="sd">            An imutable collection of Filter objects. If provided images are</span>
-<span class="sd">            made for each filter.</span>
-<span class="sd">        pixel_values : array-like (float)</span>
-<span class="sd">            The values to be sorted/smoothed into pixels. Only needed if an sed</span>
-<span class="sd">            and filters are not used.</span>
-<span class="sd">        psfs : dict</span>
-<span class="sd">            A dictionary containing the psf in each filter where the key is</span>
-<span class="sd">            each filter code and the value is the psf in that filter.</span>
-<span class="sd">        depths : dict</span>
-<span class="sd">            A dictionary containing the depth of an observation in each filter</span>
-<span class="sd">            where the key is each filter code and the value is the depth in</span>
-<span class="sd">            that filter.</span>
-<span class="sd">        aperture : float/dict</span>
-<span class="sd">            Either a float describing the size of the aperture in which the</span>
-<span class="sd">            depth is defined or a dictionary containing the size of the depth</span>
-<span class="sd">            aperture in each filter.</span>
-<span class="sd">        rest_frame : bool</span>
-<span class="sd">            Are we making an observation in the rest frame?</span>
-<span class="sd">        cosmo : obj (astropy.cosmology)</span>
-<span class="sd">            A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">            when converting rest frame luminosity to flux.</span>
-<span class="sd">        psf_resample_factor : float</span>
-<span class="sd">            The factor by which the image should be resampled for robust PSF</span>
-<span class="sd">            convolution. Note the images after PSF application will be</span>
-<span class="sd">            downsampled to the native pixel scale.</span>
-<span class="sd">        Returns</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (Quantity, float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">                (Ignoring any supersampling defined by psf_resample_factor)</span>
+<span class="sd">            fov : float</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type : str</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            sed : obj (SED)</span>
+<span class="sd">                An sed object containing the spectra for this image.</span>
+<span class="sd">            filters : obj (FilterCollection)</span>
+<span class="sd">                An imutable collection of Filter objects. If provided images are</span>
+<span class="sd">                made for each filter.</span>
+<span class="sd">            pixel_values : array-like (float)</span>
+<span class="sd">                The values to be sorted/smoothed into pixels. Only needed if an sed</span>
+<span class="sd">                and filters are not used.</span>
+<span class="sd">            psfs : dict</span>
+<span class="sd">                A dictionary containing the psf in each filter where the key is</span>
+<span class="sd">                each filter code and the value is the psf in that filter.</span>
+<span class="sd">            depths : dict</span>
+<span class="sd">                A dictionary containing the depth of an observation in each filter</span>
+<span class="sd">                where the key is each filter code and the value is the depth in</span>
+<span class="sd">                that filter.</span>
+<span class="sd">            aperture : float/dict</span>
+<span class="sd">                Either a float describing the size of the aperture in which the</span>
+<span class="sd">                depth is defined or a dictionary containing the size of the depth</span>
+<span class="sd">                aperture in each filter.</span>
+<span class="sd">            rest_frame : bool</span>
+<span class="sd">                Are we making an observation in the rest frame?</span>
+<span class="sd">            cosmo : obj (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            psf_resample_factor : float</span>
+<span class="sd">                The factor by which the image should be resampled for robust PSF</span>
+<span class="sd">                convolution. Note the images after PSF application will be</span>
+<span class="sd">                downsampled to the native pixel scale.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+<span class="sd">            Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Image : array-like</span>
 <span class="sd">            A 2D array containing the image.</span>
@@ -1504,8 +1476,9 @@
             <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
             <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
             <span class="n">sed</span><span class="o">=</span><span class="n">sed</span><span class="p">,</span>
-            <span class="n">stars</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span>
             <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
             <span class="n">pixel_values</span><span class="o">=</span><span class="n">pixel_values</span><span class="p">,</span>
             <span class="n">rest_frame</span><span class="o">=</span><span class="n">rest_frame</span><span class="p">,</span>
             <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
@@ -1514,6 +1487,8 @@
             <span class="n">depths</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
             <span class="n">apertures</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span>
             <span class="n">snrs</span><span class="o">=</span><span class="n">snrs</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Make the image, handling incorrect image types</span>
@@ -1556,7 +1531,634 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
                 <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
-            <span class="p">)</span></div></div>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_stellar_mass_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_stellar_mass_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_stellar_mass_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a mass map, either with or without smoothing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_gas_mass_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_gas_mass_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_gas_mass_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a mass map, either with or without smoothing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_stellar_age_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_stellar_age_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_stellar_age_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a age map, either with or without smoothing. The</span>
+<span class="sd">        age in a pixel is the initial mass weighted average age in that</span>
+<span class="sd">        pixel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Set up the initial mass image</span>
+        <span class="n">mass_img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the initial mass map</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">mass_img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">mass_img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+            <span class="c1"># Divide out the mass contribution to get the mean metallicity</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">mass_img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">mass_img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_stellar_metallicity_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_stellar_metallicity_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_stellar_metallicity_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a stellar metallicity map, either with or without smoothing. The</span>
+<span class="sd">        metallicity in a pixel is the mass weighted average metallicity in that</span>
+<span class="sd">        pixel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Make the mass image</span>
+        <span class="n">mass_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_stellar_mass_map</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="p">,</span> <span class="n">fov</span><span class="p">,</span> <span class="n">img_type</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">kernel_threshold</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Divide out the mass contribution to get the mean metallicity</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">mass_img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">mass_img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_gas_metallicity_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_gas_metallicity_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_gas_metallicity_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a gas metallicity map, either with or without smoothing. The</span>
+<span class="sd">        metallicity in a pixel is the mass weighted average metallicity in that</span>
+<span class="sd">        pixel.</span>
+
+<span class="sd">        TODO: make dust map!</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Make the mass image</span>
+        <span class="n">mass_img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_gas_mass_map</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="p">,</span> <span class="n">fov</span><span class="p">,</span> <span class="n">img_type</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">kernel_threshold</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Divide out the mass contribution to get the mean metallicity</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">mass_img</span><span class="o">.</span><span class="n">img</span><span class="p">[</span><span class="n">mass_img</span><span class="o">.</span><span class="n">img</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_stellar_metal_mass_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_stellar_metal_mass_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_stellar_metal_mass_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a stellar metal mass map, either with or without smoothing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_gas_metal_mass_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_gas_metal_mass_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_gas_metal_mass_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a gas metal mass map, either with or without smoothing.</span>
+
+<span class="sd">        TODO: make dust map!</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">,</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the image, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_sfr_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_sfr_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_sfr_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">age_bin</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a SFR map, either with or without smoothing. Only stars younger</span>
+<span class="sd">        than age_bin are included in the map. This is calculated by computing</span>
+<span class="sd">        the initial mass map for stars in the age bin and then dividing by the</span>
+<span class="sd">        size of the age bin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+<span class="sd">            age_bin (unyt_quantity/float)</span>
+<span class="sd">                The size of the age bin used to calculate the star formation</span>
+<span class="sd">                rate. If supplied without units, the unit system is assumed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Convert the age bin if necessary</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">age_bin</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">age_bin</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+                <span class="n">age_bin</span> <span class="o">=</span> <span class="n">age_bin</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">age_bin</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">units</span>
+
+        <span class="c1"># Get the mask for stellar particles in the age bin</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span> <span class="o">&lt;</span> <span class="n">age_bin</span>
+
+        <span class="c1">#  Warn if we have stars to plot in this bin</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The SFR is 0! (there are 0 stars in the age bin)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Instantiate the Image object.</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ParticleImage</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">smoothing_lengths</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">pixel_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">redshift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make the initial mass map, handling incorrect image types</span>
+        <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;hist&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute the image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_hist_imgs</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Convert the initial mass map to SFR</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">img</span> <span class="o">/=</span> <span class="n">age_bin</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+<div class="viewcode-block" id="Galaxy.make_ssfr_map"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_ssfr_map">[docs]</a>    <span class="k">def</span> <span class="nf">make_ssfr_map</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">age_bin</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a SFR map, either with or without smoothing. Only stars younger</span>
+<span class="sd">        than age_bin are included in the map. This is calculated by computing</span>
+<span class="sd">        the initial mass map for stars in the age bin and then dividing by the</span>
+<span class="sd">        size of the age bin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The size of a pixel.</span>
+<span class="sd">            fov (float)</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            img_type (str)</span>
+<span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
+<span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
+<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">            kernel_threshold (float)</span>
+<span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
+<span class="sd">            age_bin (unyt_quantity/float)</span>
+<span class="sd">                The size of the age bin used to calculate the star formation</span>
+<span class="sd">                rate. If supplied without units, the unit system is assumed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the SFR map</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_sfr_map</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+            <span class="n">img_type</span><span class="o">=</span><span class="n">img_type</span><span class="p">,</span>
+            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="o">=</span><span class="n">kernel_threshold</span><span class="p">,</span>
+            <span class="n">age_bin</span><span class="o">=</span><span class="n">age_bin</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert the SFR map to sSFR</span>
+        <span class="n">img</span><span class="o">.</span><span class="n">img</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span>
+
+        <span class="k">return</span> <span class="n">img</span></div></div>
 </pre></div>
         </article>
       </div>

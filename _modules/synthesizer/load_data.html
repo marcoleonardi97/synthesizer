@@ -236,9 +236,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_create_survey_photometry.html">Create survey photometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/particle/plot_create_survey_imgs.html">Create survey images</a></li>
 </ul>
 </li>
 </ul>
@@ -281,11 +279,11 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.igm.html">synthesizer.igm</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.sph_kernel_calc.html">synthesizer.imaging.extensions.sph_kernel_calc</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.observation.html">synthesizer.imaging.observation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
 </ul>
@@ -362,6 +360,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatLambdaCDM</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">.particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 
@@ -373,6 +372,7 @@
     <span class="n">metals</span><span class="p">,</span>
     <span class="n">s_oxygen</span><span class="p">,</span>
     <span class="n">s_hydrogen</span><span class="p">,</span>
+    <span class="n">s_hsmls</span><span class="p">,</span>
     <span class="n">coods</span><span class="p">,</span>
     <span class="n">masses</span><span class="p">,</span>
     <span class="n">g_coods</span><span class="p">,</span>
@@ -380,7 +380,8 @@
     <span class="n">g_metallicities</span><span class="p">,</span>
     <span class="n">g_hsml</span><span class="p">,</span>
     <span class="n">star_forming</span><span class="p">,</span>
-    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span>
+    <span class="n">redshift</span><span class="p">,</span>
+    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS galaxies into a galaxy object</span>
@@ -429,25 +430,27 @@
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
 
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
-            <span class="n">imasses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">ages</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">imasses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">ages</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
             <span class="n">metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:],</span>
-            <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">s_hsmls</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_len</span><span class="p">(</span><span class="n">lens</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
             <span class="n">metals</span><span class="o">=</span><span class="n">g_metallicities</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
             <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
 
     <span class="k">return</span> <span class="n">galaxies</span>
 
@@ -459,6 +462,7 @@
     <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-IllustrisTNG galaxies</span>
@@ -477,6 +481,8 @@
 <span class="sd">            verbosity flag</span>
 <span class="sd">        dtm (float):</span>
 <span class="sd">            dust-to-metals ratio to apply to all gas particles</span>
+<span class="sd">        physical (bool):</span>
+<span class="sd">            Should the coordinates be converted to physical?</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        galaxies (object):</span>
@@ -490,6 +496,7 @@
         <span class="n">imasses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_InitialMass&quot;</span><span class="p">][:]</span>
         <span class="n">_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_Metals&quot;</span><span class="p">][:]</span>
         <span class="n">metallicity</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_Metallicity&quot;</span><span class="p">][:]</span>
+        <span class="n">hsmls</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/SubfindHsml&quot;</span><span class="p">][:]</span>
 
         <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/StarFormationRate&quot;</span><span class="p">][:]</span>
         <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Masses&quot;</span><span class="p">][:]</span>
@@ -498,6 +505,7 @@
         <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SubfindHsml&quot;</span><span class="p">][:]</span>
 
         <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">scale_factor</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">Om0</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Omega0&quot;</span><span class="p">]</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
 
@@ -534,6 +542,7 @@
     <span class="n">metallicity</span> <span class="o">=</span> <span class="n">metallicity</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">masses</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
     <span class="n">_metals</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">hsmls</span> <span class="o">=</span> <span class="n">hsmls</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="n">masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
     <span class="n">g_masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
@@ -543,6 +552,13 @@
 
     <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
     <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_metals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># If asked, convert coordinates to physical kpc</span>
+    <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+        <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">hsmls</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
     <span class="c1"># convert formation times to ages</span>
     <span class="n">cosmo</span> <span class="o">=</span> <span class="n">FlatLambdaCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">h</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">)</span>
@@ -557,6 +573,7 @@
         <span class="n">metals</span><span class="o">=</span><span class="n">metallicity</span><span class="p">,</span>
         <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">,</span>
         <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">,</span>
+        <span class="n">s_hsmls</span><span class="o">=</span><span class="n">hsmls</span><span class="p">,</span>
         <span class="n">coods</span><span class="o">=</span><span class="n">coods</span><span class="p">,</span>
         <span class="n">masses</span><span class="o">=</span><span class="n">masses</span><span class="p">,</span>
         <span class="n">g_coods</span><span class="o">=</span><span class="n">g_coods</span><span class="p">,</span>
@@ -564,6 +581,7 @@
         <span class="n">g_metallicities</span><span class="o">=</span><span class="n">g_metals</span><span class="p">,</span>
         <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -573,7 +591,7 @@
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snap_090.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_090.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span>
+    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-Astrid galaxies</span>
@@ -648,7 +666,7 @@
         <span class="n">g_metallicities</span><span class="o">=</span><span class="n">g_metals</span><span class="p">,</span>
         <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
-        <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span>
+        <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -657,7 +675,7 @@
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snap_033.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span>
+    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-SIMBA galaxies</span>
@@ -734,6 +752,7 @@
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
     <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="load_FLARES"><a class="viewcode-back" href="../../_autosummary/synthesizer.load_data.html#synthesizer.load_data.load_FLARES">[docs]</a><span class="k">def</span> <span class="nf">load_FLARES</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
