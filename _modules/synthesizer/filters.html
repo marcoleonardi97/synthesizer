@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnknownImageType.html">synthesizer.exceptions.UnknownImageType</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.WavelengthOutOfRange.html">synthesizer.exceptions.WavelengthOutOfRange</a></li>
@@ -381,6 +382,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">unyt_array</span>
+<span class="kn">from</span> <span class="nn">urllib.error</span> <span class="kn">import</span> <span class="n">URLError</span>
 
 <span class="kn">import</span> <span class="nn">synthesizer.exceptions</span> <span class="k">as</span> <span class="nn">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
@@ -789,11 +791,7 @@
                     <span class="n">max_lam</span> <span class="o">=</span> <span class="n">this_max</span>
 
             <span class="c1"># Create wavelength array</span>
-            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
-                <span class="n">min_lam</span><span class="p">,</span>
-                <span class="n">max_lam</span> <span class="o">+</span> <span class="n">lam_resolution</span><span class="p">,</span>
-                <span class="n">lam_resolution</span>
-            <span class="p">)</span>
+            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">+</span> <span class="n">lam_resolution</span><span class="p">,</span> <span class="n">lam_resolution</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -1026,10 +1024,7 @@
                     <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">redshift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lam</span><span class="p">,</span>
-                                                                        <span class="n">fcode</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">fcode</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="s2">&quot;Filter containing rest_frame_lam=</span><span class="si">%.2e</span><span class="s2"> Angstrom &quot;</span>
@@ -1250,8 +1245,15 @@
             <span class="sa">f</span><span class="s2">&quot;fps/getdata.php?format=ascii&amp;id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">observatory</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">svo_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="c1"># Make a request for the data and handle a failure more informatively</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">svo_url</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">URLError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">SVOInaccessible</span><span class="p">(</span>
+                <span class="s2">&quot;The SVO Database is not responding. Is it down?&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Throw an error if we didn&#39;t find the filter.</span>
         <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1348,7 +1350,6 @@
         <span class="c1"># Get the correct x array to integrate w.r.t and work out if we need</span>
         <span class="c1"># to shift the transmission curve.</span>
         <span class="k">if</span> <span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Ensure the passed frequencies have units</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
                 <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
@@ -1365,7 +1366,6 @@
                 <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
         <span class="k">elif</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Ensure the passed wavelengths have no units</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
                 <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">value</span>
@@ -1387,13 +1387,7 @@
         <span class="k">if</span> <span class="n">need_shift</span><span class="p">:</span>
             <span class="c1"># Ok, shift the tranmission curve by interpolating onto the</span>
             <span class="c1"># provided wavelengths</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-                <span class="n">lam</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span>
-                <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-                <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
-            <span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># We can use the standard transmission array</span>
@@ -1439,10 +1433,13 @@
 <span class="sd">                Pivot wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
-            <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
-        <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">units</span></div>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Filter.pivT"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.pivT">[docs]</a>    <span class="k">def</span> <span class="nf">pivT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1468,13 +1465,16 @@
 <span class="sd">                Mean wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
-                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
+                    <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
-        <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">units</span></div>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Filter.bandw"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.bandw">[docs]</a>    <span class="k">def</span> <span class="nf">bandw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1497,7 +1497,9 @@
             <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">))</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">meanwv</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">B</span><span class="p">)</span></div>
 
