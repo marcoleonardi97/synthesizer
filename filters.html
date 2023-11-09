@@ -652,11 +652,11 @@ My combined Filters: [&#39;JWST/NIRCam.F090W&#39;, &#39;JWST/NIRCam.F250M&#39;, 
 <div class="highlight"><pre>
 The pivot wavelength of JWST/NIRCam.F090W is 9.02e+03 Å.
 The transmission at the pivot wavelength of JWST/NIRCam.F090W is 2.92e-01.
-The mean wavelength of JWST/NIRCam.F090W is 8.98e+03.
-The bandwidth of JWST/NIRCam.F090W is 6.11e+02 dimensionless.
-The FWHM of JWST/NIRCam.F090W is 1.44e+03 dimensionless.
+The mean wavelength of JWST/NIRCam.F090W is 8.98e+03 Å.
+The bandwidth of JWST/NIRCam.F090W is 6.11e+02 Å.
+The FWHM of JWST/NIRCam.F090W is 1.44e+03 Å.
 The transmission peak of JWST/NIRCam.F090W is 3.19e-01.
-The rectangular width of JWST/NIRCam.F090W is 1.94e+03 Å.
+The rectangular width of JWST/NIRCam.F090W is 1.94e+03.
 The maximum wavelength with non-zero transmission of JWST/NIRCam.F090W is 1.02e+04 Å.
 The minimum wavelength with non-zero transmission of JWST/NIRCam.F090W is 7.90e+03 Å.
 The minimum and maximum wavelength (regardless of transmission) of JWST/NIRCam.F090W is 7.84e+03 Å and 10355.5 Å:.2e.
@@ -664,12 +664,49 @@ The minimum and maximum wavelength (regardless of transmission) of JWST/NIRCam.F
 </div>
 </section>
 </section>
+<section id="Saving-and-loading-FilterCollections">
+<h2>Saving and loading FilterCollections<a class="headerlink" href="#Saving-and-loading-FilterCollections" title="Permalink to this heading">#</a></h2>
+<p>You may encounter situations where you want to save a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>. This can be particularly useful to avoid periods where the SVO database goes down or when using a single <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> across a number of MPI ranks where the multiple SVO database calls can cause failures.</p>
+<p>To do this you can simply call the <code class="docutils literal notranslate"><span class="pre">write_filters</span></code> method, passing the path where you want to save the file. This will create a HDF5 file containing the attributes and datasets defining the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write out the filter collection to a file in the synthesizer root directory</span>
+<span class="n">new_filters</span><span class="o">.</span><span class="n">write_filters</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;../../test_filter_collection.hdf5&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note: this HDF5 file contains the version of Synthesizer used to create it as an attribute (<code class="docutils literal notranslate"><span class="pre">hdf.attrs[&quot;synthesizer_version&quot;]</span></code>). A warning will be printed if this differs from the version you are using, just in case future changes break the functionlaity of past <code class="docutils literal notranslate"><span class="pre">FilterCollections</span></code>.</p>
+<p>To load a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> at a later data you can simply pass the path of the file into the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> at instantiation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Load a FilterCollection from a file</span>
+<span class="n">new_new_filters</span> <span class="o">=</span> <span class="n">FilterCollection</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;../../test_filter_collection.hdf5&quot;</span><span class="p">)</span>
+
+<span class="c1"># Compare filter objects to show they are the same</span>
+<span class="n">new_filters</span> <span class="o">==</span> <span class="n">new_new_filters</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+</section>
 <section id="Finding-a-Filter">
 <h2>Finding a Filter<a class="headerlink" href="#Finding-a-Filter" title="Permalink to this heading">#</a></h2>
 <p>If you want to know the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> in a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> which will probe a particular wavelength we provide a method to calculate this. This can be done for either the filter which probes the desired wavelength in the rest frame, or by providing a redshift the filter that probes that rest frame wavelength in the observer frame can be found. The method will print the resulting filter code and return the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> itself.</p>
 <p>This function takes a method argument. There are 3 methods implemented for doing this: - “pivot”: Find the filter with the closest pivot wavelength to the desired wavelength (the default). - “mean”: Find the filter with the closest mean wavelength to the desired wavelength. - “transmission”: Find the filter with the maximum transmission at the desired wavelength.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the wavelength we want to know the filter for (in the rest frame, with Angstrom units)</span>
@@ -701,7 +738,7 @@ Filter containing rest_frame_lam=1.00e+03 Angstrom (with observed wavelength=8.0
 </div>
 <p>Note that the method will produce an error if the transmission of all <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s in the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> is 0 at the desired wavelength. In certain circumstances <code class="docutils literal notranslate"><span class="pre">&quot;pivot&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;mean&quot;</span></code> can fail when the wavelength does fall inside a wide band filter.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">search_lam</span> <span class="o">=</span> <span class="mi">2000</span>
@@ -721,7 +758,7 @@ The wavelength (rest_frame_lam=2.00e+03 Angstrom, observed_lam=1.60e+04 Angstrom
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">obs_filter</span> <span class="o">=</span> <span class="n">new_filters</span><span class="o">.</span><span class="n">find_filter</span><span class="p">(</span><span class="n">search_lam</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;transmission&quot;</span><span class="p">)</span>
@@ -738,7 +775,7 @@ Filter containing rest_frame_lam=2.00e+03 Angstrom (with observed wavelength=1.6
 </div>
 <p>But in most cases if a filter isn’t found the <code class="docutils literal notranslate"><span class="pre">&quot;transmission&quot;</span></code> method will also fail.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
@@ -822,6 +859,7 @@ The wavelength (rest_frame_lam=2.00e+03 Angstrom, observed_lam=3.20e+04 Angstrom
 <li><a class="reference internal" href="#Helper-methods">Helper methods</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#Saving-and-loading-FilterCollections">Saving and loading FilterCollections</a></li>
 <li><a class="reference internal" href="#Finding-a-Filter">Finding a Filter</a></li>
 </ul>
 </li>
