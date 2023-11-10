@@ -264,6 +264,7 @@
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.exceptions.UnknownImageType.html">synthesizer.exceptions.UnknownImageType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html">synthesizer.exceptions.UnrecognisedOption</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.exceptions.WavelengthOutOfRange.html">synthesizer.exceptions.WavelengthOutOfRange</a></li>
 </ul>
 </li>
@@ -356,6 +357,18 @@
         <article role="main">
           <section id="module-synthesizer.sed">
 <span id="synthesizer-sed"></span><h1>synthesizer.sed<a class="headerlink" href="#module-synthesizer.sed" title="Permalink to this heading">#</a></h1>
+<p>Functionality related to spectra storage and manipulation.</p>
+<p>When a spectra is computed from a <cite>Galaxy</cite> or a Galaxy component the resulting
+calculated spectra are stored in <cite>Sed</cite> objects. These provide helper functions
+for quick manipulation of the spectra. Seds can contain a single spectra or
+arbitrarily many with all methods capable of acting on both consistently.</p>
+<p>Example usage:</p>
+<blockquote>
+<div><p>sed = Sed(lams, lnu)
+sed.get_fnu(redshift)
+sed.apply_attenutation(tau_v=0.7)
+sed.get_broadband_fluxes(filters)</p>
+</div></blockquote>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -366,21 +379,22 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="synthesizer.sed.calculate_Q">
 <span class="sig-prename descclassname"><span class="pre">synthesizer.sed.</span></span><span class="sig-name descname"><span class="pre">calculate_Q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionisation_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(13.6,</span> <span class="pre">'eV')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#calculate_Q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.calculate_Q" title="Permalink to this definition">#</a></dt>
-<dd><p>An improved function to calculate the ionising production rate.</p>
+<dd><p>A function to calculate the ionising production rate directly from
+spectra.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>lam</strong> (<em>float array</em>) – wavelength grid</p></li>
-<li><p><strong>lnu</strong> (<em>float array</em>) – luminosity grid (erg/s/Hz)</p></li>
-<li><p><strong>ionisation_energy</strong> (<em>unyt_array</em>) – ionisation energy</p></li>
-<li><p><strong>limit</strong> (<em>float</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – An upper bound on the number of subintervals
+<li><p><strong>lam</strong> (<em>array-like</em><em>, </em><em>float</em>) – The wavelength array.</p></li>
+<li><p><strong>lnu</strong> (<em>array-like</em><em>, </em><em>float</em>) – The luminosity grid (erg/s/Hz).</p></li>
+<li><p><strong>ionisation_energy</strong> (<em>unyt_array</em>) – The ionisation energy.</p></li>
+<li><p><strong>limit</strong> (<em>float/int</em>) – An upper bound on the number of subintervals
 used in the integration adaptive algorithm.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="simple">
 <dt>Returns</dt><dd><dl class="simple">
-<dt>float</dt><dd><p>ionising photon luminosity (s^-1)</p>
+<dt>float</dt><dd><p>Ionising photon luminosity (s^-1).</p>
 </dd>
 </dl>
 </dd>
@@ -396,15 +410,15 @@ used in the integration adaptive algorithm.</p></li>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.sed.</span></span><span class="sig-name descname"><span class="pre">Sed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.sed.</span></span><span class="sig-name descname"><span class="pre">Sed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed" title="Permalink to this definition">#</a></dt>
 <dd><p>A class representing a spectral energy distribution (SED).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.lam">
 <span class="sig-name descname"><span class="pre">lam</span></span><a class="headerlink" href="#synthesizer.sed.Sed.lam" title="Permalink to this definition">#</a></dt>
-<dd><p>the wavelength grid in Angstroms</p>
+<dd><p>The rest frame wavelength array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray</p>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -412,10 +426,10 @@ used in the integration adaptive algorithm.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.nu">
 <span class="sig-name descname"><span class="pre">nu</span></span><a class="headerlink" href="#synthesizer.sed.Sed.nu" title="Permalink to this definition">#</a></dt>
-<dd><p>frequency in Hz</p>
+<dd><p>The rest frame frequency array.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray</p>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -423,15 +437,119 @@ used in the integration adaptive algorithm.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.lnu">
 <span class="sig-name descname"><span class="pre">lnu</span></span><a class="headerlink" href="#synthesizer.sed.Sed.lnu" title="Permalink to this definition">#</a></dt>
-<dd><p>the spectral luminosity density</p>
+<dd><p>The spectral luminosity density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray</p>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
 </dd>
 </dl>
 </dd></dl>
 
-<p>Methods:</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.fnu">
+<span class="sig-name descname"><span class="pre">fnu</span></span><a class="headerlink" href="#synthesizer.sed.Sed.fnu" title="Permalink to this definition">#</a></dt>
+<dd><p>The spectral flux density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.obslam">
+<span class="sig-name descname"><span class="pre">obslam</span></span><a class="headerlink" href="#synthesizer.sed.Sed.obslam" title="Permalink to this definition">#</a></dt>
+<dd><p>The observed wavelength array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.obsnu">
+<span class="sig-name descname"><span class="pre">obsnu</span></span><a class="headerlink" href="#synthesizer.sed.Sed.obsnu" title="Permalink to this definition">#</a></dt>
+<dd><p>The observed frequency array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity">Quantity</a>, array-like, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#synthesizer.sed.Sed.description" title="Permalink to this definition">#</a></dt>
+<dd><p>An optional descriptive string defining the Sed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.redshift">
+<span class="sig-name descname"><span class="pre">redshift</span></span><a class="headerlink" href="#synthesizer.sed.Sed.redshift" title="Permalink to this definition">#</a></dt>
+<dd><p>The redshift of the Sed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.broadband_luminosities">
+<span class="sig-name descname"><span class="pre">broadband_luminosities</span></span><a class="headerlink" href="#synthesizer.sed.Sed.broadband_luminosities" title="Permalink to this definition">#</a></dt>
+<dd><p>The rest frame broadband photometry in arbitrary filters
+(filter_code: photometry).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.broadband_fluxes">
+<span class="sig-name descname"><span class="pre">broadband_fluxes</span></span><a class="headerlink" href="#synthesizer.sed.Sed.broadband_fluxes" title="Permalink to this definition">#</a></dt>
+<dd><p>The observed broadband photometry in arbitrary filters
+(filter_code: photometry).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict, float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.sed.Sed.apply_attenuation">
+<span class="sig-name descname"><span class="pre">apply_attenuation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dust_curve=&lt;synthesizer.dust.attenuation.PowerLaw</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.apply_attenuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.apply_attenuation" title="Permalink to this definition">#</a></dt>
+<dd><p>Apply attenuation to spectra.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_v</strong> (<em>float/array-like</em><em>, </em><em>float</em>) – The V-band optical depth for every star particle.</p></li>
+<li><p><strong>dust_curve</strong> (<em>synthesizer.dust.attenuation.*</em>) – An instance of one of the dust attenuation models. (defined in
+synthesizer/dust/attenuation.py)</p></li>
+<li><p><strong>mask</strong> (<em>array-like</em><em>, </em><em>bool</em>) – A mask array with an entry for each spectra. Masked out
+spectra will be ignored when applying the attenuation. Only
+applicable for Sed’s holding an (N, Nlam) array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Sed</dt><dd><p>A new Sed containing the rest frame spectra of self attenuated
+by the transmission defined from tau_v and the dust curve.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.concat">
 <span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">other_seds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.concat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.concat" title="Permalink to this definition">#</a></dt>
@@ -466,11 +584,11 @@ have the same wavelength array.</p>
 <dd><p>Calculate broadband luminosities using a FilterCollection object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fc</strong> (<em>object</em>) – a FilterCollection object</p>
+<dd class="field-odd"><p><strong>fc</strong> (<em>object</em>) – A FilterCollection object.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>(dict)</dt><dd><p>a dictionary of fluxes</p>
+<dt>(dict)</dt><dd><p>A dictionary of fluxes in each filter in fc.</p>
 </dd>
 </dl>
 </p>
@@ -488,7 +606,7 @@ have the same wavelength array.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>broadband_luminosities (dict)</dt><dd><p>A dictionary of broadband luminosities.</p>
+<dt>broadband_luminosities (dict)</dt><dd><p>A dictionary of rest frame broadband luminosities.</p>
 </dd>
 </dl>
 </p>
@@ -499,13 +617,13 @@ have the same wavelength array.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.get_fnu">
 <span class="sig-name descname"><span class="pre">get_fnu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cosmo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">igm=&lt;class</span> <span class="pre">'synthesizer.igm.Inoue14'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.get_fnu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.get_fnu" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the observed frame spectral energy distribution</p>
+<dd><p>Calculate the observed frame spectral energy distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – astropy cosmology instance</p></li>
-<li><p><strong>z</strong> (<em>float</em>) – redshift</p></li>
-<li><p><strong>igm</strong> (<em>igm</em>) – IGM class</p></li>
+<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – astropy cosmology instance.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – The redshift of the spectra.</p></li>
+<li><p><strong>igm</strong> (<em>igm</em>) – The IGM class.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -523,11 +641,11 @@ have the same wavelength array.</p>
 <span class="sig-name descname"><span class="pre">get_fnu0</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.get_fnu0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.get_fnu0" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculate a dummy observed frame spectral energy distribution.
 Useful when you want rest-frame quantities.</p>
-<p>Uses a standard distance of 10 pc</p>
+<p>Uses a standard distance of 10 pcs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
-<dt>fnu (ndarray)</dt><dd><p>Spectral flux density calcualted at d=10 pc</p>
+<dt>fnu (ndarray)</dt><dd><p>Spectral flux density calcualted at d=10 pc.</p>
 </dd>
 </dl>
 </p>
@@ -541,11 +659,14 @@ Useful when you want rest-frame quantities.</p>
 <dd><p>Return lnu at a provided wavelength.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>lam</strong> (<em>array</em><em> or </em><em>float</em>) – wavelength(s) of interest</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lam</strong> (<em>float/array-like</em><em>, </em><em>float</em>) – The wavelength(s) of interest.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>luminosity (array or float)</dt><dd><p>luminosity (lnu) at the provided wavelength</p>
+<dt>luminosity (unyt-array)</dt><dd><p>The luminosity (lnu) at the provided wavelength.</p>
 </dd>
 </dl>
 </p>
@@ -560,13 +681,13 @@ Useful when you want rest-frame quantities.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>wavelength</strong> (<em>array</em><em> or </em><em>float</em>) – wavelength(s) of interest</p></li>
-<li><p><strong>kind</strong> (<em>str</em>) – interpolation kind</p></li>
+<li><p><strong>wavelength</strong> (<em>float/array-like</em><em>, </em><em>float</em>) – The wavelength(s) of interest.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>luminosity (unyt_array)</dt><dd><p>luminosity (lnu) at the provided wavelength</p>
+<dt>luminosity (unyt_array)</dt><dd><p>The luminosity (lnu) at the provided wavelength.</p>
 </dd>
 </dl>
 </p>
@@ -577,17 +698,22 @@ Useful when you want rest-frame quantities.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.get_resampled_sed">
 <span class="sig-name descname"><span class="pre">get_resampled_sed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.get_resampled_sed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.get_resampled_sed" title="Permalink to this definition">#</a></dt>
-<dd><p>Resameple the spectra and create a new Sed object</p>
+<dd><p>Resameple the spectra and create a new Sed object.</p>
+<p>NOTE: This only resamples the rest frame spectra. For fluxes get_fnu
+must be called again after resampling.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n</strong> (<em>int</em><em> or </em><em>float</em>) – </p>
+<dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – The number of wavelength elements to resample to.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>(sed.Sed)</dt><dd><p>A rebinned Sed</p>
+<dt>(sed.Sed)</dt><dd><p>A new Sed with the rebinned rest frame spectra.</p>
 </dd>
 </dl>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>InconsistentArgument</strong> – The sampling factor must be an integer.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -616,8 +742,11 @@ window. If the window has len(2) a full fit to the spectra is performed
 else the luminosity in two windows is calculated and used to determine
 the slope, similar to observations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><dl class="simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in which to measure in terms of wavelength.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
 <dt>float</dt><dd><p>The UV continuum slope ($eta$)</p>
 </dd>
 </dl>
@@ -643,6 +772,9 @@ include ‘trapz’ and ‘quad’.</p>
 </dl>
 </p>
 </dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If method is an incompatible option an error is raised.</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -654,8 +786,8 @@ windows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>blue</strong> (<em>tuple</em><em> of </em><em>floats</em>) – The blue window</p></li>
-<li><p><strong>red</strong> (<em>tuple</em><em> of </em><em>floats</em>) – The red window</p></li>
+<li><p><strong>blue</strong> (<em>tuple</em><em>, </em><em>float</em>) – The wavelength limits of the blue window.</p></li>
+<li><p><strong>red</strong> (<em>tuple</em><em>, </em><em>float</em>) – The wavelength limits of the red window.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -675,13 +807,13 @@ windows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f1</strong> (<em>str</em>) – blue filter code</p></li>
-<li><p><strong>f2</strong> (<em>str</em>) – red filter code</p></li>
+<li><p><strong>f1</strong> (<em>str</em>) – The blue filter code.</p></li>
+<li><p><strong>f2</strong> (<em>str</em>) – The red filter code.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>(float)</dt><dd><p>the broadband colour.</p>
+<dt>(float)</dt><dd><p>The broadband colour.</p>
 </dd>
 </dl>
 </p>
@@ -696,11 +828,20 @@ windows.</p>
 definitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>definition</strong> – The choice of definition ‘Bruzual83’ or ‘Balogh’</p>
+<dd class="field-odd"><p><strong>definition</strong> – The choice of definition: ‘Bruzual83’ or ‘Balogh’.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>float</dt><dd><p>The Balmer break strength</p>
+<dd class="field-even"><p><blockquote>
+<div><dl class="simple">
+<dt>float</dt><dd><p>The Balmer break strength.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>UnrecognisedOption</dt><dd><p>If definition is an incompatible option an error is raised.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </p>
@@ -737,13 +878,23 @@ definitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>window</strong> (<em>tuple</em><em> of </em><em>floats</em>) – The window in wavelength</p></li>
-<li><p><strong>method</strong> (<em>str</em>) – The method to use for the integration</p></li>
+<li><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in wavelength.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The method to use for the integration. Options include
+‘average’, ‘trapz’, and ‘quad’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
+<dd class="field-even"><p><blockquote>
+<div><dl class="simple">
 <dt>luminosity (float)</dt><dd><p>The luminosity in the window.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Raises:</dt><dd><dl class="simple">
+<dt>UnrecognisedOption</dt><dd><p>If method is an incompatible option an error is raised.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </p>
@@ -757,7 +908,11 @@ definitions.</p>
 <dd><p>Measure the luminosity in a spectral window.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>window</strong> (<em>tuple</em><em> of </em><em>floats</em>) – The window in wavelength</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in wavelength.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The method used to calculate the bolometric luminosity. Options
+include ‘trapz’ and ‘quad’.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
@@ -765,6 +920,9 @@ definitions.</p>
 </dd>
 </dl>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If method is an incompatible option an error is raised.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -864,6 +1022,14 @@ definitions.</p>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.lam"><code class="docutils literal notranslate"><span class="pre">Sed.lam</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.nu"><code class="docutils literal notranslate"><span class="pre">Sed.nu</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.lnu"><code class="docutils literal notranslate"><span class="pre">Sed.lnu</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.fnu"><code class="docutils literal notranslate"><span class="pre">Sed.fnu</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.obslam"><code class="docutils literal notranslate"><span class="pre">Sed.obslam</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.obsnu"><code class="docutils literal notranslate"><span class="pre">Sed.obsnu</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.description"><code class="docutils literal notranslate"><span class="pre">Sed.description</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.redshift"><code class="docutils literal notranslate"><span class="pre">Sed.redshift</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.broadband_luminosities"><code class="docutils literal notranslate"><span class="pre">Sed.broadband_luminosities</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.broadband_fluxes"><code class="docutils literal notranslate"><span class="pre">Sed.broadband_fluxes</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.sed.Sed.apply_attenuation"><code class="docutils literal notranslate"><span class="pre">Sed.apply_attenuation()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.concat"><code class="docutils literal notranslate"><span class="pre">Sed.concat()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.get_broadband_fluxes"><code class="docutils literal notranslate"><span class="pre">Sed.get_broadband_fluxes()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.sed.Sed.get_broadband_luminosities"><code class="docutils literal notranslate"><span class="pre">Sed.get_broadband_luminosities()</span></code></a></li>

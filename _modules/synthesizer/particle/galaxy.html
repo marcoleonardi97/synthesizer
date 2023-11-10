@@ -263,6 +263,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnknownImageType.html">synthesizer.exceptions.UnknownImageType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnrecognisedOption.html">synthesizer.exceptions.UnrecognisedOption</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.WavelengthOutOfRange.html">synthesizer.exceptions.WavelengthOutOfRange</a></li>
 </ul>
 </li>
@@ -1253,53 +1254,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">tau_v</span>
 
         <span class="k">return</span> <span class="n">tau_v</span></div>
-
-<div class="viewcode-block" id="Galaxy.apply_attenuation"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.apply_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_attenuation</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">tau_v</span><span class="p">,</span>
-        <span class="n">incident_spectra_type</span><span class="p">,</span>
-        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Apply attenuation to a spectra.</span>
-
-<span class="sd">        Args:</span>
-
-<span class="sd">            tau_v (array-like, float)</span>
-<span class="sd">                The V-band optical depth for every star particle.</span>
-
-<span class="sd">            incident_spectra_type (str)</span>
-<span class="sd">                The key for the spectra to be attenuated.</span>
-
-<span class="sd">            dust_curve (synthesizer.dust.attenuation.*)</span>
-<span class="sd">                An instance of one of the dust attenuation models. (defined in</span>
-<span class="sd">                synthesizer/dust/attenuation.py)</span>
-
-<span class="sd">            mask (array-like, bool)</span>
-<span class="sd">                A mask array with an entry for each star particle. Masked out</span>
-<span class="sd">                particles (star particles with False in the mask) will be</span>
-<span class="sd">                ignored when applying the attenuation.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Get the wavelength grid associated to the spectra</span>
-        <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span>
-
-        <span class="c1"># Compute the transmission</span>
-        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">lam</span><span class="p">)</span>
-
-        <span class="c1"># These two should have the same shape so should work?</span>
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">transmission</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">sed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="n">incident_spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
-            <span class="n">sed</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">transmission</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">sed</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra_array</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Galaxy.screen_dust_gamma_parameter"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter">[docs]</a>    <span class="k">def</span> <span class="nf">screen_dust_gamma_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

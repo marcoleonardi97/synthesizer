@@ -263,6 +263,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnknownImageType.html">synthesizer.exceptions.UnknownImageType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnrecognisedOption.html">synthesizer.exceptions.UnrecognisedOption</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.WavelengthOutOfRange.html">synthesizer.exceptions.WavelengthOutOfRange</a></li>
 </ul>
 </li>
@@ -353,19 +354,31 @@
         </div>
         <article role="main">
           <h1>Source code for synthesizer.sed</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot; Functionality related to spectra storage and manipulation.</span>
+
+<span class="sd">When a spectra is computed from a `Galaxy` or a Galaxy component the resulting</span>
+<span class="sd">calculated spectra are stored in `Sed` objects. These provide helper functions</span>
+<span class="sd">for quick manipulation of the spectra. Seds can contain a single spectra or</span>
+<span class="sd">arbitrarily many with all methods capable of acting on both consistently.</span>
+
+<span class="sd">Example usage:</span>
+
+<span class="sd">    sed = Sed(lams, lnu)</span>
+<span class="sd">    sed.get_fnu(redshift)</span>
+<span class="sd">    sed.apply_attenutation(tau_v=0.7)</span>
+<span class="sd">    sed.get_broadband_fluxes(filters)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">Angstrom</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">cm</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">rebin_1d</span>
-<span class="kn">from</span> <span class="nn">.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Units</span>
-<span class="kn">from</span> <span class="nn">.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
-
-
-<span class="n">units</span> <span class="o">=</span> <span class="n">Units</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">rebin_1d</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
 
 
 <div class="viewcode-block" id="Sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed">[docs]</a><span class="k">class</span> <span class="nc">Sed</span><span class="p">:</span>
@@ -374,14 +387,28 @@
 <span class="sd">    A class representing a spectral energy distribution (SED).</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        lam (ndarray)</span>
-<span class="sd">            the wavelength grid in Angstroms</span>
-<span class="sd">        nu (ndarray)</span>
-<span class="sd">            frequency in Hz</span>
-<span class="sd">        lnu (ndarray)</span>
-<span class="sd">            the spectral luminosity density</span>
-
-<span class="sd">    Methods:</span>
+<span class="sd">        lam (Quantity, array-like, float)</span>
+<span class="sd">            The rest frame wavelength array.</span>
+<span class="sd">        nu (Quantity, array-like, float)</span>
+<span class="sd">            The rest frame frequency array.</span>
+<span class="sd">        lnu (Quantity, array-like, float)</span>
+<span class="sd">            The spectral luminosity density.</span>
+<span class="sd">        fnu (Quantity, array-like, float)</span>
+<span class="sd">            The spectral flux density.</span>
+<span class="sd">        obslam (Quantity, array-like, float)</span>
+<span class="sd">            The observed wavelength array.</span>
+<span class="sd">        obsnu (Quantity, array-like, float)</span>
+<span class="sd">            The observed frequency array.</span>
+<span class="sd">        description (string)</span>
+<span class="sd">            An optional descriptive string defining the Sed.</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            The redshift of the Sed.</span>
+<span class="sd">        broadband_luminosities (dict, float)</span>
+<span class="sd">            The rest frame broadband photometry in arbitrary filters</span>
+<span class="sd">            (filter_code: photometry).</span>
+<span class="sd">        broadband_fluxes (dict, float)</span>
+<span class="sd">            The observed broadband photometry in arbitrary filters</span>
+<span class="sd">            (filter_code: photometry).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define Quantities, for details see units.py</span>
@@ -392,16 +419,17 @@
     <span class="n">obsnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">obslam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise a new spectral energy distribution object.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            lam (ndarray)</span>
-<span class="sd">                the wavelength grid in Angstroms</span>
-<span class="sd">            lnu (ndarray)</span>
-<span class="sd">                the spectral luminosity density</span>
-
+<span class="sd">            lam (array-like, float)</span>
+<span class="sd">                The rest frame wavelength array.</span>
+<span class="sd">            lnu (array-like, float)</span>
+<span class="sd">                The spectral luminosity density.</span>
+<span class="sd">            description (string)</span>
+<span class="sd">                An optional descriptive string defining the Sed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Set the description</span>
@@ -525,32 +553,36 @@
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Overide multiplication operator to allow lnu to be scaled.</span>
-<span class="sd">        This only works scaling * x</span>
+<span class="sd">        This only works scaling * x.</span>
+
+<span class="sd">        Note: only acts on the rest frame spectra. To get the scaled fnu get_fnu</span>
+<span class="sd">        must be called on the newly scaled Sed object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            scaling (float)</span>
-<span class="sd">                The scaling to apply to lnu</span>
+<span class="sd">                The scaling to apply to lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
 <span class="sd">                A new instance of Sed with scaled lnu.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">scaling</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        As above but for x * scaling</span>
+<span class="sd">        As above but for x * scaling.</span>
+
+<span class="sd">        Note: only acts on the rest frame spectra. To get the scaled fnu get_fnu</span>
+<span class="sd">        must be called on the newly scaled Sed object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            scaling (float)</span>
-<span class="sd">                The scaling to apply to lnu</span>
+<span class="sd">                The scaling to apply to lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
 <span class="sd">                A new instance of Sed with scaled lnu.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">scaling</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
@@ -570,7 +602,7 @@
         <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Number of wavelength points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Wavelength range: [</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="se">\</span>
 <span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">] </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Peak luminosity/</span><span class="si">{</span><span class="n">units</span><span class="o">.</span><span class="n">lnu</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Peak luminosity/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
 <span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Bolometric luminosity/</span><span class="si">{</span><span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
@@ -581,6 +613,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_spec_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the dimensions of the spectra array.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            Tuple</span>
+<span class="sd">                The shape of self.lnu</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_lnu_at_nu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -589,13 +628,14 @@
 <span class="sd">        unit system.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            nu (array or float)</span>
-<span class="sd">                frequency(s) of interest</span>
+<span class="sd">            nu (float/array-like, float)</span>
+<span class="sd">                The frequency(s) of interest.</span>
+<span class="sd">            kind (str)</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            luminosity (array or float)</span>
-<span class="sd">                luminosity (lnu) at the provided wavelength</span>
-
+<span class="sd">            luminosity (float/array-like, float)</span>
+<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">nu</span><span class="p">)</span>
@@ -605,18 +645,19 @@
 <span class="sd">        Return lnu with units at a provided frequency using 1d interpolation.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            wavelength (array or float)</span>
-<span class="sd">                wavelength(s) of interest</span>
+<span class="sd">            wavelength (float/array-like, float)</span>
+<span class="sd">                The wavelength(s) of interest.</span>
 <span class="sd">            kind (str)</span>
-<span class="sd">                interpolation kind</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (unyt_array)</span>
-<span class="sd">                luminosity (lnu) at the provided wavelength</span>
-
+<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span></div>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_lnu_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -624,13 +665,14 @@
 <span class="sd">        interpolation.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            lam (array or float)</span>
-<span class="sd">                wavelength(s) of interest</span>
+<span class="sd">            lam (float/array-like, float)</span>
+<span class="sd">                The wavelength(s) of interest.</span>
+<span class="sd">            kind (str)</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            luminosity (array or float)</span>
-<span class="sd">                luminosity (lnu) at the provided wavelength</span>
-
+<span class="sd">            luminosity (float/array-like, float)</span>
+<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">lam</span><span class="p">)</span>
@@ -640,16 +682,20 @@
 <span class="sd">        Return lnu at a provided wavelength.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            lam (array or float)</span>
-<span class="sd">                wavelength(s) of interest</span>
+<span class="sd">            lam (float/array-like, float)</span>
+<span class="sd">                The wavelength(s) of interest.</span>
+<span class="sd">            kind (str)</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            luminosity (array or float)</span>
-<span class="sd">                luminosity (lnu) at the provided wavelength</span>
-
+<span class="sd">            luminosity (unyt-array)</span>
+<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span></div>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.measure_bolometric_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_bolometric_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_bolometric_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -665,13 +711,22 @@
 <span class="sd">            bolometric_luminosity (float)</span>
 <span class="sd">                The bolometric luminosity.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If method is an incompatible option an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Integrate using the requested method</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
             <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
             <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="mf">1e12</span><span class="p">,</span> <span class="mf">1e16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">luminosity</span>
+                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="mf">1e12</span><span class="p">,</span> <span class="mf">1e16</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Options are &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">bolometric_luminosity</span></div>
@@ -681,52 +736,70 @@
 <span class="sd">        Measure the luminosity in a spectral window.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            window (tuple of floats)</span>
-<span class="sd">                The window in wavelength</span>
+<span class="sd">            window (tuple, float)</span>
+<span class="sd">                The window in wavelength.</span>
+<span class="sd">            method (str)</span>
+<span class="sd">                The method used to calculate the bolometric luminosity. Options</span>
+<span class="sd">                include &#39;trapz&#39; and &#39;quad&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (float)</span>
 <span class="sd">                The luminosity in the window.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If method is an incompatible option an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Integrate using the requested method</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Convert wavelength limits to frequency limits and convert to</span>
-<span class="sd">            base units.</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">window</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="c1"># Convert wavelength limits to frequency limits and convert to</span>
+            <span class="c1"># base units.</span>
+            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">window</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">luminosity</span>
+                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="c1"># define a pseudo transmission function</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+            <span class="c1"># Define a pseudo transmission function</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Options are &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">luminosity</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.measure_window_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure lnu in a spectral window.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            window (tuple of floats)</span>
-<span class="sd">                The window in wavelength</span>
+<span class="sd">            window (tuple, float)</span>
+<span class="sd">                The window in wavelength.</span>
 <span class="sd">            method (str)</span>
-<span class="sd">                The method to use for the integration</span>
+<span class="sd">                The method to use for the integration. Options include</span>
+<span class="sd">                &#39;average&#39;, &#39;trapz&#39;, and &#39;quad&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (float)</span>
 <span class="sd">                The luminosity in the window.</span>
+
+<span class="sd">         Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If method is an incompatible option an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Apply the correct method</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;average&quot;</span><span class="p">:</span>
-            <span class="c1"># define a pseudo transmission function</span>
+            <span class="c1"># Define a pseudo transmission function</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
+            <span class="c1"># Apply to the correct axis of the spectra</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -735,19 +808,21 @@
                             <span class="k">for</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
-                    <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
                 <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">Lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="c1"># define a pseudo transmission function</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
+            <span class="c1"># Define a pseudo transmission function</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
+            <span class="c1"># Reverse the frequencies</span>
             <span class="n">nu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
+            <span class="c1"># Apply to the correct axis of the spectra</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -757,7 +832,7 @@
                             <span class="k">for</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span>
                         <span class="p">]</span>
                     <span class="p">)</span>
-                    <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
                 <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -767,9 +842,9 @@
                 <span class="p">)</span>
 
         <span class="c1"># note: not yet adapted for multiple SEDs</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
             <span class="c1"># define limits in base units</span>
-            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
             <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span>
@@ -779,9 +854,15 @@
 
             <span class="n">Lnu</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="n">Lnu</span> <span class="o">=</span> <span class="n">Lnu</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+            <span class="n">Lnu</span> <span class="o">=</span> <span class="n">Lnu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
-        <span class="k">return</span> <span class="n">Lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span></div>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Options are &#39;average&#39;, &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.measure_break"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_break">[docs]</a>    <span class="k">def</span> <span class="nf">measure_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -789,10 +870,10 @@
 <span class="sd">        windows.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            blue (tuple of floats)</span>
-<span class="sd">                The blue window</span>
-<span class="sd">            red (tuple of floats)</span>
-<span class="sd">                The red window</span>
+<span class="sd">            blue (tuple, float)</span>
+<span class="sd">                The wavelength limits of the blue window.</span>
+<span class="sd">            red (tuple, float)</span>
+<span class="sd">                The wavelength limits of the red window.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            break</span>
@@ -810,8 +891,8 @@
 <span class="sd">                The Balmer break strength</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3400</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
-        <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4150</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
+        <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3400</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
+        <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4150</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">)</span></div>
 
@@ -822,19 +903,30 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            definition</span>
-<span class="sd">                The choice of definition &#39;Bruzual83&#39; or &#39;Balogh&#39;</span>
+<span class="sd">                The choice of definition: &#39;Bruzual83&#39; or &#39;Balogh&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
-<span class="sd">                The Balmer break strength</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">definition</span> <span class="o">==</span> <span class="s2">&quot;Bruzual83&quot;</span><span class="p">:</span>
-            <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3750</span><span class="p">,</span> <span class="mi">3950</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
-            <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4050</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
+<span class="sd">                The Balmer break strength.</span>
 
-        <span class="k">if</span> <span class="n">definition</span> <span class="o">==</span> <span class="s2">&quot;Balogh&quot;</span><span class="p">:</span>
-            <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3850</span><span class="p">,</span> <span class="mi">3950</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
-            <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="mi">4100</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span>
+<span class="sd">         Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If definition is an incompatible option an error is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define the requested definition</span>
+        <span class="k">if</span> <span class="n">definition</span> <span class="o">==</span> <span class="s2">&quot;Bruzual83&quot;</span><span class="p">:</span>
+            <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3750</span><span class="p">,</span> <span class="mi">3950</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
+            <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4050</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
+
+        <span class="k">elif</span> <span class="n">definition</span> <span class="o">==</span> <span class="s2">&quot;Balogh&quot;</span><span class="p">:</span>
+            <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3850</span><span class="p">,</span> <span class="mi">3950</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
+            <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4000</span><span class="p">,</span> <span class="mi">4100</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised definition (</span><span class="si">{</span><span class="n">definition</span><span class="si">}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Options are &#39;Bruzual83&#39; or &#39;Balogh&#39;&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">)</span></div>
 
@@ -845,15 +937,20 @@
 <span class="sd">        else the luminosity in two windows is calculated and used to determine</span>
 <span class="sd">        the slope, similar to observations.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            window (tuple, float)</span>
+<span class="sd">                The window in which to measure in terms of wavelength.</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
 <span class="sd">                The UV continuum slope ($\beta$)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># if a single window is provided</span>
+        <span class="c1"># If a single window is provided</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
+            <span class="c1"># Handle different spectra dimensions</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                     <span class="p">[</span>
@@ -868,25 +965,26 @@
                     <span class="n">linregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">s</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2.0</span>
                 <span class="p">)</span>
 
-        <span class="c1"># if two windows are provided</span>
+        <span class="c1"># If two windows are provided</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="c1"># define the red and blue windows</span>
+            <span class="c1"># Define the red and blue windows</span>
             <span class="n">blue</span> <span class="o">=</span> <span class="n">window</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
             <span class="n">red</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
 
-            <span class="c1"># measure the red and blue windows</span>
+            <span class="c1"># Measure the red and blue windows</span>
             <span class="n">lnu_blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span>
             <span class="n">lnu_red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">red</span><span class="p">)</span>
 
-            <span class="c1"># measure beta</span>
+            <span class="c1"># Measure beta</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lnu_blue</span> <span class="o">/</span> <span class="n">lnu_red</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">))</span>
                 <span class="o">-</span> <span class="mf">2.0</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># raise exception</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a window of len 2 or 4 must be provided&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;A window of len 2 or 4 must be provided&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">beta</span></div>
 
@@ -894,21 +992,23 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate broadband luminosities using a FilterCollection object</span>
 
-<span class="sd">        Arguments:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            filters (filters.FilterCollection)</span>
 <span class="sd">                A FilterCollection object.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            broadband_luminosities (dict)</span>
-<span class="sd">                A dictionary of broadband luminosities.</span>
+<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Intialise result dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># Loop over filters</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="c1"># Apply the filter transmission curve and store the resulting</span>
             <span class="c1"># luminosity</span>
-            <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+            <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span></div>
@@ -918,11 +1018,11 @@
 <span class="sd">        Calculate a dummy observed frame spectral energy distribution.</span>
 <span class="sd">        Useful when you want rest-frame quantities.</span>
 
-<span class="sd">        Uses a standard distance of 10 pc</span>
+<span class="sd">        Uses a standard distance of 10 pcs.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            fnu (ndarray)</span>
-<span class="sd">                Spectral flux density calcualted at d=10 pc</span>
+<span class="sd">                Spectral flux density calcualted at d=10 pc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Get the observed wavelength and frequency arrays</span>
@@ -930,23 +1030,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span>
 
         <span class="c1"># Compute the flux SED and apply unit conversions to get to nJy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pc</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="mf">1e23</span>  <span class="c1"># convert to Jy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="mf">1e9</span>  <span class="c1"># convert to nJy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span></div>
 
 <div class="viewcode-block" id="Sed.get_fnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_fnu">[docs]</a>    <span class="k">def</span> <span class="nf">get_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="n">Inoue14</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the observed frame spectral energy distribution</span>
+<span class="sd">        Calculate the observed frame spectral energy distribution.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                astropy cosmology instance</span>
+<span class="sd">                astropy cosmology instance.</span>
 <span class="sd">            z (float)</span>
-<span class="sd">                redshift</span>
+<span class="sd">                The redshift of the spectra.</span>
 <span class="sd">            igm (igm)</span>
-<span class="sd">                IGM class</span>
+<span class="sd">                The IGM class.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            fnu (ndarray)</span>
@@ -962,13 +1060,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
 
         <span class="c1"># Compute the luminosity distance</span>
-        <span class="n">luminosity_distance</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">luminosity_distance</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">cm</span>
 
         <span class="c1"># Finally, compute the flux SED and apply unit conversions to get</span>
         <span class="c1"># to nJy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">luminosity_distance</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="mf">1e23</span>  <span class="c1"># convert to Jy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="mf">1e9</span>  <span class="c1"># convert to nJy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">luminosity_distance</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># If we are applying an IGM model apply it</span>
         <span class="k">if</span> <span class="n">igm</span><span class="p">:</span>
@@ -982,13 +1078,14 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            fc (object)</span>
-<span class="sd">                a FilterCollection object</span>
+<span class="sd">                A FilterCollection object.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (dict)</span>
-<span class="sd">                a dictionary of fluxes</span>
+<span class="sd">                A dictionary of fluxes in each filter in fc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Ensure fluxes actually exist</span>
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obslam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">return</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span>
@@ -998,9 +1095,10 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
+        <span class="c1"># Set up flux dictionary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="c1"># loop over filters in filter collection</span>
+        <span class="c1"># Loop over filters in filter collection</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">:</span>
             <span class="c1"># Check whether the filter transmission curve wavelength grid</span>
             <span class="c1"># and the spectral grid are the same array</span>
@@ -1025,15 +1123,16 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            f1 (str)</span>
-<span class="sd">                blue filter code</span>
+<span class="sd">                The blue filter code.</span>
 <span class="sd">            f2 (str)</span>
-<span class="sd">                red filter code</span>
+<span class="sd">                The red filter code.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (float)</span>
-<span class="sd">                the broadband colour.</span>
+<span class="sd">                The broadband colour.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Ensure fluxes exist</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span>
@@ -1062,21 +1161,24 @@
 <span class="sd">                Absorption feature index in units of wavelength</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># measure the red and blue windows</span>
+        <span class="c1"># Measure the red and blue windows</span>
         <span class="n">lnu_blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span>
         <span class="n">lnu_red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">red</span><span class="p">)</span>
 
-        <span class="c1"># define the wavelength grid over the feature</span>
+        <span class="c1"># Define the wavelength grid over the feature</span>
         <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">feature</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">feature_lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
 
-        <span class="c1"># using the red and blue windows fit the continuum</span>
+        <span class="c1"># Using the red and blue windows fit the continuum</span>
         <span class="c1"># note, this does not conserve units so we need to add them back in</span>
         <span class="c1"># later.</span>
 
+        <span class="c1"># Handle different spectra shapes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="c1"># set up output array</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lam</span>
+            <span class="c1"># Multiple spectra case</span>
+
+            <span class="c1"># Set up output array</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span>
 
             <span class="c1"># Note: I&#39;m sure this could be done better.</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">):</span>
@@ -1084,125 +1186,191 @@
                     <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">)],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lnu_red</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="mi">1</span>
                 <span class="p">)</span>
 
-                <span class="c1"># use the continuum fit to define the continuum</span>
+                <span class="c1"># Use the continuum fit to define the continuum</span>
                 <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
                     <span class="o">+</span> <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+                <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
-                <span class="c1"># define the continuum subtracted spectrum</span>
+                <span class="c1"># Define the continuum subtracted spectrum</span>
                 <span class="n">feature_lum</span> <span class="o">=</span> <span class="n">_lnu</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
                 <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
                 <span class="p">)</span>
 
-                <span class="c1"># measure index</span>
+                <span class="c1"># Measure index</span>
                 <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Single spectra case</span>
+
             <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">)],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span>
             <span class="p">)</span>
 
-            <span class="c1"># use the continuum fit to define the continuum</span>
+            <span class="c1"># Use the continuum fit to define the continuum</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">)</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">lnu</span>
+                <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
-            <span class="c1"># define the continuum subtracted spectrum</span>
+            <span class="c1"># Define the continuum subtracted spectrum</span>
             <span class="n">feature_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
 
             <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
 
-            <span class="c1"># measure index</span>
+            <span class="c1"># Measure index</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">index</span></div>
 
 <div class="viewcode-block" id="Sed.get_resampled_sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_resampled_sed">[docs]</a>    <span class="k">def</span> <span class="nf">get_resampled_sed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Resameple the spectra and create a new Sed object</span>
+<span class="sd">        Resameple the spectra and create a new Sed object.</span>
+
+<span class="sd">        NOTE: This only resamples the rest frame spectra. For fluxes get_fnu</span>
+<span class="sd">        must be called again after resampling.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            n (int or float)</span>
+<span class="sd">            n (int)</span>
+<span class="sd">                The number of wavelength elements to resample to.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (sed.Sed)</span>
-<span class="sd">                A rebinned Sed</span>
+<span class="sd">                A new Sed with the rebinned rest frame spectra.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InconsistentArgument</span>
+<span class="sd">                The sampling factor must be an integer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Resample the Sed</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
                 <span class="n">rebin_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">),</span> <span class="n">rebin_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-                <span class="s2">&quot;Non-integer resampling not yet implemented.&quot;</span>
-            <span class="p">)</span>
-
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Handle improper resampling factors</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;Sampling factor must be integer or float.&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">sed</span></div></div>
+        <span class="k">return</span> <span class="n">sed</span></div>
+
+<div class="viewcode-block" id="Sed.apply_attenuation"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.apply_attenuation">[docs]</a>    <span class="k">def</span> <span class="nf">apply_attenuation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tau_v</span><span class="p">,</span>
+        <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">),</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply attenuation to spectra.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tau_v (float/array-like, float)</span>
+<span class="sd">                The V-band optical depth for every star particle.</span>
+<span class="sd">            dust_curve (synthesizer.dust.attenuation.*)</span>
+<span class="sd">                An instance of one of the dust attenuation models. (defined in</span>
+<span class="sd">                synthesizer/dust/attenuation.py)</span>
+<span class="sd">            mask (array-like, bool)</span>
+<span class="sd">                A mask array with an entry for each spectra. Masked out</span>
+<span class="sd">                spectra will be ignored when applying the attenuation. Only</span>
+<span class="sd">                applicable for Sed&#39;s holding an (N, Nlam) array.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Sed</span>
+<span class="sd">                A new Sed containing the rest frame spectra of self attenuated</span>
+<span class="sd">                by the transmission defined from tau_v and the dust curve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure the mask is compatible with the spectra</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="s2">&quot;Masks are only applicable for Seds containing multiple spectra&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">mask</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="s2">&quot;Mask and spectra are incompatible shapes &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># If tau_v is an array it needs to match the spectra shape</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="s2">&quot;Arrays of tau_v values are only applicable for Seds&quot;</span>
+                    <span class="s2">&quot; containing multiple spectra&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_v</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="s2">&quot;tau_v and spectra are incompatible shapes &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">tau_v</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Compute the transmission</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
+
+        <span class="c1"># Get a copy of the rest frame spectra, we need to avoid</span>
+        <span class="c1"># modifying the original</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+
+        <span class="c1"># Apply the transmission curve to the rest frame spectra with or</span>
+        <span class="c1"># without applying a mask</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spectra</span> <span class="o">*=</span> <span class="n">transmission</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">transmission</span>
+
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="calculate_Q"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.calculate_Q">[docs]</a><span class="k">def</span> <span class="nf">calculate_Q</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">,</span> <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An improved function to calculate the ionising production rate.</span>
+<span class="sd">    A function to calculate the ionising production rate directly from</span>
+<span class="sd">    spectra.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        lam (float array)</span>
-<span class="sd">            wavelength grid</span>
-<span class="sd">        lnu (float array)</span>
-<span class="sd">            luminosity grid (erg/s/Hz)</span>
+<span class="sd">        lam (array-like, float)</span>
+<span class="sd">            The wavelength array.</span>
+<span class="sd">        lnu (array-like, float)</span>
+<span class="sd">            The luminosity grid (erg/s/Hz).</span>
 <span class="sd">        ionisation_energy (unyt_array)</span>
-<span class="sd">            ionisation energy</span>
-<span class="sd">        limit (float or int, optional)</span>
+<span class="sd">            The ionisation energy.</span>
+<span class="sd">        limit (float/int)</span>
 <span class="sd">            An upper bound on the number of subintervals</span>
 <span class="sd">            used in the integration adaptive algorithm.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">        float</span>
-<span class="sd">            ionising photon luminosity (s^-1)</span>
+<span class="sd">            Ionising photon luminosity (s^-1).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Apply units if not present</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">*</span> <span class="n">angstrom</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span>
 
-    <span class="c1"># convert lnu to llam</span>
+    <span class="c1"># Convert lnu to llam</span>
     <span class="n">llam</span> <span class="o">=</span> <span class="n">lnu</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span>
 
-    <span class="c1"># convert llam to lum [THIS SEEMS REDUNDANT]</span>
-    <span class="n">lum</span> <span class="o">=</span> <span class="n">llam</span> <span class="o">*</span> <span class="n">lam</span>
-
-    <span class="c1"># caculate ionisation wavelength</span>
+    <span class="c1"># Caculate ionisation wavelength</span>
     <span class="n">ionisation_wavelength</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">ionisation_energy</span>
 
-    <span class="n">x</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">lum</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom/s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x_</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="c1"># Defintion integration arrays</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">llam</span> <span class="o">*</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span>
+        <span class="k">lambda</span> <span class="n">x_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
+        <span class="mi">0</span><span class="p">,</span>
+        <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
     <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
-
-
-<span class="c1"># def rebin(l, f, n):  # rebin SED [currently destroys original]</span>
-<span class="c1">#     n_len = int(np.floor(len(l) / n))</span>
-<span class="c1">#     _l = l[: n_len * n]</span>
-<span class="c1">#     _f = f[: n_len * n]</span>
-<span class="c1">#     nl = np.mean(_l.reshape(n_len, n), axis=1)</span>
-<span class="c1">#     nf = np.sum(_f.reshape(n_len, n), axis=1) / n</span>
-
-<span class="c1">#     return nl, nf</span>
 </pre></div>
         </article>
       </div>
