@@ -736,7 +736,62 @@
                     <span class="o">-</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">T0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="mf">0.0</span></div></div></div>
+                <span class="k">return</span> <span class="mf">0.0</span></div></div>
+    
+<div class="viewcode-block" id="SFH.ExponentiallyDeclining"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.ExponentiallyDeclining">[docs]</a>    <span class="k">class</span> <span class="nc">ExponentiallyDeclining</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An exponentially declining star formation history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Exponentially Declining&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;initial_age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+<div class="viewcode-block" id="SFH.ExponentiallyDeclining.sfr_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.ExponentiallyDeclining.sfr_">[docs]</a>        <span class="k">def</span> <span class="nf">sfr_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;age is lookback time&quot;&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.0</span></div></div>
+    
+<div class="viewcode-block" id="SFH.DelayedExponentiallyDeclining"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.DelayedExponentiallyDeclining">[docs]</a>    <span class="k">class</span> <span class="nc">DelayedExponentiallyDeclining</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A delayed exponentially declining star formation history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Delayed Exponentially Declining&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;initial_age&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+<div class="viewcode-block" id="SFH.DelayedExponentiallyDeclining.sfr_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.DelayedExponentiallyDeclining.sfr_">[docs]</a>        <span class="k">def</span> <span class="nf">sfr_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;age is lookback time&quot;&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mf">0.0</span></div></div>
+
+<div class="viewcode-block" id="SFH.DoublePowerLaw"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.DoublePowerLaw">[docs]</a>    <span class="k">class</span> <span class="nc">DoublePowerLaw</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A delayed exponentially declining star formation history</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Delayed Exponentially Declining&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;beta&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SFH.DoublePowerLaw.sfr_"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sfzh.html#synthesizer.parametric.sfzh.SFH.DoublePowerLaw.sfr_">[docs]</a>        <span class="k">def</span> <span class="nf">sfr_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;age is lookback time&quot;&quot;&quot;</span>
+
+            <span class="k">return</span> <span class="p">((</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span><span class="o">**-</span><span class="mi">1</span> </div></div></div>
 </pre></div>
         </article>
       </div>
