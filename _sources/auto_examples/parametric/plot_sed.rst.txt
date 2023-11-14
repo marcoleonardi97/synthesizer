@@ -26,7 +26,7 @@ including photometry. This example will:
 - build a parametric galaxy (see make_sfzh)
 - calculate spectral luminosity density
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-112
+.. GENERATED FROM PYTHON SOURCE LINES 10-116
 
 
 
@@ -96,22 +96,28 @@ including photometry. This example will:
 
     ----------
     SUMMARY OF PARAMETERISED STAR FORMATION HISTORY
-    <class 'synthesizer.parametric.sfzh.SFH.Constant'>
+    <class 'synthesizer.parametric.sf_hist.Constant'>
     duration: 10 Myr
     median age: 5.00 Myr
     mean age: 5.00 Myr
     ----------
 
     Pure stellar spectra
-    /opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1813: RuntimeWarning: divide by zero encountered in log10
-      out_arr = func(np.asarray(inp), out=out_func, **kwargs)
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     Intrinsic spectra
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     Simple dust and gas screen
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     CF00 model
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     Pacman model
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     Pacman model (no Ly-alpha escape, and no dust)
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     Pacman model (complex)
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     CF00 implemented within the Pacman model
+    No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
     ----------
     SUMMARY OF PARAMETRIC GALAXY
     ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠒⠒⠦⣄⡀⠀⠀⠀⠀⠀⠀⠀
@@ -130,7 +136,9 @@ including photometry. This example will:
             ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
     <class 'synthesizer.parametric.galaxy.Galaxy'>
     log10(stellar mass formed/Msol):             8.0
-    available SEDs: ['incident', 'transmitted', 'nebular', 'escaped', 'reprocessed', 'intrinsic', 'emergent', 'attenuated', 'young_attenuated', 'old_attenuated', 'young_emergent', 'old_emergent', 'young_incident', 'young_transmitted', 'young_nebular', 'young_reprocessed', 'young_intrinsic', 'old_incident', 'old_transmitted', 'old_nebular', 'old_reprocessed', 'old_intrinsic', 'young_escaped', 'old_escaped']
+    available SEDs: 
+        Stellar:  ['incident', 'transmitted', 'nebular', 'escaped', 'reprocessed', 'intrinsic', 'emergent', 'young_incident', 'young_transmitted', 'young_nebular', 'young_reprocessed', 'young_intrinsic', 'old_incident', 'old_transmitted', 'old_nebular', 'old_reprocessed', 'old_intrinsic', 'young_attenuated', 'old_attenuated', 'attenuated', 'young_emergent', 'old_emergent', 'young_escaped', 'old_escaped']
+        Combined: []
     available lines: []
     available images: []
     ----------
@@ -142,7 +150,7 @@ including photometry. This example will:
     log10(Peak luminosity/erg/(Hz*s)):             33.49 
     log10(Bolometric luminosity/erg/s):             43.91 
     ----------
-    {'U': unyt_quantity(9.10969508e+27, 'erg/(Hz*s)'), 'V': unyt_quantity(6.38206168e+27, 'erg/(Hz*s)'), 'J': unyt_quantity(2.29564781e+28, 'erg/(Hz*s)')}
+    {'U': unyt_quantity(9.10969607e+27, 'erg/(Hz*s)'), 'V': unyt_quantity(6.38206205e+27, 'erg/(Hz*s)'), 'J': unyt_quantity(2.29564789e+28, 'erg/(Hz*s)')}
 
 
 
@@ -157,7 +165,7 @@ including photometry. This example will:
 
     from synthesizer.filters import FilterCollection
     from synthesizer.grid import Grid
-    from synthesizer.parametric.sfzh import SFH, ZH, generate_sfzh
+    from synthesizer.parametric import SFH, ZDist, Stars
     from synthesizer.parametric.galaxy import Galaxy
     from unyt import Myr
 
@@ -175,64 +183,68 @@ including photometry. This example will:
         # define the parameters of the star formation and metal enrichment 
         # histories
         sfh_p = {"duration": 10 * Myr}
-        Z_p = {"log10Z": -2.0}  # can also use linear metallicity e.g. {'Z': 0.01}
+        Z_p = {"log10metallicity": -2.0}  # can also use linear metallicity e.g. {'Z': 0.01}
         stellar_mass = 1e8
 
         # define the functional form of the star formation and metal enrichment 
         # histories
-        sfh = SFH.Constant(sfh_p)  # constant star formation
+        sfh = SFH.Constant(**sfh_p)  # constant star formation
         print(sfh)  # print sfh summary
 
-        Zh = ZH.deltaConstant(Z_p)  # constant metallicity
+        metal_dist = ZDist.DeltaConstant(**Z_p)  # constant metallicity
 
         # get the 2D star formation and metal enrichment history for the given SPS 
         # grid.
-        sfzh = generate_sfzh(
-            grid.log10age, grid.metallicity, sfh, Zh, stellar_mass=stellar_mass
+        stars = Stars(
+            grid.log10age,
+            grid.metallicity,
+            sf_hist_func=sfh,
+            metal_dist_func=metal_dist,
+            initial_mass=stellar_mass,
         )
 
         # create a galaxy object
-        galaxy = Galaxy(sfzh)
+        galaxy = Galaxy(stars)
 
         # generate pure stellar spectra alone
-        galaxy.get_spectra_incident(grid)
+        galaxy.stars.get_spectra_incident(grid)
         print("Pure stellar spectra")
         galaxy.plot_spectra(show=True)
 
         # generate intrinsic spectra (which includes reprocessing by gas)
-        galaxy.get_spectra_reprocessed(grid, fesc=0.5)
+        galaxy.stars.get_spectra_reprocessed(grid, fesc=0.5)
         print("Intrinsic spectra")
         galaxy.plot_spectra(show=True)
 
         # # --- simple dust and gas screen
-        galaxy.get_spectra_screen(grid, tau_v=0.1)
+        galaxy.stars.get_spectra_screen(grid, tau_v=0.1)
         print("Simple dust and gas screen")
         galaxy.plot_spectra(show=True)
 
         # --- CF00 model
-        galaxy.get_spectra_CharlotFall(
+        galaxy.stars.get_spectra_CharlotFall(
             grid, tau_v_ISM=0.1, tau_v_BC=0.1, alpha_ISM=-0.7, alpha_BC=-1.3
         )
         print("CF00 model")
         galaxy.plot_spectra(show=True)
 
         # # --- pacman model
-        galaxy.get_spectra_pacman(grid, tau_v=0.1, fesc=0.5)
+        galaxy.stars.get_spectra_pacman(grid, tau_v=0.1, fesc=0.5)
         print("Pacman model")
         galaxy.plot_spectra(show=True)
 
         # pacman model (no Lyman-alpha escape and no dust)
-        galaxy.get_spectra_pacman(grid, fesc=0.0, fesc_LyA=0.0)
+        galaxy.stars.get_spectra_pacman(grid, fesc=0.0, fesc_LyA=0.0)
         print("Pacman model (no Ly-alpha escape, and no dust)")
         galaxy.plot_spectra(show=True)
 
         # # --- pacman model (complex)
-        galaxy.get_spectra_pacman(grid, fesc=0.0, fesc_LyA=0.5, tau_v=0.6)
+        galaxy.stars.get_spectra_pacman(grid, fesc=0.0, fesc_LyA=0.5, tau_v=0.6)
         print("Pacman model (complex)")
         galaxy.plot_spectra(show=True)
 
         # --- CF00 model implemented within pacman model
-        galaxy.get_spectra_pacman(
+        galaxy.stars.get_spectra_pacman(
             grid, fesc=0.1, fesc_LyA=0.1, tau_v=[1.0, 1.0], alpha=[-1, -1],
             young_old_thresh=1e7
         )
@@ -242,7 +254,7 @@ including photometry. This example will:
         # print galaxy summary
         print(galaxy)
 
-        sed = galaxy.spectra["attenuated"]
+        sed = galaxy.stars.spectra["attenuated"]
         print(sed)
 
         # generate broadband photometry using 3 top-hat filters
@@ -259,7 +271,7 @@ including photometry. This example will:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 10.274 seconds)
+   **Total running time of the script:** (0 minutes 1.165 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_sed.py:
