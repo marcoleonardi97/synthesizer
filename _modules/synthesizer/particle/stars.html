@@ -421,9 +421,9 @@
 <span class="sd">        alpha_enhancement (array-like, float)</span>
 <span class="sd">            The alpha enhancement [alpha/Fe] of each stellar particle.</span>
 <span class="sd">        log10ages (array-like, float)</span>
-<span class="sd">            Convnience attribute containing log10(age).</span>
+<span class="sd">            Convenience attribute containing log10(age in yr).</span>
 <span class="sd">        log10metallicities (array-like, float)</span>
-<span class="sd">            Convnience attribute containing log10(metallicity).</span>
+<span class="sd">            Convenience attribute containing log10(metallicity).</span>
 <span class="sd">        resampled (bool)</span>
 <span class="sd">            Flag for whether the young particles have been resampled.</span>
 <span class="sd">        current_masses (array-like, float)</span>
@@ -568,6 +568,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">s_hydrogen</span> <span class="o">=</span> <span class="n">s_hydrogen</span>
 
         <span class="c1"># Compute useful logged quantities</span>
+        <span class="c1"># TODO: should be changed to a property to avoid data duplication</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
 
@@ -661,7 +662,11 @@
         <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
         <span class="p">)</span>
-        <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">)</span>
+
+        <span class="c1"># Make sure we set the number of particles to the size of the mask</span>
+        <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
+
+        <span class="c1"># Make sure we get the wavelength index of the grid array</span>
         <span class="n">nlam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="c1"># Slice the spectral grids and pad them with copies of the edges.</span>
@@ -747,9 +752,7 @@
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">compute_integrated_sed</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">spec</span></div>
+        <span class="k">return</span> <span class="n">compute_integrated_sed</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Stars.generate_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1005,10 +1008,10 @@
         <span class="c1"># Get the appropriate mask</span>
         <span class="k">if</span> <span class="n">young</span><span class="p">:</span>
             <span class="c1"># Mask out old stars</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">young</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">young</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">old</span><span class="p">:</span>
             <span class="c1"># Mask out young stars</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">old</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Nothing to mask out</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
