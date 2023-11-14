@@ -368,6 +368,7 @@
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">kb</span><span class="p">,</span> <span class="n">um</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Hz</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">accepts</span>
 <span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">temperature</span> <span class="k">as</span> <span class="n">temperature_dim</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">planck</span>
@@ -417,16 +418,20 @@
             <span class="n">limit</span><span class="o">=</span><span class="mi">100</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EmissionBase.lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase.lnu">[docs]</a>    <span class="k">def</span> <span class="nf">lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<div class="viewcode-block" id="EmissionBase.lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase.lnu">[docs]</a>    <span class="k">def</span> <span class="nf">lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the normalised lnu for the provided wavelength grid</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        lam: unyt_array</span>
-<span class="sd">            Wavelength grid</span>
+<span class="sd">        _lam: (float/array-like, float)</span>
+<span class="sd">                An array of wavelengths (expected in AA, global unit)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span><span class="p">()</span></div></div>
 

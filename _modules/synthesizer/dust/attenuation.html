@@ -366,7 +366,7 @@
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">um</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span>
 
 <span class="kn">from</span> <span class="nn">dust_extinction.grain_models</span> <span class="kn">import</span> <span class="n">WD01</span>
 
@@ -384,7 +384,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (array-like, float)</span>
-<span class="sd">            The input wavelength array.</span>
+<span class="sd">            The input wavelength array (expected in AA units, </span>
+<span class="sd">            global unit).</span>
 
 <span class="sd">        slope (float)</span>
 <span class="sd">            The slope of the attenuation curve.</span>
@@ -404,7 +405,10 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Wavelength in microns</span>
-    <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">um</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;um&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">/</span><span class="mf">1e4</span>
     <span class="n">lam_v</span> <span class="o">=</span> <span class="mf">0.55</span>
     <span class="n">k_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">lam_micron</span><span class="p">)</span>
 
@@ -591,7 +595,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            lam (float/array, float)</span>
 <span class="sd">                An array of wavelengths or a single wavlength at which to</span>
-<span class="sd">                calculate optical depths.</span>
+<span class="sd">                calculate optical depths (in AA, global unit).</span>
 <span class="sd">            interp (str)</span>
 <span class="sd">                The type of interpolation to use. Can be ‘linear’, ‘nearest’,</span>
 <span class="sd">                ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’,</span>
@@ -611,7 +615,12 @@
             <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_lam_v</span></div></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
+
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_lam_v</span></div></div>
 
 
 <div class="viewcode-block" id="Calzetti2000"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000">[docs]</a><span class="k">class</span> <span class="nc">Calzetti2000</span><span class="p">(</span><span class="n">AttenuationLaw</span><span class="p">):</span>
@@ -672,7 +681,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            lam (float/array-like, float)</span>
 <span class="sd">                An array of wavelengths or a single wavlength at which to</span>
-<span class="sd">                calculate optical depths.</span>
+<span class="sd">                calculate optical depths (in AA, global unit).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float/array-like, float</span>
@@ -735,13 +744,17 @@
 <span class="sd">        Args:</span>
 <span class="sd">            lam (float/array-like, float)</span>
 <span class="sd">                An array of wavelengths or a single wavlength at which to</span>
-<span class="sd">                calculate optical depths. Must have unyts attached.</span>
+<span class="sd">                calculate optical depths (in AA, global unit).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float/array-like, float</span>
 <span class="sd">                The optical depth.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">())</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="p">((</span><span class="n">_lam</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="GrainsWD01.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -762,7 +775,11 @@
 <span class="sd">                for singular tau_v values or (tau_v.size, lam.size) tau_v</span>
 <span class="sd">                is an array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="o">.</span><span class="n">extinguish</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">lam</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">(),</span> <span class="n">Av</span><span class="o">=</span><span class="mf">1.086</span> <span class="o">*</span> <span class="n">tau_v</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="o">.</span><span class="n">extinguish</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">_lam</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">(),</span> <span class="n">Av</span><span class="o">=</span><span class="mf">1.086</span> <span class="o">*</span> <span class="n">tau_v</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>
