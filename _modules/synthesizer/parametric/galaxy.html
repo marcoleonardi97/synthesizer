@@ -371,7 +371,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.imaging.images</span> <span class="kn">import</span> <span class="n">ParametricImage</span>
-<span class="kn">from</span> <span class="nn">synthesizer.art</span> <span class="kn">import</span> <span class="n">Art</span>
+<span class="kn">from</span> <span class="nn">synthesizer.art</span> <span class="kn">import</span> <span class="n">Art</span><span class="p">,</span> <span class="n">get_centred_art</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">ParticleStars</span>
 
 
@@ -440,10 +440,13 @@
 <span class="sd">            available SEDs, lines, and images.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Define the width to print within</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mi">79</span>
+
         <span class="n">pstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;SUMMARY OF PARAMETRIC GALAXY&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="n">Art</span><span class="o">.</span><span class="n">galaxy</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">width</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;SUMMARY OF PARAMETRIC GALAXY&quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="n">get_centred_art</span><span class="p">(</span><span class="n">Art</span><span class="o">.</span><span class="n">galaxy</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;log10(stellar mass formed/Msol): </span><span class="se">\</span>
@@ -451,11 +454,97 @@
             <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="p">)</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;available SEDs: </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;    Stellar:  </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;    Combined: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;available lines: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;available images: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Define the connecting character for list wrapping</span>
+        <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Print stellar spectra keys</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
+            <span class="n">spectra_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">14</span><span class="p">:</span>
+                    <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">+=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">spectra_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Slice off the last two entries, we don&#39;t need then</span>
+            <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Stellar:  [&quot;</span> <span class="o">+</span> <span class="n">conn_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Stellar:  []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Print combined spectra keys</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
+            <span class="n">spectra_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">14</span><span class="p">:</span>
+                    <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">+=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">spectra_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Slice off the last two entries, we don&#39;t need then</span>
+            <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Combined: [&quot;</span> <span class="o">+</span> <span class="n">conn_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Combined: []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Print line keys</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Redefine the connecting character for list wrapping</span>
+            <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">18</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+            <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
+            <span class="n">line_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">14</span><span class="p">:</span>
+                    <span class="n">line_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">+=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">line_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Slice off the last two entries, we don&#39;t need then</span>
+            <span class="n">line_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;available lines: [&quot;</span> <span class="o">+</span> <span class="n">conn_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_keys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;available lines: []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Print image keys</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Redefine the connecting character for list wrapping</span>
+            <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">19</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+            <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
+            <span class="n">img_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">14</span><span class="p">:</span>
+                    <span class="n">img_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">+=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">img_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Slice off the last two entries, we don&#39;t need then</span>
+            <span class="n">img_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;available images: [&quot;</span> <span class="o">+</span> <span class="n">conn_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">img_keys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;available images: []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">width</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">pstr</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_galaxy</span><span class="p">):</span>
