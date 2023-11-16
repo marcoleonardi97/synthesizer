@@ -397,7 +397,14 @@ JWST/NIRCam.F277W: 58.53 nJy
 JWST/NIRCam.F356W: 49.31 nJy
 JWST/NIRCam.F444W: 48.39 nJy
 JWST/MIRI.F770W: 41.07 nJy
-No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
+WARNING: filter wavelength grid is not the same as the SED wavelength grid.
 </pre></div>
 </div>
 <div class="line-block">
@@ -425,8 +432,7 @@ No artists with labels found to put in legend.  Note that artists whose label st
     <span class="c1"># define filters</span>
     <span class="n">filter_codes</span> <span class="o">=</span> <span class="p">[</span>
         <span class="sa">f</span><span class="s2">&quot;JWST/NIRCam.</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;F090W&quot;</span><span class="p">,</span> <span class="s2">&quot;F115W&quot;</span><span class="p">,</span> <span class="s2">&quot;F150W&quot;</span><span class="p">,</span> <span class="s2">&quot;F200W&quot;</span><span class="p">,</span> <span class="s2">&quot;F277W&quot;</span><span class="p">,</span> <span class="s2">&quot;F356W&quot;</span><span class="p">,</span>
-                  <span class="s2">&quot;F444W&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;F090W&quot;</span><span class="p">,</span> <span class="s2">&quot;F115W&quot;</span><span class="p">,</span> <span class="s2">&quot;F150W&quot;</span><span class="p">,</span> <span class="s2">&quot;F200W&quot;</span><span class="p">,</span> <span class="s2">&quot;F277W&quot;</span><span class="p">,</span> <span class="s2">&quot;F356W&quot;</span><span class="p">,</span> <span class="s2">&quot;F444W&quot;</span><span class="p">]</span>
     <span class="p">]</span>  <span class="c1"># define a list of filter codes</span>
     <span class="n">filter_codes</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;JWST/MIRI.</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;F770W&quot;</span><span class="p">]]</span>
     <span class="n">fc</span> <span class="o">=</span> <span class="n">FilterCollection</span><span class="p">(</span><span class="n">filter_codes</span><span class="p">)</span>
@@ -452,14 +458,16 @@ No artists with labels found to put in legend.  Note that artists whose label st
         <span class="n">initial_mass</span><span class="o">=</span><span class="n">stellar_mass</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># Define redshift</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="mf">10.0</span>
+
     <span class="c1"># create a galaxy object</span>
-    <span class="n">galaxy</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">stars</span><span class="p">)</span>
+    <span class="n">galaxy</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">stars</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
 
     <span class="c1"># generate spectra using pacman model (complex)</span>
     <span class="n">sed</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 
     <span class="c1"># now calculate the observed frame spectra</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="mf">10.0</span>  <span class="c1"># redshift</span>
     <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
         <span class="n">cosmo</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="n">Madau96</span>
     <span class="p">)</span>  <span class="c1"># generate observed frame spectra, assume Madau96 IGM model</span>
@@ -473,14 +481,15 @@ No artists with labels found to put in legend.  Note that artists whose label st
 
     <span class="c1"># make plot of observed including broadband fluxes (if filter collection</span>
     <span class="c1"># object given)</span>
-    <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_observed_spectra</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span>
-                                 <span class="n">z</span><span class="p">,</span>
-                                 <span class="n">fc</span><span class="o">=</span><span class="n">fc</span><span class="p">,</span>
-                                 <span class="c1"># spectra_to_plot=[&quot;total&quot;],</span>
-                                 <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_observed_spectra</span><span class="p">(</span>
+        <span class="n">filters</span><span class="o">=</span><span class="n">fc</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stellar_spectra</span><span class="o">=</span><span class="n">sed</span><span class="p">,</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.202 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.728 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-parametric-plot-observed-sed-py">
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a5047ab40041abb4e5cdefc7cbbe690/plot_observed_sed.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_observed_sed.py</span></code></a></p>

@@ -376,7 +376,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
-<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span><span class="p">,</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
 
@@ -1063,9 +1063,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
                     <span class="s2">&quot;young_attenuated&quot;</span>
                 <span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
-                    <span class="s2">&quot;old_attenuated&quot;</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_escaped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
@@ -1158,7 +1156,9 @@
         <span class="c1"># If only one line specified convert to a list to avoid writing a</span>
         <span class="c1"># longer if statement</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_ids</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">line_ids</span><span class="p">,</span> <span class="p">]</span>
+            <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">line_ids</span><span class="p">,</span>
+            <span class="p">]</span>
 
         <span class="c1"># Dictionary holding Line objects</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1230,7 +1230,9 @@
         <span class="c1"># then generate them</span>
         <span class="k">if</span> <span class="s2">&quot;intrinsic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
             <span class="n">intrinsic_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_line_intrinsic</span><span class="p">(</span>
-                <span class="n">grid</span><span class="p">,</span> <span class="n">line_ids</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+                <span class="n">grid</span><span class="p">,</span>
+                <span class="n">line_ids</span><span class="p">,</span>
+                <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">intrinsic_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span>
@@ -1241,9 +1243,7 @@
         <span class="c1"># Loop over the intrinsic lines</span>
         <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">intrinsic_line</span> <span class="ow">in</span> <span class="n">intrinsic_lines</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Calculate attenuation</span>
-            <span class="n">T_BC</span> <span class="o">=</span> <span class="n">dust_curve_BC</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
-                <span class="n">tau_v_BC</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
-            <span class="p">)</span>
+            <span class="n">T_BC</span> <span class="o">=</span> <span class="n">dust_curve_BC</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v_BC</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span><span class="p">)</span>
             <span class="n">T_ISM</span> <span class="o">=</span> <span class="n">dust_curve_ISM</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
                 <span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
             <span class="p">)</span>
@@ -1350,131 +1350,59 @@
         <span class="k">return</span> <span class="n">young</span><span class="p">,</span> <span class="n">old</span></div>
 
 <div class="viewcode-block" id="StarsComponent.plot_spectra"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">spectra_to_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">ylimits</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;peak&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        plots all spectra associated with a galaxy object</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            show (bool):</span>
-<span class="sd">                flag for whether to show the plot or just return the</span>
-<span class="sd">                figure and axes</span>
-<span class="sd">            spectra_to_plot (None, list):</span>
-<span class="sd">                list of named spectra to plot that are present in</span>
-<span class="sd">                `galaxy.spectra`</span>
-<span class="sd">            figsize (tuple):</span>
-<span class="sd">                tuple with size 2 defining the figure size</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            fig (object)</span>
-<span class="sd">            ax (object)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-
-        <span class="n">left</span> <span class="o">=</span> <span class="mf">0.15</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="mf">0.6</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="mf">0.1</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="mf">0.8</span>
-
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-        <span class="c1"># only plot FIR if &#39;total&#39; is plotted otherwise just plot UV-NIR</span>
-        <span class="k">if</span> <span class="s2">&quot;total&quot;</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">:</span>
-            <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">xlim</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">]</span>
-
-        <span class="n">ypeak</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
-        <span class="k">for</span> <span class="n">sed_name</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">:</span>
-            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">sed_name</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">sed_name</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">ypeak</span><span class="p">:</span>
-                <span class="n">ypeak</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span>
-
-        <span class="c1"># ax.set_xlim([2.5, 4.2])</span>
-
-        <span class="k">if</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;peak&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">ypeak</span> <span class="o">==</span> <span class="n">ypeak</span><span class="p">:</span>
-                <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="n">ypeak</span> <span class="o">-</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ypeak</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">]</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">)</span>
-
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
-
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">labelspacing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\lambda/\AA)$&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(L_{\nu}/erg\ s^{-1}\ Hz^{-1} M_{\odot}^{-1})$&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
-
-<div class="viewcode-block" id="StarsComponent.plot_observed_spectra"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.plot_observed_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_observed_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">cosmo</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">,</span>
-        <span class="n">fc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">spectra_to_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        plots all spectra associated with a galaxy object</span>
+<span class="sd">        Plots either specific spectra (specified via spectra_to_plot) or all</span>
+<span class="sd">        spectra on the child Stars object.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            spectra_to_plot (string/list, string)</span>
+<span class="sd">                The specific spectra to plot.</span>
+<span class="sd">                    - If None all spectra are plotted.</span>
+<span class="sd">                    - If a list of strings each specifc spectra is plotted.</span>
+<span class="sd">                    - If a single string then only that spectra is plotted.</span>
+<span class="sd">            show (bool)</span>
+<span class="sd">                Flag for whether to show the plot or just return the</span>
+<span class="sd">                figure and axes.</span>
+<span class="sd">            ylimits (tuple)</span>
+<span class="sd">                The limits to apply to the y axis. If not provided the limits</span>
+<span class="sd">                will be calculated with the lower limit set to 1000 (100) times less</span>
+<span class="sd">                than the peak of the spectrum for rest_frame (observed) spectra.</span>
+<span class="sd">            xlimits (tuple)</span>
+<span class="sd">                The limits to apply to the x axis. If not provided the optimal</span>
+<span class="sd">                limits are found based on the ylimits.</span>
+<span class="sd">            figsize (tuple)</span>
+<span class="sd">                Tuple with size 2 defining the figure size.</span>
 
 <span class="sd">        Returns:</span>
+<span class="sd">            fig (matplotlib.pyplot.figure)</span>
+<span class="sd">                The matplotlib figure object for the plot.</span>
+<span class="sd">            ax (matplotlib.axes)</span>
+<span class="sd">                The matplotlib axes object containing the plotted data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Handling whether we are plotting all spectra, specific spectra, or</span>
+        <span class="c1"># a single spectra</span>
+        <span class="k">if</span> <span class="n">spectra_to_plot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_to_plot</span><span class="p">]</span>
 
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
-
-        <span class="n">left</span> <span class="o">=</span> <span class="mf">0.15</span>
-        <span class="n">height</span> <span class="o">=</span> <span class="mf">0.7</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="mf">0.1</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="mf">0.8</span>
-
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-        <span class="n">filter_ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-        <span class="k">for</span> <span class="n">sed_name</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">:</span>
-            <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">sed_name</span><span class="p">]</span>
-            <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">sed_name</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">sed_name</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">fc</span><span class="p">:</span>
-                <span class="n">sed</span><span class="o">.</span><span class="n">get_broadband_fluxes</span><span class="p">(</span><span class="n">fc</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">:</span>
-                    <span class="n">wv</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span>
-                    <span class="n">filter_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">wv</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-
-        <span class="c1"># ax.set_xlim([5000., 100000.])</span>
-        <span class="c1"># ax.set_ylim([0., 100])</span>
-        <span class="n">filter_ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">labelspacing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\lambda_</span><span class="si">{obs}</span><span class="s2">/\AA)$&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(f_{\nu}/nJy)$&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
+        <span class="k">return</span> <span class="n">plot_spectra</span><span class="p">(</span>
+            <span class="n">spectra</span><span class="p">,</span>
+            <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
+            <span class="n">ylimits</span><span class="o">=</span><span class="n">ylimits</span><span class="p">,</span>
+            <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
+        <span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

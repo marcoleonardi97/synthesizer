@@ -378,6 +378,7 @@
 <span class="sd">    sed.get_broadband_fluxes(filters)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
@@ -622,7 +623,6 @@
 
         <span class="k">return</span> <span class="n">pstr</span>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -654,8 +654,8 @@
 <span class="sd">            luminosity (unyt_array)</span>
 <span class="sd">                The spectral luminosity density per Hz array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> 
-    
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">luminosity_lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -666,7 +666,7 @@
 <span class="sd">                The spectral luminosity density per Angstrom array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">llam</span>
-    
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">wavelength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1438,6 +1438,334 @@
         <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
         <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
     <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.plot_spectra">[docs]</a><span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
+    <span class="n">spectra</span><span class="p">,</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
+    <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">draw_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">x_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots either a specific spectra or all spectra provided in a dictionary.</span>
+
+<span class="sd">    This is a generic plotting function to be used either directly or to be</span>
+<span class="sd">    wrapped by helper methods through Synthesizer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spectra (dict/Sed)</span>
+<span class="sd">            The Sed objects from which to plot. This can either be a dictionary</span>
+<span class="sd">            of Sed objects to plot multiple or a single Sed object to only plot</span>
+<span class="sd">            one.</span>
+<span class="sd">        fig (matplotlib.pyplot.figure)</span>
+<span class="sd">            The figure containing the axis. By default one is created in this</span>
+<span class="sd">            function.</span>
+<span class="sd">        ax (matplotlib.axes)</span>
+<span class="sd">            The axis to plot the data on. By default one is created in this</span>
+<span class="sd">            function.</span>
+<span class="sd">        show (bool)</span>
+<span class="sd">            Flag for whether to show the plot or just return the</span>
+<span class="sd">            figure and axes.</span>
+<span class="sd">        ylimits (tuple)</span>
+<span class="sd">            The limits to apply to the y axis. If not provided the limits</span>
+<span class="sd">            will be calculated with the lower limit set to 1000 (100) times less</span>
+<span class="sd">            than the peak of the spectrum for rest_frame (observed) spectra.</span>
+<span class="sd">        xlimits (tuple)</span>
+<span class="sd">            The limits to apply to the x axis. If not provided the optimal</span>
+<span class="sd">            limits are found based on the ylimits.</span>
+<span class="sd">        figsize (tuple)</span>
+<span class="sd">            Tuple with size 2 defining the figure size.</span>
+<span class="sd">        label (string)</span>
+<span class="sd">            The label to give the spectra. Only applicable when Sed is a single</span>
+<span class="sd">            spectra.</span>
+<span class="sd">        draw_legend (bool)</span>
+<span class="sd">            Whether to draw the legend.</span>
+<span class="sd">        rest_frame (bool)</span>
+<span class="sd">            Whether to plot the rest frame spectra. If False the observed</span>
+<span class="sd">            spectra is plotted.</span>
+<span class="sd">        x_units (unyt.unit_object.Unit)</span>
+<span class="sd">            The units of the x axis. This will be converted to a string</span>
+<span class="sd">            and included in the axis label. By default the internal unit system</span>
+<span class="sd">            is assumed unless this is passed.</span>
+<span class="sd">        y_units (unyt.unit_object.Unit)</span>
+<span class="sd">            The units of the y axis. This will be converted to a string</span>
+<span class="sd">            and included in the axis label. By default the internal unit system</span>
+<span class="sd">            is assumed unless this is passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        fig (matplotlib.pyplot.figure)</span>
+<span class="sd">            The matplotlib figure object for the plot.</span>
+<span class="sd">        ax (matplotlib.axes)</span>
+<span class="sd">            The matplotlib axes object containing the plotted data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Make a singular Sed a dictionary for ease below</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">label</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;spectra&quot;</span><span class="p">:</span> <span class="n">spectra</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Don&#39;t draw a legend if not label given</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">draw_legend</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No label given, we will not draw a legened&quot;</span><span class="p">)</span>
+            <span class="n">draw_legend</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># If we don&#39;t already have a figure, make one</span>
+    <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Set up the figure</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+        <span class="c1"># Define the axes geometry</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="mf">0.15</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="mf">0.6</span>
+        <span class="n">bottom</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mf">0.8</span>
+
+        <span class="c1"># Create the axes</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">((</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
+
+        <span class="c1"># Set the scale to log log</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">()</span>
+
+    <span class="c1"># Loop over the dict we have been handed</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Get the appropriate luminosity/flux and wavelengths</span>
+        <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
+            <span class="n">plt_spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lnu</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Ensure we have fluxes</span>
+            <span class="k">if</span> <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;This Sed has no fluxes (</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">)! &quot;</span> <span class="s2">&quot;Have you called Sed.get_fnu()?&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Ok everything is fine</span>
+            <span class="n">plt_spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span>
+
+        <span class="c1"># Prettify the label</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+
+        <span class="c1"># Plot this spectra</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">plt_spectra</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># Do we not have y limtis?</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ylimits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Define initial xlimits</span>
+        <span class="n">ylimits</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+
+        <span class="c1"># Loop over spectra and get the total required limits</span>
+        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Get the maximum</span>
+            <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span><span class="p">)</span>
+
+            <span class="c1"># Derive the x limits</span>
+            <span class="n">y_up</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">)</span>
+            <span class="n">y_low</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span>
+
+            <span class="c1"># Update limits</span>
+            <span class="k">if</span> <span class="n">y_low</span> <span class="o">&lt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_low</span>
+            <span class="k">if</span> <span class="n">y_up</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">ylimits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_up</span>
+
+    <span class="c1"># Do we not have x limits?</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xlimits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># Define initial xlimits</span>
+        <span class="n">xlimits</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span>
+
+        <span class="c1"># Loop over spectra and get the total required limits</span>
+        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Derive the x limits from data above the ylimits</span>
+            <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
+                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">[</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+            <span class="c1"># Saftey skip if no values are above the limit</span>
+            <span class="k">if</span> <span class="n">lams_above</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Derive the x limits</span>
+            <span class="n">x_low</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">lams_above</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span>
+            <span class="n">x_up</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">lams_above</span><span class="p">))</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">)</span>
+
+            <span class="c1"># Update limits</span>
+            <span class="k">if</span> <span class="n">x_low</span> <span class="o">&lt;</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">xlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_low</span>
+            <span class="k">if</span> <span class="n">x_up</span> <span class="o">&gt;</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">xlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_up</span>
+
+    <span class="c1"># Set the limits</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlimits</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">*</span><span class="n">ylimits</span><span class="p">)</span>
+
+    <span class="c1"># Make the legend</span>
+    <span class="k">if</span> <span class="n">draw_legend</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">labelspacing</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="c1"># Parse the units for the labels and make them pretty</span>
+    <span class="k">if</span> <span class="n">x_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x_units</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">y_units</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">plt_spectra</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_units</span><span class="p">)</span>
+    <span class="n">x_units</span> <span class="o">=</span> <span class="n">x_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; \ &quot;</span><span class="p">)</span>
+    <span class="n">y_units</span> <span class="o">=</span> <span class="n">y_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; \ &quot;</span><span class="p">)</span>
+
+    <span class="c1"># Label the axes</span>
+    <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L_{\nu}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda_\mathrm</span><span class="si">{obs}</span><span class="s2">/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F_{\nu}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Are we showing?</span>
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="plot_observed_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.plot_observed_spectra">[docs]</a><span class="k">def</span> <span class="nf">plot_observed_spectra</span><span class="p">(</span>
+    <span class="n">spectra</span><span class="p">,</span>
+    <span class="n">redshift</span><span class="p">,</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
+    <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">draw_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">x_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots either a specific observed spectra or all observed spectra</span>
+<span class="sd">    provided in a dictionary.</span>
+
+<span class="sd">    This function is a wrapper around plot_spectra.</span>
+
+<span class="sd">    This is a generic plotting function to be used either directly or to be</span>
+<span class="sd">    wrapped by helper methods through Synthesizer.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spectra (dict/Sed)</span>
+<span class="sd">            The Sed objects from which to plot. This can either be a dictionary</span>
+<span class="sd">            of Sed objects to plot multiple or a single Sed object to only plot</span>
+<span class="sd">            one.</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            The redshift of the observation.</span>
+<span class="sd">        fig (matplotlib.pyplot.figure)</span>
+<span class="sd">            The figure containing the axis. By default one is created in this</span>
+<span class="sd">            function.</span>
+<span class="sd">        ax (matplotlib.axes)</span>
+<span class="sd">            The axis to plot the data on. By default one is created in this</span>
+<span class="sd">            function.</span>
+<span class="sd">        show (bool)</span>
+<span class="sd">            Flag for whether to show the plot or just return the</span>
+<span class="sd">            figure and axes.</span>
+<span class="sd">        ylimits (tuple)</span>
+<span class="sd">            The limits to apply to the y axis. If not provided the limits</span>
+<span class="sd">            will be calculated with the lower limit set to 1000 (100) times less</span>
+<span class="sd">            than the peak of the spectrum for rest_frame (observed) spectra.</span>
+<span class="sd">        xlimits (tuple)</span>
+<span class="sd">            The limits to apply to the x axis. If not provided the optimal</span>
+<span class="sd">            limits are found based on the ylimits.</span>
+<span class="sd">        figsize (tuple)</span>
+<span class="sd">            Tuple with size 2 defining the figure size.</span>
+<span class="sd">        label (string)</span>
+<span class="sd">            The label to give the spectra. Only applicable when Sed is a single</span>
+<span class="sd">            spectra.</span>
+<span class="sd">        draw_legend (bool)</span>
+<span class="sd">            Whether to draw the legend.</span>
+<span class="sd">        x_units (unyt.unit_object.Unit)</span>
+<span class="sd">            The units of the x axis. This will be converted to a string</span>
+<span class="sd">            and included in the axis label. By default the internal unit system</span>
+<span class="sd">            is assumed unless this is passed.</span>
+<span class="sd">        y_units (unyt.unit_object.Unit)</span>
+<span class="sd">            The units of the y axis. This will be converted to a string</span>
+<span class="sd">            and included in the axis label. By default the internal unit system</span>
+<span class="sd">            is assumed unless this is passed.</span>
+<span class="sd">        filters (FilterCollection)</span>
+<span class="sd">            If given then the photometry is computed and both the photometry</span>
+<span class="sd">            and filter curves are plotted</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        fig (matplotlib.pyplot.figure)</span>
+<span class="sd">            The matplotlib figure object for the plot.</span>
+<span class="sd">        ax (matplotlib.axes)</span>
+<span class="sd">            The matplotlib axes object containing the plotted data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get the observed spectra plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra</span><span class="p">(</span>
+        <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">ylimits</span><span class="o">=</span><span class="n">ylimits</span><span class="p">,</span>
+        <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">draw_legend</span><span class="o">=</span><span class="n">draw_legend</span><span class="p">,</span>
+        <span class="n">rest_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">x_units</span><span class="o">=</span><span class="n">x_units</span><span class="p">,</span>
+        <span class="n">y_units</span><span class="o">=</span><span class="n">y_units</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Are we including photometry and filters?</span>
+    <span class="k">if</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Add a filter axis</span>
+        <span class="n">filter_ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="n">filter_ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># PLot each filter curve</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+            <span class="n">filter_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lam</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">),</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="c1"># Make a singular Sed a dictionary for ease below</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+            <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">label</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;spectra&quot;</span><span class="p">:</span> <span class="n">spectra</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Loop over spectra plotting photometry and filter curves</span>
+        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Get the photometry</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">get_broadband_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+
+            <span class="c1"># Plot the photometry for each filter</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+                <span class="n">piv_lam</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                    <span class="n">piv_lam</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">),</span>
+                    <span class="n">sed</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">],</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 </pre></div>
         </article>
       </div>
