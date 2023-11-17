@@ -258,6 +258,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentParameter.html">synthesizer.exceptions.InconsistentParameter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentWavelengths.html">synthesizer.exceptions.InconsistentWavelengths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
@@ -371,6 +372,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span><span class="p">,</span> <span class="n">plot_spectra</span><span class="p">,</span> <span class="n">plot_observed_spectra</span>
 
 
@@ -554,6 +557,56 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">(</span><span class="mf">1500.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGalaxy.get_observed_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_observed_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">get_observed_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="n">Inoue14</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the observed spectra for all Sed objects within this galaxy.</span>
+
+<span class="sd">        This will run Sed.get_fnu(...) and populate Sed.fnu (and sed.obslam</span>
+<span class="sd">        and sed.obsnu) for all spectra in:</span>
+<span class="sd">            - Galaxy.spectra</span>
+<span class="sd">            - Galaxy.stars.spectra</span>
+<span class="sd">            - Galaxy.gas.spectra (WIP)</span>
+<span class="sd">            - Galaxy.black_holes.spectra (WIP)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cosmo (astropy.cosmology.Cosmology)</span>
+<span class="sd">                The cosmology object containing the cosmological model used</span>
+<span class="sd">                to calculate the luminosity distance.</span>
+<span class="sd">            igm (igm)</span>
+<span class="sd">                The object describing the intergalactic medium (defaults to</span>
+<span class="sd">                Inoue14).</span>
+
+<span class="sd">        Raises:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure we have a redshift</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingAttribute</span><span class="p">(</span>
+                <span class="s2">&quot;This Galaxy has no redshift! Fluxes can&#39;t be&quot;</span>
+                <span class="s2">&quot; calculated without one.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Loop over all combined spectra</span>
+        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Calculate the observed spectra</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Loop over all stellar spectra</span>
+        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c1"># Calculate the observed spectra</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+        <span class="c1"># TODO: Once implemented do this for gas and black holes too</span>
 
 <div class="viewcode-block" id="BaseGalaxy.plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
