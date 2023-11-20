@@ -253,6 +253,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.html">synthesizer.exceptions</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.exceptions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.GridError.html">synthesizer.exceptions.GridError</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentAddition.html">synthesizer.exceptions.InconsistentAddition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentArguments.html">synthesizer.exceptions.InconsistentArguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
@@ -532,11 +533,12 @@
         <span class="p">)</span>
         <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">)</span>
 
-        <span class="c1"># Ensure initial masses is an accepted type to avoid </span>
+        <span class="c1"># Ensure initial masses is an accepted type to avoid</span>
         <span class="c1"># issues when masking</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_masses</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s1">&#39;Initial mass should be numpy or unyt array.&#39;</span><span class="p">)</span>
+                <span class="s2">&quot;Initial mass should be numpy or unyt array.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Set always required stellar particle properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span> <span class="o">=</span> <span class="n">initial_masses</span>
@@ -660,9 +662,7 @@
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
         <span class="p">]</span>
-        <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-        <span class="p">)</span>
+        <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
         <span class="c1"># Make sure we set the number of particles to the size of the mask</span>
         <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
@@ -696,13 +696,14 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Stars.generate_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_lnu</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">grid</span><span class="p">,</span>
-            <span class="n">spectra_name</span><span class="p">,</span>
-            <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
-            <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">spectra_name</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the integrated rest frame spectra for a given grid key</span>
@@ -724,16 +725,51 @@
 <span class="sd">                for old star particles.</span>
 <span class="sd">            verbose (bool)</span>
 <span class="sd">                Flag for verbose output.</span>
+<span class="sd">            do_grid_check (bool)</span>
+<span class="sd">                Whether to check how many particles lie outside the grid. This</span>
+<span class="sd">                is True by default and provides a vital sanity check. There</span>
+<span class="sd">                are instances when you may want to turn this off:</span>
+<span class="sd">                    - You know particles will lie outside the grid and want</span>
+<span class="sd">                      this behaviour. In this case the check is redundant.</span>
+<span class="sd">                    - You know your particle lie within the grid but don&#39;t</span>
+<span class="sd">                      want to waste compute checking. This case is useful when</span>
+<span class="sd">                      working with large particle counts.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Ensure we have a total key in the grid. If not error.</span>
+        <span class="c1"># Ensure we have a key in the grid. If not error.</span>
         <span class="k">if</span> <span class="n">spectra_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
                 <span class="s2">&quot;The Grid does not contain the key &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">spectra_name</span>
             <span class="p">)</span>
+
+        <span class="c1"># Are we checking the particles are consistent with the grid?</span>
+        <span class="k">if</span> <span class="n">do_grid_check</span><span class="p">:</span>
+            <span class="c1"># Check the fraction of particles outside of the grid (these will be</span>
+            <span class="c1"># pinned to the edge of the grid) by finding those inside</span>
+            <span class="n">age_inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&lt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&gt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">met_inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">&lt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Combine the boolean arrays for each axis</span>
+            <span class="n">inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">age_inside_mask</span><span class="p">,</span> <span class="n">met_inside_mask</span><span class="p">)</span>
+
+            <span class="c1"># Get the number outside</span>
+            <span class="n">n_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="o">~</span><span class="n">inside_mask</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="c1"># Compute the ratio of those outside to total number</span>
+            <span class="n">ratio_out</span> <span class="o">=</span> <span class="n">n_out</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span>
+
+            <span class="c1"># Tell the user if there are particles outside the grid</span>
+            <span class="k">if</span> <span class="n">ratio_out</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ratio_out</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% of particles lie outside the grid!&quot;</span><span class="p">)</span>
 
         <span class="c1"># Get particle age masks</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
@@ -782,7 +818,6 @@
 
         <span class="c1"># If the line_id is a str denoting a single line</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-
             <span class="c1"># Get the grid information we need</span>
             <span class="n">grid_line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
             <span class="n">wavelength</span> <span class="o">=</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
@@ -808,7 +843,6 @@
 
         <span class="c1"># Else if the line is list or tuple denoting a doublet (or higher)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-
             <span class="c1"># Set up containers for the line information</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
@@ -823,14 +857,11 @@
 
                 <span class="c1"># Line luminosity erg/s</span>
                 <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">)</span>
+                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">)</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
-                <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">))</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -841,7 +872,14 @@
         <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Stars.generate_particle_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_particle_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_particle_lnu</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">spectra_name</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the particle rest frame spectra for a given grid key spectra</span>
@@ -862,7 +900,16 @@
 <span class="sd">                If not False, specifies age in Myr at which to filter</span>
 <span class="sd">                for old star particles.</span>
 <span class="sd">            verbose (bool)</span>
-<span class="sd">                Flag for verbose output.</span>
+<span class="sd">                Flag for verbose output. By default False.</span>
+<span class="sd">            do_grid_check (bool)</span>
+<span class="sd">                Whether to check how many particles lie outside the grid. This</span>
+<span class="sd">                is True by default and provides a vital sanity check. There</span>
+<span class="sd">                are instances when you may want to turn this off:</span>
+<span class="sd">                    - You know particles will lie outside the grid and want</span>
+<span class="sd">                      this behaviour. In this case the check is redundant.</span>
+<span class="sd">                    - You know your particle lie within the grid but don&#39;t</span>
+<span class="sd">                      want to waste compute checking. This case is useful when</span>
+<span class="sd">                      working with large particle counts.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
@@ -871,8 +918,34 @@
         <span class="c1"># Ensure we have a total key in the grid. If not error.</span>
         <span class="k">if</span> <span class="n">spectra_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
-                <span class="s2">&quot;The Grid does not contain the key &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">spectra_name</span>
+                <span class="sa">f</span><span class="s2">&quot;The Grid does not contain the key &#39;</span><span class="si">{</span><span class="n">spectra_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
             <span class="p">)</span>
+
+        <span class="c1"># Are we checking the particles are consistent with the grid?</span>
+        <span class="k">if</span> <span class="n">do_grid_check</span><span class="p">:</span>
+            <span class="c1"># Check the fraction of particles outside of the grid (these will be</span>
+            <span class="c1"># pinned to the edge of the grid) by finding those inside</span>
+            <span class="n">age_inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&lt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">&gt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">met_inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">&lt;</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Combine the boolean arrays for each axis</span>
+            <span class="n">inside_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">age_inside_mask</span><span class="p">,</span> <span class="n">met_inside_mask</span><span class="p">)</span>
+
+            <span class="c1"># Get the number outside</span>
+            <span class="n">n_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="o">~</span><span class="n">inside_mask</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="c1"># Compute the ratio of those outside to total number</span>
+            <span class="n">ratio_out</span> <span class="o">=</span> <span class="n">n_out</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span>
+
+            <span class="c1"># Tell the user if there are particles outside the grid</span>
+            <span class="k">if</span> <span class="n">ratio_out</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ratio_out</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% of particles lie outside the grid!&quot;</span><span class="p">)</span>
 
         <span class="c1"># Get particle age masks</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
@@ -924,15 +997,12 @@
 
         <span class="c1"># If the line_id is a str denoting a single line</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-
             <span class="c1"># Get the grid information we need</span>
             <span class="n">grid_line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
             <span class="n">wavelength</span> <span class="o">=</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
 
             <span class="c1"># Line luminosity erg/s</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span>
-            <span class="p">)</span>
+            <span class="n">luminosity</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">)</span>
 
             <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span>
@@ -950,7 +1020,6 @@
 
         <span class="c1"># Else if the line is list or tuple denoting a doublet (or higher)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-
             <span class="c1"># Set up containers for the line information</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
@@ -965,14 +1034,11 @@
 
                 <span class="c1"># Line luminosity erg/s</span>
                 <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span>
+                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
-                <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span>
-                <span class="p">)</span>
+                <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -1517,7 +1583,9 @@
         <span class="c1"># If only one line specified convert to a list to avoid writing a</span>
         <span class="c1"># longer if statement</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_ids</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">line_ids</span><span class="p">,</span> <span class="p">]</span>
+            <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">line_ids</span><span class="p">,</span>
+            <span class="p">]</span>
 
         <span class="c1"># Dictionary holding Line objects</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1532,7 +1600,9 @@
 
             <span class="c1"># Compute the line object</span>
             <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_line</span><span class="p">(</span>
-                <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+                <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+                <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
+                <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Store this line</span>
@@ -1591,7 +1661,9 @@
         <span class="c1"># then generate them</span>
         <span class="k">if</span> <span class="s2">&quot;intrinsic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">:</span>
             <span class="n">intrinsic_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_line_intrinsic</span><span class="p">(</span>
-                <span class="n">grid</span><span class="p">,</span> <span class="n">line_ids</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+                <span class="n">grid</span><span class="p">,</span>
+                <span class="n">line_ids</span><span class="p">,</span>
+                <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">intrinsic_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span>
@@ -1602,9 +1674,7 @@
         <span class="c1"># Loop over the intrinsic lines</span>
         <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">intrinsic_line</span> <span class="ow">in</span> <span class="n">intrinsic_lines</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Calculate attenuation</span>
-            <span class="n">T_BC</span> <span class="o">=</span> <span class="n">dust_curve_BC</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
-                <span class="n">tau_v_BC</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
-            <span class="p">)</span>
+            <span class="n">T_BC</span> <span class="o">=</span> <span class="n">dust_curve_BC</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v_BC</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span><span class="p">)</span>
             <span class="n">T_ISM</span> <span class="o">=</span> <span class="n">dust_curve_ISM</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span>
                 <span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span>
             <span class="p">)</span>
@@ -1684,12 +1754,12 @@
 
 
 <div class="viewcode-block" id="sample_sfhz"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.sample_sfhz">[docs]</a><span class="k">def</span> <span class="nf">sample_sfhz</span><span class="p">(</span>
-        <span class="n">sfzh</span><span class="p">,</span>
-        <span class="n">log10ages</span><span class="p">,</span>
-        <span class="n">log10metallicities</span><span class="p">,</span>
-        <span class="n">nstar</span><span class="p">,</span>
-        <span class="n">initial_mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="n">sfzh</span><span class="p">,</span>
+    <span class="n">log10ages</span><span class="p">,</span>
+    <span class="n">log10metallicities</span><span class="p">,</span>
+    <span class="n">nstar</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create &quot;fake&quot; stellar particles by sampling a SFZH.</span>
@@ -1729,9 +1799,7 @@
     <span class="p">)</span>
 
     <span class="c1"># Extract the sampled ages and metallicites and create an array</span>
-    <span class="n">random_from_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">log10ages</span><span class="p">[</span><span class="n">x_idx</span><span class="p">],</span> <span class="n">log10metallicities</span><span class="p">[</span><span class="n">y_idx</span><span class="p">])</span>
-    <span class="p">)</span>
+    <span class="n">random_from_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">log10ages</span><span class="p">[</span><span class="n">x_idx</span><span class="p">],</span> <span class="n">log10metallicities</span><span class="p">[</span><span class="n">y_idx</span><span class="p">]))</span>
 
     <span class="c1"># Extract the individual logged quantities</span>
     <span class="n">log10ages</span><span class="p">,</span> <span class="n">log10metallicities</span> <span class="o">=</span> <span class="n">random_from_cdf</span><span class="o">.</span><span class="n">T</span>
@@ -1745,7 +1813,6 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">stars</span></div>
-
 </pre></div>
         </article>
       </div>

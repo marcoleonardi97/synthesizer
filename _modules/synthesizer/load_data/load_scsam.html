@@ -253,6 +253,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.html">synthesizer.exceptions</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.exceptions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.GridError.html">synthesizer.exceptions.GridError</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentAddition.html">synthesizer.exceptions.InconsistentAddition</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentArguments.html">synthesizer.exceptions.InconsistentArguments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
@@ -381,16 +382,15 @@
 
 
 <div class="viewcode-block" id="load_SCSAM"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_scsam.html#synthesizer.load_data.load_scsam.load_SCSAM">[docs]</a><span class="k">def</span> <span class="nf">load_SCSAM</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reads an SC-SAM sfhist_*-*.dat file.</span>
 <span class="sd">    Returns a list of galaxy objects, halo indices, and birth halo IDs</span>
 <span class="sd">    Adapted from code by Aaron Yung.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        fname (str): </span>
+<span class="sd">        fname (str):</span>
 <span class="sd">            SC-SAM sfhist_*-*.dat file to be read</span>
-<span class="sd">        method (str): </span>
+<span class="sd">        method (str):</span>
 <span class="sd">            &#39;particle&#39;, &#39;parametric_NNI&#39; or &#39;paremteric_RGI&#39;,</span>
 <span class="sd">            depending on how you wish to model your SFZH.</span>
 <span class="sd">            - &#39;particle&#39; treats each age-Z bin as a particle</span>
@@ -398,7 +398,7 @@
 <span class="sd">              interpolate the grid for a parametric SFH</span>
 <span class="sd">            - &#39;parametric_RGI&#39; uses scipy&#39;s regular grid interpolator to</span>
 <span class="sd">              interpolate the grid for a parametric SFH</span>
-<span class="sd">        grid (grid object): </span>
+<span class="sd">        grid (grid object):</span>
 <span class="sd">            synthesizer grid object (needed for parametric galaxies)</span>
 <span class="sd">        verbose (bool):</span>
 <span class="sd">            increase output verbosity</span>
@@ -413,58 +413,56 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Prepare to read SFHist file</span>
-    <span class="n">sfhist</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">sfhist</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">sfhist</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 
     <span class="c1"># Set up halo index, birth halo ID, redshift and galaxy object lists</span>
-    <span class="n">halo_ind_list</span>  <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">halo_ind_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">birthhalo_id_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">redshift_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">galaxies</span> <span class="o">=</span> <span class="p">[]</span>
-    
+
     <span class="c1"># Line counter</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">count_gal</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Read file line by line as it can be large</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-
         <span class="c1"># Get age-metallicity grid structure</span>
         <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">Z_len</span><span class="p">,</span> <span class="n">age_len</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;There are </span><span class="si">{</span><span class="n">Z_len</span><span class="si">}</span><span class="s1"> metallicity bins and </span><span class="si">{</span><span class="n">age_len</span><span class="si">}</span><span class="s1"> age bins.&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="n">Z_len</span><span class="si">}</span><span class="s2"> metallicity bins and </span><span class="si">{</span><span class="n">age_len</span><span class="si">}</span><span class="s2"> age bins.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Get metallicity bins</span>
         <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">Z_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="c1"># logZ in solar units</span>
+            <span class="n">Z_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>  <span class="c1"># logZ in solar units</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Z_lst (log10Zsun): </span><span class="si">{</span><span class="n">Z_lst</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Z_lst (log10Zsun): </span><span class="si">{</span><span class="n">Z_lst</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Check that this agrees with the expected grid structure</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Z_len</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong number of Z bins.&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wrong number of Z bins.&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
-            <span class="n">Z_sun</span> <span class="o">=</span> <span class="mf">0.02</span> <span class="c1"># Solar metallicity</span>
-            <span class="n">Z_lst</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">)</span> <span class="o">*</span> <span class="n">Z_sun</span> <span class="c1"># Unitless</span>
+            <span class="n">Z_sun</span> <span class="o">=</span> <span class="mf">0.02</span>  <span class="c1"># Solar metallicity</span>
+            <span class="n">Z_lst</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">)</span> <span class="o">*</span> <span class="n">Z_sun</span>  <span class="c1"># Unitless</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Z_lst (unitless): </span><span class="si">{</span><span class="n">Z_lst</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Z_lst (unitless): </span><span class="si">{</span><span class="n">Z_lst</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="c1"># Get age bins</span>
         <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">age_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span> <span class="c1"># Gyr</span>
+            <span class="n">age_lst</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>  <span class="c1"># Gyr</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;age_lst: </span><span class="si">{</span><span class="n">age_lst</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;age_lst: </span><span class="si">{</span><span class="n">age_lst</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># Check that this agrees with the expected grid structure</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">age_lst</span><span class="p">)</span> <span class="o">!=</span> <span class="n">age_len</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Wrong number of age bins.&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wrong number of age bins.&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
 
         <span class="c1"># Get galaxy data</span>
         <span class="c1"># The data chunk for each galaxy consists of one header line,</span>
         <span class="c1"># followed by the age x Z grid.</span>
         <span class="c1"># Thus it takes up age_len+1 lines.</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            
+        <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># The line preceding each age x Z grid contains:</span>
             <span class="n">halo_ind</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">birthhalo_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
@@ -479,25 +477,28 @@
             <span class="n">SFH</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># If the age x Z grid of a galaxy is being read:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">_grid</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
             <span class="n">SFH</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_grid</span><span class="p">)</span>
 
         <span class="c1"># If the last line of an age x Z grid has been read:</span>
         <span class="c1"># (i.e we now have the full grid of a single galaxy)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">count</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">age_len</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
-
-            <span class="n">count_gal</span> <span class="o">+=</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">age_len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">age_len</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">count_gal</span> <span class="o">+=</span> <span class="mi">1</span>
 
             <span class="c1"># Create galaxy object</span>
-            <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;particle&#39;</span><span class="p">:</span>
-                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_particle_galaxy</span><span class="p">(</span><span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;parametric_NNI&#39;</span><span class="p">:</span>
-                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_parametric_galaxy</span><span class="p">(</span><span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span>
-                                                       <span class="n">Z_lst</span><span class="p">,</span> <span class="s1">&#39;NNI&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;parametric_RGI&#39;</span><span class="p">:</span>
-                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_parametric_galaxy</span><span class="p">(</span><span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span>
-                                                       <span class="n">Z_lst</span><span class="p">,</span> <span class="s1">&#39;RGI&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;particle&quot;</span><span class="p">:</span>
+                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_particle_galaxy</span><span class="p">(</span>
+                    <span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;parametric_NNI&quot;</span><span class="p">:</span>
+                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_parametric_galaxy</span><span class="p">(</span>
+                    <span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="s2">&quot;NNI&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;parametric_RGI&quot;</span><span class="p">:</span>
+                <span class="n">galaxy</span> <span class="o">=</span> <span class="n">_load_SCSAM_parametric_galaxy</span><span class="p">(</span>
+                    <span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="s2">&quot;RGI&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+                <span class="p">)</span>
 
             <span class="c1"># Append to list of galaxy objects</span>
             <span class="n">galaxies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">galaxy</span><span class="p">)</span>
@@ -508,7 +509,6 @@
 
 
 <span class="k">def</span> <span class="nf">_load_SCSAM_particle_galaxy</span><span class="p">(</span><span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Treat each age-Z bin as a particle.</span>
 
@@ -519,9 +519,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Initialise arrays for storing particle information</span>
-    <span class="n">p_imass</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initial mass</span>
-    <span class="n">p_age</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># age</span>
-    <span class="n">p_Z</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># metallicity</span>
+    <span class="n">p_imass</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># initial mass</span>
+    <span class="n">p_age</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># age</span>
+    <span class="n">p_Z</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># metallicity</span>
 
     <span class="c1"># Get length of arrays</span>
     <span class="n">age_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">age_lst</span><span class="p">)</span>
@@ -529,32 +529,31 @@
 
     <span class="c1"># Iterate through every point on the grid</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Iterating through grid...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Iterating through grid...&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">age_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">age_len</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">Z_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Z_len</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">SFH</span><span class="p">[</span><span class="n">age_ind</span><span class="p">][</span><span class="n">Z_ind</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">SFH</span><span class="p">[</span><span class="n">age_ind</span><span class="p">][</span><span class="n">Z_ind</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">p_imass</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SFH</span><span class="p">[</span><span class="n">age_ind</span><span class="p">][</span><span class="n">Z_ind</span><span class="p">])</span> <span class="c1"># 10^9 Msun</span>
-                <span class="n">p_age</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">age_lst</span><span class="p">[</span><span class="n">age_ind</span><span class="p">])</span> <span class="c1"># Gyr</span>
-                <span class="n">p_Z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">[</span><span class="n">Z_ind</span><span class="p">])</span> <span class="c1"># unitless</span>
+                <span class="n">p_imass</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SFH</span><span class="p">[</span><span class="n">age_ind</span><span class="p">][</span><span class="n">Z_ind</span><span class="p">])</span>  <span class="c1"># 10^9 Msun</span>
+                <span class="n">p_age</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">age_lst</span><span class="p">[</span><span class="n">age_ind</span><span class="p">])</span>  <span class="c1"># Gyr</span>
+                <span class="n">p_Z</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">[</span><span class="n">Z_ind</span><span class="p">])</span>  <span class="c1"># unitless</span>
 
     <span class="c1"># Convert units</span>
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Converting units...&#39;</span><span class="p">)</span>
-    <span class="n">p_imass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p_imass</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="c1"># Msun</span>
-    <span class="n">p_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p_age</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="c1"># yr</span>
-    <span class="n">p_Z</span> <span class="o">=</span> <span class="n">p_Z</span> <span class="c1"># unitless</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Converting units...&quot;</span><span class="p">)</span>
+    <span class="n">p_imass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p_imass</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># Msun</span>
+    <span class="n">p_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p_age</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># yr</span>
+    <span class="n">p_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">p_Z</span><span class="p">)</span>  <span class="c1"># unitless</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generating SED...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Generating SED...&quot;</span><span class="p">)</span>
 
     <span class="c1"># Create stars object</span>
-    <span class="n">stars</span> <span class="o">=</span> <span class="n">ParticleStars</span><span class="p">(</span><span class="n">initial_masses</span><span class="o">=</span><span class="n">p_imass</span><span class="p">,</span> <span class="n">ages</span><span class="o">=</span><span class="n">p_age</span><span class="p">,</span>
-                          <span class="n">metallicities</span><span class="o">=</span><span class="n">p_Z</span><span class="p">)</span>
+    <span class="n">stars</span> <span class="o">=</span> <span class="n">ParticleStars</span><span class="p">(</span><span class="n">initial_masses</span><span class="o">=</span><span class="n">p_imass</span><span class="p">,</span> <span class="n">ages</span><span class="o">=</span><span class="n">p_age</span><span class="p">,</span> <span class="n">metallicities</span><span class="o">=</span><span class="n">p_Z</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating galaxy object...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating galaxy object...&quot;</span><span class="p">)</span>
     <span class="c1"># Create galaxy object</span>
     <span class="n">particle_galaxy</span> <span class="o">=</span> <span class="n">ParticleGalaxy</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="n">stars</span><span class="p">)</span>
 
@@ -562,7 +561,6 @@
 
 
 <span class="k">def</span> <span class="nf">_load_SCSAM_parametric_galaxy</span><span class="p">(</span><span class="n">SFH</span><span class="p">,</span> <span class="n">age_lst</span><span class="p">,</span> <span class="n">Z_lst</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obtain galaxy SED using the parametric method.</span>
 <span class="sd">    This is done by interpolating the grid.</span>
@@ -579,36 +577,35 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># This the grid that we want to interpolate to</span>
-    <span class="n">new_age</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span> <span class="c1"># yr</span>
-    <span class="n">new_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">)</span> <span class="c1"># log10Z</span>
+    <span class="n">new_age</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span>  <span class="c1"># yr</span>
+    <span class="n">new_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">)</span>  <span class="c1"># log10Z</span>
 
     <span class="c1"># This is the old grid, to be interpolated</span>
-    <span class="n">old_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">age_lst</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="c1"># yr</span>
-    <span class="n">old_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">)</span> <span class="c1"># log10Z</span>
+    <span class="n">old_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">age_lst</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># yr</span>
+    <span class="n">old_Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">Z_lst</span><span class="p">)</span>  <span class="c1"># log10Z</span>
 
     <span class="c1"># Convert SFH units</span>
-    <span class="n">SFH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">SFH</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="c1"># Msun</span>
+    <span class="n">SFH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">SFH</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span>  <span class="c1"># Msun</span>
     <span class="n">sum_SFH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">SFH</span><span class="p">))</span>
 
     <span class="c1"># Using regular grid interpolator</span>
-    <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;RGI&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;RGI&quot;</span><span class="p">:</span>
         <span class="c1"># Get coords for new grid</span>
-        <span class="n">new_X</span><span class="p">,</span> <span class="n">new_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">new_age</span><span class="p">,</span> <span class="n">new_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        <span class="n">new_X</span><span class="p">,</span> <span class="n">new_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">new_age</span><span class="p">,</span> <span class="n">new_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
         <span class="c1"># Set up the old grid for interpolation</span>
-        <span class="n">interp_obj</span> <span class="o">=</span> <span class="n">RGI</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">(</span><span class="n">old_age</span><span class="p">,</span> <span class="n">old_Z</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">SFH</span><span class="p">,</span>
-                         <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">interp_obj</span> <span class="o">=</span> <span class="n">RGI</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="p">(</span><span class="n">old_age</span><span class="p">,</span> <span class="n">old_Z</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">SFH</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="c1"># Interpolate to new grid coordinates and reshape</span>
         <span class="n">new_SFH</span> <span class="o">=</span> <span class="n">interp_obj</span><span class="p">((</span><span class="n">new_X</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">new_Y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
-        <span class="n">new_SFH</span> <span class="o">=</span> <span class="n">new_SFH</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_age</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">new_Z</span><span class="p">))</span>
+        <span class="n">new_SFH</span> <span class="o">=</span> <span class="n">new_SFH</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_age</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_Z</span><span class="p">))</span>
         <span class="c1"># Convert NaNs to zero</span>
-        <span class="n">new_SFH</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">new_SFH</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">new_SFH</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">new_SFH</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="c1"># Using nearest ND interpolator</span>
-    <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;NNI&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;NNI&quot;</span><span class="p">:</span>
         <span class="c1"># Get coords for new grid</span>
-        <span class="n">new_X</span><span class="p">,</span> <span class="n">new_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">new_age</span><span class="p">,</span> <span class="n">new_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        <span class="n">new_X</span><span class="p">,</span> <span class="n">new_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">new_age</span><span class="p">,</span> <span class="n">new_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
         <span class="c1"># Get list of coordinates of old grid</span>
-        <span class="n">old_X</span><span class="p">,</span> <span class="n">old_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">old_age</span><span class="p">,</span> <span class="n">old_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)</span>
+        <span class="n">old_X</span><span class="p">,</span> <span class="n">old_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">old_age</span><span class="p">,</span> <span class="n">old_Z</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
         <span class="n">old_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">old_X</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">old_Y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span>
         <span class="c1"># Set up the old grid for interpolation</span>
         <span class="n">interp_obj</span> <span class="o">=</span> <span class="n">NNI</span><span class="p">(</span><span class="n">old_coords</span><span class="p">,</span> <span class="n">SFH</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -616,7 +613,7 @@
         <span class="n">new_SFH</span> <span class="o">=</span> <span class="n">interp_obj</span><span class="p">(</span><span class="n">new_X</span><span class="p">,</span> <span class="n">new_Y</span><span class="p">)</span>
 
     <span class="c1"># Normalise the new grid</span>
-    <span class="n">norm_SFH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">SFH</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_SFH</span><span class="p">)</span>
+    <span class="n">norm_SFH</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">SFH</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">new_SFH</span><span class="p">)</span>
     <span class="n">new_SFH</span> <span class="o">*=</span> <span class="n">norm_SFH</span>
 
     <span class="c1"># Create Binned SFZH object</span>
@@ -625,7 +622,7 @@
         <span class="n">metallicities</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span>
         <span class="n">sfzh</span><span class="o">=</span><span class="n">new_SFH</span><span class="p">,</span>
     <span class="p">)</span>
-    
+
     <span class="c1"># Create galaxy object</span>
     <span class="n">parametric_galaxy</span> <span class="o">=</span> <span class="n">ParametricGalaxy</span><span class="p">(</span><span class="n">stars</span><span class="p">)</span>
 
