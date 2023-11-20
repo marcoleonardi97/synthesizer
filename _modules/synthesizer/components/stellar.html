@@ -655,6 +655,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the intrinsic spectra, this is the sum of the escaping</span>
@@ -662,6 +663,10 @@
 <span class="sd">        emission. The transmitted emission is the emission that is</span>
 <span class="sd">        transmitted through the gas. In addition to returning the intrinsic</span>
 <span class="sd">        spectra this saves the incident, nebular, and escaped spectra.</span>
+
+<span class="sd">        Note, if a grid that has not been post-processed through a </span>
+<span class="sd">        photoionisation code is provided (i.e. read_lines=False) this will</span>
+<span class="sd">        just call `get_spectra_incident`. </span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            grid (obj):</span>
@@ -678,9 +683,11 @@
 <span class="sd">            old (bool, float):</span>
 <span class="sd">                If not False, specifies age in Myr at which to filter</span>
 <span class="sd">                for old star particles.</span>
-<span class="sd">            label (string)</span>
+<span class="sd">            label (string):</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            verbose (bool):</span>
+<span class="sd">                verbose output flag</span>
 
 <span class="sd">        Updates:</span>
 <span class="sd">            incident:</span>
@@ -696,9 +703,29 @@
 <span class="sd">            Sed</span>
 <span class="sd">                An Sed object containing the intrinsic spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        
         <span class="c1"># Make sure young and old in Myr, if provided</span>
         <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
+
+        <span class="c1"># Check if grid has been run through a photoionisation code</span>
+        <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="p">(</span><span class="s2">&quot;The grid you are using has not been post-processed &quot;</span>
+                     <span class="s2">&quot;through a photoionisation code. This method will &quot;</span>
+                     <span class="s2">&quot;just return the incident stellar emission. Are &quot;</span>
+                     <span class="s2">&quot;you sure this is the method you want to use?&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+                <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+                <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">intrinsic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">incident&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">spec</span>
 
         <span class="c1"># The incident emission</span>
         <span class="n">incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span>
@@ -751,9 +778,9 @@
             <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">reprocessed</span>
 
         <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;escaped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escaped</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reprocessed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">label</span> <span class="o">+</span> <span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intrinsic</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">escaped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escaped</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">reprocessed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reprocessed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">intrinsic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intrinsic</span>
 
         <span class="k">return</span> <span class="n">reprocessed</span></div>
 
@@ -927,6 +954,12 @@
                     <span class="s2">&quot;a single dust screen situation.&quot;</span>
                 <span class="p">)</span>
 
+        <span class="c1"># If grid has photoinoisation outputs, use the reprocessed outputs</span>
+        <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span><span class="p">:</span>
+            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s1">&#39;reprocessed&#39;</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># otherwise just use the intrinsic stellar spectra</span>
+            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s1">&#39;intrinsic&#39;</span>
+
         <span class="c1"># Generate intrinsic spectra for young and old particles</span>
         <span class="c1"># separately before summing them if we have been given</span>
         <span class="c1"># a threshold</span>
@@ -974,18 +1007,20 @@
             <span class="p">)</span>
 
             <span class="c1"># Combine young and old spectra</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_incident&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_incident&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_transmitted&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_transmitted&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_nebular&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_nebular&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_incident&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_incident&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_transmitted&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_transmitted&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;nebular&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_nebular&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_nebular&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_intrinsic&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_intrinsic&quot;</span><span class="p">]</span>
             <span class="p">)</span>
@@ -1011,7 +1046,7 @@
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span>
 
             <span class="c1"># Calculate the attenuated emission</span>
-            <span class="n">attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+            <span class="n">attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">reprocessed_name</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
                 <span class="n">tau_v</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attenuated</span>
@@ -1039,9 +1074,11 @@
 
             <span class="c1"># Calculate attenuated spectra of young stars</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use the BC slope</span>
-            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
-                <span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
-            <span class="p">)</span>
+            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;young_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span>\
+                    <span class="n">apply_attenuation</span><span class="p">(</span>
+                    <span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
+                <span class="p">)</span>
+
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># use the ISM slope</span>
             <span class="n">young_attenuated</span> <span class="o">=</span> <span class="n">young_attenuated</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
                 <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
@@ -1049,9 +1086,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated</span>
 
             <span class="c1"># Calculate attenuated spectra of old stars</span>
-            <span class="n">old_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
-                <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
-            <span class="p">)</span>
+            <span class="n">old_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;old_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span>\
+                    <span class="n">apply_attenuation</span><span class="p">(</span>
+                    <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
+                <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_attenuated</span>
 
             <span class="c1"># Get the combined attenuated spectra</span>
