@@ -165,6 +165,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../grids/grids_example.html">Grids</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../abundances.html">Abundances</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxies/galaxies.html">Galaxy Objects</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Galaxy Objects</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../galaxies/galaxy_obj.html">Working with Galaxy objects</a></li>
 </ul>
@@ -203,7 +204,6 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/general/index.html">General examples</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of General examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_igm.html">IGM transmission example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_dustcurves.html">Dust curves example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_abundances.html">Abundances example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_filters.html">Filters example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_quiescent_colours.html">Plot quiescent UVJ diagram</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/general/plot_photometry.html">Photometry example</a></li>
@@ -412,7 +412,7 @@
 
         <span class="c1"># if lam is not a unyt_array assume it has units of angstrom and </span>
         <span class="c1"># convert to a unyt_array</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
             <span class="n">lam</span> <span class="o">*=</span> <span class="n">angstrom</span>
 
         <span class="c1"># define frequency</span>
@@ -496,9 +496,9 @@
 
     <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
         <span class="c1"># ionisation parameter</span>
-        <span class="s2">&quot;log10U&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;ionisation_parameter&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="c1"># radius in log10 parsecs, only important for spherical geometry</span>
-        <span class="s2">&quot;log10radius&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
         <span class="c1"># covering factor. Keep as 1 as it is more efficient to simply combine</span>
         <span class="c1"># SEDs to get != 1.0 values</span>
         <span class="s2">&quot;covering_factor&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -509,7 +509,7 @@
         <span class="c1"># K, if not provided the command is not used</span>
         <span class="s2">&quot;T_floor&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># Hydrogen density</span>
-        <span class="s2">&quot;log10n_H&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span>
+        <span class="s2">&quot;hydrogen_density&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="mf">2.5</span><span class="p">),</span>
         <span class="c1"># redshift, only necessary if CMB heating included</span>
         <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="c1"># include CMB heating</span>
@@ -603,7 +603,7 @@
 <span class="sd">    which will again introduce issues on mass conservation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">d2m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
         <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
         <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
         <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
@@ -623,7 +623,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">f_graphite</span><span class="p">,</span> <span class="n">f_Si</span><span class="p">,</span> <span class="n">f_pah</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
 
-    <span class="n">log10U</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;log10U&quot;</span><span class="p">]</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;ionisation_parameter&quot;</span><span class="p">]</span>
+    <span class="n">log10U</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
 
     <span class="c1"># plane parallel geometry</span>
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;planeparallel&quot;</span><span class="p">:</span>
@@ -638,10 +639,9 @@
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;spherical&quot;</span><span class="p">:</span>
         <span class="c1"># in the spherical geometry case I think U is some average U, not U at</span>
         <span class="c1"># the inner face of the cloud.</span>
-        <span class="n">log10Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">calculate_Q_from_U</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">log10U</span><span class="p">,</span>
-                                             <span class="mi">10</span><span class="o">**</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;log10n_H&quot;</span><span class="p">]))</span>
+        <span class="n">log10Q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">calculate_Q_from_U</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]))</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q(H) = </span><span class="si">{</span><span class="n">log10Q</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;radius </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;log10radius&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> log parsecs</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;radius </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1"> log parsecs</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;sphere</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># add background continuum</span>
@@ -652,8 +652,8 @@
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;CMB </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># define hydrogend density</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;log10n_H&quot;</span><span class="p">]:</span>
-        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;hden </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;log10n_H&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> log constant density</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;hden </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1"> log constant density</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># covering factor</span>
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;covering_factor&quot;</span><span class="p">]:</span>
