@@ -380,7 +380,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span>
 
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -391,6 +391,8 @@
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="kn">from</span> <span class="nn">synthesizer.stats</span> <span class="kn">import</span> <span class="n">weighted_median</span><span class="p">,</span> <span class="n">weighted_mean</span>
 <span class="kn">from</span> <span class="nn">synthesizer.plt</span> <span class="kn">import</span> <span class="n">single_histxy</span><span class="p">,</span> <span class="n">mlabel</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric.sf_hist</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">SFHCommon</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric.metal_dist</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">ZDistCommon</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 
 
@@ -459,18 +461,14 @@
     <span class="n">initial_mass</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">log10ages</span><span class="p">,</span>
-            <span class="n">metallicities</span><span class="p">,</span>
-            <span class="n">initial_mass</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-            <span class="n">morphology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sfzh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sf_hist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">metal_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">sf_hist_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">metal_dist_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">instant_sf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">instant_metallicity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">log10ages</span><span class="p">,</span>
+        <span class="n">metallicities</span><span class="p">,</span>
+        <span class="n">initial_mass</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">morphology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sfzh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sf_hist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metal_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parametric stellar population.</span>
@@ -499,28 +497,25 @@
 <span class="sd">            sfzh (array-like, float)</span>
 <span class="sd">                An array describing the binned SFZH. If provided all following</span>
 <span class="sd">                arguments are ignored.</span>
-<span class="sd">            sf_hist (array-like, float)</span>
-<span class="sd">                An array describing the star formation history.</span>
-<span class="sd">            metal_dist (array-like, float)</span>
-<span class="sd">                An array describing the metallity distribution.</span>
-<span class="sd">            sf_hist_func (SFH.*)</span>
-<span class="sd">                An instance of one of the child classes of SFH. This will be</span>
-<span class="sd">                used to calculate sf_hist and takes precendence over a passed</span>
-<span class="sd">                sf_hist if both are present.</span>
-<span class="sd">            metal_dist_func (ZH.*)</span>
-<span class="sd">                An instance of one of the child classes of ZH. This will be</span>
-<span class="sd">                used to calculate metal_dist and takes precendence over a</span>
-<span class="sd">                passed metal_dist if both are present.</span>
-<span class="sd">            instant_sf (float)</span>
-<span class="sd">                An age at which to compute an instantaneous SFH, i.e. all</span>
-<span class="sd">                stellar mass populating a single SFH bin.</span>
-<span class="sd">            instant_metallicity (float)</span>
-<span class="sd">                A metallicity at which to compute an instantaneous ZH, i.e. all</span>
-<span class="sd">                stellar populating a single ZH bin.</span>
+<span class="sd">            sf_hist (float/unyt_quantity/array-like, float/SFH.*)</span>
+<span class="sd">                Either:</span>
+<span class="sd">                    - An age at which to compute an instantaneous SFH, i.e. all</span>
+<span class="sd">                      stellar mass populating a single SFH bin.</span>
+<span class="sd">                    - An array describing the star formation history.</span>
+<span class="sd">                    - An instance of one of the child classes of SFH. This</span>
+<span class="sd">                      will be used to calculate an array describing the SFH.</span>
+<span class="sd">            metal_dist (float/unyt_quantity/array-like, float/ZDist.*)</span>
+<span class="sd">                Either:</span>
+<span class="sd">                    - A metallicity at which to compute an instantaneous</span>
+<span class="sd">                      ZH, i.e. all stellar mass populating a single Z bin.</span>
+<span class="sd">                    - An array describing the metallity distribution.</span>
+<span class="sd">                    - An instance of one of the child classes of ZH. This</span>
+<span class="sd">                      will be used to calculate an array describing the</span>
+<span class="sd">                      metallicity distribution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Instantiate the parent</span>
-        <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">)</span>
+        <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">)</span>
 
         <span class="c1"># Set the age grid properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">=</span> <span class="n">log10ages</span>
@@ -534,17 +529,53 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
         <span class="p">]</span>
 
-        <span class="c1"># Store the function used to make the star formation history if given</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="o">=</span> <span class="n">sf_hist_func</span>
+        <span class="c1"># Store the SFH we&#39;ve been given, this is either...</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sf_hist</span><span class="p">),</span> <span class="n">SFHCommon</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="o">=</span> <span class="n">sf_hist</span>  <span class="c1"># a SFH function</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_sf</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sf_hist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="n">instant_sf</span> <span class="o">=</span> <span class="n">sf_hist</span>  <span class="c1"># an instantaneous SFH</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sf_hist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="n">sf_hist</span>  <span class="c1"># a numpy array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_sf</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">sf_hist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># we must have been passed a SFZH</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_sf</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised sf_hist type (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sf_hist</span><span class="p">)</span><span class="si">}</span><span class="s2">! This should be&quot;</span>
+                <span class="s2">&quot; either a float, an instance of a SFH function from the &quot;</span>
+                <span class="s2">&quot;SFH module, or a single float.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># Store the function used to make the metallicity history if given</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="n">metal_dist_func</span>
-
-        <span class="c1"># Store the SFH array (if None recalculated below)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="n">sf_hist</span>
-
-        <span class="c1"># Store the ZH array (if None recalculated below)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">metal_dist</span>
+        <span class="c1"># Store the metallicity distribution we&#39;ve been given, this is either...</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">),</span> <span class="n">ZDistCommon</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="n">metal_dist</span>  <span class="c1"># a ZDist function</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="n">metal_dist</span>  <span class="c1"># an instantaneous SFH</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">metal_dist</span>  <span class="c1"># a numpy array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">metal_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># we must have been passed a SFZH</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unrecognised metal_dist type (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">)</span><span class="si">}</span><span class="s2">! This &quot;</span>
+                <span class="s2">&quot;should be either a float, an instance of a ZDist function &quot;</span>
+                <span class="s2">&quot;from the ZDist module, or a single float.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Store the total initial stellar mass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_mass</span> <span class="o">=</span> <span class="n">initial_mass</span>
@@ -552,7 +583,6 @@
         <span class="c1"># If we have been handed an explict SFZH grid we can ignore all the</span>
         <span class="c1"># calculation methods</span>
         <span class="k">if</span> <span class="n">sfzh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Store the SFZH grid</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="n">sfzh</span>
 
@@ -563,7 +593,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-
             <span class="c1"># Set up the array ready for the calculation</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">log10ages</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">metallicities</span><span class="p">)))</span>
 
@@ -579,9 +608,7 @@
             <span class="c1"># Regular linearly</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_grid_type</span> <span class="o">=</span> <span class="s2">&quot;Z&quot;</span>
 
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Regular in logspace</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_grid_type</span> <span class="o">=</span> <span class="s2">&quot;log10Z&quot;</span>
 
@@ -611,7 +638,6 @@
 
         <span class="c1"># Handle the instantaneous SFH case</span>
         <span class="k">if</span> <span class="n">instant_sf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Create SFH array</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
@@ -627,7 +653,6 @@
 
         <span class="c1"># Handle the instantaneous ZH case</span>
         <span class="k">if</span> <span class="n">instant_metallicity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Create SFH array</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
@@ -637,7 +662,6 @@
 
         <span class="c1"># Calculate SFH from function if necessary</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Set up SFH array</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
@@ -651,7 +675,6 @@
 
         <span class="c1"># Calculate SFH from function if necessary</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
             <span class="c1"># Set up SFH array</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
@@ -735,9 +758,7 @@
         <span class="n">sfzh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Account for the SFZH mask in the non-zero indices</span>
-        <span class="n">non_zero_inds</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">],</span> <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">non_zero_inds</span> <span class="o">=</span> <span class="p">(</span><span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">],</span> <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">])</span>
 
         <span class="c1"># Compute the spectra</span>
         <span class="n">spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
@@ -775,7 +796,6 @@
 
         <span class="c1"># If the line_id is a str denoting a single line</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-
             <span class="c1"># Get the grid information we need</span>
             <span class="n">grid_line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
             <span class="n">wavelength</span> <span class="o">=</span> <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
@@ -786,9 +806,7 @@
             <span class="p">)</span>
 
             <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
-            <span class="n">continuum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">continuum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
             <span class="c1"># NOTE: this is currently incorrect and should be made of the</span>
             <span class="c1"># separated nebular and stellar continuum emission</span>
@@ -803,7 +821,6 @@
 
         <span class="c1"># Else if the line is list or tuple denoting a doublet (or higher)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-
             <span class="c1"># Set up containers for the line information</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
@@ -819,16 +836,12 @@
                 <span class="c1"># Line luminosity erg/s</span>
                 <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                        <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
                 <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                        <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="p">)</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
                 <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -887,8 +900,9 @@
 <span class="sd">                The other instance of Stars to add to this one.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">log10ages</span><span class="p">)</span> <span class="ow">and</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">log10ages</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">metallicities</span>
+        <span class="p">):</span>
             <span class="n">new_sfzh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">+</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">sfzh</span>
 
         <span class="k">else</span><span class="p">:</span>

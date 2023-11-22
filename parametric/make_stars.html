@@ -369,11 +369,27 @@
         <article role="main">
           <section id="Making-a-Parametric-Stellar-Population">
 <h1>Making a Parametric Stellar Population<a class="headerlink" href="#Making-a-Parametric-Stellar-Population" title="Permalink to this heading">#</a></h1>
-<p>The core element of the parametric modelling in <code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> is the <code class="docutils literal notranslate"><span class="pre">parametric.Stars</span></code> object. This contains everything necessary to describe a stellar population including: - A 2D SFZH grid containg the stellar mass formed in stellar age and metallicity bins. - A <code class="docutils literal notranslate"><span class="pre">Morphology</span></code> object describing it’s distribution (optional but required for imaging). - The axes of the SFZH grid. - The total initial stellar mass.</p>
-<p>And if calculated by the user (see the parametric <code class="docutils literal notranslate"><span class="pre">Sed</span></code> <a class="reference internal" href="generate_sed.html"><span class="doc">docs</span></a>): - The stellar spectra. - Line luminosities.</p>
+<p>The core element of the parametric modelling in <code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> is the <code class="docutils literal notranslate"><span class="pre">parametric.Stars</span></code> object. This contains everything necessary to describe a stellar population including:</p>
+<ul class="simple">
+<li><p>A 2D SFZH grid containing the stellar mass formed in stellar age and metallicity bins.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">Morphology</span></code> object describing it’s distribution (optional but required for imaging).</p></li>
+<li><p>The axes of the SFZH grid.</p></li>
+<li><p>The total initial stellar mass.</p></li>
+</ul>
+<p>And if calculated by the user (see the parametric <code class="docutils literal notranslate"><span class="pre">Sed</span></code> <a class="reference internal" href="generate_sed.html"><span class="doc">docs</span></a>):</p>
+<ul class="simple">
+<li><p>The stellar spectra.</p></li>
+<li><p>Line luminosities.</p></li>
+</ul>
 <p>There are a number of different methods to define a parametric stellar population (from here on a <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object). In what follows we will focus on user defined values/arrays but note that each different method could instead use simulated data (e.g. from Semi Analytic Models) rather than user defined values.</p>
-<p>The possible ways of defining a <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object are (the age and metallicity axis of the SFZH must always be supplied): - Explictly providing the SFZH grid itself. Note that this will mean all other definitions below are ignored. - Providing singular age and metallicity values to define an “instantaneous” SFZH, i.e. one where all the stellar mass is in a single age and metallicity bin. - Providing arrays which contain the SFH and metallicity distribution in terms of stellar mass formed. -
-Providing SFH and metallcity distribution functions (from <code class="docutils literal notranslate"><span class="pre">parametric.sf_hist</span></code> and <code class="docutils literal notranslate"><span class="pre">parametric.metal_dist</span></code>). These will be used internal to compute the arrays from the previous point. - Any combination of the above.</p>
+<p>The possible ways of defining a <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object are (the age and metallicity axis of the SFZH must always be supplied):</p>
+<ul class="simple">
+<li><p>Explictly providing the SFZH grid itself. Note that this will mean all other definitions below are ignored.</p></li>
+<li><p>Providing singular age and metallicity values to define an “instantaneous” SFZH, i.e. one where all the stellar mass is in a single age and metallicity bin.</p></li>
+<li><p>Providing arrays which contain the SFH and metallicity distribution in terms of stellar mass formed.</p></li>
+<li><p>Providing SFH and metallcity distribution functions (from <code class="docutils literal notranslate"><span class="pre">parametric.sf_hist</span></code> and <code class="docutils literal notranslate"><span class="pre">parametric.metal_dist</span></code>). These will be used internally to compute the arrays from the previous point.</p></li>
+<li><p>Any combination of the above.</p></li>
+</ul>
 <p>Below we simply import some packages and objects we’ll need.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -399,7 +415,7 @@ Providing SFH and metallcity distribution functions (from <code class="docutils 
 <span class="n">metallicities</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">log10metallicities</span>
 
 <span class="c1"># Get the instantaneous Stars</span>
-<span class="n">inst_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">instant_sf</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">instant_metallicity</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">3</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span>
+<span class="n">inst_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="mi">10</span><span class="o">**-</span><span class="mi">3</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -445,7 +461,7 @@ mean metallicity: 0.0010
 </section>
 <section id="Defining-SFZH-from-arrays">
 <h2>Defining SFZH from arrays<a class="headerlink" href="#Defining-SFZH-from-arrays" title="Permalink to this heading">#</a></h2>
-<p>Of course, most of the time you won’t want an instantaneous SFZH but instead a distribution. One way to achieve this is to pass a arrays describing the SFH and metallicity distribution. This particularly useful if you have data explictly describing the ages and metallicities of a stellar population. However, here we’ll demonstrate this with entirely unphysical arrays.</p>
+<p>Of course, most of the time you won’t want an instantaneous SFZH but instead a distribution. One way to achieve this is to pass arrays describing the SFH and metallicity distribution. This is particularly useful if you have data explictly describing the ages and metallicities of a stellar population. However, here we’ll demonstrate this with entirely unphysical arrays.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -489,8 +505,8 @@ mean metallicity: 0.0003
 </section>
 <section id="Defining-SFZH-using-functions">
 <h2>Defining SFZH using functions<a class="headerlink" href="#Defining-SFZH-using-functions" title="Permalink to this heading">#</a></h2>
-<p>You won’t always have explict arrays to describe the age and metallicity distribtions. For these situations <code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> provides a suite of functions to describe the SFH and metallicity distribution.</p>
-<p>SFH parametrisations can be found in the <code class="docutils literal notranslate"><span class="pre">SFH</span></code> module, while metallicity distribution parametrisations can be found in the <code class="docutils literal notranslate"><span class="pre">ZDist</span></code> module. To see a full list of available parametrisations just print the .</p>
+<p>You won’t always have explict arrays to describe the age and metallicity distributions. For these situations <code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> provides a suite of functions to describe the SFH and metallicity distribution.</p>
+<p>SFH parametrisations can be found in the <code class="docutils literal notranslate"><span class="pre">SFH</span></code> module, while metallicity distribution parametrisations can be found in the <code class="docutils literal notranslate"><span class="pre">ZDist</span></code> module. To see a full list of available parametrisations just print the <code class="docutils literal notranslate"><span class="pre">parametrisations</span></code> list from these modules`.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -509,7 +525,7 @@ mean metallicity: 0.0003
 (&#39;DeltaConstant&#39;, &#39;Normal&#39;)
 </pre></div></div>
 </div>
-<p>To use one of these parametrisations you have to first define each parametrisation and then pass them to the <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object at instantiation. Below we demonstrate a few examples using different parametrisations.</p>
+<p>To use one of these parametrisations you have to first define an instance of a parametrisation and then pass it to the <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object at instantiation. Below we demonstrate a few examples using different parametrisations.</p>
 <section id="Constant-SFH-and-metallicity-delta-function">
 <h3>Constant SFH and metallicity delta function<a class="headerlink" href="#Constant-SFH-and-metallicity-delta-function" title="Permalink to this heading">#</a></h3>
 <div class="nbinput docutils container">
@@ -525,7 +541,7 @@ mean metallicity: 0.0003
 <span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
-<span class="n">const_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist_func</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist_func</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">const_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">const_stars</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">const_stars</span><span class="o">.</span><span class="n">plot_sfzh</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -584,7 +600,7 @@ mean metallicity: 0.0032
 <span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
-<span class="n">exp_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist_func</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist_func</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.5</span><span class="p">)</span>
+<span class="n">exp_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.5</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">exp_stars</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">exp_stars</span><span class="o">.</span><span class="n">plot_sfzh</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -640,7 +656,7 @@ mean metallicity: 0.0010
 <span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
-<span class="n">logn_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist_func</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">instant_metallicity</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">logn_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">logn_stars</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">logn_stars</span><span class="o">.</span><span class="n">plot_sfzh</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -681,8 +697,13 @@ mean metallicity: 0.0056
 <section id="Defining-your-own-parametrisations">
 <h3>Defining your own parametrisations<a class="headerlink" href="#Defining-your-own-parametrisations" title="Permalink to this heading">#</a></h3>
 <p>If <code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> doesn’t already include a parametrisation you need, you can add a custom parametrisation by defining a new class.</p>
-<p>The important requirements of a custom functions are: - They inherit the <code class="docutils literal notranslate"><span class="pre">Common</span></code> parent class. - They instantiate the parent class (<code class="docutils literal notranslate"><span class="pre">SFH/ZDist.Common</span></code>) with the model parameters and a meaningful name. - They implement a private <code class="docutils literal notranslate"><span class="pre">_sfr</span></code> method which takes a single age and returns a single SFR weight in the <code class="docutils literal notranslate"><span class="pre">SFH</span></code> case, or they implement a <code class="docutils literal notranslate"><span class="pre">_weight</span></code> method which take a single metallicity and return a single metallicity weight in the <code class="docutils literal notranslate"><span class="pre">ZDist</span></code> case. - The <code class="docutils literal notranslate"><span class="pre">SFH</span></code> methods should perform
-their calculations in years.</p>
+<p>The important requirements of a custom functions are:</p>
+<ul class="simple">
+<li><p>They inherit the <code class="docutils literal notranslate"><span class="pre">Common</span></code> parent class.</p></li>
+<li><p>They instantiate the parent class (<code class="docutils literal notranslate"><span class="pre">SFH/ZDist.Common</span></code>) with the model parameters and a meaningful name.</p></li>
+<li><p>They implement a private <code class="docutils literal notranslate"><span class="pre">_sfr</span></code> method which takes a single age and returns a single SFR weight in the <code class="docutils literal notranslate"><span class="pre">SFH</span></code> case, or they implement a <code class="docutils literal notranslate"><span class="pre">_weight</span></code> method which take a single metallicity and return a single metallicity weight in the <code class="docutils literal notranslate"><span class="pre">ZDist</span></code> case.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">SFH</span></code> methods should perform their calculations in years.</p></li>
+</ul>
 <p>Below we demonstrate how to define a custom function using existing SFH and metallicity distribution functions for demonstration purposes.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -794,7 +815,7 @@ their calculations in years.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
-<span class="n">custom_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist_func</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist_func</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">custom_stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span> <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">custom_stars</span><span class="p">)</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">custom_stars</span><span class="o">.</span><span class="n">plot_sfzh</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <br/><br/></pre></div>
