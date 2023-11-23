@@ -788,36 +788,39 @@ Only used for smoothed images.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter">
-<span class="sig-name descname"><span class="pre">screen_dust_gamma_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.035</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_gas_metallicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_gas_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.screen_dust_gamma_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculate the gamma parameter controlling the optical depth
+<span class="sig-name descname"><span class="pre">screen_dust_gamma_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamma_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Z_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.035</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_gas_metallicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sf_gas_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.screen_dust_gamma_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the gamma parameter, controlling the optical depth
 due to dust dependent on the mass and metallicity of star forming
 gas.</p>
-<p>gamma = (Z_SF / Z_MW) * (M_SF / M_star) * (1 / beta)</p>
-<p>where Z_SF is the star forming gas metallicity, Z_MW is the Milky
-Way value (defaults to value from Zahid+14), M_SF is the star forming gas mass, M_star
-is the stellar mass, and beta is a normalisation value.</p>
+<p>gamma = gamma_max - (gamma_max - gamma_min) / C</p>
+<p>C = 1 + (Z_SF / Z_MW) * (M_SF / M_star) * (1 / beta)</p>
+<p>gamma_max and gamma_min set the upper and lower bounds to which gamma
+asymptotically approaches where the star forming gas mass is high (low)
+and the star forming gas metallicity is high (low), respectively.</p>
+<p>Z_SF is the star forming gas metallicity, Z_MW is the Milky
+Way value (defaults to value from Zahid+14), M_SF is the star forming
+gas mass, M_star is the stellar mass, and beta is a normalisation value.</p>
+<p>The gamma array can be used directly in attenuation methods.</p>
 <p>Zahid+14:
 <a class="reference external" href="https://iopscience.iop.org/article/10.1088/0004-637X/791/2/130">https://iopscience.iop.org/article/10.1088/0004-637X/791/2/130</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>beta</strong> (<em>float</em>) – normalisation value, default 0.1</p></li>
-<li><p><strong>Z_norm</strong> (<em>float</em>) – metallicity normsalition value, defaults to Zahid+14
+<li><p><strong>gamma_min</strong> (<em>float</em>) – Lower limit of the gamma parameter.</p></li>
+<li><p><strong>gamma_max</strong> (<em>float</em>) – Upper limit of the gamma parameter.</p></li>
+<li><p><strong>beta</strong> (<em>float</em>) – Normalisation value, default 0.1</p></li>
+<li><p><strong>Z_norm</strong> (<em>float</em>) – Metallicity normsalition value, defaults to Zahid+14
 value for the Milky Way (0.035)</p></li>
-<li><p><strong>sf_gas_metallicity</strong> (<em>array</em>) – custom star forming gas metallicity array. If None,
+<li><p><strong>sf_gas_metallicity</strong> (<em>array</em>) – Custom star forming gas metallicity array. If None,
 defaults to value attached to this galaxy object.</p></li>
-<li><p><strong>sf_gas_mass</strong> (<em>array</em>) – custom star forming gas mass array. If None,
+<li><p><strong>sf_gas_mass</strong> (<em>array</em>) – Custom star forming gas mass array, units Msun. If
+None, defaults to value attached to this galaxy object.</p></li>
+<li><p><strong>stellar_mass</strong> (<em>array</em>) – Custom stellar mass array, units Msun. If None,
 defaults to value attached to this galaxy object.</p></li>
-<li><p><strong>stellar_mass</strong> (<em>array</em>) – custom stellar mass array. If None, defaults to value
-attached to this galaxy object.</p></li>
-<li><p><strong>gamma_min</strong> (<em>float</em>) – lower limit of the gamma parameter. If None, no lower
-limit implemented. Default = None</p></li>
-<li><p><strong>gamma_max</strong> (<em>float</em>) – upper limit of the gamma parameter. If None, no upper
-limit implemented. Default = None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>gamma scaling parameter for this galaxy</p>
+<dd class="field-even"><p>Dust attentuation scaling parameter for this galaxy</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>gamma (array)</p>
