@@ -492,30 +492,28 @@
         <span class="c1"># Set the smoothing lengths for these gas particles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">smoothing_lengths</span>
 
-        <span class="c1"># The dust to metal ratio for gas particles. Either 1 value or a value</span>
-        <span class="c1"># per gas particle.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">=</span> <span class="n">dust_to_metal_ratio</span>
-
+        <span class="c1"># </span>
         <span class="k">if</span> <span class="p">(</span><span class="n">dust_to_metal_ratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dust_masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Neither dust mass not dust to metal ratio &quot;</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Neither dust mass nor dust to metal ratio &quot;</span>
                        <span class="s2">&quot;provided. Assuming dust to metal ratio = 0.3&quot;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">=</span> <span class="mf">0.3</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">calculate_dust_mass</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">dust_to_metal_ratio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">dust_to_metal_ratio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># The dust to metal ratio for gas particles. Either a scalar</span>
             <span class="c1"># or an array of values for each gas particle</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">=</span> <span class="n">dust_to_metal_ratio</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">calculate_dust_mass</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">dust_masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># if dust_masses is not None:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_masses</span> <span class="o">=</span> <span class="n">dust_masses</span>
 
             <span class="c1"># TODO: this should be removed when dust masses are</span>
             <span class="c1"># properly propagated to LOS calculation</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dust_masses</span> <span class="o">/</span>\
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masses</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_masses</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
 
         <span class="c1"># Check the arguments we&#39;ve been given</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_gas_args</span><span class="p">()</span>
