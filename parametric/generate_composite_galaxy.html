@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.InconsistentParameter.html">synthesizer.exceptions.InconsistentParameter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.InconsistentWavelengths.html">synthesizer.exceptions.InconsistentWavelengths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.IncorrectUnits.html">synthesizer.exceptions.IncorrectUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
@@ -378,7 +379,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">Sersic2D</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">Sersic2D</span><span class="p">,</span> <span class="n">PointSource</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span><span class="p">,</span> <span class="n">Stars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">UVJ</span>
@@ -391,8 +392,9 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define geometry of the images</span>
-<span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">kpc</span>  <span class="c1"># resolution in kpc</span>
-<span class="n">fov</span> <span class="o">=</span> <span class="n">resolution</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mi">50</span> <span class="o">*</span> <span class="n">kpc</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">kpc</span>  <span class="c1"># resolution in kpc</span>
+<span class="n">npix</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">fov</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">npix</span>
 </pre></div>
 </div>
 </div>
@@ -424,7 +426,7 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span><span class="n">r_eff_kpc</span><span class="o">=</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">ellip</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">35.</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span><span class="n">r_eff</span><span class="o">=</span><span class="mf">1.</span><span class="o">*</span><span class="n">kpc</span><span class="p">,</span> <span class="n">sersic_index</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">ellipticity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mf">35.</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -435,7 +437,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfh_p</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">}</span>
 <span class="n">Z_p</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;log10metallicity&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">}</span>  <span class="c1"># can also use linear metallicity e.g. {&#39;Z&#39;: 0.01}</span>
-<span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span>
+<span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mf">9.5</span>
 </pre></div>
 </div>
 </div>
@@ -476,6 +478,7 @@
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
     <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
     <span class="n">sed</span><span class="o">=</span><span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">],</span>
+    <span class="c1"># npix=npix,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -513,7 +516,7 @@
 
 
 &lt;class &#39;synthesizer.parametric.galaxy.Galaxy&#39;&gt;
-log10(stellar mass formed/Msol):             9.0
+log10(stellar mass formed/Msol):             9.5
 available SEDs:
     Stellar:  [incident]
     Combined: []
@@ -539,7 +542,7 @@ available images: []
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define bulge morphology</span>
-<span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span><span class="n">r_eff_kpc</span><span class="o">=</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mf">4.</span><span class="p">)</span>
+<span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span><span class="n">r_eff</span><span class="o">=</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">sersic_index</span><span class="o">=</span><span class="mf">4.</span><span class="p">)</span>
 
 <span class="c1"># Define the parameters of the star formation and metal enrichment histories</span>
 <span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mf">8.5</span>
@@ -558,10 +561,14 @@ available images: []
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
     <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
     <span class="n">sed</span><span class="o">=</span><span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">],</span>
-    <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+    <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
+    <span class="c1"># fov=fov,</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">bulge</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bulge_img</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bulge_img</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bulge_img</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
 
 <span class="c1"># Make and plot an rgb image</span>
 <span class="n">bulge_img</span><span class="o">.</span><span class="n">make_rgb_image</span><span class="p">(</span><span class="n">rgb_filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;R&quot;</span> <span class="p">:</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span>
@@ -603,6 +610,9 @@ available lines: []
 available images: []
 -------------------------------------------------------------------------------
 
+0.0001 Mpc
+50
+0.005 Mpc
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -613,20 +623,108 @@ available images: []
 </div>
 </div>
 </section>
-<section id="Total">
-<h2>Total<a class="headerlink" href="#Total" title="Permalink to this heading">#</a></h2>
-<p>Finally we can combine the disk and bulge together to make a composite galaxy.</p>
+<section id="Nuclear">
+<h2>Nuclear<a class="headerlink" href="#Nuclear" title="Permalink to this heading">#</a></h2>
+<p>A nuclear (point-source) component. At the moment this is modelled as a stellar population but eventuall it will be an AGN.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define nuclear morphology, in this case a point source (i.e. unresolved)</span>
+<span class="n">morph</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">0.0</span><span class="p">])</span><span class="o">*</span><span class="n">kpc</span><span class="p">)</span>
+<span class="c1"># morph = PointSource(offset=np.array([0.2,0.4])*kpc)</span>
+
+<span class="c1"># Define the parameters of the star formation and metal enrichment histories</span>
+<span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">7</span>
+<span class="n">stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="mf">10.</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">morphology</span><span class="o">=</span><span class="n">morph</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="n">stellar_mass</span><span class="p">)</span>
+
+<span class="c1"># Get galaxy object</span>
+<span class="n">nuclear</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="n">stars</span><span class="p">)</span>
+
+<span class="c1"># Get specrtra</span>
+<span class="n">nuclear</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+<span class="c1"># make images</span>
+<span class="n">nuclear_img</span> <span class="o">=</span> <span class="n">nuclear</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+    <span class="n">sed</span><span class="o">=</span><span class="n">nuclear</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">],</span>
+    <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">nuclear</span><span class="p">)</span>
+
+<span class="c1"># Make and plot an rgb image</span>
+<span class="n">nuclear_img</span><span class="o">.</span><span class="n">make_rgb_image</span><span class="p">(</span><span class="n">rgb_filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;R&quot;</span> <span class="p">:</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span>
+                                   <span class="s2">&quot;G&quot;</span> <span class="p">:</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span>
+                                   <span class="s2">&quot;B&quot;</span> <span class="p">:</span> <span class="s1">&#39;U&#39;</span><span class="p">})</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">nuclear_img</span><span class="o">.</span><span class="n">plot_rgb_image</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+-------------------------------------------------------------------------------
+                            SUMMARY OF PARAMETRIC GALAXY
+                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠒⠒⠦⣄⡀⠀⠀⠀⠀⠀⠀⠀
+                           ⠀⠀⠀⠀⠀⢀⣤⣶⡾⠿⠿⠿⠿⣿⣿⣶⣦⣄⠙⠷⣤⡀⠀⠀⠀⠀
+                           ⠀⠀⠀⣠⡾⠛⠉⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⣿⣷⣄⠘⢿⡄⠀⠀⠀
+                           ⠀⢀⡾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠐⠂⠠⢄⡀⠈⢿⣿⣧⠈⢿⡄⠀⠀
+                           ⢀⠏⠀⠀⠀⢀⠄⣀⣴⣾⠿⠛⠛⠛⠷⣦⡙⢦⠀⢻⣿⡆⠘⡇⠀⠀
+                           ⠀⠀⠀+-+-+-+-+-+-+-+-+-+-+-+⡇⠀⠀
+                           ⠀⠀⠀|S|Y|N|T|H|E|S|I|Z|E|R|⠃⠀⠀
+                           ⠀⠀⢰+-+-+-+-+-+-+-+-+-+-+-+⠀⠀⠀
+                           ⠀⠀⢸⡇⠸⣿⣷⠀⢳⡈⢿⣦⣀⣀⣀⣠⣴⣾⠟⠁⠀⠀⠀⠀⢀⡎
+                           ⠀⠀⠘⣷⠀⢻⣿⣧⠀⠙⠢⠌⢉⣛⠛⠋⠉⠀⠀⠀⠀⠀⠀⣠⠎⠀
+                           ⠀⠀⠀⠹⣧⡀⠻⣿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡾⠃⠀⠀
+                           ⠀⠀⠀⠀⠈⠻⣤⡈⠻⢿⣿⣷⣦⣤⣤⣤⣤⣤⣴⡾⠛⠉⠀⠀⠀⠀
+                           ⠀⠀⠀⠀⠀⠀⠈⠙⠶⢤⣈⣉⠛⠛⠛⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀
+                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
+
+&lt;class &#39;synthesizer.parametric.galaxy.Galaxy&#39;&gt;
+log10(stellar mass formed/Msol):             7.0
+available SEDs:
+    Stellar:  [incident]
+    Combined: []
+available lines: []
+available images: []
+-------------------------------------------------------------------------------
+
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/parametric_generate_composite_galaxy_23_1.png" src="../_images/parametric_generate_composite_galaxy_23_1.png" />
+</div>
+</div>
+</section>
+<section id="Total">
+<h2>Total<a class="headerlink" href="#Total" title="Permalink to this heading">#</a></h2>
+<p>Finally we can combine the disk and bulge together to make a composite galaxy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Combine galaxy objects</span>
-<span class="n">combined</span> <span class="o">=</span> <span class="n">disk</span> <span class="o">+</span> <span class="n">bulge</span>
+<span class="n">combined</span> <span class="o">=</span> <span class="n">disk</span> <span class="o">+</span> <span class="n">bulge</span> <span class="o">+</span> <span class="n">nuclear</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
 
 <span class="c1"># Combine images</span>
-<span class="n">total</span> <span class="o">=</span> <span class="n">disk_img</span> <span class="o">+</span> <span class="n">bulge_img</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">disk_img</span> <span class="o">+</span> <span class="n">bulge_img</span> <span class="o">+</span> <span class="n">nuclear_img</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">disk_img</span><span class="o">.</span><span class="n">img</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bulge_img</span><span class="o">.</span><span class="n">img</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nuclear_img</span><span class="o">.</span><span class="n">img</span><span class="p">))</span>
 
 <span class="c1"># Make and plot an rgb image</span>
 <span class="n">total</span><span class="o">.</span><span class="n">make_rgb_image</span><span class="p">(</span><span class="n">rgb_filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;R&quot;</span> <span class="p">:</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span>
@@ -660,7 +758,7 @@ available images: []
 
 
 &lt;class &#39;synthesizer.parametric.galaxy.Galaxy&#39;&gt;
-log10(stellar mass formed/Msol):             9.119331048066094
+log10(stellar mass formed/Msol):             9.542639402837727
 available SEDs:
     Stellar:  [incident]
     Combined: []
@@ -668,18 +766,21 @@ available lines: []
 available images: []
 -------------------------------------------------------------------------------
 
+8.887197855353432e+29 dimensionless
+1.3312082686704764e+29 dimensionless
+4.209650169048073e+27 dimensionless
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_composite_galaxy_23_1.png" src="../_images/parametric_generate_composite_galaxy_23_1.png" />
+<img alt="../_images/parametric_generate_composite_galaxy_25_1.png" src="../_images/parametric_generate_composite_galaxy_25_1.png" />
 </div>
 </div>
 <p>And plot the spectra for good measure…</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">=</span> <span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;incident&#39;</span><span class="p">]</span>
@@ -689,6 +790,10 @@ available images: []
 <span class="n">sed</span> <span class="o">=</span> <span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;incident&#39;</span><span class="p">]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="s1">&#39;bulge&#39;</span><span class="p">)</span>
+
+<span class="n">sed</span> <span class="o">=</span> <span class="n">nuclear</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;incident&#39;</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;nuclear&#39;</span><span class="p">)</span>
 
 <span class="n">sed</span> <span class="o">=</span> <span class="n">combined</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;incident&#39;</span><span class="p">]</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
@@ -707,7 +812,7 @@ available images: []
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_composite_galaxy_25_0.png" src="../_images/parametric_generate_composite_galaxy_25_0.png" />
+<img alt="../_images/parametric_generate_composite_galaxy_27_0.png" src="../_images/parametric_generate_composite_galaxy_27_0.png" />
 </div>
 </div>
 </section>
@@ -771,6 +876,7 @@ available images: []
 <li><a class="reference internal" href="#">Generate composite galaxy</a><ul>
 <li><a class="reference internal" href="#Disk">Disk</a></li>
 <li><a class="reference internal" href="#Bulge">Bulge</a></li>
+<li><a class="reference internal" href="#Nuclear">Nuclear</a></li>
 <li><a class="reference internal" href="#Total">Total</a></li>
 </ul>
 </li>

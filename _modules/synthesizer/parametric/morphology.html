@@ -259,6 +259,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentParameter.html">synthesizer.exceptions.InconsistentParameter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.InconsistentWavelengths.html">synthesizer.exceptions.InconsistentWavelengths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.IncorrectUnits.html">synthesizer.exceptions.IncorrectUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
@@ -367,7 +368,7 @@
           <h1>Source code for synthesizer.parametric.morphology</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.modeling.models</span> <span class="kn">import</span> <span class="n">Sersic2D</span> <span class="k">as</span> <span class="n">Sersic2D_</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">mas</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">mas</span><span class="p">,</span> <span class="n">unyt_array</span>
 <span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">length</span><span class="p">,</span> <span class="n">angle</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
@@ -385,14 +386,15 @@
 <span class="sd">        shows a plot of the model for a given resolution and npix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MorphologyBase.plot_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.MorphologyBase.plot_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">plot_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">npix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MorphologyBase.plot_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.MorphologyBase.plot_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">plot_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">npix</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Produce a plot of the current morphology</span>
+<span class="sd">        A simple method to produce a quick density plot.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        lam: float array</span>
-<span class="sd">            wavelength, expected mwith units</span>
+<span class="sd">        Arguments</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">                The resolution (in the same units provded to the child class).</span>
+<span class="sd">            npix (int)</span>
+<span class="sd">                The number of pixels.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">bins</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -403,7 +405,11 @@
 
         <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">img</span><span class="p">),</span>
+            <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span>
         <span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
 
@@ -413,30 +419,56 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class holding the Sersic2D profile. This is a wrapper around the</span>
 <span class="sd">    astropy.models.Sersic2D class.</span>
-
-<span class="sd">    Methods</span>
-<span class="sd">    -------</span>
-<span class="sd">    compute_density_grid</span>
-<span class="sd">        Calculates and returns the density grid defined by this Morphology</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">r_eff_kpc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">r_eff_mas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">ellip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">r_eff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sersic_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ellipticity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">theta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the morphology.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments</span>
+<span class="sd">            r_eff (unyt)</span>
+<span class="sd">                Effective radius. This is converted as required.</span>
+<span class="sd">            sersic_index (float)</span>
+<span class="sd">                Sersic index.</span>
+<span class="sd">            ellipticity (float)</span>
+<span class="sd">                Ellipticity.</span>
+<span class="sd">            theta (float)</span>
+<span class="sd">                Theta, the rotation angle.</span>
+<span class="sd">            cosmo (astro.cosmology)</span>
+<span class="sd">                astropy cosmology object.</span>
+<span class="sd">            redshift (float)</span>
+<span class="sd">                Redshift.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Check units of r_eff and convert if necessary.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r_eff</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">length</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">=</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;kpc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">angle</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">=</span> <span class="n">r_eff</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;mas&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span>
+                    <span class="s2">&quot;The units of r_eff must have length or angle dimensions&quot;</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r_eff</span> <span class="o">=</span> <span class="n">r_eff</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingAttribute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            The effective radius must be provided&quot;&quot;&quot;</span><span class="p">)</span>
 
         <span class="c1"># Define the parameter set</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">=</span> <span class="n">r_eff_kpc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">=</span> <span class="n">r_eff_mas</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ellip</span> <span class="o">=</span> <span class="n">ellip</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sersic_index</span> <span class="o">=</span> <span class="n">sersic_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipticity</span> <span class="o">=</span> <span class="n">ellipticity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">theta</span> <span class="o">=</span> <span class="n">theta</span>
 
         <span class="c1"># Associate the cosmology and redshift to this object</span>
@@ -457,17 +489,17 @@
             <span class="c1"># Calculate one effective radius from the other depending on what</span>
             <span class="c1"># we&#39;ve been given.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpc_proper_per_mas</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">/</span> <span class="n">kpc_proper_per_mas</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">kpc_proper_per_mas</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="o">*</span> <span class="n">kpc_proper_per_mas</span>
 
         <span class="c1"># Intialise the kpc model</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_kpc</span> <span class="o">=</span> <span class="n">Sersic2D_</span><span class="p">(</span>
                 <span class="n">amplitude</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">r_eff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span><span class="p">,</span>
-                <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
-                <span class="n">ellip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ellip</span><span class="p">,</span>
+                <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sersic_index</span><span class="p">,</span>
+                <span class="n">ellip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipticity</span><span class="p">,</span>
                 <span class="n">theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -478,8 +510,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">model_mas</span> <span class="o">=</span> <span class="n">Sersic2D_</span><span class="p">(</span>
                 <span class="n">amplitude</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">r_eff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span><span class="p">,</span>
-                <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
-                <span class="n">ellip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ellip</span><span class="p">,</span>
+                <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sersic_index</span><span class="p">,</span>
+                <span class="n">ellip</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipticity</span><span class="p">,</span>
                 <span class="n">theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -493,7 +525,7 @@
         <span class="c1"># Ensure at least one effective radius has been passed</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_kpc</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_eff_mas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;An effective radius must be defined in either kpc (r_eff_kpc) &quot;</span>
+                <span class="s2">&quot;An effective radius must be defined in either kpc (r_eff_kpc)&quot;</span>
                 <span class="s2">&quot;or milliarcseconds (mas)&quot;</span>
             <span class="p">)</span>
 
@@ -512,19 +544,17 @@
 <span class="sd">        This acts as a wrapper to astropy functionality (defined above) which</span>
 <span class="sd">        only work in units of kpc or milliarcseconds (mas)</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        xx: array-like (float)</span>
-<span class="sd">            x values on a 2D grid.</span>
-<span class="sd">        yy: array-like (float)</span>
-<span class="sd">            y values on a 2D grid.</span>
-<span class="sd">        units : unyt.unit</span>
-<span class="sd">            The units in which the coordinate grids are defined.</span>
+<span class="sd">        Arguments</span>
+<span class="sd">            xx: array-like (float)</span>
+<span class="sd">                x values on a 2D grid.</span>
+<span class="sd">            yy: array-like (float)</span>
+<span class="sd">                y values on a 2D grid.</span>
+<span class="sd">            units : unyt.unit</span>
+<span class="sd">                The units in which the coordinate grids are defined.</span>
 
 <span class="sd">        Returns</span>
-<span class="sd">        ----------</span>
-<span class="sd">        density_grid : np.ndarray</span>
-<span class="sd">            The density grid produced</span>
+<span class="sd">            density_grid : np.ndarray</span>
+<span class="sd">                The density grid produced</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Ensure we have the model corresponding to the requested units</span>
@@ -544,6 +574,109 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_kpc</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="n">mas</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_mas</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Only kpc and milliarcsecond (mas) units are supported &quot;</span>
+                <span class="s2">&quot;for morphologies.&quot;</span>
+            <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PointSource"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.PointSource">[docs]</a><span class="k">class</span> <span class="nc">PointSource</span><span class="p">(</span><span class="n">MorphologyBase</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class holding the Sersic2D profile. This is a wrapper around the</span>
+<span class="sd">    astropy.models.Sersic2D class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span><span class="o">*</span><span class="n">kpc</span><span class="p">,</span>
+        <span class="n">cosmo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the morphology.</span>
+<span class="sd">        </span>
+<span class="sd">        Arguments</span>
+<span class="sd">            offset (unyt_array/float)</span>
+<span class="sd">                The [x,y] offset in angular or physical units from the centre </span>
+<span class="sd">                of the image. The default (0,0) places the source in the centre</span>
+<span class="sd">                of the image. </span>
+<span class="sd">            cosmo (astropy.cosmology)</span>
+<span class="sd">                astropy cosmology object.</span>
+<span class="sd">            redshift (float)</span>
+<span class="sd">                Redshift.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check units of r_eff and convert if necessary</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">offset</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">length</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;kpc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">elif</span> <span class="n">offset</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">angle</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;mas&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                The units of offset must have length or angle dimensions&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        
+        <span class="c1"># Associate the cosmology and redshift to this object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cosmo</span> <span class="o">=</span> <span class="n">cosmo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
+
+        <span class="c1"># If cosmology and redshift have been provided we can calculate both</span>
+        <span class="c1"># models</span>
+        <span class="k">if</span> <span class="n">cosmo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">redshift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Compute conversion</span>
+            <span class="n">kpc_proper_per_mas</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cosmo</span><span class="o">.</span><span class="n">kpc_proper_per_arcmin</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;kpc/mas&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Calculate one offset from the other depending on what</span>
+            <span class="c1"># we&#39;ve been given.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span> <span class="o">/</span> <span class="n">kpc_proper_per_mas</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span> <span class="o">*</span> <span class="n">kpc_proper_per_mas</span>
+
+<div class="viewcode-block" id="PointSource.compute_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.PointSource.compute_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">kpc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the density grid defined by this morphology as a function of</span>
+<span class="sd">        the input coordinate grids.</span>
+
+<span class="sd">        This acts as a wrapper to astropy functionality (defined above) which</span>
+<span class="sd">        only work in units of kpc or milliarcseconds (mas)</span>
+
+<span class="sd">        Arguments</span>
+<span class="sd">            xx: array-like (float)</span>
+<span class="sd">                x values on a 2D grid.</span>
+<span class="sd">            yy: array-like (float)</span>
+<span class="sd">                y values on a 2D grid.</span>
+<span class="sd">            units : unyt.unit</span>
+<span class="sd">                The units in which the coordinate grids are defined.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">            density_grid : np.ndarray</span>
+<span class="sd">                The density grid produced</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create empty density grid</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">xx</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">yy</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="n">kpc</span><span class="p">:</span>
+            <span class="c1"># find the pixel corresponding to the supplied offset</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">xx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">yy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="c1"># set the pixel value to 1.0</span>
+            <span class="n">image</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="k">return</span> <span class="n">image</span>
+
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="n">mas</span><span class="p">:</span>
+            <span class="c1"># find the pixel corresponding to the supplied offset</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">xx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">yy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="c1"># set the pixel value to 1.0</span>
+            <span class="n">image</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="k">return</span> <span class="n">image</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;Only kpc and milliarcsecond (mas) units are supported &quot;</span>
