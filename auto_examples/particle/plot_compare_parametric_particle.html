@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plot line of sight diagnostics" href="plot_get_los_attenutation.html" /><link rel="prev" title="Create sampled SED" href="plot_create_sampled_sed.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Create sampled SED" href="plot_create_sampled_sed.html" /><link rel="prev" title="Generate mock coordinates" href="plot_generate_coordinates.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2023.09.10 -->
         <title>Compare parametric and particle SEDs - synthesizer 0.1 documentation</title>
@@ -232,8 +232,8 @@
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Particle galaxy examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="plot_generate_coordinates.html">Generate mock coordinates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Compare parametric and particle SEDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
 </ul>
 </li>
@@ -390,37 +390,31 @@ to download the full example code</p>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">ParametricStars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.stars</span> <span class="kn">import</span> <span class="n">sample_sfhz</span>
-<span class="kn">from</span> <span class="nn">synthesizer.particle.stars</span> <span class="kn">import</span> <span class="n">Stars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span> <span class="k">as</span> <span class="n">ParametricGalaxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span> <span class="k">as</span> <span class="n">ParticleGalaxy</span>
 
-
-<span class="c1"># --- initialise the SPS grid</span>
-<span class="c1"># grid_name = &#39;bpass-v2.2.1-bin_chab-100_cloudy-v17.03_log10Uref-2&#39;</span>
-<span class="c1"># grid = Grid(grid_name)</span>
-
-<span class="c1"># Get the location of this script, __file__ is the absolute path of this</span>
-<span class="c1"># script, however we just want to directory</span>
-<span class="c1"># script_path = os.path.abspath(os.path.dirname(__file__))</span>
 
 <span class="c1"># Define the grid</span>
 <span class="n">grid_name</span> <span class="o">=</span> <span class="s2">&quot;test_grid&quot;</span>
 <span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;../../tests/test_grid/&quot;</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">)</span>
 
-<span class="c1"># --- define the binned (parametric star formation history)</span>
-
+<span class="c1"># Define the SFH and metallicity distribution</span>
 <span class="n">Z_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;metallicity&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">}</span>
 <span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">DeltaConstant</span><span class="p">(</span><span class="o">**</span><span class="n">Z_p</span><span class="p">)</span>
 <span class="n">sfh_p</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">}</span>
-<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="o">**</span><span class="n">sfh_p</span><span class="p">)</span>  <span class="c1"># constant star formation</span>
+<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="o">**</span><span class="n">sfh_p</span><span class="p">)</span>
+
+<span class="c1"># Define the parametric stars</span>
 <span class="n">sfzh</span> <span class="o">=</span> <span class="n">ParametricStars</span><span class="p">(</span>
-    <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span> <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span>
+    <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span>
+    <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># --------------------------------------------</span>
-<span class="c1"># CREATE PARAMETRIC SED</span>
-
+<span class="c1"># Compute the parametric sed</span>
 <span class="n">parametric_galaxy</span> <span class="o">=</span> <span class="n">ParametricGalaxy</span><span class="p">(</span><span class="n">sfzh</span><span class="p">)</span>
 <span class="n">parametric_galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 <span class="n">sed</span> <span class="o">=</span> <span class="n">parametric_galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span>
@@ -429,36 +423,39 @@ to download the full example code</p>
 <span class="p">)</span>
 
 
-<span class="c1"># --------------------------------------------</span>
-<span class="c1"># CREATE PARTICLE SED</span>
+<span class="c1"># Compute the particle Sed for a range of particle samples</span>
+<span class="k">for</span> <span class="n">nstar</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]:</span>
+    <span class="c1"># Get the stars object</span>
+    <span class="n">stars</span> <span class="o">=</span> <span class="n">sample_sfhz</span><span class="p">(</span>
+        <span class="n">sfzh</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span>
+        <span class="n">sfzh</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span>
+        <span class="n">sfzh</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">,</span>
+        <span class="n">nstar</span><span class="p">,</span>
+        <span class="n">initial_mass</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">nstar</span><span class="p">,</span>
+    <span class="p">)</span>
 
-<span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>  <span class="c1"># , 1000]:</span>
-    <span class="c1"># --- create stars object</span>
-    <span class="n">stars</span> <span class="o">=</span> <span class="n">sample_sfhz</span><span class="p">(</span><span class="n">sfzh</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">sfzh</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">sfzh</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
-    <span class="c1"># ensure that the total mass = 1 irrespective of N. This can be also acheived by setting the mass of the star particles in sample_sfhz but this will be easier most of the time.</span>
-    <span class="n">stars</span><span class="o">.</span><span class="n">renormalise_mass</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-
-    <span class="c1"># --- create galaxy object</span>
+    <span class="c1"># Get the particle galaxy</span>
     <span class="n">particle_galaxy</span> <span class="o">=</span> <span class="n">ParticleGalaxy</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="n">stars</span><span class="p">)</span>
 
-    <span class="c1"># --- this generates stellar and intrinsic spectra</span>
-    <span class="c1"># particle_galaxy.generate_spectra(grid, fesc=0.0, integrated=True)</span>
+    <span class="c1"># Calculate the stars SEDs using nearest grid point</span>
+    <span class="n">ngp_sed</span> <span class="o">=</span> <span class="n">particle_galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span>
+        <span class="n">grid</span><span class="p">,</span> <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;ngp&quot;</span>
+    <span class="p">)</span>
 
-    <span class="c1"># Calculate the stars SEDs</span>
-    <span class="n">particle_galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-
-    <span class="n">sed</span> <span class="o">=</span> <span class="n">particle_galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;particle (N=</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ngp_sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ngp_sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span>
+        <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;particle (N=</span><span class="si">{</span><span class="n">nstar</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
 
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">])</span>
-<span class="c1"># plt.savefig(script_path + &#39;/plots/compare_parametric_particle.png&#39;, dpi=200, bbox_inches=&#39;tight&#39;); plt.close()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">18</span><span class="p">,</span> <span class="mi">22</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.628 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.608 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-particle-plot-compare-parametric-particle-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1d60be4f3c8caede2f10ddfbbdb4366d/plot_compare_parametric_particle.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_compare_parametric_particle.ipynb</span></code></a></p>
@@ -475,23 +472,23 @@ to download the full example code</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="plot_get_los_attenutation.html">
+          <a class="next-page" href="plot_create_sampled_sed.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Plot line of sight diagnostics</div>
+                <div class="title">Create sampled SED</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="plot_create_sampled_sed.html">
+          <a class="prev-page" href="plot_generate_coordinates.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Create sampled SED</div>
+                <div class="title">Generate mock coordinates</div>
                 
               </div>
             </a>

@@ -231,8 +231,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
 </ul>
 </li>
@@ -467,6 +467,7 @@
         <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the line contribution spectra. This is only invoked if</span>
@@ -487,6 +488,9 @@
 <span class="sd">            old (bool, float):</span>
 <span class="sd">                If not False, specifies age in Myr at which to filter</span>
 <span class="sd">                for old star particles.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            numpy.ndarray</span>
@@ -499,7 +503,11 @@
         <span class="c1"># Generate contribution of line emission alone and reduce the</span>
         <span class="c1"># contribution of Lyman-alpha</span>
         <span class="n">linecont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Multiply by the Lyamn-continuum escape fraction</span>
@@ -511,7 +519,14 @@
 
         <span class="k">return</span> <span class="n">linecont</span></div>
 
-<div class="viewcode-block" id="StarsComponent.get_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="StarsComponent.get_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_incident</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the incident (equivalent to pure stellar for stars) spectra</span>
 <span class="sd">        using the provided Grid.</span>
@@ -528,6 +543,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_incident&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -538,7 +556,13 @@
         <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
 
         <span class="c1"># Get the incident spectra</span>
-        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;incident&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Create the Sed object</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
@@ -555,6 +579,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the transmitted spectra using the provided Grid. This is the</span>
@@ -576,6 +601,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -587,7 +615,11 @@
 
         <span class="c1"># Get the transmitted spectra</span>
         <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Create the Sed object</span>
@@ -605,6 +637,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate nebular spectra from a grid object and star particles.</span>
@@ -625,6 +658,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_nebular&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -635,7 +671,13 @@
         <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
 
         <span class="c1"># Get the nebular emission spectra</span>
-        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Apply the escape fraction</span>
         <span class="n">lnu</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
@@ -657,6 +699,7 @@
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the intrinsic spectra, this is the sum of the escaping</span>
@@ -665,9 +708,9 @@
 <span class="sd">        transmitted through the gas. In addition to returning the intrinsic</span>
 <span class="sd">        spectra this saves the incident, nebular, and escaped spectra.</span>
 
-<span class="sd">        Note, if a grid that has not been post-processed through a </span>
+<span class="sd">        Note, if a grid that has not been post-processed through a</span>
 <span class="sd">        photoionisation code is provided (i.e. read_lines=False) this will</span>
-<span class="sd">        just call `get_spectra_incident`. </span>
+<span class="sd">        just call `get_spectra_incident`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            grid (obj):</span>
@@ -689,6 +732,9 @@
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
 <span class="sd">            verbose (bool):</span>
 <span class="sd">                verbose output flag</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Updates:</span>
 <span class="sd">            incident:</span>
@@ -704,7 +750,7 @@
 <span class="sd">            Sed</span>
 <span class="sd">                An Sed object containing the intrinsic spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        
+
         <span class="c1"># Make sure young and old in Myr, if provided</span>
         <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
 
@@ -712,20 +758,23 @@
         <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="p">(</span><span class="s2">&quot;The grid you are using has not been post-processed &quot;</span>
-                     <span class="s2">&quot;through a photoionisation code. This method will &quot;</span>
-                     <span class="s2">&quot;just return the incident stellar emission. Are &quot;</span>
-                     <span class="s2">&quot;you sure this is the method you want to use?&quot;</span><span class="p">)</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;The grid you are using has not been post-processed &quot;</span>
+                        <span class="s2">&quot;through a photoionisation code. This method will &quot;</span>
+                        <span class="s2">&quot;just return the incident stellar emission. Are &quot;</span>
+                        <span class="s2">&quot;you sure this is the method you want to use?&quot;</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
 
             <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span>
                 <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
                 <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
                 <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
-                <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">intrinsic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">incident&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">incident&quot;</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">spec</span>
 
         <span class="c1"># The incident emission</span>
@@ -734,6 +783,7 @@
             <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
             <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># The emission which escapes the gas</span>
@@ -742,12 +792,22 @@
 
         <span class="c1"># The stellar emission which **is** reprocessed by the gas</span>
         <span class="n">transmitted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_transmitted</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># The nebular emission</span>
         <span class="n">nebular</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_nebular</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># If the Lyman-alpha escape fraction is &lt;1.0 suppress it.</span>
@@ -757,11 +817,16 @@
                 <span class="n">grid</span><span class="p">,</span>
                 <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
                 <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Get the nebular continuum emission</span>
             <span class="n">nebular_continuum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
-                <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+                <span class="n">grid</span><span class="p">,</span>
+                <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span>
+                <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+                <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">nebular_continuum</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
 
@@ -779,9 +844,9 @@
             <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">reprocessed</span>
 
         <span class="k">if</span> <span class="n">fesc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">escaped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escaped</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">reprocessed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reprocessed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">intrinsic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intrinsic</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">escaped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">escaped</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">reprocessed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reprocessed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intrinsic</span>
 
         <span class="k">return</span> <span class="n">reprocessed</span></div>
 
@@ -793,6 +858,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates dust attenuated spectra assuming a simple screen.</span>
@@ -815,6 +881,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -839,6 +908,7 @@
             <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
             <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Apply the dust screen</span>
@@ -861,6 +931,7 @@
         <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates dust attenuated spectra assuming the PACMAN dust/fesc model</span>
@@ -894,6 +965,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            InconsistentArguments:</span>
@@ -957,9 +1031,9 @@
 
         <span class="c1"># If grid has photoinoisation outputs, use the reprocessed outputs</span>
         <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span><span class="p">:</span>
-            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s1">&#39;reprocessed&#39;</span>
+            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s2">&quot;reprocessed&quot;</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># otherwise just use the intrinsic stellar spectra</span>
-            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s1">&#39;intrinsic&#39;</span>
+            <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s2">&quot;intrinsic&quot;</span>
 
         <span class="c1"># Generate intrinsic spectra for young and old particles</span>
         <span class="c1"># separately before summing them if we have been given</span>
@@ -994,6 +1068,7 @@
                 <span class="n">young</span><span class="o">=</span><span class="n">young_old_thresh</span><span class="p">,</span>
                 <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Generate the old gas reprocessed spectra</span>
@@ -1005,6 +1080,7 @@
                 <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">old</span><span class="o">=</span><span class="n">young_old_thresh</span><span class="p">,</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Combine young and old spectra</span>
@@ -1039,7 +1115,12 @@
             <span class="c1">#   - reprocessed = transmitted + nebular</span>
             <span class="c1">#   - intrinsic = transmitted + reprocessed</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span>
-                <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span>
+                <span class="n">grid</span><span class="p">,</span>
+                <span class="n">fesc</span><span class="p">,</span>
+                <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span>
+                <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">):</span>
@@ -1075,10 +1156,9 @@
 
             <span class="c1"># Calculate attenuated spectra of young stars</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use the BC slope</span>
-            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;young_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span>\
-                    <span class="n">apply_attenuation</span><span class="p">(</span>
-                    <span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
-                <span class="p">)</span>
+            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;young_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span><span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">)</span>
 
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># use the ISM slope</span>
             <span class="n">young_attenuated</span> <span class="o">=</span> <span class="n">young_attenuated</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
@@ -1087,10 +1167,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated</span>
 
             <span class="c1"># Calculate attenuated spectra of old stars</span>
-            <span class="n">old_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;old_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span>\
-                    <span class="n">apply_attenuation</span><span class="p">(</span>
-                    <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
-                <span class="p">)</span>
+            <span class="n">old_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;old_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+                <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_attenuated</span>
 
             <span class="c1"># Get the combined attenuated spectra</span>
@@ -1133,6 +1212,7 @@
         <span class="n">alpha_ISM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">alpha_BC</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">young_old_thresh</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates dust attenuated spectra assuming the Charlot &amp; Fall (2000)</span>
@@ -1156,6 +1236,9 @@
 <span class="sd">            young_old_thresh (float)</span>
 <span class="sd">                The threshold in log10(age/yr) for young/old stellar</span>
 <span class="sd">                populations.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -1170,6 +1253,7 @@
             <span class="n">tau_v</span><span class="o">=</span><span class="p">[</span><span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">tau_v_BC</span><span class="p">],</span>
             <span class="n">alpha</span><span class="o">=</span><span class="p">[</span><span class="n">alpha_ISM</span><span class="p">,</span> <span class="n">alpha_BC</span><span class="p">],</span>
             <span class="n">young_old_thresh</span><span class="o">=</span><span class="n">young_old_thresh</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="StarsComponent.get_line_intrinsic"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_line_intrinsic">[docs]</a>    <span class="k">def</span> <span class="nf">get_line_intrinsic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_ids</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
@@ -1396,7 +1480,7 @@
         <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plots either specific spectra (specified via spectra_to_plot) or all</span>
@@ -1445,7 +1529,7 @@
             <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
             <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
             <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
-            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
         </article>

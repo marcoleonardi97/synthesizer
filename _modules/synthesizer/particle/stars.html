@@ -231,8 +231,8 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_generate_coordinates.html">Generate mock coordinates</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
 </ul>
 </li>
@@ -388,11 +388,14 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.particles</span> <span class="kn">import</span> <span class="n">Particles</span>
+<span class="kn">from</span> <span class="nn">synthesizer.plt</span> <span class="kn">import</span> <span class="n">single_histxy</span><span class="p">,</span> <span class="n">mlabel</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
@@ -587,6 +590,10 @@
         <span class="c1"># Check the arguments we&#39;ve been given</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_star_args</span><span class="p">()</span>
 
+        <span class="c1"># Particle stars can calculate and attach a SFZH analogous to a</span>
+        <span class="c1"># parametric galaxy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="nf">_check_star_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sanitizes the inputs ensuring all arguments agree and are compatible.</span>
@@ -631,7 +638,14 @@
 
         <span class="k">return</span> <span class="n">pstr</span>
 
-    <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="p">,</span>
+        <span class="n">spectra_type</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A method to prepare the arguments for SED computation with the C</span>
 <span class="sd">        functions.</span>
@@ -647,6 +661,15 @@
 <span class="sd">            mask (bool)</span>
 <span class="sd">                A mask to be applied to the stars. Spectra will only be computed</span>
 <span class="sd">                and returned for stars with True in the mask.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple</span>
+<span class="sd">                A tuple of all the arguments required by the C extension.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Make a dummy mask if none has been passed</span>
@@ -656,11 +679,11 @@
         <span class="c1"># Set up the inputs to the C function.</span>
         <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
@@ -693,6 +716,7 @@
             <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
             <span class="n">npart</span><span class="p">,</span>
             <span class="n">nlam</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Stars.generate_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_lnu</span><span class="p">(</span>
@@ -704,6 +728,7 @@
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the integrated rest frame spectra for a given grid key</span>
@@ -734,6 +759,11 @@
 <span class="sd">                    - You know your particle lie within the grid but don&#39;t</span>
 <span class="sd">                      want to waste compute checking. This case is useful when</span>
 <span class="sd">                      working with large particle counts.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
@@ -785,7 +815,11 @@
 
         <span class="c1"># Prepare the arguments for the C function.</span>
         <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sed_args</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span> <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+            <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
@@ -880,6 +914,7 @@
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the particle rest frame spectra for a given grid key spectra</span>
@@ -910,6 +945,11 @@
 <span class="sd">                    - You know your particle lie within the grid but don&#39;t</span>
 <span class="sd">                      want to waste compute checking. This case is useful when</span>
 <span class="sd">                      working with large particle counts.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
@@ -961,7 +1001,11 @@
 
         <span class="c1"># Prepare the arguments for the C function.</span>
         <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sed_args</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span> <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+            <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
@@ -1282,6 +1326,7 @@
         <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the line contribution spectra. This is only invoked if</span>
@@ -1302,6 +1347,9 @@
 <span class="sd">            old (bool, float):</span>
 <span class="sd">                If not False, specifies age in Myr at which to filter</span>
 <span class="sd">                for old star particles.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_particle_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            numpy.ndarray</span>
@@ -1311,7 +1359,11 @@
         <span class="c1"># Generate contribution of line emission alone and reduce the</span>
         <span class="c1"># contribution of Lyman-alpha</span>
         <span class="n">linecont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Multiply by the Lyamn-continuum escape fraction</span>
@@ -1323,7 +1375,14 @@
 
         <span class="k">return</span> <span class="n">linecont</span></div>
 
-<div class="viewcode-block" id="Stars.get_particle_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_particle_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Stars.get_particle_spectra_incident"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_particle_spectra_incident">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_spectra_incident</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the incident (equivalent to pure stellar for stars) spectra</span>
 <span class="sd">        using the provided Grid.</span>
@@ -1340,6 +1399,10 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_incident&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_particle_lnu.</span>
+
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -1347,7 +1410,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Get the incident spectra</span>
-        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;incident&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Create the Sed object</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
@@ -1364,6 +1433,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the transmitted spectra using the provided Grid. This is the</span>
@@ -1385,6 +1455,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_particle_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -1393,7 +1466,11 @@
 
         <span class="c1"># Get the transmitted spectra</span>
         <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Create the Sed object</span>
@@ -1411,6 +1488,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate nebular spectra from a grid object and star particles.</span>
@@ -1431,6 +1509,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_nebular&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_particle_lnu.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
@@ -1438,7 +1519,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Get the nebular emission spectra</span>
-        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">)</span>
+        <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
 
         <span class="c1"># Apply the escape fraction</span>
         <span class="n">lnu</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
@@ -1459,6 +1542,7 @@
         <span class="n">young</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates the intrinsic spectra, this is the sum of the escaping</span>
@@ -1486,6 +1570,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_particle_lnu.</span>
 
 <span class="sd">        Updates:</span>
 <span class="sd">            incident:</span>
@@ -1508,6 +1595,7 @@
             <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
             <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># The emission which escapes the gas</span>
@@ -1516,12 +1604,17 @@
 
         <span class="c1"># The stellar emission which **is** reprocessed by the gas</span>
         <span class="n">transmitted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_transmitted</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># The nebular emission</span>
         <span class="n">nebular</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_particle_spectra_nebular</span><span class="p">(</span>
-            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
         <span class="c1"># If the Lyman-alpha escape fraction is &lt;1.0 suppress it.</span>
@@ -1531,11 +1624,16 @@
                 <span class="n">grid</span><span class="p">,</span>
                 <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
                 <span class="n">fesc_LyA</span><span class="o">=</span><span class="n">fesc_LyA</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Get the nebular continuum emission</span>
             <span class="n">nebular_continuum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_particle_lnu</span><span class="p">(</span>
-                <span class="n">grid</span><span class="p">,</span> <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="n">old</span>
+                <span class="n">grid</span><span class="p">,</span>
+                <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span>
+                <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+                <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">nebular_continuum</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
 
@@ -1750,7 +1848,174 @@
             <span class="n">tau_v_ISM</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">dust_curve_nebular</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
             <span class="n">dust_curve_stellar</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare_sfzh_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method to prepare the arguments for SFZH computation with the C</span>
+<span class="sd">        functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The SPS grid object to extract spectra from.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple</span>
+<span class="sd">                A tuple of all the arguments required by the C extension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set up the inputs to the C function.</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="n">part_props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># Make sure we set the number of particles to the size of the mask</span>
+        <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">part_mass</span><span class="p">))</span>
+
+        <span class="c1"># Get the grid dimensions after slicing what we need</span>
+        <span class="n">grid_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid_props</span><span class="p">):</span>
+            <span class="n">grid_dims</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># Convert inputs to tuples</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
+        <span class="n">part_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">part_props</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">grid_props</span><span class="p">,</span>
+            <span class="n">part_props</span><span class="p">,</span>
+            <span class="n">part_mass</span><span class="p">,</span>
+            <span class="n">grid_dims</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
+            <span class="n">npart</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Stars.get_sfzh"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_sfzh">[docs]</a>    <span class="k">def</span> <span class="nf">get_sfzh</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the binned SFZH history of this collection of particles.</span>
+
+<span class="sd">        The binned SFZH produced by this method is equivalent to the weights</span>
+<span class="sd">        used to extract spectra from the grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The spectral grid object.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Numpy array of containing the SFZH.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span> <span class="nn">synthesizer.extensions.sfzh</span> <span class="kn">import</span> <span class="n">compute_sfzh</span>
+
+        <span class="c1"># Prepare the arguments for the C function.</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sfzh_args</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get the SFZH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="n">compute_sfzh</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span></div>
+
+<div class="viewcode-block" id="Stars.plot_sfzh"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.plot_sfzh">[docs]</a>    <span class="k">def</span> <span class="nf">plot_sfzh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Plot the binned SZFH.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            show (bool)</span>
+<span class="sd">                Should we invoke plt.show()?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            fig</span>
+<span class="sd">                The Figure object contain the plot axes.</span>
+<span class="sd">            ax</span>
+<span class="sd">                The Axes object containing the plotted data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Ensure we have the SFZH</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_sfzh</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">grid_assignment_method</span><span class="p">)</span>
+
+        <span class="c1"># Get the grid axes</span>
+        <span class="n">log10ages</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span>
+        <span class="n">log10metallicities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">)</span>
+
+        <span class="c1"># Create the figure and extra axes for histograms</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">haxx</span><span class="p">,</span> <span class="n">haxy</span> <span class="o">=</span> <span class="n">single_histxy</span><span class="p">()</span>
+
+        <span class="c1"># Visulise the SFZH grid</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span>
+            <span class="n">log10ages</span><span class="p">,</span>
+            <span class="n">log10metallicities</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">cmr</span><span class="o">.</span><span class="n">sunburst</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add binned Z to right of the plot</span>
+        <span class="n">metal_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">haxy</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span>
+            <span class="n">log10metallicities</span><span class="p">,</span>
+            <span class="n">metal_dist</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">),</span>
+            <span class="n">step</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add binned SF_HIST to top of the plot</span>
+        <span class="n">sf_hist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">haxx</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">log10ages</span><span class="p">,</span>
+            <span class="n">sf_hist</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sf_hist</span><span class="p">),</span>
+            <span class="n">step</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set plot limits</span>
+        <span class="n">haxy</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">])</span>
+        <span class="n">haxy</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">log10metallicities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">haxx</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">])</span>
+        <span class="n">haxx</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">log10ages</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">log10ages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Set labels</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">mlabel</span><span class="p">(</span><span class="s2">&quot;log_</span><span class="si">{10}</span><span class="s2">(age/yr)&quot;</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">mlabel</span><span class="p">(</span><span class="s2">&quot;log_</span><span class="si">{10}</span><span class="s2">Z&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Set the limits so all axes line up</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">log10metallicities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">log10ages</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">log10ages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Shall we show it?</span>
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div></div>
 
 
 <div class="viewcode-block" id="sample_sfhz"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.sample_sfhz">[docs]</a><span class="k">def</span> <span class="nf">sample_sfhz</span><span class="p">(</span>
