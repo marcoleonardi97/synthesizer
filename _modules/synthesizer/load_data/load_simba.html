@@ -373,6 +373,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatLambdaCDM</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">..particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 
@@ -466,13 +467,13 @@
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
 
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
-            <span class="n">imasses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">ages</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">imasses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">ages</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
             <span class="n">metallicity</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:],</span>
-            <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># get the gas particle begin / end indices</span>
@@ -493,11 +494,11 @@
                 <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span>
         
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
             <span class="n">metals</span><span class="o">=</span><span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">dust_masses</span><span class="o">=</span><span class="n">g_dustmass</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">dust_masses</span><span class="o">=</span><span class="n">g_dustmass</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">galaxies</span></div>
