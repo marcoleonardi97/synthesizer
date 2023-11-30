@@ -392,10 +392,7 @@
 
 <div class="viewcode-block" id="flux_to_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.flux_to_luminosity">[docs]</a><span class="k">def</span> <span class="nf">flux_to_luminosity</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts flux to luminosity in erg / s / Hz.</span>
-
-<span class="sd">    This can either be flux -&gt; luminosity per wavelength/frequency (intensity)</span>
-<span class="sd">    or power; all units are handled automatically.</span>
+<span class="sd">    Converts flux to luminosity in erg / s.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        flux (unyt_quantity/unyt_array)</span>
@@ -425,10 +422,49 @@
     <span class="c1"># Calculate the luminosity in interim units</span>
     <span class="n">lum</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">lum_dist</span><span class="o">**</span><span class="mi">2</span>
 
-    <span class="c1"># And convert to erg / s / Hz</span>
+    <span class="c1"># And redshift</span>
     <span class="n">lum</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span>
 
-    <span class="k">return</span> <span class="n">lum</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">lum</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fnu_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_lnu</span><span class="p">(</span><span class="n">fnu</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts spectral flux density to spectral luminosity density</span>
+<span class="sd">    in erg / s / Hz.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fnu (unyt_quantity/unyt_array)</span>
+<span class="sd">            The spectral flux dnesity to be converted to luminosity, can</span>
+<span class="sd">            either be a singular value or array.</span>
+<span class="sd">        cosmo (astropy.cosmology)</span>
+<span class="sd">            The cosmology object used to calculate luminosity distance.</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            The redshift of the rest frame.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity/unyt_array</span>
+<span class="sd">            The converted spectral luminosity density.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        IncorrectUnits</span>
+<span class="sd">            If units are missing an error is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ensure we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;fnu must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the luminosity distance (need to convert from astropy to unyt)</span>
+    <span class="n">lum_dist</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">cm</span>
+
+    <span class="c1"># Calculate the luminosity in interim units</span>
+    <span class="n">lnu</span> <span class="o">=</span> <span class="n">fnu</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">lum_dist</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># And redshift</span>
+    <span class="n">lnu</span> <span class="o">/=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span>
+
+    <span class="k">return</span> <span class="n">lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="fnu_to_apparent_mag"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_apparent_mag">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_apparent_mag</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
@@ -461,7 +497,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        app_mag (float)</span>
-<span class="sd">            The apparent AB magnitude to be converted, can either be a </span>
+<span class="sd">            The apparent AB magnitude to be converted, can either be a</span>
 <span class="sd">            singular value or array.</span>
 
 <span class="sd">    Returns:</span>
@@ -471,6 +507,65 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span> <span class="o">*</span> <span class="p">(</span><span class="n">app_mag</span> <span class="o">-</span> <span class="mf">8.9</span><span class="p">))</span> <span class="o">*</span> <span class="n">nJy</span></div>
+
+
+<div class="viewcode-block" id="llam_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.llam_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">llam_to_lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">llam</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts spectral luminosity density in terms of wavelength (llam) to</span>
+<span class="sd">    spectral luminosity density in terms of frequency (lnu).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lam (unyt_quantity/unyt_array)</span>
+<span class="sd">            The wavelength array the flux is defined at.</span>
+<span class="sd">        llam (unyt_quantity/unyt_array)</span>
+<span class="sd">            The spectral luminoisty density in terms of wavelength.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity/unyt_array</span>
+<span class="sd">            The spectral luminosity in terms of frequency, in units of nJy.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        IncorrectUnits</span>
+<span class="sd">            If units are missing an error is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ensure we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">llam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;llam must be given with unyt units.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">llam</span> <span class="o">*</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg / s / Hz&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="lnu_to_llam"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.lnu_to_llam">[docs]</a><span class="k">def</span> <span class="nf">lnu_to_llam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts spectral luminoisty density in terms of frequency (lnu)</span>
+<span class="sd">    to luminoisty in terms of wavelength (llam).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lam (unyt_quantity/unyt_array)</span>
+<span class="sd">            The wavelength array the luminoisty density is defined at.</span>
+<span class="sd">        lnu (unyt_quantity/unyt_array)</span>
+<span class="sd">            The spectral luminoisty density in terms of frequency.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity/unyt_array</span>
+<span class="sd">            The spectral luminoisty density in terms of wavelength, in units</span>
+<span class="sd">            of erg / s / A.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        IncorrectUnits</span>
+<span class="sd">            If units are missing an error is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ensure we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lnu must be given with unyt units.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">((</span><span class="n">lnu</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg / s / angstrom&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="flam_to_fnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.flam_to_fnu">[docs]</a><span class="k">def</span> <span class="nf">flam_to_fnu</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">flam</span><span class="p">):</span>
@@ -486,7 +581,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        unyt_quantity/unyt_array</span>
-<span class="sd">            The spectral flux in terms of frequency.</span>
+<span class="sd">            The spectral flux in terms of frequency, in units of nJy.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        IncorrectUnits</span>
@@ -499,26 +594,24 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Delta lambda</span>
-    <span class="n">lam_m</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**-</span><span class="mi">10</span>
-
-    <span class="k">return</span> <span class="n">flam</span> <span class="o">*</span> <span class="n">lam</span> <span class="o">/</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam_m</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">flam</span> <span class="o">*</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;nJy&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="fnu_to_flam"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_flam">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_flam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">fnu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts flux in terms of frequency (f_nu) to flux in terms of wavelength</span>
-<span class="sd">    (flam).</span>
+<span class="sd">    Converts spectral flux density in terms of frequency (f_nu)</span>
+<span class="sd">    to flux in terms of wavelength (flam).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (unyt_quantity/unyt_array)</span>
-<span class="sd">            The wavelength array the flux is defined at.</span>
+<span class="sd">            The wavelength array the flux density is defined at.</span>
 <span class="sd">        fnu (unyt_quantity/unyt_array)</span>
-<span class="sd">            The flux in terms of frequency.</span>
+<span class="sd">            The spectral flux density in terms of frequency.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        unyt_quantity/unyt_array</span>
-<span class="sd">            The flux in terms of wavlength.</span>
+<span class="sd">            The spectral flux density in terms of wavelength, in units</span>
+<span class="sd">            of erg / s / Hz / cm**2.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        IncorrectUnits</span>
@@ -531,10 +624,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Delta lambda</span>
-    <span class="n">lam_m</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">*</span> <span class="mf">1e-10</span>
-
-    <span class="k">return</span> <span class="n">fnu</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam_m</span><span class="p">)</span> <span class="o">/</span> <span class="n">lam</span></div>
+    <span class="k">return</span> <span class="p">((</span><span class="n">fnu</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg / s / angstrom / cm**2&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="absolute_mag_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.absolute_mag_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">absolute_mag_to_lnu</span><span class="p">(</span><span class="n">ab_mag</span><span class="p">):</span>
@@ -556,7 +646,7 @@
 
 
 <div class="viewcode-block" id="lnu_to_absolute_mag"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.lnu_to_absolute_mag">[docs]</a><span class="k">def</span> <span class="nf">lnu_to_absolute_mag</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert luminosity to absolute magnitude (M).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert spectral luminosity density to absolute magnitude (M).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        unyt_quantity/unyt_array</span>
