@@ -228,6 +228,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_create_image.html">Create image example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_observed_sed.html">Generate parametric observed SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_sed.html">Generate parametric galaxy SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_scale_by_luminosity.html">An example showing how to scale a galaxy’s mass by luminosity/flux.</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_equivalent_width.html">Plot equivalent width for UV indices</a></li>
 </ul>
 </li>
@@ -398,6 +399,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.sf_hist</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">SFHCommon</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.metal_dist</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">ZDistCommon</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span>
 
 
 <div class="viewcode-block" id="Stars"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.stars.html#synthesizer.parametric.stars.Stars">[docs]</a><span class="k">class</span> <span class="nc">Stars</span><span class="p">(</span><span class="n">StarsComponent</span><span class="p">):</span>
@@ -913,6 +915,121 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span><span class="s2">&quot;SFZH must be the same shape&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Stars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">sfzh</span><span class="o">=</span><span class="n">new_sfzh</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Stars.scale_mass_by_luminosity"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.stars.html#synthesizer.parametric.stars.Stars.scale_mass_by_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">scale_mass_by_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lum</span><span class="p">,</span> <span class="n">scale_filter</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scale the mass of the stellar population to match a luminosity in a</span>
+<span class="sd">        specific filter.</span>
+
+<span class="sd">        NOTE: This will overwrite the initial mass attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lum (unyt_quantity)</span>
+<span class="sd">                The desried luminosity in scale_filter.</span>
+<span class="sd">            scale_filter (Filter)</span>
+<span class="sd">                The filter in which lum is measured.</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The spectra key with which to do this scaling, e.g. &quot;incident&quot;</span>
+<span class="sd">                or &quot;emergent&quot;.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">            MissingSpectraType</span>
+<span class="sd">                If the requested spectra doesn&#39;t exist an error is thrown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check we have the spectra</span>
+        <span class="k">if</span> <span class="n">spectra_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The requested spectra type (</span><span class="si">{</span><span class="n">spectra_type</span><span class="si">}</span><span class="s2">) does not exist&quot;</span>
+                <span class="s2">&quot; in this stellar population. Have you called the &quot;</span>
+                <span class="s2">&quot;corresponding spectra method?&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Check we have units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lum</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lum must be given with unyt units&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the current luminosity in scale_filter</span>
+        <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+        <span class="n">current_lum</span> <span class="o">=</span> <span class="n">scale_filter</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the conversion ratio between the requested and current</span>
+        <span class="c1"># luminosity</span>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="n">lum</span> <span class="o">/</span> <span class="n">current_lum</span>
+
+        <span class="c1"># Apply conversion to the masses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_mass</span> <span class="o">*=</span> <span class="n">conversion</span>
+
+        <span class="c1"># Apply the conversion to all spectra</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">conversion</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="n">conversion</span>
+
+        <span class="c1"># Apply correction to the SFZH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">*=</span> <span class="n">conversion</span></div>
+
+<div class="viewcode-block" id="Stars.scale_mass_by_flux"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.stars.html#synthesizer.parametric.stars.Stars.scale_mass_by_flux">[docs]</a>    <span class="k">def</span> <span class="nf">scale_mass_by_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">scale_filter</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scale the mass of the stellar population to match a flux in a</span>
+<span class="sd">        specific filter.</span>
+
+<span class="sd">        NOTE: This will overwrite the initial mass attribute.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            flux (unyt_quantity)</span>
+<span class="sd">                The desried flux in scale_filter.</span>
+<span class="sd">            scale_filter (Filter)</span>
+<span class="sd">                The filter in which flux is measured.</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The spectra key with which to do this scaling, e.g. &quot;incident&quot;</span>
+<span class="sd">                or &quot;emergent&quot;.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">            MissingSpectraType</span>
+<span class="sd">                If the requested spectra doesn&#39;t exist an error is thrown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check we have the spectra</span>
+        <span class="k">if</span> <span class="n">spectra_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The requested spectra type (</span><span class="si">{</span><span class="n">spectra_type</span><span class="si">}</span><span class="s2">) does not exist&quot;</span>
+                <span class="s2">&quot; in this stellar population. Have you called the &quot;</span>
+                <span class="s2">&quot;corresponding spectra method?&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Check we have units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">flux</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lum must be given with unyt units&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Get the sed object</span>
+        <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+
+        <span class="c1"># Ensure we have a flux</span>
+        <span class="k">if</span> <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingSpectraType</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{spectra_type}</span><span class="s2"> does not have a flux! Make sure to&quot;</span>
+                <span class="s2">&quot; run Sed.get_fnu or Galaxy.get_observed_spectra&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Calculate the current flux in scale_filter</span>
+        <span class="n">current_flux</span> <span class="o">=</span> <span class="n">scale_filter</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="n">sed</span><span class="o">.</span><span class="n">obsnu</span><span class="p">)</span>
+
+        <span class="c1"># Calculate the conversion ratio between the requested and current</span>
+        <span class="c1"># flux</span>
+        <span class="n">conversion</span> <span class="o">=</span> <span class="n">flux</span> <span class="o">/</span> <span class="n">current_flux</span>
+
+        <span class="c1"># Apply conversion to the masses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_mass</span> <span class="o">*=</span> <span class="n">conversion</span>
+
+        <span class="c1"># Apply the conversion to all spectra</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">conversion</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">*=</span> <span class="n">conversion</span>
+
+        <span class="c1"># Apply correction to the SFZH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">*=</span> <span class="n">conversion</span></div>
 
 <div class="viewcode-block" id="Stars.plot_sfzh"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.stars.html#synthesizer.parametric.stars.Stars.plot_sfzh">[docs]</a>    <span class="k">def</span> <span class="nf">plot_sfzh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
