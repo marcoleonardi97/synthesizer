@@ -393,6 +393,7 @@
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">cm</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">rebin_1d</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
@@ -1305,7 +1306,7 @@
 <div class="viewcode-block" id="Sed.get_resampled_sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_resampled_sed">[docs]</a>    <span class="k">def</span> <span class="nf">get_resampled_sed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resample the spectra onto a new set of wavelength points.</span>
-<span class="sd">        </span>
+
 <span class="sd">        This resampling can either be done by an integer number of wavelength</span>
 <span class="sd">        elements per original wavelength element (i.e. up sampling),</span>
 <span class="sd">        or by providing a new wavelength grid to resample on to.</span>
@@ -1417,54 +1418,44 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spectra</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">transmission</span>
 
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Sed.calculate_ionising_photon_production_rate"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.calculate_ionising_photon_production_rate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_ionising_photon_production_rate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A function to calculate the ionising photon production rate.</span>
 
-<div class="viewcode-block" id="calculate_Q"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.calculate_Q">[docs]</a><span class="k">def</span> <span class="nf">calculate_Q</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">,</span> <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function to calculate the ionising production rate directly from</span>
-<span class="sd">    spectra.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            ionisation_energy (unyt_array)</span>
+<span class="sd">                The ionisation energy.</span>
+<span class="sd">            limit (float/int)</span>
+<span class="sd">                An upper bound on the number of subintervals</span>
+<span class="sd">                used in the integration adaptive algorithm.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        lam (array-like, float)</span>
-<span class="sd">            The wavelength array.</span>
-<span class="sd">        lnu (array-like, float)</span>
-<span class="sd">            The luminosity grid (erg/s/Hz).</span>
-<span class="sd">        ionisation_energy (unyt_array)</span>
-<span class="sd">            The ionisation energy.</span>
-<span class="sd">        limit (float/int)</span>
-<span class="sd">            An upper bound on the number of subintervals</span>
-<span class="sd">            used in the integration adaptive algorithm.</span>
+<span class="sd">        Returns</span>
+<span class="sd">            float</span>
+<span class="sd">                Ionising photon luminosity (s^-1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">        float</span>
-<span class="sd">            Ionising photon luminosity (s^-1).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+        <span class="c1"># Convert lnu to llam</span>
+        <span class="n">llam</span> <span class="o">=</span> <span class="n">lnu_to_llam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
 
-    <span class="c1"># Apply units if not present</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-        <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">*</span> <span class="n">angstrom</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-        <span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span>
+        <span class="c1"># Caculate ionisation wavelength</span>
+        <span class="n">ionisation_wavelength</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">ionisation_energy</span>
 
-    <span class="c1"># Convert lnu to llam</span>
-    <span class="n">llam</span> <span class="o">=</span> <span class="n">lnu</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="o">**</span><span class="mi">2</span>
+        <span class="c1"># Defintion integration arrays</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">llam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span>
 
-    <span class="c1"># Caculate ionisation wavelength</span>
-    <span class="n">ionisation_wavelength</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">ionisation_energy</span>
-
-    <span class="c1"># Defintion integration arrays</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">llam</span> <span class="o">*</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="p">(</span>
-        <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">x_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span>
-        <span class="mi">0</span><span class="p">,</span>
-        <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
-    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div></div>
 
 
 <div class="viewcode-block" id="plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.plot_spectra">[docs]</a><span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
