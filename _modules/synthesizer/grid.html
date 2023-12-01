@@ -550,7 +550,7 @@
 <span class="sd">            otherwise, this is a list of the requested lines.</span>
 <span class="sd">        read_spectra (bool/list)</span>
 <span class="sd">            Flag for whether to read spectra.</span>
-<span class="sd">        spectra (array-like, float)</span>
+<span class="sd">        spectra (dict, array-like, float)</span>
 <span class="sd">            The spectra array from the grid. This is an N-dimensional</span>
 <span class="sd">            grid where N is the number of axes of the SPS grid. The final</span>
 <span class="sd">            dimension is always wavelength.</span>
@@ -767,18 +767,17 @@
 
         <span class="c1"># Loop over spectra to interpolate</span>
         <span class="k">for</span> <span class="n">spectra_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
-
             <span class="c1"># Are we doing the look up in one go, or looping?</span>
             <span class="k">if</span> <span class="n">loop_grid</span><span class="p">:</span>
                 <span class="n">new_spectra</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span>
-                
+
                 <span class="c1"># Loop over first axis of spectra array</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_spec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]):</span>
                     <span class="n">new_spectra</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">_spec</span><span class="p">)</span>
-               
-                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> 
+
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
                 <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_spectra</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>    
+            <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Evaluate the function at the desired wavelengths</span>
                 <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span>
 
@@ -1112,7 +1111,23 @@
         <span class="n">delta_lambda</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="c1"># Return tuple of wavelengths and delta lambda</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">delta_lambda</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">delta_lambda</span></div>
+
+<div class="viewcode-block" id="Grid.get_sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_sed">[docs]</a>    <span class="k">def</span> <span class="nf">get_sed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the spectra grid as an Sed object enabling grid wide</span>
+<span class="sd">        use of Sed methods for flux, photometry, indices, ionising photons</span>
+<span class="sd">        etc.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spectra_type (string)</span>
+<span class="sd">                The key of the spectra grid to extract as an Sed object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Sed</span>
+<span class="sd">                The spectra grid as an Sed object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span></div></div>
 </pre></div>
         </article>
       </div>
