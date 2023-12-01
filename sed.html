@@ -438,7 +438,7 @@ SUMMARY OF SED
 Number of wavelength points: 8228
 Wavelength range: [0.00 Å,             299293000000.00 Å]
 log10(Peak luminosity/erg/(Hz*s)):             29.49
-log10(Bolometric luminosity/erg/s):             44.85
+log10(Bolometric luminosity/             erg/s):             36.85
 ----------
 </pre></div></div>
 </div>
@@ -588,7 +588,7 @@ unyt_quantity(7.01614831e+44, &#39;erg/s&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:431: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:467: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
   If increasing the limit yields no improvement it is advised to analyze
   the integrand in order to determine the difficulties.  If the position of a
   local difficulty can be determined (singularity, discontinuity) one will
@@ -722,7 +722,7 @@ unyt_quantity(1.51428348e+29, &#39;erg/(Hz*s)&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:562: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:599: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
   If increasing the limit yields no improvement it is advised to analyze
   the integrand in order to determine the difficulties.  If the position of a
   local difficulty can be determined (singularity, discontinuity) one will
@@ -861,7 +861,7 @@ unyt_quantity(5.80884398, &#39;Å&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:1081: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:1118: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
   the requested tolerance from being achieved.  The error may be
   underestimated.
   return integrate.quad(
@@ -1235,6 +1235,64 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 <div class="output_area docutils container">
 <img alt="_images/sed_71_0.png" src="_images/sed_71_0.png" />
 </div>
+</div>
+<p>If you have an attenuated SED, a natural quantity to calculate is the extinction of that spectra (<span class="math notranslate nohighlight">\(A\)</span>). This can be done either at the wavelengths of the <code class="docutils literal notranslate"><span class="pre">Sed</span></code>, an arbitrary wavelength/wavelength array, or at commonly used values (1500 and 5500 angstrom) using functions available in the <code class="docutils literal notranslate"><span class="pre">sed</span></code> module. Note that these functions return the extinction/attenuation in magnitudes. Below is a demonstration.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">um</span><span class="p">,</span> <span class="n">angstrom</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">get_attenuation</span><span class="p">,</span> <span class="n">get_attenuation_at_lam</span><span class="p">,</span> <span class="n">get_attenuation_at_1500</span><span class="p">,</span> <span class="n">get_attenuation_at_5500</span>
+
+<span class="c1"># Get an intrinsic spectra</span>
+<span class="n">grid_point</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_grid_point</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">))</span>
+<span class="n">int_sed</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">spectra_id</span><span class="o">=</span><span class="s1">&#39;incident&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get the attenuated spectra</span>
+<span class="n">att_sed</span> <span class="o">=</span> <span class="n">int_sed</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span><span class="n">tau_v</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+<span class="c1"># Get attenuation at sed.lam</span>
+<span class="n">attenuation</span> <span class="o">=</span> <span class="n">get_attenuation</span><span class="p">(</span><span class="n">int_sed</span><span class="p">,</span> <span class="n">att_sed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">attenuation</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">attenuation</span><span class="p">)])</span>
+
+<span class="c1"># Get attenuation at 5 microns</span>
+<span class="n">att_at_5</span> <span class="o">=</span> <span class="n">get_attenuation_at_lam</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">um</span><span class="p">,</span> <span class="n">int_sed</span><span class="p">,</span> <span class="n">att_sed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">att_at_5</span><span class="p">)</span>
+
+<span class="c1"># Get attenuation at an arbitrary range of wavelengths</span>
+<span class="n">att_at_range</span> <span class="o">=</span> <span class="n">get_attenuation_at_lam</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">int_sed</span><span class="p">,</span> <span class="n">att_sed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">att_at_range</span><span class="p">)</span>
+
+<span class="c1"># Get attenuation at 1500 angstrom</span>
+<span class="n">att_at_1500</span> <span class="o">=</span> <span class="n">get_attenuation_at_1500</span><span class="p">(</span><span class="n">int_sed</span><span class="p">,</span> <span class="n">att_sed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">att_at_1500</span><span class="p">)</span>
+
+<span class="c1"># Get attenuation at 5500 angstrom</span>
+<span class="n">att_at_5500</span> <span class="o">=</span> <span class="n">get_attenuation_at_5500</span><span class="p">(</span><span class="n">int_sed</span><span class="p">,</span> <span class="n">att_sed</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">att_at_5500</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[       inf        inf        inf ... 0.04221877 0.04207831 0.04193828]
+0.08360170415641599
+[0.83601817 0.66881427 0.5573455  0.47772428 0.41800898]
+2.786725867509981
+0.7600168668767144
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1938: RuntimeWarning: invalid value encountered in divide
+  out_arr = func(
+</pre></div></div>
 </div>
 </section>
 </section>

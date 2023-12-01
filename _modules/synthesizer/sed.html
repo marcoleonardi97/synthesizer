@@ -398,6 +398,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">rebin_1d</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span>
 
 
 <div class="viewcode-block" id="Sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed">[docs]</a><span class="k">class</span> <span class="nc">Sed</span><span class="p">:</span>
@@ -412,6 +413,8 @@
 <span class="sd">            The rest frame frequency array.</span>
 <span class="sd">        lnu (Quantity, array-like, float)</span>
 <span class="sd">            The spectral luminosity density.</span>
+<span class="sd">        bolometric_luminosity (Quantity, float)</span>
+<span class="sd">            The bolometric luminosity.</span>
 <span class="sd">        fnu (Quantity, array-like, float)</span>
 <span class="sd">            The spectral flux density.</span>
 <span class="sd">        obslam (Quantity, array-like, float)</span>
@@ -439,6 +442,7 @@
     <span class="n">obslam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">luminosity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">llam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -446,9 +450,11 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            lam (array-like, float)</span>
-<span class="sd">                The rest frame wavelength array.</span>
+<span class="sd">                The rest frame wavelength array. Default units are defined</span>
+<span class="sd">                in `synthesizer.units`. If unmodified these will be Angstroms.</span>
 <span class="sd">            lnu (array-like, float)</span>
-<span class="sd">                The spectral luminosity density.</span>
+<span class="sd">                The spectral luminosity density. Default units are defined in</span>
+<span class="sd">                `synthesizer.units`. If unmodified these will be erg/s/Hz</span>
 <span class="sd">            description (string)</span>
 <span class="sd">                An optional descriptive string defining the Sed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -457,17 +463,41 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
         <span class="c1"># Set the wavelength</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span>  <span class="c1"># \AA</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>  <span class="c1"># \AA</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;`lam` must be a unyt_array, list, list of &quot;</span>
+                    <span class="s2">&quot;lists, or N-d numpy array&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Calculate frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span>
 
         <span class="c1"># If no lnu is provided create an empty array with the same shape as</span>
         <span class="c1"># lam.</span>
         <span class="k">if</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lnu</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;`lnu` must be a unyt_array, list, list &quot;</span>
+                        <span class="s2">&quot;of lists, or N-d numpy array&quot;</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
-        <span class="c1"># Calculate frequency</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># Hz</span>
+        <span class="c1"># Measure the bolometric luminosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
 
         <span class="c1"># Redshift of the SED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="mi">0</span>
@@ -628,9 +658,15 @@
 <span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">] </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Peak luminosity/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
 <span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Bolometric luminosity/</span><span class="si">{</span><span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
-<span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">bolometric_luminosity</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># if bolometric luminosity attribute has not been calculated,</span>
+        <span class="c1"># calculate it.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(Bolometric luminosity/ </span><span class="se">\</span>
+<span class="s2">            </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="se">\</span>
+<span class="s2">            </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span>
 
         <span class="k">return</span> <span class="n">pstr</span>
@@ -808,6 +844,7 @@
                 <span class="s2">&quot;Options are &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
             <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">bolometric_luminosity</span>
         <span class="k">return</span> <span class="n">bolometric_luminosity</span></div>
 
 <div class="viewcode-block" id="Sed.measure_window_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
@@ -1418,7 +1455,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spectra</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">transmission</span>
 
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">spectra</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.calculate_ionising_photon_production_rate"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.calculate_ionising_photon_production_rate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_ionising_photon_production_rate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1784,6 +1821,128 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="get_transmission"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_transmission">[docs]</a><span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate transmission as a function of wavelength from an attenuated and</span>
+<span class="sd">    an intrinsic sed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        intrinsic_sed (Sed)</span>
+<span class="sd">            The intrinsic spectra object.</span>
+<span class="sd">        attenuated_sed (Sed)</span>
+<span class="sd">            The attenuated spectra object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array-like, float</span>
+<span class="sd">            The transmission array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ensure wavelength arrays are equal</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">attenuated_sed</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">_lam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="s2">&quot;Wavelength arrays of input spectra must be the same!&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">attenuated_sed</span><span class="o">.</span><span class="n">lnu</span> <span class="o">/</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">lnu</span></div>
+
+
+<div class="viewcode-block" id="get_attenuation"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_attenuation">[docs]</a><span class="k">def</span> <span class="nf">get_attenuation</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate attenuation as a function of wavelength</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        intrinsic_sed (Sed)</span>
+<span class="sd">            The intrinsic spectra object.</span>
+<span class="sd">        attenuated_sed (Sed)</span>
+<span class="sd">            The attenuated spectra object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array-like, float</span>
+<span class="sd">            The attenuation array in magnitudes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate the transmission array</span>
+    <span class="n">transmission</span> <span class="o">=</span> <span class="n">get_transmission</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="o">-</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_attenuation_at_lam"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_attenuation_at_lam">[docs]</a><span class="k">def</span> <span class="nf">get_attenuation_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate attenuation at a given wavelength</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lam (float/array-like, float)</span>
+<span class="sd">            The wavelength/s at which to evaluate the attenuation in</span>
+<span class="sd">            the same units as sed.lam (by default angstrom).</span>
+<span class="sd">        intrinsic_sed (Sed)</span>
+<span class="sd">            The intrinsic spectra object.</span>
+<span class="sd">        attenuated_sed (Sed)</span>
+<span class="sd">            The attenuated spectra object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float/array-like, float</span>
+<span class="sd">            The attenuation at the passed wavelength/s in magnitudes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Enusre we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Ensure lam is in the same units as the sed</span>
+    <span class="k">if</span> <span class="n">lam</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+
+    <span class="c1"># Calcilate the transmission array</span>
+    <span class="n">attenuation</span> <span class="o">=</span> <span class="n">get_attenuation</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">attenuation</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_attenuation_at_5500"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_attenuation_at_5500">[docs]</a><span class="k">def</span> <span class="nf">get_attenuation_at_5500</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate rest-frame FUV attenuation at 5500 angstrom.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        intrinsic_sed (Sed)</span>
+<span class="sd">            The intrinsic spectra object.</span>
+<span class="sd">        attenuated_sed (Sed)</span>
+<span class="sd">            The attenuated spectra object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">         float</span>
+<span class="sd">            The attenuation at rest-frame 5500 angstrom in magnitudes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">get_attenuation_at_lam</span><span class="p">(</span>
+        <span class="mf">5500.0</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span>
+        <span class="n">intrinsic_sed</span><span class="p">,</span>
+        <span class="n">attenuated_sed</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_attenuation_at_1500"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_attenuation_at_1500">[docs]</a><span class="k">def</span> <span class="nf">get_attenuation_at_1500</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate rest-frame FUV attenuation at 1500 angstrom.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        intrinsic_sed (Sed)</span>
+<span class="sd">            The intrinsic spectra object.</span>
+<span class="sd">        attenuated_sed (Sed)</span>
+<span class="sd">            The attenuated spectra object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">         float</span>
+<span class="sd">            The attenuation at rest-frame 1500 angstrom in magnitudes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">get_attenuation_at_lam</span><span class="p">(</span>
+        <span class="mf">1500.0</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span>
+        <span class="n">intrinsic_sed</span><span class="p">,</span>
+        <span class="n">attenuated_sed</span><span class="p">,</span>
+    <span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

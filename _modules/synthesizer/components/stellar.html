@@ -927,6 +927,7 @@
         <span class="n">young_old_thresh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">dust_emission_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -962,6 +963,9 @@
 <span class="sd">            label (string)</span>
 <span class="sd">                A modifier for the spectra dictionary key such that the</span>
 <span class="sd">                key is label + &quot;_transmitted&quot;.</span>
+<span class="sd">            dust_emisison_model (object)</span>
+<span class="sd">                Instance of a dust_emission_model from</span>
+<span class="sd">                synthesizer.dust.emission.</span>
 <span class="sd">            kwargs</span>
 <span class="sd">                Any keyword arguments which can be passed to</span>
 <span class="sd">                generate_lnu.</span>
@@ -983,6 +987,10 @@
 <span class="sd">            attenuated</span>
 <span class="sd">            emergent</span>
 
+<span class="sd">            if dust_emission_model provided:</span>
+<span class="sd">                dust</span>
+<span class="sd">                total</span>
+
 <span class="sd">            if CF00:</span>
 <span class="sd">                young_incident</span>
 <span class="sd">                young_escaped</span>
@@ -1001,9 +1009,16 @@
 <span class="sd">                old_attenuated</span>
 <span class="sd">                old_emergent</span>
 
+<span class="sd">                if dust_emission_model provided:</span>
+<span class="sd">                    young_dust</span>
+<span class="sd">                    young_total</span>
+<span class="sd">                    old_dust</span>
+<span class="sd">                    old_total</span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
-<span class="sd">                A Sed object containing the emergent spectra.</span>
+<span class="sd">                A Sed object containing the emergent or total spectra depending</span>
+<span class="sd">                on whether a dust_emission_model is provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Ensure we have a compatible set of parameters</span>
@@ -1122,6 +1137,14 @@
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">):</span>
             <span class="c1"># Single screen dust, no separate birth cloud attenuation</span>
+            <span class="c1"># Generates:</span>
+            <span class="c1">#   - attenuated</span>
+            <span class="c1">#   - emergent</span>
+
+            <span class="c1"># if dust_emission_model:</span>
+            <span class="c1">#   - dust</span>
+            <span class="c1">#   - total</span>
+  
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span>
 
             <span class="c1"># Calculate the attenuated emission</span>
@@ -1130,11 +1153,65 @@
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attenuated</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+
+            <span class="c1"># Set emergent spectra based on fesc (for all particles)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fesc</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;escaped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Force updating of the bolometric luminosity attribute. I don&#39;t </span>
+            <span class="c1"># know why this is necessary.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">dust_emission_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="c1"># Calculate the dust bolometric luminosity as the difference</span>
+                <span class="c1"># between the emergent and incident bolometric luminosities.</span>
+
+                <span class="n">dust_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">-</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span>
+
+                <span class="c1"># Get normalised dust spectrum, this is an synthesizer.sed.Sed</span>
+                <span class="c1"># object.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;dust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dust_emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+                    <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+
+                <span class="c1"># scale the dust spectra by the dust_bolometric_luminosity</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;dust&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span>
+
+                <span class="c1"># define total as the sum of emergent and dust</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;dust&#39;</span><span class="p">]</span> <span class="o">+</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;emergent&#39;</span><span class="p">])</span>
+            
         <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">tau_v</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="c1"># Apply separate attenuation to both the young and old components.</span>
 
             <span class="c1"># Two screen dust, one for diffuse ISM, the other for birth cloud</span>
             <span class="c1"># dust.</span>
+
+            <span class="c1"># Generates:</span>
+            <span class="c1">#   - young_attenuated_BC </span>
+            <span class="c1">#   - young_attenuated</span>
+            <span class="c1">#   - young_emergent</span>
+            <span class="c1">#   - old_attenuated</span>
+            <span class="c1">#   - old_emergent</span>
+            <span class="c1">#   - attenuated</span>
+            <span class="c1">#   - emergent</span>
+
+            <span class="c1"># if dust_emission_model:</span>
+            <span class="c1">#   - young_dust</span>
+            <span class="c1">#   - old_dust</span>
+            <span class="c1">#   - young_total</span>
+            <span class="c1">#   - old_total</span>
+            <span class="c1">#   - total</span>
+
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="p">(</span>
@@ -1153,12 +1230,13 @@
 
             <span class="c1"># Calculate attenuated spectra of young stars</span>
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># use the BC slope</span>
-            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
+            <span class="n">young_attenuated_BC</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
                 <span class="sa">f</span><span class="s2">&quot;young_</span><span class="si">{</span><span class="n">reprocessed_name</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span><span class="n">tau_v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated_BC&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated_BC</span>
 
             <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># use the ISM slope</span>
-            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="n">young_attenuated</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+            <span class="n">young_attenuated</span> <span class="o">=</span> <span class="n">young_attenuated_BC</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
                 <span class="n">tau_v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated</span>
@@ -1170,6 +1248,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_attenuated</span>
 
             <span class="c1"># Get the combined attenuated spectra</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated</span> <span class="o">+</span> <span class="n">old_attenuated</span>
+
+            <span class="c1"># Get the combined escaping spectra</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">young_attenuated</span> <span class="o">+</span> <span class="n">old_attenuated</span>
 
             <span class="c1"># Set emergent spectra based on fesc (for young and old particles)</span>
@@ -1190,16 +1271,88 @@
                     <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
                 <span class="p">)</span>
 
-        <span class="c1"># Set emergent spectra based on fesc (for all particles)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">fesc</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;escaped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
-            <span class="p">)</span>
+            <span class="c1"># Force updating of the bolometric luminosity attribute. I don&#39;t </span>
+            <span class="c1"># know why this is necessary.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span></div>
+            <span class="k">if</span> <span class="n">dust_emission_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dust_emission_model</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;Separate dust emission model for diffuse and &quot;</span>
+                            <span class="s2">&quot;birth cloud dust not given&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                
+                    <span class="n">dust_emission_model</span> <span class="o">=</span> <span class="p">[</span><span class="n">dust_emission_model</span><span class="p">,</span>
+                                            <span class="n">dust_emission_model</span><span class="p">]</span>
+     
+                <span class="c1"># Start with the birth cloud dust.</span>
+                <span class="n">dust_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_transmitted&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">-</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated_BC&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust_BC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">dust_emission_model</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+
+                <span class="c1"># Scale the dust spectra by the dust_bolometric_luminosity.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust_BC&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="p">(</span>
+                    <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+                <span class="c1"># ISM dust heated by young stars. This is the difference </span>
+                <span class="c1"># between the birth cloud and ISM attenuated spectra.</span>
+                <span class="n">dust_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated_BC&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">-</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust_ISM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">dust_emission_model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+
+                <span class="c1"># Scale the dust spectra by the dust_bolometric_luminosity.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust_ISM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="p">(</span>
+                    <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                
+                <span class="c1"># Combine both dust components for young stars</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_dust_BC&quot;</span><span class="p">]</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_dust_ISM&quot;</span><span class="p">])</span>
+
+                <span class="c1"># Combine both dust components for young stars</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_emergent&#39;</span><span class="p">]</span> <span class="o">+</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust&#39;</span><span class="p">])</span>
+                
+                <span class="c1"># ISM dust heated by old stars. </span>
+                <span class="n">dust_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_transmitted&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">-</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">dust_emission_model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+
+                <span class="c1"># Scale the dust spectra by the dust_bolometric_luminosity.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="p">(</span>
+                    <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                
+                <span class="c1"># Combine both dust components for young stars</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_emergent&#39;</span><span class="p">]</span> <span class="o">+</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">])</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;dust&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_dust&#39;</span><span class="p">]</span>
+                                        <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">])</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;young_total&#39;</span><span class="p">]</span>
+                                         <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;old_total&#39;</span><span class="p">])</span>
+                    
+        <span class="c1"># Return total spectra if a dust_emission_model is provided, otherwise</span>
+        <span class="c1"># return the emergent spectra.      </span>
+        <span class="k">if</span> <span class="n">dust_emission_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="StarsComponent.get_spectra_CharlotFall"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra_CharlotFall">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_CharlotFall</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

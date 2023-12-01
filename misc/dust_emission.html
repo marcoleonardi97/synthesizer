@@ -375,35 +375,43 @@
           <section id="Dust-emission">
 <h1>Dust emission<a class="headerlink" href="#Dust-emission" title="Permalink to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> has the capability of creating a dust emission spectrum using a simple energy balance approach.</p>
-<section id="Dust-emission-models">
-<h2>Dust emission models<a class="headerlink" href="#Dust-emission-models" title="Permalink to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> contains a handful of dust emission models, let’s explore these first:</p>
+<section id="Emission-models">
+<h2>Emission models<a class="headerlink" href="#Emission-models" title="Permalink to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Synthesizer</span></code> contains a handful of dust emission models (and will be extended with more).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.dust</span> <span class="kn">import</span> <span class="n">emission</span> <span class="k">as</span> <span class="n">dust</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.dust.emission</span> <span class="kn">import</span> <span class="n">Blackbody</span><span class="p">,</span> <span class="n">Greybody</span><span class="p">,</span> <span class="n">Casey12</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">um</span><span class="p">,</span> <span class="n">K</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">K</span>
 </pre></div>
 </div>
 </div>
+<p>Define a wavelength grid:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">um</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">lam</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">))</span> <span class="o">*</span> <span class="n">Angstrom</span>
 </pre></div>
 </div>
 </div>
+<section id="Blackbody">
+<h3>Blackbody<a class="headerlink" href="#Blackbody" title="Permalink to this heading">#</a></h3>
+<p>First let’s explore simple blackbody models. By default a dust emission model provides a normalised spectrum.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">]:</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">dust</span><span class="o">.</span><span class="n">Blackbody</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lam</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Blackbody</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s1"> K&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <br/></pre></div>
 </div>
 </div>
@@ -420,7 +428,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/misc_dust_emission_4_1.png" src="../_images/misc_dust_emission_4_1.png" />
+<img alt="../_images/misc_dust_emission_6_1.png" src="../_images/misc_dust_emission_6_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -428,32 +436,20 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">]:</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">dust</span><span class="o">.</span><span class="n">Greybody</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lam</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Greybody</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">)</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s1"> K&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[0.00000000e+000 0.00000000e+000 8.58659413e-210 ... 6.66385754e-017
- 6.66150747e-017 6.65915847e-017] erg
-[1.73429373e-251 6.68287836e-128 4.69681433e-087 ... 1.01890873e-018
- 1.01854486e-018 1.01818115e-018] erg
-[3.34076153e-128 4.21111340e-067 4.39346286e-047 ... 4.26191319e-020
- 4.26038496e-020 4.25885742e-020] erg
-[2.10593941e-67 1.51828259e-37 6.10306124e-28 ... 1.77044319e-21
- 1.76980707e-21 1.76917123e-21] erg
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/misc_dust_emission_5_1.png" src="../_images/misc_dust_emission_5_1.png" />
+<img alt="../_images/misc_dust_emission_7_0.png" src="../_images/misc_dust_emission_7_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -461,8 +457,12 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">25</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">]:</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">dust</span><span class="o">.</span><span class="n">Casey12</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lam</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Casey12</span><span class="p">(</span><span class="n">T</span><span class="o">*</span><span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">T</span><span class="si">}</span><span class="s1"> K&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -470,9 +470,10 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/misc_dust_emission_6_0.png" src="../_images/misc_dust_emission_6_0.png" />
+<img alt="../_images/misc_dust_emission_8_0.png" src="../_images/misc_dust_emission_8_0.png" />
 </div>
 </div>
+</section>
 </section>
 </section>
 
@@ -514,7 +515,10 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Dust emission</a><ul>
-<li><a class="reference internal" href="#Dust-emission-models">Dust emission models</a></li>
+<li><a class="reference internal" href="#Emission-models">Emission models</a><ul>
+<li><a class="reference internal" href="#Blackbody">Blackbody</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

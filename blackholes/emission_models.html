@@ -459,20 +459,20 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;hydrogen_density_blr&#39;,
- &#39;covering_fraction_blr&#39;,
- &#39;hydrogen_density_nlr&#39;,
- &#39;theta_torus&#39;,
+[&#39;covering_fraction_nlr&#39;,
  &#39;ionisation_parameter_nlr&#39;,
- &#39;covering_fraction_nlr&#39;,
- &#39;cosine_inclination&#39;,
- &#39;mass&#39;,
- &#39;bolometric_luminosity&#39;,
- &#39;metallicity&#39;,
- &#39;velocity_dispersion_blr&#39;,
+ &#39;hydrogen_density_nlr&#39;,
+ &#39;ionisation_parameter_blr&#39;,
+ &#39;theta_torus&#39;,
+ &#39;covering_fraction_blr&#39;,
  &#39;velocity_dispersion_nlr&#39;,
+ &#39;bolometric_luminosity&#39;,
  &#39;accretion_rate_eddington&#39;,
- &#39;ionisation_parameter_blr&#39;]
+ &#39;velocity_dispersion_blr&#39;,
+ &#39;hydrogen_density_blr&#39;,
+ &#39;metallicity&#39;,
+ &#39;cosine_inclination&#39;,
+ &#39;mass&#39;]
 </pre></div></div>
 </div>
 <p>Parameters fixed at initialisation:</p>
@@ -516,11 +516,11 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;cosine_inclination&#39;,
- &#39;mass&#39;,
- &#39;bolometric_luminosity&#39;,
+[&#39;bolometric_luminosity&#39;,
+ &#39;accretion_rate_eddington&#39;,
  &#39;metallicity&#39;,
- &#39;accretion_rate_eddington&#39;]
+ &#39;cosine_inclination&#39;,
+ &#39;mass&#39;]
 </pre></div></div>
 </div>
 <p>For the UnifiedAGN model a handful of spectra can be created (and returned) if desired:</p>
@@ -546,7 +546,7 @@
  &#39;nlr&#39;,
  &#39;blr&#39;,
  &#39;torus&#39;,
- &#39;total&#39;]
+ &#39;intrinsic&#39;]
 </pre></div></div>
 </div>
 <section id="Generating-spectra">
@@ -569,18 +569,19 @@
   out_arr = func(np.asarray(inp), out=out_func, **kwargs)
 </pre></div></div>
 </div>
+<p>Note, the combined spectra from the AGN is labelled as “intrinsic”. While moderately confusing this is to align with the labelling of stellar population spectra. When associated with a galaxy the “emergent”, “dust”, and “total” spectra can be generated if diffuse dust attenuation (and emission) is specified.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;disc_incident&#39;</span><span class="p">,</span> <span class="s1">&#39;disc&#39;</span><span class="p">,</span> <span class="s1">&#39;blr&#39;</span><span class="p">,</span> <span class="s1">&#39;nlr&#39;</span><span class="p">,</span> <span class="s1">&#39;torus&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">]:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;disc_incident&#39;</span><span class="p">,</span> <span class="s1">&#39;disc&#39;</span><span class="p">,</span> <span class="s1">&#39;blr&#39;</span><span class="p">,</span> <span class="s1">&#39;nlr&#39;</span><span class="p">,</span> <span class="s1">&#39;torus&#39;</span><span class="p">,</span> <span class="s1">&#39;intrinsic&#39;</span><span class="p">]:</span>
 
     <span class="n">sed</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
 
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="nb">id</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">+</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">+</span><span class="mf">0.2</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\log_</span><span class="si">{10}</span><span class="s1">(\lambda/\AA)$&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\log_</span><span class="si">{10}</span><span class="s1">(\nu L_{\nu})$&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -601,7 +602,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/blackholes_emission_models_19_1.png" src="../_images/blackholes_emission_models_19_1.png" />
+<img alt="../_images/blackholes_emission_models_20_1.png" src="../_images/blackholes_emission_models_20_1.png" />
 </div>
 </div>
 </section>
@@ -617,7 +618,7 @@
     <span class="n">cosine_inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">inclination</span><span class="o">*</span><span class="n">deg</span><span class="p">)</span><span class="o">.</span><span class="n">to_value</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">))</span>
     <span class="n">parameters_dict</span><span class="p">,</span> <span class="n">spectra</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">mass</span><span class="o">=</span><span class="mf">1E9</span><span class="p">,</span> <span class="n">accretion_rate_eddington</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">cosine_inclination</span><span class="o">=</span><span class="n">cosine_inclination</span><span class="p">,</span> <span class="n">metallicity</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 
-    <span class="n">sed</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;intrinsic&#39;</span><span class="p">]</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="n">inclination</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
@@ -633,7 +634,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/blackholes_emission_models_21_0.png" src="../_images/blackholes_emission_models_21_0.png" />
+<img alt="../_images/blackholes_emission_models_22_0.png" src="../_images/blackholes_emission_models_22_0.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
