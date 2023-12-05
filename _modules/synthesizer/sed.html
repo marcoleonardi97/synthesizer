@@ -683,6 +683,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the spectra in terms fo flux</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            flux (unyt_array)</span>
+<span class="sd">                The flux array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">llam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the spectral luminosity density per Angstrom.</span>
@@ -1505,12 +1516,14 @@
     <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
     <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">draw_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">x_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">y_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots either a specific spectra or all spectra provided in a dictionary.</span>
+<span class="sd">    The plotted &quot;type&quot; of spectra is defined by the quantity_to_plot keyword</span>
+<span class="sd">    arrgument which defaults to &quot;lnu&quot;.</span>
 
 <span class="sd">    This is a generic plotting function to be used either directly or to be</span>
 <span class="sd">    wrapped by helper methods through Synthesizer.</span>
@@ -1543,9 +1556,6 @@
 <span class="sd">            spectra.</span>
 <span class="sd">        draw_legend (bool)</span>
 <span class="sd">            Whether to draw the legend.</span>
-<span class="sd">        rest_frame (bool)</span>
-<span class="sd">            Whether to plot the rest frame spectra. If False the observed</span>
-<span class="sd">            spectra is plotted.</span>
 <span class="sd">        x_units (unyt.unit_object.Unit)</span>
 <span class="sd">            The units of the x axis. This will be converted to a string</span>
 <span class="sd">            and included in the axis label. By default the internal unit system</span>
@@ -1554,6 +1564,10 @@
 <span class="sd">            The units of the y axis. This will be converted to a string</span>
 <span class="sd">            and included in the axis label. By default the internal unit system</span>
 <span class="sd">            is assumed unless this is passed.</span>
+<span class="sd">        quantity_to_plot (string)</span>
+<span class="sd">            The sed property to plot. Can be &quot;lnu&quot;, &quot;luminosity&quot; or &quot;llam&quot;</span>
+<span class="sd">            for rest frame spectra or &quot;fnu&quot;, &quot;flam&quot; or &quot;flux&quot; for observed</span>
+<span class="sd">            spectra. Defaults to &quot;lnu&quot;.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        fig (matplotlib.pyplot.figure)</span>
@@ -1561,6 +1575,23 @@
 <span class="sd">        ax (matplotlib.axes)</span>
 <span class="sd">            The matplotlib axes object containing the plotted data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check we have been given a valid quantity_to_plot</span>
+    <span class="k">if</span> <span class="n">quantity_to_plot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="s2">&quot;lnu&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;llam&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;luminosity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fnu&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;flam&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;flux&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantity_to_plot</span><span class="si">}</span><span class="s2"> is not a valid quantity_to_plot&quot;</span>
+            <span class="s2">&quot;(can be &#39;fnu&#39; or &#39;flam&#39;)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Are we plotting in the rest_frame?</span>
+    <span class="n">rest_frame</span> <span class="o">=</span> <span class="n">quantity_to_plot</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span> <span class="s2">&quot;llam&quot;</span><span class="p">,</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">)</span>
 
     <span class="c1"># Make a singular Sed a dictionary for ease below</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
@@ -1594,7 +1625,6 @@
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Get the appropriate luminosity/flux and wavelengths</span>
         <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
-            <span class="n">plt_spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lnu</span>
             <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Ensure we have fluxes</span>
@@ -1604,8 +1634,9 @@
                 <span class="p">)</span>
 
             <span class="c1"># Ok everything is fine</span>
-            <span class="n">plt_spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span>
             <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span>
+
+        <span class="n">plt_spectra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="p">)</span>
 
         <span class="c1"># Prettify the label</span>
         <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
@@ -1620,11 +1651,14 @@
 
         <span class="c1"># Loop over spectra and get the total required limits</span>
         <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="c1"># Get the maximum</span>
-            <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
-                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span><span class="p">)</span>
+            <span class="c1"># Get the maximum ignoring infinites</span>
+            <span class="n">okinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="kc">True</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">okinds</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">max_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="p">)[</span><span class="n">okinds</span><span class="p">])</span>
 
             <span class="c1"># Derive the x limits</span>
             <span class="n">y_up</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">max_val</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.05</span><span class="p">)</span>
@@ -1644,10 +1678,12 @@
         <span class="c1"># Loop over spectra and get the total required limits</span>
         <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="c1"># Derive the x limits from data above the ylimits</span>
+            <span class="n">plt_spectra</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="p">)</span>
+            <span class="n">lam_mask</span> <span class="o">=</span> <span class="n">plt_spectra</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
-                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">lam_mask</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">[</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">&gt;</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">lams_above</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">[</span><span class="n">lam_mask</span><span class="p">]</span>
 
             <span class="c1"># Saftey skip if no values are above the limit</span>
             <span class="k">if</span> <span class="n">lams_above</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1680,16 +1716,28 @@
         <span class="n">y_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">plt_spectra</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">y_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">y_units</span><span class="p">)</span>
-    <span class="n">x_units</span> <span class="o">=</span> <span class="n">x_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; \ &quot;</span><span class="p">)</span>
-    <span class="n">y_units</span> <span class="o">=</span> <span class="n">y_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; \ &quot;</span><span class="p">)</span>
+    <span class="n">x_units</span> <span class="o">=</span> <span class="n">x_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="n">y_units</span> <span class="o">=</span> <span class="n">y_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
 
-    <span class="c1"># Label the axes</span>
+    <span class="c1"># Label the x axis</span>
     <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L_{\nu}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda_\mathrm</span><span class="si">{obs}</span><span class="s2">/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Label the y axis handling all possibilities</span>
+    <span class="k">if</span> <span class="n">quantity_to_plot</span> <span class="o">==</span> <span class="s2">&quot;lnu&quot;</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L_{\nu}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">quantity_to_plot</span> <span class="o">==</span> <span class="s2">&quot;llam&quot;</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L_{\lambda}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">quantity_to_plot</span> <span class="o">==</span> <span class="s2">&quot;luminosity&quot;</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">quantity_to_plot</span> <span class="o">==</span> <span class="s2">&quot;fnu&quot;</span><span class="p">:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F_{\nu}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">quantity_to_plot</span> <span class="o">==</span> <span class="s2">&quot;flam&quot;</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F_{\lambda}/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
 
     <span class="c1"># Are we showing?</span>
     <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
@@ -1712,6 +1760,7 @@
     <span class="n">x_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">y_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s2">&quot;fnu&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plots either a specific observed spectra or all observed spectra</span>
@@ -1763,6 +1812,9 @@
 <span class="sd">        filters (FilterCollection)</span>
 <span class="sd">            If given then the photometry is computed and both the photometry</span>
 <span class="sd">            and filter curves are plotted</span>
+<span class="sd">        quantity_to_plot (string)</span>
+<span class="sd">            The sed property to plot. Can be &quot;fnu&quot;, &quot;flam&quot;, or &quot;flux&quot;.</span>
+<span class="sd">            Defaults to &quot;fnu&quot;.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        fig (matplotlib.pyplot.figure)</span>
@@ -1770,6 +1822,13 @@
 <span class="sd">        ax (matplotlib.axes)</span>
 <span class="sd">            The matplotlib axes object containing the plotted data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check we have been given a valid quantity_to_plot</span>
+    <span class="k">if</span> <span class="n">quantity_to_plot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;fnu&quot;</span><span class="p">,</span> <span class="s2">&quot;flam&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">quantity_to_plot</span><span class="si">}</span><span class="s2"> is not a valid quantity_to_plot&quot;</span>
+            <span class="s2">&quot;(can be &#39;fnu&#39; or &#39;flam&#39;)&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Get the observed spectra plot</span>
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra</span><span class="p">(</span>
@@ -1782,9 +1841,9 @@
         <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
         <span class="n">draw_legend</span><span class="o">=</span><span class="n">draw_legend</span><span class="p">,</span>
-        <span class="n">rest_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">x_units</span><span class="o">=</span><span class="n">x_units</span><span class="p">,</span>
         <span class="n">y_units</span><span class="o">=</span><span class="n">y_units</span><span class="p">,</span>
+        <span class="n">quantity_to_plot</span><span class="o">=</span><span class="n">quantity_to_plot</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># Are we including photometry and filters?</span>
