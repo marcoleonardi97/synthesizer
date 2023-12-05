@@ -380,6 +380,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.blackholes</span> <span class="kn">import</span> <span class="n">UnifiedAGN</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">deg</span>
@@ -459,20 +460,20 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;velocity_dispersion_nlr&#39;,
- &#39;ionisation_parameter_nlr&#39;,
- &#39;accretion_rate_eddington&#39;,
- &#39;velocity_dispersion_blr&#39;,
- &#39;ionisation_parameter_blr&#39;,
- &#39;hydrogen_density_blr&#39;,
- &#39;theta_torus&#39;,
+[&#39;bolometric_luminosity&#39;,
  &#39;metallicity&#39;,
  &#39;covering_fraction_nlr&#39;,
- &#39;cosine_inclination&#39;,
- &#39;hydrogen_density_nlr&#39;,
- &#39;bolometric_luminosity&#39;,
+ &#39;velocity_dispersion_blr&#39;,
+ &#39;hydrogen_density_blr&#39;,
+ &#39;ionisation_parameter_blr&#39;,
+ &#39;ionisation_parameter_nlr&#39;,
+ &#39;covering_fraction_blr&#39;,
+ &#39;accretion_rate_eddington&#39;,
  &#39;mass&#39;,
- &#39;covering_fraction_blr&#39;]
+ &#39;hydrogen_density_nlr&#39;,
+ &#39;cosine_inclination&#39;,
+ &#39;theta_torus&#39;,
+ &#39;velocity_dispersion_nlr&#39;]
 </pre></div></div>
 </div>
 <p>Parameters fixed at initialisation:</p>
@@ -516,11 +517,11 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;accretion_rate_eddington&#39;,
+[&#39;bolometric_luminosity&#39;,
  &#39;metallicity&#39;,
- &#39;cosine_inclination&#39;,
- &#39;bolometric_luminosity&#39;,
- &#39;mass&#39;]
+ &#39;accretion_rate_eddington&#39;,
+ &#39;mass&#39;,
+ &#39;cosine_inclination&#39;]
 </pre></div></div>
 </div>
 <p>For the UnifiedAGN model a handful of spectra can be created (and returned) if desired:</p>
@@ -574,28 +575,18 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;disc_incident&#39;</span><span class="p">,</span> <span class="s1">&#39;disc&#39;</span><span class="p">,</span> <span class="s1">&#39;blr&#39;</span><span class="p">,</span> <span class="s1">&#39;nlr&#39;</span><span class="p">,</span> <span class="s1">&#39;torus&#39;</span><span class="p">,</span> <span class="s1">&#39;intrinsic&#39;</span><span class="p">]:</span>
-
-    <span class="n">sed</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
-
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">),</span> <span class="n">label</span> <span class="o">=</span> <span class="nb">id</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">luminosity</span><span class="p">))</span><span class="o">+</span><span class="mf">0.2</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\log_</span><span class="si">{10}</span><span class="s1">(\lambda/\AA)$&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\log_</span><span class="si">{10}</span><span class="s1">(\nu L_{\nu})$&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s1">&#39;luminosity&#39;</span><span class="p">,</span> <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">xlimits</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1E2</span><span class="p">,</span><span class="mf">1E6</span><span class="p">],</span> <span class="n">ylimits</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1E43</span><span class="p">,</span> <span class="mf">1E48</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1813: RuntimeWarning: divide by zero encountered in log10
-  out_arr = func(np.asarray(inp), out=out_func, **kwargs)
+(&lt;Figure size 600x600 with 1 Axes&gt;,
+ &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{Å}]$&#39;, ylabel=&#39;$L/[\\mathrm{erg\\ / \\ s}]$&#39;&gt;)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -630,11 +621,20 @@
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1813: RuntimeWarning: divide by zero encountered in log10
+  out_arr = func(np.asarray(inp), out=out_func, **kwargs)
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/blackholes_emission_models_22_0.png" src="../_images/blackholes_emission_models_22_0.png" />
+<img alt="../_images/blackholes_emission_models_22_1.png" src="../_images/blackholes_emission_models_22_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">
