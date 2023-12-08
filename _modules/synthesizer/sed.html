@@ -1285,9 +1285,11 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            index (float)</span>
-<span class="sd">                Absorption feature index in units of wavelength</span>
+<span class="sd">               Absorption feature index in units of wavelength</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        
+        <span class="c1"># self.lnu = np.array([self.lnu, self.lnu*2])</span>
+        
         <span class="c1"># Measure the red and blue windows</span>
         <span class="n">lnu_blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span>
         <span class="n">lnu_red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">red</span><span class="p">)</span>
@@ -1295,61 +1297,56 @@
         <span class="c1"># Define the wavelength grid over the feature</span>
         <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">feature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">feature</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">feature_lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
-
-        <span class="c1"># Using the red and blue windows fit the continuum</span>
-        <span class="c1"># note, this does not conserve units so we need to add them back in</span>
-        <span class="c1"># later.</span>
+        
+        <span class="c1"># Extract mean values</span>
+        <span class="n">mean_blue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span>
+        <span class="n">mean_red</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">)</span>
 
         <span class="c1"># Handle different spectra shapes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="c1"># Multiple spectra case</span>
+            
+            <span class="c1"># Perform polyfit for the continuum fit for all spectra</span>
+            <span class="n">continuum_fits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span>
+                <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="c1"># Use the continuum fit to define the continuum for all spectra</span>
+            <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">continuum_fits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                <span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="o">+</span> <span class="n">continuum_fits</span><span class="p">[</span><span class="mi">1</span><span class="p">][:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
-            <span class="c1"># Set up output array</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span>
+            <span class="c1"># Define the continuum subtracted spectrum for all SEDs</span>
+            <span class="n">feature_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[:,</span> <span class="n">transmission</span><span class="p">]</span>
+            <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="p">(</span>
+               <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
+            <span class="p">)</span>
 
-            <span class="c1"># Note: I&#39;m sure this could be done better.</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">):</span>
-                <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">)],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lnu_red</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="mi">1</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Use the continuum fit to define the continuum</span>
-                <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-
-                <span class="c1"># Define the continuum subtracted spectrum</span>
-                <span class="n">feature_lum</span> <span class="o">=</span> <span class="n">_lnu</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
-                <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Measure index</span>
-                <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">)</span>
+            <span class="c1"># Measure index for all SEDs</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Single spectra case</span>
 
-            <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">)],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span>
-            <span class="p">)</span>
 
+            <span class="c1"># Perform polyfit for the continuum fit</span>
+            <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">([</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            
             <span class="c1"># Use the continuum fit to define the continuum</span>
-            <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                <span class="o">+</span> <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+            <span class="n">continuum</span> <span class="o">=</span> <span class="p">((</span><span class="n">continuum_fit</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">feature_lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span>
+                         <span class="n">continuum_fit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>   
 
             <span class="c1"># Define the continuum subtracted spectrum</span>
             <span class="n">feature_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
-
             <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
 
             <span class="c1"># Measure index</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">)</span>
-
+            
         <span class="k">return</span> <span class="n">index</span></div>
+
 
 <div class="viewcode-block" id="Sed.get_resampled_sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_resampled_sed">[docs]</a>    <span class="k">def</span> <span class="nf">get_resampled_sed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resample_factor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
