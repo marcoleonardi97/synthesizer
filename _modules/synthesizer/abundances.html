@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -388,10 +390,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
 
-<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">InconsistentParameter</span><span class="p">,</span>
-    <span class="n">UnrecognisedOption</span>
-    <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">InconsistentParameter</span><span class="p">,</span> <span class="n">UnrecognisedOption</span>
 
 
 <div class="viewcode-block" id="ScalingFunctions"><a class="viewcode-back" href="../../_autosummary/synthesizer.abundances.html#synthesizer.abundances.ScalingFunctions">[docs]</a><span class="k">class</span> <span class="nc">ScalingFunctions</span><span class="p">:</span>
@@ -400,7 +399,7 @@
 <span class="sd">    This is a class holds scaling functions for individual elements. In each</span>
 <span class="sd">    case the function returns the logarthimic abundance relative to Hydrogen</span>
 <span class="sd">    for a given metallicity.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Example:</span>
 
 <span class="sd">    ScalingFunctions.N.Dopita2006(0.016)</span>
@@ -410,27 +409,27 @@
 <span class="sd">    element_functions = getattr(ScalingFunctions, &#39;N&#39;)</span>
 <span class="sd">    scaling_function = getattr(element_functions, &#39;Dopita2006&#39;)</span>
 <span class="sd">    scaling_function(0.016)</span>
-<span class="sd">    </span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ScalingFunctions.Dopita2006"><a class="viewcode-back" href="../../_autosummary/synthesizer.abundances.html#synthesizer.abundances.ScalingFunctions.Dopita2006">[docs]</a>    <span class="k">class</span> <span class="nc">Dopita2006</span><span class="p">:</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Scaling functions for Nitrogen.&quot;&quot;&quot;</span>
-        <span class="n">ads</span> <span class="o">=</span> <span class="s1">&#39;https://ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/abstract&#39;</span>
-        <span class="n">doi</span> <span class="o">=</span> <span class="s1">&#39;10.1086/508261&#39;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Scaling functions for Nitrogen.&quot;&quot;&quot;</span>
+
+        <span class="n">ads</span> <span class="o">=</span> <span class="s2">&quot;https://ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/abstract&quot;</span>
+        <span class="n">doi</span> <span class="o">=</span> <span class="s2">&quot;10.1086/508261&quot;</span>
 
 <div class="viewcode-block" id="ScalingFunctions.Dopita2006.N"><a class="viewcode-back" href="../../_autosummary/synthesizer.abundances.html#synthesizer.abundances.ScalingFunctions.Dopita2006.N">[docs]</a>        <span class="k">def</span> <span class="nf">N</span><span class="p">(</span><span class="n">metallicity</span><span class="p">):</span>
-
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            </span>
-<span class="sd">            Arguments:</span>
+
+<span class="sd">            Args:</span>
 <span class="sd">                metallicity (float)</span>
 <span class="sd">                    The metallicity (mass fraction in metals)</span>
-<span class="sd">            </span>
+
 <span class="sd">            Returns:</span>
 <span class="sd">                abundance (float)</span>
 <span class="sd">                    The logarithmic abundance relative to Hydrogen.</span>
-<span class="sd">            </span>
+
 <span class="sd">            &quot;&quot;&quot;</span>
 
             <span class="c1"># the metallicity scaled to the Dopita (2006) value</span>
@@ -438,24 +437,23 @@
             <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="n">dopita_solar_metallicity</span>
 
             <span class="n">abundance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
-                    <span class="mf">1.1E-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">4.9E-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="p">)</span>
+                <span class="mf">1.1e-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">4.9e-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
 
             <span class="k">return</span> <span class="n">abundance</span></div>
-        
-<div class="viewcode-block" id="ScalingFunctions.Dopita2006.C"><a class="viewcode-back" href="../../_autosummary/synthesizer.abundances.html#synthesizer.abundances.ScalingFunctions.Dopita2006.C">[docs]</a>        <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">metallicity</span><span class="p">):</span>
 
+<div class="viewcode-block" id="ScalingFunctions.Dopita2006.C"><a class="viewcode-back" href="../../_autosummary/synthesizer.abundances.html#synthesizer.abundances.ScalingFunctions.Dopita2006.C">[docs]</a>        <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">metallicity</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Scaling functions for Carbon.</span>
-<span class="sd">            </span>
-<span class="sd">            Arguments:</span>
+
+<span class="sd">            Args:</span>
 <span class="sd">                metallicity (float)</span>
 <span class="sd">                    The metallicity (mass fraction in metals)</span>
-<span class="sd">            </span>
+
 <span class="sd">            Returns:</span>
 <span class="sd">                abundance (float)</span>
 <span class="sd">                    The logarithmic abundance relative to Hydrogen.</span>
-<span class="sd">            </span>
+
 <span class="sd">            &quot;&quot;&quot;</span>
 
             <span class="c1"># the metallicity scaled to the Dopita (2006) value</span>
@@ -463,8 +461,8 @@
             <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="n">dopita_solar_metallicity</span>
 
             <span class="n">abundance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
-                    <span class="mf">6E-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">2E-4</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="p">)</span>
+                <span class="mf">6e-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">2e-4</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
 
             <span class="k">return</span> <span class="n">abundance</span></div></div></div>
 
@@ -701,18 +699,18 @@
         <span class="n">abundances</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">carbon_abundance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">nitrogen_abundance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="kc">False</span>
+        <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A class for calcualting elemental abundances including various scaling and depletion on to dust</span>
 
-<span class="sd">        Arguments:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            metallicity (float)</span>
 <span class="sd">                ass fraction in metals, default is Solar metallicity.</span>
 <span class="sd">            alpha (float)</span>
 <span class="sd">                Enhancement of the alpha elements.</span>
 <span class="sd">            abundances (dict)</span>
-<span class="sd">                A dictionary containing the abundances for specific elements or </span>
+<span class="sd">                A dictionary containing the abundances for specific elements or</span>
 <span class="sd">                functions to calculate them for the specified metallicity.</span>
 <span class="sd">            dust_to_metal_ratio (float)</span>
 <span class="sd">                the fraction of metals in dust.</span>
@@ -736,54 +734,48 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span> <span class="o">=</span> <span class="mf">0.2485</span> <span class="o">+</span> <span class="mf">1.7756</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span>
 
         <span class="c1"># Define mass fraction in hydrogen</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span> 
-                                       <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="p">)</span>
-        
+        <span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span>
+
         <span class="c1"># logathrimic total abundance of element relative to H</span>
         <span class="n">total</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># hydrogen is by definition 0.0</span>
         <span class="n">total</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">total</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span> <span class="o">/</span>
-                               <span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span> <span class="o">/</span>
-                               <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">])</span>
+        <span class="n">total</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="c1"># Scale elemental abundances from solar abundances based on given</span>
         <span class="c1"># metallicity</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metals</span><span class="p">:</span>
-            <span class="n">total</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span>
-                                              <span class="bp">self</span><span class="o">.</span><span class="n">solar_metallicity</span><span class="p">)</span>
+            <span class="n">total</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sol</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_metallicity</span><span class="p">)</span>
 
         <span class="c1"># Scale alpha-element abundances from solar abundances</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_elements</span><span class="p">:</span>
             <span class="n">total</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha</span>
-
 
         <span class="c1"># Set holding elements that don&#39;t need to be rescaled.</span>
         <span class="n">unscaled_metals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
 
         <span class="c1"># If abundances argument is provided go ahead and set the abundances.</span>
         <span class="k">if</span> <span class="n">abundances</span><span class="p">:</span>
-
-            <span class="c1"># loop over each element in the dictionary</span>
+            <span class="c1"># loop over each element in the dictionary</span>
             <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">abundances</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                
-                <span class="c1"># Setting alpha, nitrogen_abundance, or carbon_abundance will </span>
-                <span class="c1"># result in the metallicity no longer being correct. To account </span>
-                <span class="c1"># for this we need to rescale the abundances to recover the </span>
-                <span class="c1"># correct metallicity. However, we don&#39;t want to rescale the </span>
-                <span class="c1"># things we&#39;ve changed. For this reason, here we record the </span>
+                <span class="c1"># Setting alpha, nitrogen_abundance, or carbon_abundance will</span>
+                <span class="c1"># result in the metallicity no longer being correct. To account</span>
+                <span class="c1"># for this we need to rescale the abundances to recover the</span>
+                <span class="c1"># correct metallicity. However, we don&#39;t want to rescale the</span>
+                <span class="c1"># things we&#39;ve changed. For this reason, here we record the</span>
                 <span class="c1"># elements which have changed. See below for the rescaling.</span>
-                <span class="n">unscaled_metals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+                <span class="n">unscaled_metals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>
 
-                <span class="c1"># if value is a float simply set the abundance to this value.</span>
+                <span class="c1"># if value is a float simply set the abundance to this value.</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
                     <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
                 <span class="c1"># if value is a str use this to call the specific function to</span>
                 <span class="c1"># calculate the abundance from the metallicity.</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-
                     <span class="c1"># get the class holding functions for this element</span>
                     <span class="n">study_functions</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ScalingFunctions</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
@@ -797,17 +789,18 @@
         <span class="c1"># Calculate the mass in unscaled, scaled, and non-metals.</span>
         <span class="n">mass_in_unscaled_metals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mass</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">unscaled_metals</span><span class="p">),</span> <span class="n">a</span><span class="o">=</span><span class="n">total</span><span class="p">)</span>
         <span class="n">mass_in_scaled_metals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mass</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scaled_metals</span><span class="p">),</span> <span class="n">a</span><span class="o">=</span><span class="n">total</span><span class="p">)</span>
-        <span class="n">mass_in_non_metals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mass</span><span class="p">([</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;He&#39;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="n">total</span><span class="p">)</span>
+        <span class="n">mass_in_non_metals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mass</span><span class="p">([</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;He&quot;</span><span class="p">],</span> <span class="n">a</span><span class="o">=</span><span class="n">total</span><span class="p">)</span>
 
         <span class="c1"># Now, calculate the scaling factor. The metallicity is:</span>
         <span class="c1"># metallicity = scaling*mass_in_scaled_metals + mass_in_unscaled_metals</span>
-        <span class="c1">#  / (scaling*mass_in_scaled_metals + mass_in_non_metals + </span>
+        <span class="c1">#  / (scaling*mass_in_scaled_metals + mass_in_non_metals +</span>
         <span class="c1"># mass_in_unscaled_metals)</span>
         <span class="c1"># and so (by rearranging) the scaling factor is:</span>
-        <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span><span class="n">mass_in_unscaled_metals</span> <span class="o">-</span> <span class="n">metallicity</span> <span class="o">*</span>
-                   <span class="n">mass_in_unscaled_metals</span> <span class="o">-</span> <span class="n">metallicity</span> <span class="o">*</span>
-                   <span class="n">mass_in_non_metals</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_in_scaled_metals</span> <span class="o">*</span>
-                                          <span class="p">(</span><span class="n">metallicity</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mass_in_unscaled_metals</span>
+            <span class="o">-</span> <span class="n">metallicity</span> <span class="o">*</span> <span class="n">mass_in_unscaled_metals</span>
+            <span class="o">-</span> <span class="n">metallicity</span> <span class="o">*</span> <span class="n">mass_in_non_metals</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mass_in_scaled_metals</span> <span class="o">*</span> <span class="p">(</span><span class="n">metallicity</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
         <span class="c1"># now apply this scaling</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">scaled_metals</span><span class="p">:</span>
@@ -825,7 +818,7 @@
         <span class="k">if</span> <span class="n">dust_to_metal_ratio</span><span class="p">:</span>
             <span class="c1"># check that the dust to metal ratio is allowed</span>
             <span class="k">if</span> <span class="n">dust_to_metal_ratio</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_dust_to_metal_ratio</span><span class="p">:</span>
-                <span class="c1"># get scaled depletion values, i.e. the fraction of each </span>
+                <span class="c1"># get scaled depletion values, i.e. the fraction of each</span>
                 <span class="c1"># element which is depleted on to dust</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">get_depletions</span><span class="p">()</span>
 
@@ -857,7 +850,7 @@
                 <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If not dust_to_metal_ratio ratio is provided set the dust to be </span>
+            <span class="c1"># If not dust_to_metal_ratio ratio is provided set the dust to be</span>
             <span class="c1"># None.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="o">-</span><span class="mi">99</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span> <span class="o">=</span> <span class="p">{</span><span class="n">element</span><span class="p">:</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">}</span>
@@ -919,7 +912,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the mass for a collection of elements.</span>
 
-<span class="sd">        Arguments:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            elements (list, str)</span>
 <span class="sd">                A list of element names.</span>
 <span class="sd">            a (dict)</span>
@@ -927,7 +920,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            mass (float)</span>
-<span class="sd">                The mass in those elements. Normally this needs to be </span>
+<span class="sd">                The mass in those elements. Normally this needs to be</span>
 <span class="sd">                normalised to be useful.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -955,7 +948,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span><span class="p">:</span>
             <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span>
 
-        <span class="c1"># if a list of elements is not provided, assume it&#39;s all metals</span>
+        <span class="c1"># if a list of elements is not provided, assume it&#39;s all metals</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">elements</span><span class="p">:</span>
             <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metals</span>
 
@@ -972,9 +965,9 @@
 <span class="sd">        This function returns the depletion after scaling using the solar abundances and depletion patterns from the dust-to-metal ratio. This is the fraction of each element that is depleted on to dust.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_dust_to_metal_ratio</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_depletion</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_dust_to_metal_ratio</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_depletion</span><span class="p">[</span><span class="n">element</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span></div>
 

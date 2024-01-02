@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -472,6 +474,55 @@
     <span class="n">brr</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">resample_factor</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">brr</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="value_to_array"><a class="viewcode-back" href="../../_autosummary/synthesizer.utils.html#synthesizer.utils.value_to_array">[docs]</a><span class="k">def</span> <span class="nf">value_to_array</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A helper functions for converting a single value to an array holding</span>
+<span class="sd">    a single value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (float/unyt_quantity)</span>
+<span class="sd">            The value to wrapped into an array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array-like/unyt_array</span>
+<span class="sd">            An array containing the single value</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InconsistentArguments</span>
+<span class="sd">            If the argument is not a float or unyt_quantity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Just return it if we have been handed an array already or None</span>
+    <span class="c1"># NOTE: unyt_arrays and quantities are by definition arrays and thus</span>
+    <span class="c1"># return True for the isinstance below.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">value</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">value</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="s2">&quot;Value to convert to an array wasn&#39;t a float or a unyt_quantity:&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;type(value) = </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">arr</span></div>
 </pre></div>
         </article>
       </div>

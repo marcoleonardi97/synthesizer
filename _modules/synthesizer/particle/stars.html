@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -1083,8 +1085,15 @@
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">masked_spec</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
+        <span class="c1"># If there&#39;s no mask we&#39;re done</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">masked_spec</span>
+
+        <span class="c1"># If we have a mask we need to account for the zeroed spectra</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nstars</span><span class="p">,</span> <span class="n">masked_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">spec</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">masked_spec</span>
         <span class="k">return</span> <span class="n">spec</span></div>
 
 <div class="viewcode-block" id="Stars.generate_particle_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_particle_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_particle_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">):</span>

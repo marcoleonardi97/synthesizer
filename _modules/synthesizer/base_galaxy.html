@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -567,6 +569,7 @@
         <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plots either specific observed spectra (specified via combined_spectra,</span>
@@ -608,6 +611,10 @@
 <span class="sd">                limits are found based on the ylimits.</span>
 <span class="sd">            figsize (tuple)</span>
 <span class="sd">                Tuple with size 2 defining the figure size.</span>
+<span class="sd">            quantity_to_plot (string)</span>
+<span class="sd">                The sed property to plot. Can be &quot;lnu&quot;, &quot;luminosity&quot; or &quot;llam&quot;</span>
+<span class="sd">                for rest frame spectra or &quot;fnu&quot;, &quot;flam&quot; or &quot;flux&quot; for observed</span>
+<span class="sd">                spectra. Defaults to &quot;lnu&quot;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            fig (matplotlib.pyplot.figure)</span>
@@ -622,32 +629,78 @@
         <span class="c1"># Get the combined spectra</span>
         <span class="k">if</span> <span class="n">combined_spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">combined_spectra</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">combined_spectra</span><span class="p">})</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">combined_spectra</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">combined_spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;combined_spectra&quot;</span><span class="p">:</span> <span class="n">combined_spectra</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
 
         <span class="c1"># Get the stellar spectra</span>
         <span class="k">if</span> <span class="n">stellar_spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stellar_spectra</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stellar_spectra</span><span class="p">})</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Stellar &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stellar_spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stellar_spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;stellar_spectra&quot;</span><span class="p">:</span> <span class="n">stellar_spectra</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Stellar &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="c1"># Get the gas spectra</span>
         <span class="k">if</span> <span class="n">gas_spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gas_spectra</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gas_spectra</span><span class="p">})</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;Gas &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">gas_spectra</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gas_spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;gas_spectra&quot;</span><span class="p">:</span> <span class="n">gas_spectra</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;Gas &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="c1"># Get the black hole spectra</span>
         <span class="k">if</span> <span class="n">black_hole_spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">black_hole_spectra</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                    <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">black_hole_spectra</span><span class="p">}</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Black Hole &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">black_hole_spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">black_hole_spectra</span><span class="p">,</span> <span class="n">Sed</span><span class="p">):</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;black_hole_spectra&quot;</span><span class="p">:</span> <span class="n">black_hole_spectra</span><span class="p">,</span>
+                    <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Black Hole &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">plot_spectra</span><span class="p">(</span>
             <span class="n">spectra</span><span class="p">,</span>
@@ -656,6 +709,7 @@
             <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
             <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
             <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
+            <span class="n">quantity_to_plot</span><span class="o">=</span><span class="n">quantity_to_plot</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseGalaxy.plot_observed_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.plot_observed_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_observed_spectra</span><span class="p">(</span>
@@ -669,6 +723,7 @@
         <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
         <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s2">&quot;fnu&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plots either specific observed spectra (specified via combined_spectra,</span>
@@ -713,6 +768,10 @@
 <span class="sd">            filters (FilterCollection)</span>
 <span class="sd">                If given then the photometry is computed and both the photometry</span>
 <span class="sd">                and filter curves are plotted</span>
+<span class="sd">            quantity_to_plot (string)</span>
+<span class="sd">                The sed property to plot. Can be &quot;lnu&quot;, &quot;luminosity&quot; or &quot;llam&quot;</span>
+<span class="sd">                for rest frame spectra or &quot;fnu&quot;, &quot;flam&quot; or &quot;flux&quot; for observed</span>
+<span class="sd">                spectra. Defaults to &quot;lnu&quot;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            fig (matplotlib.pyplot.figure)</span>
@@ -753,7 +812,12 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Stellar &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="c1"># Get the gas spectra</span>
         <span class="k">if</span> <span class="n">gas_spectra</span><span class="p">:</span>
@@ -768,14 +832,16 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;Gas &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="c1"># Get the black hole spectra</span>
         <span class="k">if</span> <span class="n">black_hole_spectra</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">black_hole_spectra</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
                 <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;Black Hole&quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="s2">&quot;Black Hole &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">black_hole_spectra</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
@@ -786,7 +852,12 @@
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+                <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;Black Hole &quot;</span> <span class="o">+</span> <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">plot_observed_spectra</span><span class="p">(</span>
             <span class="n">spectra</span><span class="p">,</span>
@@ -797,6 +868,7 @@
             <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
             <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
             <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+            <span class="n">quantity_to_plot</span><span class="o">=</span><span class="n">quantity_to_plot</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
         </article>

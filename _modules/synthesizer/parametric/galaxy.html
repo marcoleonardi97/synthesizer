@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -377,7 +379,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.base_galaxy</span> <span class="kn">import</span> <span class="n">BaseGalaxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
-<span class="kn">from</span> <span class="nn">synthesizer.imaging.images</span> <span class="kn">import</span> <span class="n">ParametricImage</span>
+<span class="kn">from</span> <span class="nn">synthesizer.imaging.images</span> <span class="kn">import</span> <span class="n">ParametricImage</span><span class="p">,</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">synthesizer.art</span> <span class="kn">import</span> <span class="n">Art</span><span class="p">,</span> <span class="n">get_centred_art</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">ParticleStars</span>
 
@@ -472,7 +474,7 @@
         <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
 
         <span class="c1"># Print stellar spectra keys</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
             <span class="n">spectra_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
             <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
@@ -490,6 +492,32 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Stellar:  []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Define the connecting character for list wrapping</span>
+        <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">19</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Print stellar spectra keys</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Print keys nicely so they don&#39;t spill over</span>
+            <span class="n">spectra_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+            <span class="n">iline</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">19</span><span class="p">:</span>
+                    <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">+=</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">iline</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">spectra_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Slice off the last two entries, we don&#39;t need then</span>
+            <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectra_keys</span><span class="p">[</span><span class="n">iline</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Black Holes:  [&quot;</span> <span class="o">+</span> <span class="n">conn_char</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">spectra_keys</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;    Black Holes:  []&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Define the connecting character for list wrapping</span>
+        <span class="n">conn_char</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
 
         <span class="c1"># Print combined spectra keys</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -649,7 +677,8 @@
         <span class="n">resolution</span><span class="p">,</span>
         <span class="n">fov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">npix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stellar_spectra_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">blackhole_spectra_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">psfs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">depths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -662,51 +691,58 @@
         <span class="n">psf_resample_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Makes images in each filter provided in filters. Additionally an image</span>
-<span class="sd">        can be made with or without a PSF and noise.</span>
+<span class="sd">        Makes images in each filter provided in filters for either specific</span>
+<span class="sd">        components of the galaxy or any combination.</span>
+
+<span class="sd">        Additionally an image can be made with or without a PSF and noise.</span>
+
+<span class="sd">        If multiple components are requested they will be combined into a</span>
+<span class="sd">        single output image.</span>
+
 <span class="sd">        NOTE: Either npix or fov must be defined.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        resolution : float</span>
-<span class="sd">           The size of a pixel.</span>
-<span class="sd">           (Ignoring any supersampling defined by psf_resample_factor)</span>
-<span class="sd">        npix : int</span>
-<span class="sd">            The number of pixels along an axis.</span>
-<span class="sd">        fov : float</span>
-<span class="sd">            The width of the image in image coordinates.</span>
-<span class="sd">        sed : obj (SED)</span>
-<span class="sd">            An sed object containing the spectra for this image.</span>
-<span class="sd">        filters : obj (FilterCollection)</span>
-<span class="sd">            An imutable collection of Filter objects. If provided images are</span>
-<span class="sd">            made for each filter.</span>
-<span class="sd">        psfs : dict</span>
-<span class="sd">            A dictionary containing the psf in each filter where the key is</span>
-<span class="sd">            each filter code and the value is the psf in that filter.</span>
-<span class="sd">        depths : dict</span>
-<span class="sd">            A dictionary containing the depth of an observation in each filter</span>
-<span class="sd">            where the key is each filter code and the value is the depth in</span>
-<span class="sd">            that filter.</span>
-<span class="sd">        aperture : float/dict</span>
-<span class="sd">            Either a float describing the size of the aperture in which the</span>
-<span class="sd">            depth is defined or a dictionary containing the size of the depth</span>
-<span class="sd">            aperture in each filter.</span>
-<span class="sd">        rest_frame : bool</span>
-<span class="sd">            Are we making an observation in the rest frame?</span>
-<span class="sd">        cosmo : obj (astropy.cosmology)</span>
-<span class="sd">            A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">            when converting rest frame luminosity to flux.</span>
-<span class="sd">        redshift : float</span>
-<span class="sd">            The redshift of the observation. Used when converting between</span>
-<span class="sd">            physical cartesian coordinates and angular coordinates.</span>
-<span class="sd">        psf_resample_factor : float</span>
-<span class="sd">            The factor by which the image should be resampled for robust PSF</span>
-<span class="sd">            convolution. Note the images after PSF application will be</span>
-<span class="sd">            downsampled to the native pixel scale.</span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Image : array-like</span>
-<span class="sd">            A 2D array containing the image.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float)</span>
+<span class="sd">               The size of a pixel.</span>
+<span class="sd">               (Ignoring any supersampling defined by psf_resample_factor)</span>
+<span class="sd">            npix (int)</span>
+<span class="sd">                The number of pixels along an axis.</span>
+<span class="sd">            fov : float</span>
+<span class="sd">                The width of the image in image coordinates.</span>
+<span class="sd">            stellar_spectra_type (string)</span>
+<span class="sd">                The stellar spectra key to use for the image.</span>
+<span class="sd">            blackhole_spectra_type (string)</span>
+<span class="sd">                The black hole spectra key to use for the image.</span>
+<span class="sd">            filters (FilterCollection)</span>
+<span class="sd">                An imutable collection of Filter objects. If provided images are</span>
+<span class="sd">                made for each filter.</span>
+<span class="sd">            psfs (dict)</span>
+<span class="sd">                A dictionary containing the psf in each filter where the key is</span>
+<span class="sd">                each filter code and the value is the psf in that filter.</span>
+<span class="sd">            depths (dict)</span>
+<span class="sd">                A dictionary containing the depth of an observation in each filter</span>
+<span class="sd">                where the key is each filter code and the value is the depth in</span>
+<span class="sd">                that filter.</span>
+<span class="sd">            aperture (float/dict)</span>
+<span class="sd">                Either a float describing the size of the aperture in which the</span>
+<span class="sd">                depth is defined or a dictionary containing the size of the depth</span>
+<span class="sd">                aperture in each filter.</span>
+<span class="sd">            rest_frame (bool)</span>
+<span class="sd">                Are we making an observation in the rest frame?</span>
+<span class="sd">            cosmo : obj (astropy.cosmology)</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
+<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">            redshift (float)</span>
+<span class="sd">                The redshift of the observation. Used when converting between</span>
+<span class="sd">                physical cartesian coordinates and angular coordinates.</span>
+<span class="sd">            psf_resample_factor (float)</span>
+<span class="sd">                The factor by which the image should be resampled for robust PSF</span>
+<span class="sd">                convolution. Note the images after PSF application will be</span>
+<span class="sd">                downsampled to the native pixel scale.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Image</span>
+<span class="sd">                An instance of an Image object contain the created images.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle a super resolution image</span>
@@ -714,37 +750,89 @@
             <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">resolution</span> <span class="o">/=</span> <span class="n">psf_resample_factor</span>
 
-        <span class="c1"># Instantiate the Image object.</span>
-        <span class="n">img</span> <span class="o">=</span> <span class="n">ParametricImage</span><span class="p">(</span>
-            <span class="n">morphology</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="p">,</span>
-            <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-            <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
-            <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
-            <span class="n">sed</span><span class="o">=</span><span class="n">sed</span><span class="p">,</span>
-            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-            <span class="n">rest_frame</span><span class="o">=</span><span class="n">rest_frame</span><span class="p">,</span>
-            <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
-            <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
-            <span class="n">psfs</span><span class="o">=</span><span class="n">psfs</span><span class="p">,</span>
-            <span class="n">depths</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
-            <span class="n">apertures</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span>
-            <span class="n">snrs</span><span class="o">=</span><span class="n">snrs</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="c1"># Make sure we have an image to make</span>
+        <span class="k">if</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;At least one spectra type must be provided &quot;</span>
+                <span class="s2">&quot;(stellar_spectra_type or blackhole_spectra_type)!&quot;</span>
+                <span class="s2">&quot; What component do you want images of?&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># Compute image</span>
-        <span class="n">img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+        <span class="c1"># Make stellar image if requested</span>
+        <span class="k">if</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Instantiate the Image object.</span>
+            <span class="n">stellar_img</span> <span class="o">=</span> <span class="n">ParametricImage</span><span class="p">(</span>
+                <span class="n">morphology</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="p">,</span>
+                <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+                <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
+                <span class="n">sed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">stellar_spectra_type</span><span class="p">],</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+                <span class="n">rest_frame</span><span class="o">=</span><span class="n">rest_frame</span><span class="p">,</span>
+                <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
+                <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                <span class="n">psfs</span><span class="o">=</span><span class="n">psfs</span><span class="p">,</span>
+                <span class="n">depths</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
+                <span class="n">apertures</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span>
+                <span class="n">snrs</span><span class="o">=</span><span class="n">snrs</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">psfs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Convolve the image/images</span>
-            <span class="n">img</span><span class="o">.</span><span class="n">get_psfed_imgs</span><span class="p">()</span>
+            <span class="c1"># Compute image</span>
+            <span class="n">stellar_img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
 
-            <span class="c1"># Downsample to the native resolution if we need to.</span>
-            <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">img</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">psf_resample_factor</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">psfs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Convolve the image/images</span>
+                <span class="n">stellar_img</span><span class="o">.</span><span class="n">get_psfed_imgs</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">depths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">noises</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">img</span><span class="o">.</span><span class="n">get_noisy_imgs</span><span class="p">(</span><span class="n">noises</span><span class="p">)</span>
+                <span class="c1"># Downsample to the native resolution if we need to.</span>
+                <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">stellar_img</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">psf_resample_factor</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">depths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">noises</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stellar_img</span><span class="o">.</span><span class="n">get_noisy_imgs</span><span class="p">(</span><span class="n">noises</span><span class="p">)</span>
+
+        <span class="c1"># Make black hole image if requested</span>
+        <span class="k">if</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Instantiate the Image object.</span>
+            <span class="n">blackhole_img</span> <span class="o">=</span> <span class="n">ParametricImage</span><span class="p">(</span>
+                <span class="n">morphology</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">morphology</span><span class="p">,</span>
+                <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+                <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+                <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
+                <span class="n">sed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">blackhole_spectra_type</span><span class="p">],</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+                <span class="n">rest_frame</span><span class="o">=</span><span class="n">rest_frame</span><span class="p">,</span>
+                <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
+                <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                <span class="n">psfs</span><span class="o">=</span><span class="n">psfs</span><span class="p">,</span>
+                <span class="n">depths</span><span class="o">=</span><span class="n">depths</span><span class="p">,</span>
+                <span class="n">apertures</span><span class="o">=</span><span class="n">aperture</span><span class="p">,</span>
+                <span class="n">snrs</span><span class="o">=</span><span class="n">snrs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Compute image</span>
+            <span class="n">blackhole_img</span><span class="o">.</span><span class="n">get_imgs</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">psfs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Convolve the image/images</span>
+                <span class="n">blackhole_img</span><span class="o">.</span><span class="n">get_psfed_imgs</span><span class="p">()</span>
+
+                <span class="c1"># Downsample to the native resolution if we need to.</span>
+                <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">psf_resample_factor</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">blackhole_img</span><span class="o">.</span><span class="n">downsample</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">psf_resample_factor</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">depths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">noises</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">blackhole_img</span><span class="o">.</span><span class="n">get_noisy_imgs</span><span class="p">(</span><span class="n">noises</span><span class="p">)</span>
+
+        <span class="c1"># Combine images</span>
+        <span class="k">if</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">stellar_img</span>
+        <span class="k">elif</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">stellar_img</span> <span class="o">+</span> <span class="n">blackhole_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">blackhole_img</span>
 
         <span class="k">return</span> <span class="n">img</span></div></div>
 </pre></div>

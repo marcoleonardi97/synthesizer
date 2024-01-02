@@ -180,6 +180,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -249,7 +250,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -273,6 +274,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -382,14 +384,15 @@
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">mas</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">K</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.emission</span> <span class="kn">import</span> <span class="n">Greybody</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">Sersic2D</span><span class="p">,</span> <span class="n">PointSource</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span><span class="p">,</span> <span class="n">Stars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.blackholes</span> <span class="kn">import</span> <span class="n">UnifiedAGN</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">BlackHoles</span>
+<span class="kn">from</span> <span class="nn">synthesizer.blackhole_emission_models</span> <span class="kn">import</span> <span class="n">UnifiedAGN</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">BlackHole</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">UVJ</span>
 </pre></div>
@@ -401,8 +404,8 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define geometry of the images</span>
-<span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">kpc</span>  <span class="c1"># resolution in kpc</span>
-<span class="n">npix</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">kpc</span>  <span class="c1"># resolution in kpc</span>
+<span class="n">npix</span> <span class="o">=</span> <span class="mi">301</span>
 <span class="n">fov</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">npix</span>
 </pre></div>
 </div>
@@ -449,11 +452,9 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sfh_p</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;duration&#39;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">}</span>
-<span class="n">Z_p</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;log10metallicity&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">}</span>  <span class="c1"># can also use linear metallicity e.g. {&#39;Z&#39;: 0.01}</span>
-<span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mf">9.5</span>
-<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="o">**</span><span class="n">sfh_p</span><span class="p">)</span>  <span class="c1"># constant star formation</span>
-<span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">DeltaConstant</span><span class="p">(</span><span class="o">**</span><span class="n">Z_p</span><span class="p">)</span>  <span class="c1"># constant metallicity</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stellar_mass</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">14</span>
+<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">)</span>
+<span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -502,7 +503,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;synthesizer.sed.Sed at 0x7f76b6fab2b0&gt;
+&lt;synthesizer.sed.Sed at 0x7f49b52144c0&gt;
 </pre></div></div>
 </div>
 </section>
@@ -513,40 +514,21 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">black_hole</span> <span class="o">=</span> <span class="n">BlackHoles</span><span class="p">(</span><span class="n">mass</span><span class="o">=</span><span class="mf">1E8</span><span class="o">*</span><span class="n">Msun</span><span class="p">,</span> <span class="n">inclination</span><span class="o">=</span><span class="mi">15</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="n">accretion_rate</span><span class="o">=</span><span class="mf">1.</span><span class="o">*</span><span class="n">Msun</span><span class="o">/</span><span class="n">yr</span><span class="p">,</span> <span class="n">metallicity</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">black_hole</span> <span class="o">=</span> <span class="n">BlackHole</span><span class="p">(</span><span class="n">mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">6.5</span><span class="o">*</span><span class="n">Msun</span><span class="p">,</span> <span class="n">inclination</span><span class="o">=</span><span class="mi">60</span><span class="o">*</span><span class="n">deg</span><span class="p">,</span> <span class="n">accretion_rate</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">Msun</span><span class="o">/</span><span class="n">yr</span><span class="p">,</span> <span class="n">metallicity</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Next, let’s define the emission model and generate the spectra.</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">emission_model</span> <span class="o">=</span> <span class="n">UnifiedAGN</span><span class="p">(</span><span class="n">disc_model</span><span class="o">=</span><span class="s1">&#39;test_grid_agn&#39;</span><span class="p">,</span> <span class="n">photoionisation_model</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">)</span>
 
-<span class="c1"># get the spectra assuming this emission model</span>
-<span class="n">black_hole</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span> <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">)</span>
+<span class="c1"># Get the spectra assuming this emission model</span>
+<span class="n">spectra</span> <span class="o">=</span> <span class="n">black_hole</span><span class="o">.</span><span class="n">get_spectra_attenuated</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span> <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-{&#39;disc_incident&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7414a30&gt;,
- &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7416230&gt;,
- &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7415cf0&gt;,
- &#39;disc&#39;: &lt;synthesizer.sed.Sed at 0x7f76a74150f0&gt;,
- &#39;blr&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7414730&gt;,
- &#39;nlr&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7415ff0&gt;,
- &#39;torus&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7416050&gt;,
- &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7415e40&gt;,
- &#39;emergent&#39;: &lt;synthesizer.sed.Sed at 0x7f7702652dd0&gt;,
- &#39;dust&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7415f30&gt;,
- &#39;total&#39;: &lt;synthesizer.sed.Sed at 0x7f76a7416260&gt;}
-</pre></div></div>
 </div>
 </section>
 <section id="The-Galaxy">
@@ -586,10 +568,12 @@
 
 
 &lt;class &#39;synthesizer.parametric.galaxy.Galaxy&#39;&gt;
-log10(stellar mass formed/Msol):             9.5
+log10(stellar mass formed/Msol):             14.0
 available SEDs:
     Stellar:  [incident, transmitted, nebular, reprocessed, intrinsic,
                emergent, dust, total]
+    Black Holes:  [disc_incident, disc_transmitted, disc_escaped, disc, blr,
+                   torus, intrinsic, emergent, dust, total]
     Combined: []
 available lines: []
 available images: []
@@ -597,75 +581,57 @@ available images: []
 
 </pre></div></div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;black_holes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;attenuated&#39;</span><span class="p">]</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;stars&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;black_holes&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
 </section>
 </section>
 <section id="Spectra">
 <h2>Spectra<a class="headerlink" href="#Spectra" title="Permalink to this heading">#</a></h2>
 <p>We can use the <code class="docutils literal notranslate"><span class="pre">plot_spectra</span></code> function to make a quick spectrum of the galaxy.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s1">&#39;luminosity&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
+    <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">stellar_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">black_hole_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">quantity_to_plot</span><span class="o">=</span><span class="s1">&#39;luminosity&#39;</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(&lt;Figure size 1000x600 with 1 Axes&gt;,
- &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{Å}]$&#39;, ylabel=&#39;$L/[\\mathrm{erg\\ / \\ s}]$&#39;&gt;)
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_active_galaxy_30_1.png" src="../_images/parametric_generate_active_galaxy_30_1.png" />
+<img alt="../_images/parametric_generate_active_galaxy_29_0.png" src="../_images/parametric_generate_active_galaxy_29_0.png" />
 </div>
 </div>
 </section>
 <section id="Images">
 <h2>Images<a class="headerlink" href="#Images" title="Permalink to this heading">#</a></h2>
-<p>Let’s define some filters.</p>
+<p>To make iamges we need filters to define the photometry. For details see the <a class="reference internal" href="../filters.html"><span class="doc">filter</span></a> and <a class="reference internal" href="../imaging/imaging.html"><span class="doc">imaging</span></a> docs.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filters</span> <span class="o">=</span> <span class="n">UVJ</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>Let’s look at the total spectra.</p>
-<p>Now let’s make some images.</p>
+<p>With the spectra and filters made we can make images of each component and combine them.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="c1"># Make images</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
     <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-    <span class="n">sed</span><span class="o">=</span><span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">],</span>
-    <span class="c1"># npix=npix,</span>
+    <span class="n">stellar_spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+    <span class="n">blackhole_spectra_type</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">galaxy</span><span class="p">)</span>
 
 <span class="c1"># Make and plot an rgb image</span>
 <span class="n">img</span><span class="o">.</span><span class="n">make_rgb_image</span><span class="p">(</span><span class="n">rgb_filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;R&quot;</span> <span class="p">:</span> <span class="s1">&#39;J&#39;</span><span class="p">,</span>
@@ -675,46 +641,11 @@ available images: []
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
--------------------------------------------------------------------------------
-                            SUMMARY OF PARAMETRIC GALAXY
-                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠒⠒⠦⣄⡀⠀⠀⠀⠀⠀⠀⠀
-                           ⠀⠀⠀⠀⠀⢀⣤⣶⡾⠿⠿⠿⠿⣿⣿⣶⣦⣄⠙⠷⣤⡀⠀⠀⠀⠀
-                           ⠀⠀⠀⣠⡾⠛⠉⠀⠀⠀⠀⠀⠀⠀⠈⠙⠻⣿⣷⣄⠘⢿⡄⠀⠀⠀
-                           ⠀⢀⡾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠐⠂⠠⢄⡀⠈⢿⣿⣧⠈⢿⡄⠀⠀
-                           ⢀⠏⠀⠀⠀⢀⠄⣀⣴⣾⠿⠛⠛⠛⠷⣦⡙⢦⠀⢻⣿⡆⠘⡇⠀⠀
-                           ⠀⠀⠀+-+-+-+-+-+-+-+-+-+-+-+⡇⠀⠀
-                           ⠀⠀⠀|S|Y|N|T|H|E|S|I|Z|E|R|⠃⠀⠀
-                           ⠀⠀⢰+-+-+-+-+-+-+-+-+-+-+-+⠀⠀⠀
-                           ⠀⠀⢸⡇⠸⣿⣷⠀⢳⡈⢿⣦⣀⣀⣀⣠⣴⣾⠟⠁⠀⠀⠀⠀⢀⡎
-                           ⠀⠀⠘⣷⠀⢻⣿⣧⠀⠙⠢⠌⢉⣛⠛⠋⠉⠀⠀⠀⠀⠀⠀⣠⠎⠀
-                           ⠀⠀⠀⠹⣧⡀⠻⣿⣷⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⡾⠃⠀⠀
-                           ⠀⠀⠀⠀⠈⠻⣤⡈⠻⢿⣿⣷⣦⣤⣤⣤⣤⣤⣴⡾⠛⠉⠀⠀⠀⠀
-                           ⠀⠀⠀⠀⠀⠀⠈⠙⠶⢤⣈⣉⠛⠛⠛⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀
-                           ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
-
-&lt;class &#39;synthesizer.parametric.galaxy.Galaxy&#39;&gt;
-log10(stellar mass formed/Msol):             9.5
-available SEDs:
-    Stellar:  [incident, transmitted, nebular, reprocessed, intrinsic,
-               emergent, dust, total]
-    Combined: [black_holes, stars, total]
-available lines: []
-available images: []
--------------------------------------------------------------------------------
-
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_active_galaxy_36_1.png" src="../_images/parametric_generate_active_galaxy_36_1.png" />
+<img alt="../_images/parametric_generate_active_galaxy_34_0.png" src="../_images/parametric_generate_active_galaxy_34_0.png" />
 </div>
 </div>
 </section>

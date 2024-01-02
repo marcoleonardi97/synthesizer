@@ -178,6 +178,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -247,7 +248,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -271,6 +272,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -372,12 +374,12 @@
           <h1>Source code for synthesizer.parametric.blackholes</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for working with a parametric black holes.</span>
 
-<span class="sd">Contains the BlackHoles class for use with parametric systems. This houses</span>
+<span class="sd">Contains the BlackHole class for use with parametric systems. This houses</span>
 <span class="sd">all the attributes and functionality related to parametric black holes.</span>
 
 <span class="sd">Example usages:</span>
 
-<span class="sd">    bhs = BlackHoles(</span>
+<span class="sd">    bhs = BlackHole(</span>
 <span class="sd">        bolometric_luminosity,</span>
 <span class="sd">        mass,</span>
 <span class="sd">        accretion_rate,</span>
@@ -388,13 +390,18 @@
 <span class="sd">        offset,</span>
 <span class="sd">)</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">kpc</span>
+
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">PointSource</span>
 <span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">BlackholesComponent</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span>
 
 
-<div class="viewcode-block" id="BlackHoles"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.blackholes.html#synthesizer.parametric.blackholes.BlackHoles">[docs]</a><span class="k">class</span> <span class="nc">BlackHoles</span><span class="p">(</span><span class="n">BlackholesComponent</span><span class="p">):</span>
+<div class="viewcode-block" id="BlackHole"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.blackholes.html#synthesizer.parametric.blackholes.BlackHole">[docs]</a><span class="k">class</span> <span class="nc">BlackHole</span><span class="p">(</span><span class="n">BlackholesComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base parametric BlackHoles class.</span>
+<span class="sd">    The base parametric BlackHole class.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        morphology (PointSource)</span>
@@ -411,7 +418,8 @@
         <span class="n">inclination</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">spin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metallicity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the Stars instance. The first two arguments are always</span>
@@ -434,11 +442,13 @@
 <span class="sd">                models.</span>
 <span class="sd">            spin (float)</span>
 <span class="sd">                The spin of the blackhole. Necessary for some disc models.</span>
-<span class="sd">            offset (unyt_array, float)</span>
+<span class="sd">            offset (unyt_array)</span>
 <span class="sd">                The (x,y) offsets of the blackhole relative to the centre of</span>
 <span class="sd">                the image. Units can be length or angle but should be</span>
 <span class="sd">                consistent with the scene.</span>
-
+<span class="sd">            kwargs (dict)</span>
+<span class="sd">                Any parameter for the emission models can be provided as kwargs</span>
+<span class="sd">                here to override the defaults of the emission models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Initialise base class</span>
@@ -451,10 +461,139 @@
             <span class="n">inclination</span><span class="o">=</span><span class="n">inclination</span><span class="p">,</span>
             <span class="n">spin</span><span class="o">=</span><span class="n">spin</span><span class="p">,</span>
             <span class="n">metallicity</span><span class="o">=</span><span class="n">metallicity</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="c1"># Ensure the offset has units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">offset</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;The offset must be provided with units&quot;</span><span class="p">)</span>
+
         <span class="c1"># Initialise morphology using the in-built point-source class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">morphology</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">morphology</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">emission_model</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="p">,</span>
+        <span class="n">spectra_type</span><span class="p">,</span>
+        <span class="n">line_region</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A method to prepare the arguments for SED computation with the C</span>
+<span class="sd">        functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            emission_model (synthesizer.blackhole_emission_models.*)</span>
+<span class="sd">                An instance of a blackhole emission model.</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The SPS grid object to extract spectra from.</span>
+<span class="sd">            fesc (float)</span>
+<span class="sd">                The escape fraction.</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The type of spectra to extract from the Grid. This must match a</span>
+<span class="sd">                type of spectra stored in the Grid.</span>
+<span class="sd">            line_region (str)</span>
+<span class="sd">                The specific line region, i.e. &#39;nlr&#39; or &#39;blr&#39;.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+<span class="sd">            kwargs (dict)</span>
+<span class="sd">                Any other arguments. Mainly unused and here for consistency</span>
+<span class="sd">                with particle version of this method which does have extra</span>
+<span class="sd">                arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple</span>
+<span class="sd">                A tuple of all the arguments required by the C extension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set up the inputs to the C function.</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">axis</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">axes</span>
+        <span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+            <span class="c1"># Source parameters from the appropriate place</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">required_parameters</span><span class="p">:</span>
+                <span class="c1"># Parameters that need to be provided from the black hole</span>
+                <span class="c1"># (these already exclude any parameters fixed on the</span>
+                <span class="c1"># emission model)</span>
+                <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="n">axis</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">variable_parameters</span>
+                <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="c1"># Variable parameters defined on the black hole (not including</span>
+                <span class="c1"># line region parameters)</span>
+                <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">variable_parameters</span>
+                <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="c1"># Variable line region parameters defined on the black hole</span>
+                <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Parameters required from the emission_model (not including</span>
+                <span class="c1"># line region parameters)</span>
+                <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Line region parameters required from the emission_model</span>
+                <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingArgument</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2"> can&#39;t be sourced from emission_model or self.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Remove units from any unyt_arrays and make contiguous</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
+
+        <span class="c1"># For black holes mass is a grid parameter but we still need to</span>
+        <span class="c1"># multiply by mass in the extensions so just multiply by 1</span>
+        <span class="n">mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># Make sure we get the wavelength index of the grid array</span>
+        <span class="n">nlam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Get the grid spctra</span>
+        <span class="n">grid_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get the grid dimensions after slicing what we need</span>
+        <span class="n">grid_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid_props</span><span class="p">):</span>
+            <span class="n">grid_dims</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">grid_dims</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">nlam</span>
+
+        <span class="c1"># Convert inputs to tuples</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">grid_spectra</span><span class="p">,</span>
+            <span class="n">grid_props</span><span class="p">,</span>
+            <span class="n">props</span><span class="p">,</span>
+            <span class="n">mass</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">fesc</span><span class="p">]),</span>
+            <span class="n">grid_dims</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nlam</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

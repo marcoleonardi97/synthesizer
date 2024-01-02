@@ -180,6 +180,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="blackholes/blackholes.html">Black holes</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Black holes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="blackholes/emission_models.html">Blackhole emission models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="blackholes/particle_blackholes.html">Blackholes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="blackholes/parametric_blackholes.html">Parametric Blackholes</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="parametric/parametric.html">Parametric models</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Parametric models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -249,7 +250,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.abundances.html">synthesizer.abundances</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.art.html">synthesizer.art</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.blackholes.html">synthesizer.blackholes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.blackhole_emission_models.html">synthesizer.blackhole_emission_models</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
@@ -273,6 +274,7 @@
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
@@ -438,8 +440,7 @@ SUMMARY OF SED
 Number of wavelength points: 8228
 Wavelength range: [0.00 Å,             299293000000.00 Å]
 log10(Peak luminosity/erg/(Hz*s)):             29.49
-log10(Bolometric luminosity/             erg/s):             36.85
-----------
+log10(Bolometric luminosity/erg/s):36.84609876080591----------
 </pre></div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">Sed</span></code> objects contain a wavelength grid and luminosity in the <code class="docutils literal notranslate"><span class="pre">lam</span></code> and <code class="docutils literal notranslate"><span class="pre">lnu</span></code> attributes. Both come with units making them easy to convert:</p>
@@ -588,13 +589,13 @@ unyt_quantity(7.01614831e+44, &#39;erg/s&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:478: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:494: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
   If increasing the limit yields no improvement it is advised to analyze
   the integrand in order to determine the difficulties.  If the position of a
   local difficulty can be determined (singularity, discontinuity) one will
   probably gain from splitting up the interval and calling the integrator
   on the subranges.  Perhaps a special-purpose integrator should be used.
-  integrate.quad(self._get_lnu_at_nu, 1e12, 1e16)[0] * self.lnu.units * Hz
+  integrate.quad(
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -603,7 +604,7 @@ unyt_quantity(7.01614831e+44, &#39;erg/s&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(6.92085519e+44, &#39;erg/s&#39;)
+unyt_quantity(6.94274574e+44, &#39;erg/s&#39;)
 </pre></div></div>
 </div>
 <p>Under-the-hood the above uses a function to get the luminosity at a particular frequency or wavelength:</p>
@@ -722,7 +723,7 @@ unyt_quantity(1.51428348e+29, &#39;erg/(Hz*s)&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:610: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:658: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
   If increasing the limit yields no improvement it is advised to analyze
   the integrand in order to determine the difficulties.  If the position of a
   local difficulty can be determined (singularity, discontinuity) one will
@@ -861,7 +862,7 @@ unyt_quantity(5.80884398, &#39;Å&#39;)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:1126: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:1173: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
   the requested tolerance from being achieved.  The error may be
   underestimated.
   return integrate.quad(
@@ -1181,7 +1182,7 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[40464.978773  20232.4893865 40464.978773 ] dimensionless
+[1.  0.5 1. ] dimensionless
 </pre></div></div>
 </div>
 <p>To apply attenuation to an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> you can use the <code class="docutils literal notranslate"><span class="pre">apply_attenuation</span></code> method and pass the optical depth. An instance of a dust curve can also be provided but this defaults to a power law with slope = 1 (<code class="docutils literal notranslate"><span class="pre">synthesizer.dust.attenuation.PowerLaw(slope=1)</span></code>).</p>
