@@ -234,8 +234,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
@@ -392,13 +392,12 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Stars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Gas</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
-<span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.base_galaxy</span> <span class="kn">import</span> <span class="n">BaseGalaxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.imaging.images</span> <span class="kn">import</span> <span class="n">ParticleImage</span>
@@ -410,7 +409,8 @@
 
 <span class="sd">    When working with particles this object provides interfaces for calculating</span>
 <span class="sd">    spectra, galaxy properties and images. A galaxy can be composed of any</span>
-<span class="sd">    combination of particle.Stars, particle.Gas, or particle.BlackHoles objects.</span>
+<span class="sd">    combination of particle.Stars, particle.Gas, or</span>
+<span class="sd">    particle.BlackHoles objects.</span>
 
 <span class="sd">    Attributes:</span>
 
@@ -437,8 +437,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str)</span>
-<span class="sd">                A name to identify the galaxy. Only used for external labelling,</span>
-<span class="sd">                has no internal use.</span>
+<span class="sd">                A name to identify the galaxy. Only used for external</span>
+<span class="sd">                labelling, has no internal use.</span>
 <span class="sd">            stars (object, Stars/Stars)</span>
 <span class="sd">                An instance of Stars containing the stellar particle data</span>
 <span class="sd">            gas (object, Gas)</span>
@@ -456,8 +456,9 @@
         <span class="c1"># Check we haven&#39;t been given a SFZH</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stars</span><span class="p">,</span> <span class="n">ParametricStars</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Parametric Stars passed instead of particle based Stars object.&quot;</span>
-                <span class="s2">&quot; Did you mean synthesizer.parametric.Galaxy instead?&quot;</span>
+                <span class="s2">&quot;Parametric Stars passed instead of particle based Stars &quot;</span>
+                <span class="s2">&quot;object. Did you mean synthesizer.parametric.Galaxy &quot;</span>
+                <span class="s2">&quot;instead?&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Set the type of galaxy</span>
@@ -572,8 +573,8 @@
 <div class="viewcode-block" id="Galaxy.calculate_black_hole_metallicity"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.calculate_black_hole_metallicity">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_black_hole_metallicity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default_metallicity</span><span class="o">=</span><span class="mf">0.012</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the metallicity of the region surrounding a black hole. This</span>
-<span class="sd">        is defined as the mass weighted average metallicity of all gas particles</span>
-<span class="sd">        whose SPH kernels intersect the black holes position.</span>
+<span class="sd">        is defined as the mass weighted average metallicity of all gas</span>
+<span class="sd">        particles whose SPH kernels intersect the black holes position.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            default_metallicity (float)</span>
@@ -584,8 +585,9 @@
         <span class="c1"># Ensure we actually have Gas and black holes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Calculating the metallicity of the region surrounding the black&quot;</span>
-                <span class="s2">&quot; hole requires a Galaxy to be intialised with a Gas object!&quot;</span>
+                <span class="s2">&quot;Calculating the metallicity of the region surrounding the &quot;</span>
+                <span class="s2">&quot;black hole requires a Galaxy to be intialised with a Gas &quot;</span>
+                <span class="s2">&quot;object!&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -644,12 +646,12 @@
 <span class="sd">        Args:</span>
 <span class="sd">            kernel (array_like, float)</span>
 <span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
-<span class="sd">                order such that a k element array can be indexed for the value of</span>
-<span class="sd">                impact parameter q via kernel[int(k*q)]. Note, this can be an</span>
-<span class="sd">                arbitrary kernel.</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
 <span class="sd">            mask (bool)</span>
-<span class="sd">                A mask to be applied to the stars. Surface densities will only be</span>
-<span class="sd">                computed and returned for stars with True in the mask.</span>
+<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
+<span class="sd">                be computed and returned for stars with True in the mask.</span>
 <span class="sd">            threshold (float)</span>
 <span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
 <span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
@@ -794,7 +796,8 @@
         <span class="c1">#             self.stars.log10ages[age_mask],</span>
         <span class="c1">#             self.stars.log10metallicities[age_mask])):</span>
 
-        <span class="c1">#         weights_temp = self._calculate_weights(grid, metal, age, mass,</span>
+        <span class="c1">#         weights_temp = self._calculate_weights(grid, metal, age,</span>
+        <span class="c1">#                                                mass,</span>
         <span class="c1">#                                                young_stars=True)</span>
         <span class="c1">#         lum[i] = np.sum(grid.line_luminosities * weights_temp,</span>
         <span class="c1">#                         axis=(1, 2))</span>
@@ -832,12 +835,12 @@
 <span class="sd">                ...</span>
 <span class="sd">            kernel (array_like/float)</span>
 <span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
-<span class="sd">                order such that a k element array can be indexed for the value of</span>
-<span class="sd">                impact parameter q via kernel[int(k*q)]. Note, this can be an</span>
-<span class="sd">                arbitrary kernel.</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
 <span class="sd">            mask (bool)</span>
-<span class="sd">                A mask to be applied to the stars. Surface densities will only be</span>
-<span class="sd">                computed and returned for stars with True in the mask.</span>
+<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
+<span class="sd">                be computed and returned for stars with True in the mask.</span>
 <span class="sd">            threshold (float)</span>
 <span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
 <span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
@@ -890,7 +893,8 @@
 
 <span class="sd">        Z_SF is the star forming gas metallicity, Z_MW is the Milky</span>
 <span class="sd">        Way value (defaults to value from Zahid+14), M_SF is the star forming</span>
-<span class="sd">        gas mass, M_star is the stellar mass, and beta is a normalisation value.</span>
+<span class="sd">        gas mass, M_star is the stellar mass, and beta is a normalisation</span>
+<span class="sd">        value.</span>
 
 <span class="sd">        The gamma array can be used directly in attenuation methods.</span>
 
@@ -998,34 +1002,34 @@
 <span class="sd">            blackhole_spectra_type (string)</span>
 <span class="sd">                The black hole spectra key to use for the image.</span>
 <span class="sd">            filters : obj (FilterCollection)</span>
-<span class="sd">                An imutable collection of Filter objects. If provided images are</span>
-<span class="sd">                made for each filter.</span>
+<span class="sd">                An imutable collection of Filter objects. If provided images</span>
+<span class="sd">                are made for each filter.</span>
 <span class="sd">            pixel_values : array-like (float)</span>
-<span class="sd">                The values to be sorted/smoothed into pixels. Only needed if an sed</span>
-<span class="sd">                and filters are not used.</span>
+<span class="sd">                The values to be sorted/smoothed into pixels. Only needed if</span>
+<span class="sd">                an sed and filters are not used.</span>
 <span class="sd">            psfs : dict</span>
 <span class="sd">                A dictionary containing the psf in each filter where the key is</span>
 <span class="sd">                each filter code and the value is the psf in that filter.</span>
 <span class="sd">            depths : dict</span>
-<span class="sd">                A dictionary containing the depth of an observation in each filter</span>
-<span class="sd">                where the key is each filter code and the value is the depth in</span>
-<span class="sd">                that filter.</span>
+<span class="sd">                A dictionary containing the depth of an observation in each</span>
+<span class="sd">                filter where the key is each filter code and the value is the</span>
+<span class="sd">                depth in that filter.</span>
 <span class="sd">            aperture : float/dict</span>
 <span class="sd">                Either a float describing the size of the aperture in which the</span>
-<span class="sd">                depth is defined or a dictionary containing the size of the depth</span>
-<span class="sd">                aperture in each filter.</span>
+<span class="sd">                depth is defined or a dictionary containing the size of the</span>
+<span class="sd">                depth aperture in each filter.</span>
 <span class="sd">            rest_frame : bool</span>
 <span class="sd">                Are we making an observation in the rest frame?</span>
 <span class="sd">            cosmo : obj (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            psf_resample_factor : float</span>
-<span class="sd">                The factor by which the image should be resampled for robust PSF</span>
-<span class="sd">                convolution. Note the images after PSF application will be</span>
+<span class="sd">                The factor by which the image should be resampled for robust</span>
+<span class="sd">                PSF convolution. Note the images after PSF application will be</span>
 <span class="sd">                downsampled to the native pixel scale.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1188,11 +1192,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1251,11 +1255,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1316,11 +1320,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1406,11 +1410,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1442,7 +1446,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;(Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Make the mass image</span>
@@ -1480,11 +1485,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1516,7 +1521,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;(Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Make the mass image</span>
@@ -1550,11 +1556,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1586,7 +1592,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;(Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">img</span></div>
@@ -1614,11 +1621,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 
@@ -1650,7 +1657,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. (Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown img_type </span><span class="si">{</span><span class="n">img_type</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;(Options are &#39;hist&#39; or &#39;smoothed&#39;)&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">img</span></div>
@@ -1680,11 +1688,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 <span class="sd">            age_bin (unyt_quantity/float)</span>
@@ -1767,11 +1775,11 @@
 <span class="sd">                The type of image to be made, either &quot;hist&quot; -&gt; a histogram, or</span>
 <span class="sd">                &quot;smoothed&quot; -&gt; particles smoothed over a kernel.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 <span class="sd">            age_bin (unyt_quantity/float)</span>

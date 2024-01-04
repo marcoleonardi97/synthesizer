@@ -234,8 +234,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
@@ -383,21 +383,16 @@
 <span class="sd">img.get_imgs()</span>
 <span class="sd">img.plot_image(...)</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">math</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">ctypes</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">mas</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
-<span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">length</span><span class="p">,</span> <span class="n">angle</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt.dimensions</span> <span class="kn">import</span> <span class="n">angle</span>
 
 <span class="kn">import</span> <span class="nn">synthesizer.exceptions</span> <span class="k">as</span> <span class="nn">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.imaging.scene</span> <span class="kn">import</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">ParticleScene</span>
-<span class="kn">from</span> <span class="nn">synthesizer.imaging.spectral_cubes</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ParticleSpectralCube</span><span class="p">,</span>
-    <span class="n">ParametricSpectralCube</span><span class="p">,</span>
-<span class="p">)</span>
 
 
 <div class="viewcode-block" id="Image"><a class="viewcode-back" href="../../../_autosummary/synthesizer.imaging.images.html#synthesizer.imaging.images.Image">[docs]</a><span class="k">class</span> <span class="nc">Image</span><span class="p">:</span>
@@ -414,8 +409,8 @@
 <span class="sd">            a dictionary containing a PSF for each filter with</span>
 <span class="sd">            {filter_code: PSF} key-value pair structure.</span>
 <span class="sd">        filters (FilterCollection)</span>
-<span class="sd">            An imutable collection of Filter objects. If provided, images are made</span>
-<span class="sd">            for each filter.</span>
+<span class="sd">            An imutable collection of Filter objects. If provided, images are</span>
+<span class="sd">            made for each filter.</span>
 <span class="sd">        img (array-like, float)</span>
 <span class="sd">            An array containing an image. Only used if a single image is</span>
 <span class="sd">            created. (npix, npix)</span>
@@ -426,8 +421,8 @@
 <span class="sd">            An array containing an image with noise. Only used if a single</span>
 <span class="sd">            image is created. (npix, npix)</span>
 <span class="sd">        imgs (dict, array-like, float)</span>
-<span class="sd">            A dictionary containing filter_code keys and img values. Only used if a</span>
-<span class="sd">            FilterCollection is passed.</span>
+<span class="sd">            A dictionary containing filter_code keys and img values. Only used</span>
+<span class="sd">            if a FilterCollection is passed.</span>
 <span class="sd">        imgs_psf (dict, array-like, float)</span>
 <span class="sd">            A dictionary containing filter_code keys and images with PSF as</span>
 <span class="sd">            values. Only used if a FilterCollection is passed.</span>
@@ -479,20 +474,22 @@
 <span class="sd">                An imutable collection of Filter objects. If provided, images</span>
 <span class="sd">                are made for each filter.</span>
 <span class="sd">            psfs (array-like/dict, float/array_like, float)</span>
-<span class="sd">                Either A single array describing a PSF to be used on all images or</span>
-<span class="sd">                a dictionary containing a PSF for each filter with</span>
-<span class="sd">                {filter_code: PSF} key-value pair structure.</span>
+<span class="sd">                Either A single array describing a PSF to be used on all</span>
+<span class="sd">                images or a dictionary containing a PSF for each filter</span>
+<span class="sd">                with {filter_code: PSF} key-value pair structure.</span>
 <span class="sd">            depths (float/dict, float)</span>
-<span class="sd">                The depth of this observation. Can either be a single value or a</span>
-<span class="sd">                value per filter in a dictionary.</span>
+<span class="sd">                The depth of this observation. Can either be a single value or</span>
+<span class="sd">                a value per filter in a dictionary.</span>
 <span class="sd">            snrs (float/dict, float)</span>
 <span class="sd">                The desired signal to noise of this observation. Assuming a</span>
-<span class="sd">                signal-to-noise ratio of the form SN R= S / N = S / sqrt(sigma).</span>
+<span class="sd">                signal-to-noise ratio of the form</span>
+<span class="sd">                SN R= S / N = S / sqrt(sigma).</span>
 <span class="sd">                Can either be a single SNR or a SNR per filter in a dictionary.</span>
 <span class="sd">            apertures (float/dict, float)</span>
 <span class="sd">                The radius of the aperture depth is defined in, if not a point</span>
 <span class="sd">                source depth, in the same units as the image resolution. Can</span>
-<span class="sd">                either be a single radius or a radius per filter in a dictionary.</span>
+<span class="sd">                either be a single radius or a radius per filter in a</span>
+<span class="sd">                dictionary.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Define attributes to hold the PSF information</span>
@@ -555,19 +552,10 @@
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">!=</span> <span class="n">other_img</span><span class="o">.</span><span class="n">npix</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot add Images: resolution=(&quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot; + &quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot;), fov=(&quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot; + &quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot;), npix=(&quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot; + &quot;</span>
-                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot add Images: resolution=(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span><span class="si">}</span><span class="s2"> + &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span><span class="si">}</span><span class="s2">), fov=(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span><span class="si">}</span><span class="s2"> + &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">fov</span><span class="p">)</span><span class="si">}</span><span class="s2">), npix=(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span><span class="si">}</span><span class="s2"> + &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">other_img</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Make sure they contain compatible filters (but we allow one</span>
@@ -576,12 +564,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">!=</span> <span class="n">other_img</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
                     <span class="s2">&quot;Cannot add Images with incompatible filter sets!&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Filter set 1:&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;[ &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Filter set 1: [ &quot;</span>
                     <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fstr</span> <span class="k">for</span> <span class="n">fstr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">])</span>
-                    <span class="o">+</span> <span class="s2">&quot; ]&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Filter set 2:&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;[ &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; ]</span><span class="se">\n</span><span class="s2">Filter set 2:[ &quot;</span>
                     <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                         <span class="p">[</span><span class="n">fstr</span> <span class="k">for</span> <span class="n">fstr</span> <span class="ow">in</span> <span class="n">other_img</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">]</span>
                     <span class="p">)</span>
@@ -738,8 +723,8 @@
 
 <div class="viewcode-block" id="Image.get_imgs"><a class="viewcode-back" href="../../../_autosummary/synthesizer.imaging.images.html#synthesizer.imaging.images.Image.get_imgs">[docs]</a>    <span class="k">def</span> <span class="nf">get_imgs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A generic method to calculate an image where particles are smoothed over</span>
-<span class="sd">        a kernel.</span>
+<span class="sd">        A generic method to calculate an image where particles are smoothed</span>
+<span class="sd">        over a kernel.</span>
 
 <span class="sd">        If pixel_values is defined then a single image is made and returned,</span>
 <span class="sd">        if a filter list has been provided a image is made for each filter and</span>
@@ -750,8 +735,9 @@
 <span class="sd">            img/imgs (array_like/dictionary, float)</span>
 <span class="sd">                If pixel_values is provided: A 2D array containing particles</span>
 <span class="sd">                smoothed and sorted into an image. (npix, npix)</span>
-<span class="sd">                If a filter list is provided: A dictionary containing 2D array with</span>
-<span class="sd">                particles smoothed and sorted into the image. (npix, npix)</span>
+<span class="sd">                If a filter list is provided: A dictionary containing 2D array</span>
+<span class="sd">                with particles smoothed and sorted into the image.</span>
+<span class="sd">                (npix, npix)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle the possible cases (multiple filters or single image)</span>
@@ -816,10 +802,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            img/imgs (array_like/dictionary, float)</span>
-<span class="sd">                If pixel_values exists: A singular image convolved with the PSF.</span>
-<span class="sd">                If a filter list exists: Each img in self.imgs is returned</span>
-<span class="sd">                convolved with the corresponding PSF (or the single PSF if an</span>
-<span class="sd">                array was supplied for psf).</span>
+<span class="sd">                If pixel_values exists: A singular image convolved with the</span>
+<span class="sd">                PSF. If a filter list exists: Each img in self.imgs is</span>
+<span class="sd">                returned convolved with the corresponding PSF (or the single</span>
+<span class="sd">                PSF if an array was supplied for psf).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            InconsistentArguments</span>
@@ -891,7 +877,8 @@
 <span class="sd">                The depth of this observation.</span>
 <span class="sd">            snr (float)</span>
 <span class="sd">                The desired signal to noise of this observation. Assuming a</span>
-<span class="sd">                signal-to-noise ratio of the form SN R= S / N = S / sqrt(sigma).</span>
+<span class="sd">                signal-to-noise ratio of the form</span>
+<span class="sd">                SN R= S / N = S / sqrt(sigma).</span>
 <span class="sd">            aperture (float)</span>
 <span class="sd">                The radius of the aperture depth is defined in, if not a point</span>
 <span class="sd">                source depth, in the same units as the image resolution.</span>
@@ -962,16 +949,16 @@
 <span class="sd">        Args:</span>
 <span class="sd">            noises (float/dict, float)</span>
 <span class="sd">                The standard deviation of the noise distribution. If noises is</span>
-<span class="sd">                provided then depth, snr and aperture are ignored. Can either be a</span>
-<span class="sd">                single value or a value per filter in a dictionary.</span>
+<span class="sd">                provided then depth, snr and aperture are ignored. Can either</span>
+<span class="sd">                be a single value or a value per filter in a dictionary.</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            noisy_img (array_like, float)</span>
 <span class="sd">                The image with a noise contribution.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            InconsistentArguments</span>
-<span class="sd">                If dictionaries are provided and each filter doesn&#39;t have an entry</span>
-<span class="sd">                and error is thrown.</span>
+<span class="sd">                If dictionaries are provided and each filter doesn&#39;t have an</span>
+<span class="sd">                entry and error is thrown.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Check we have a valid set of noise attributes</span>
@@ -1142,9 +1129,9 @@
 <span class="sd">                (self.imgs_psf), or &quot;noise&quot; for images with noise</span>
 <span class="sd">                (self.imgs_noise).</span>
 <span class="sd">            filter_code (str)</span>
-<span class="sd">                The filter code of the image to be plotted. If provided a plot is</span>
-<span class="sd">                made only for this filter. This is not needed if the image object</span>
-<span class="sd">                only contains a single image.</span>
+<span class="sd">                The filter code of the image to be plotted. If provided a plot</span>
+<span class="sd">                is made only for this filter. This is not needed if the image</span>
+<span class="sd">                object only contains a single image.</span>
 <span class="sd">            show (bool)</span>
 <span class="sd">                Whether to show the plot or not (Default False).</span>
 <span class="sd">            vmin (float)</span>
@@ -1153,12 +1140,12 @@
 <span class="sd">                The maximum value of the normalisation range.</span>
 <span class="sd">            scaling_func (function)</span>
 <span class="sd">                A function to scale the image by. This function should take a</span>
-<span class="sd">                single array and produce an array of the same shape but scaled in</span>
-<span class="sd">                the desired manner.</span>
+<span class="sd">                single array and produce an array of the same shape but scaled</span>
+<span class="sd">                in the desired manner.</span>
 <span class="sd">            cmap (str)</span>
-<span class="sd">                The name of the matplotlib colormap for image plotting. Can be any</span>
-<span class="sd">                valid string that can be passed to the cmap argument of imshow.</span>
-<span class="sd">                Defaults to &quot;Greys_r&quot;.</span>
+<span class="sd">                The name of the matplotlib colormap for image plotting. Can be</span>
+<span class="sd">                any valid string that can be passed to the cmap argument of</span>
+<span class="sd">                imshow. Defaults to &quot;Greys_r&quot;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.pyplot.figure</span>
@@ -1168,13 +1155,15 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnknownImageType</span>
-<span class="sd">                If the requested image type has not yet been created and stored in</span>
-<span class="sd">                this image object an exception is raised.</span>
+<span class="sd">                If the requested image type has not yet been created and</span>
+<span class="sd">                stored in this image object an exception is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Handle the scaling function for less branches</span>
         <span class="k">if</span> <span class="n">scaling_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">scaling_func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+
+            <span class="k">def</span> <span class="nf">scaling_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># What type of image are we plotting?</span>
         <span class="k">if</span> <span class="n">img_type</span> <span class="o">==</span> <span class="s2">&quot;standard&quot;</span><span class="p">:</span>
@@ -1306,9 +1295,9 @@
 <span class="sd">            extent (array_like)</span>
 <span class="sd">                The extent of the x and y axes.</span>
 <span class="sd">            cmap (str)</span>
-<span class="sd">                The name of the matplotlib colormap for image plotting. Can be any</span>
-<span class="sd">                valid string that can be passed to the cmap argument of imshow.</span>
-<span class="sd">                Defaults to &quot;Greys_r&quot;.</span>
+<span class="sd">                The name of the matplotlib colormap for image plotting. Can be</span>
+<span class="sd">                any valid string that can be passed to the cmap argument of</span>
+<span class="sd">                imshow. Defaults to &quot;Greys_r&quot;.</span>
 <span class="sd">            cbar_label (str)</span>
 <span class="sd">                The label for the colorbar.</span>
 <span class="sd">            norm (function)</span>
@@ -1373,8 +1362,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            rgb_filters (dict, array_like, str)</span>
-<span class="sd">                A dictionary containing lists of each filter to combine to create</span>
-<span class="sd">                the red, green, and blue channels. e.g. {&quot;R&quot;: &quot;Webb/NIRCam.F277W&quot;,</span>
+<span class="sd">                A dictionary containing lists of each filter to combine to</span>
+<span class="sd">                create the red, green, and blue channels.</span>
+<span class="sd">                e.g. {&quot;R&quot;: &quot;Webb/NIRCam.F277W&quot;,</span>
 <span class="sd">                &quot;G&quot;: &quot;Webb/NIRCam.F150W&quot;, &quot;B&quot;: &quot;Webb/NIRCam.F090W&quot;}.</span>
 <span class="sd">            img_type (str)</span>
 <span class="sd">                The type of images to combine. Can be &quot;standard&quot; for noiseless</span>
@@ -1396,7 +1386,9 @@
 
         <span class="c1"># Handle the scaling function for less branches</span>
         <span class="k">if</span> <span class="n">scaling_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">scaling_func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+
+            <span class="k">def</span> <span class="nf">scaling_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">x</span>
 
         <span class="c1"># Handle the case where we haven&#39;t been passed weights</span>
         <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1462,8 +1454,8 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            MissingImage</span>
-<span class="sd">                If the RGB image has not yet been created and stored in this image</span>
-<span class="sd">                object an exception is raised.</span>
+<span class="sd">                If the RGB image has not yet been created and stored in this</span>
+<span class="sd">                image object an exception is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If the image hasn&#39;t been made throw an error</span>
@@ -1585,8 +1577,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the ParticleImage.</span>
 
-<span class="sd">        NOTE: any two of (resolution, npix, fov) must be stated with units where</span>
-<span class="sd">        appropriate.</span>
+<span class="sd">        NOTE: any two of (resolution, npix, fov) must be stated with units</span>
+<span class="sd">        where appropriate.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            resolution (unyt_quantity)</span>
@@ -1595,8 +1587,9 @@
 <span class="sd">                The number of pixels along an axis of the image or number of</span>
 <span class="sd">                spaxels in the image plane of the IFU.</span>
 <span class="sd">            fov (unyt_quantity)</span>
-<span class="sd">                The width of the image/ifu. If coordinates are being used to make</span>
-<span class="sd">                the image this should have the same units as those coordinates.</span>
+<span class="sd">                The width of the image/ifu. If coordinates are being used to</span>
+<span class="sd">                make the image this should have the same units as those</span>
+<span class="sd">                coordinates.</span>
 <span class="sd">            sed (Sed)</span>
 <span class="sd">                An sed object containing the spectra for this observation.</span>
 <span class="sd">            filters (FilterCollection)</span>
@@ -1605,8 +1598,8 @@
 <span class="sd">            coordinates (array-like, float)</span>
 <span class="sd">                The position of particles to be sorted into the image.</span>
 <span class="sd">            pixel_values (array-like, float)</span>
-<span class="sd">                The values to be sorted/smoothed into pixels. Only needed if an sed</span>
-<span class="sd">                and filters are not used.</span>
+<span class="sd">                The values to be sorted/smoothed into pixels. Only needed if</span>
+<span class="sd">                an sed and filters are not used.</span>
 <span class="sd">            smoothing_lengths (array-like, float)</span>
 <span class="sd">                The values describing the size of the smooth kernel for each</span>
 <span class="sd">                particle. Only needed if star objects are not passed.</span>
@@ -1616,29 +1609,31 @@
 <span class="sd">            rest_frame (bool)</span>
 <span class="sd">                Are we making an observation in the rest frame?</span>
 <span class="sd">            redshift (float)</span>
-<span class="sd">                The redshift of the observation. Used when converting rest frame</span>
-<span class="sd">                luminosity to flux.</span>
+<span class="sd">                The redshift of the observation. Used when converting rest</span>
+<span class="sd">                frame luminosity to flux.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            psfs (array-like/dict, float/array_like, float)</span>
-<span class="sd">                Either A single array describing a PSF to be used on all images or</span>
-<span class="sd">                a dictionary containing a PSF for each filter with</span>
+<span class="sd">                Either A single array describing a PSF to be used on all</span>
+<span class="sd">                images or a dictionary containing a PSF for each filter with</span>
 <span class="sd">                {filter_code: PSF} key-value pair structure.</span>
 <span class="sd">            depths (float/dict, float)</span>
-<span class="sd">                The depth of this observation. Can either be a single value or a</span>
-<span class="sd">                value per filter in a dictionary.</span>
+<span class="sd">                The depth of this observation. Can either be a single value or</span>
+<span class="sd">                a value per filter in a dictionary.</span>
 <span class="sd">            snrs (float/dict, float)</span>
 <span class="sd">                The desired signal to noise of this observation. Assuming a</span>
-<span class="sd">                signal-to-noise ratio of the form SN R= S / N = S / sqrt(sigma).</span>
+<span class="sd">                signal-to-noise ratio of the form</span>
+<span class="sd">                SN R= S / N = S / sqrt(sigma).</span>
 <span class="sd">                Can either be a single SNR or a SNR per filter in a dictionary.</span>
 <span class="sd">            apertures (float/dict, float)</span>
 <span class="sd">                The radius of the aperture depth is defined in, if not a point</span>
 <span class="sd">                source depth, in the same units as the image resolution. Can</span>
-<span class="sd">                either be a single radius or a radius per filter in a dictionary.</span>
+<span class="sd">                either be a single radius or a radius per filter in a</span>
+<span class="sd">                dictionary.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1716,8 +1711,8 @@
 
     <span class="k">def</span> <span class="nf">_get_img_single_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A generic method to calculate an image where particles are smoothed over</span>
-<span class="sd">        a kernel. This uses C extensions to calculate the image for each</span>
+<span class="sd">        A generic method to calculate an image where particles are smoothed</span>
+<span class="sd">        over a kernel. This uses C extensions to calculate the image for each</span>
 <span class="sd">        particle efficiently.</span>
 
 <span class="sd">        Args:</span>
@@ -1782,8 +1777,8 @@
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        morphology (BaseMorphology and children)</span>
-<span class="sd">            The object that describes the parameters and creates the density grid</span>
-<span class="sd">            for a particular morphology.</span>
+<span class="sd">            The object that describes the parameters and creates the density</span>
+<span class="sd">            grid for a particular morphology.</span>
 <span class="sd">        density_grid (array-like, float)</span>
 <span class="sd">            The density grid defined by the morphology over which photometry or</span>
 <span class="sd">            smooth_value are smoothed to make an image.</span>
@@ -1813,55 +1808,58 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the ParametricImage.</span>
 
-<span class="sd">        NOTE: any two of (resolution, npix, fov) must be stated with units where</span>
-<span class="sd">        appropriate.</span>
+<span class="sd">        NOTE: any two of (resolution, npix, fov) must be stated with units</span>
+<span class="sd">        where appropriate.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            morphology (Morphology)</span>
-<span class="sd">                The object that describes the parameters and creates the density</span>
-<span class="sd">                grid for the desired morphology to be imaged.</span>
+<span class="sd">                The object that describes the parameters and creates the</span>
+<span class="sd">                density grid for the desired morphology to be imaged.</span>
 <span class="sd">            resolution (unyt_quantity)</span>
 <span class="sd">                The size a pixel.</span>
 <span class="sd">            npix (int)</span>
 <span class="sd">                The number of pixels along an axis of the image or number of</span>
 <span class="sd">                spaxels in the image plane of the IFU.</span>
 <span class="sd">            fov (unyt_quantity)</span>
-<span class="sd">                The width of the image/ifu. If coordinates are being used to make</span>
-<span class="sd">                the image this should have the same units as those coordinates.</span>
+<span class="sd">                The width of the image/ifu. If coordinates are being used to</span>
+<span class="sd">                make the image this should have the same units as those</span>
+<span class="sd">                coordinates.</span>
 <span class="sd">            sed (Sed)</span>
 <span class="sd">                An sed object containing the spectra for this observation.</span>
 <span class="sd">            smooth_value (float)</span>
-<span class="sd">                A value to smooth over the morphology defined density grid. Only</span>
-<span class="sd">                used when a single value is provided and Filters are not.</span>
+<span class="sd">                A value to smooth over the morphology defined density grid.</span>
+<span class="sd">                Only used when a single value is provided and Filters are not.</span>
 <span class="sd">            filters (FilterCollection)</span>
 <span class="sd">                An object containing the Filter objects for which images are</span>
 <span class="sd">                required.</span>
 <span class="sd">            rest_frame (bool)</span>
 <span class="sd">                Are we making an observation in the rest frame?</span>
 <span class="sd">            redshift (float)</span>
-<span class="sd">                The redshift of the observation. Used when converting rest frame</span>
-<span class="sd">                luminosity to flux.</span>
+<span class="sd">                The redshift of the observation. Used when converting rest</span>
+<span class="sd">                frame luminosity to flux.</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
-<span class="sd">                A cosmology object from astropy, used for cosmological calculations</span>
-<span class="sd">                when converting rest frame luminosity to flux.</span>
+<span class="sd">                A cosmology object from astropy, used for cosmological</span>
+<span class="sd">                calculations when converting rest frame luminosity to flux.</span>
 <span class="sd">            psfs (array-like/dict, float/array_like, float)</span>
-<span class="sd">                Either A single array describing a PSF to be used on all images or</span>
-<span class="sd">                a dictionary containing a PSF for each filter with</span>
+<span class="sd">                Either A single array describing a PSF to be used on all</span>
+<span class="sd">                images or a dictionary containing a PSF for each filter with</span>
 <span class="sd">                {filter_code: PSF} key-value pair structure.</span>
 <span class="sd">            depths (float/dict, float)</span>
-<span class="sd">                The depth of this observation. Can either be a single value or a</span>
-<span class="sd">                value per filter in a dictionary.</span>
+<span class="sd">                The depth of this observation. Can either be a single value or</span>
+<span class="sd">                a value per filter in a dictionary.</span>
 <span class="sd">            snrs (float/dict, float)</span>
 <span class="sd">                The desired signal to noise of this observation. Assuming a</span>
-<span class="sd">                signal-to-noise ratio of the form SN R= S / N = S / sqrt(sigma).</span>
+<span class="sd">                signal-to-noise ratio of the form</span>
+<span class="sd">                SN R= S / N = S / sqrt(sigma).</span>
 <span class="sd">                Can either be a single SNR or a SNR per filter in a dictionary.</span>
 <span class="sd">            apertures (float/dict, float)</span>
 <span class="sd">                The radius of the aperture depth is defined in, if not a point</span>
 <span class="sd">                source depth, in the same units as the image resolution. Can</span>
-<span class="sd">                either be a single radius or a radius per filter in a dictionary.</span>
+<span class="sd">                either be a single radius or a radius per filter in a</span>
+<span class="sd">                dictionary.</span>
 <span class="sd">            kernel (array-like, float)</span>
-<span class="sd">                The values from one of the kernels from the kernel_functions module.</span>
-<span class="sd">                Only used for smoothed images.</span>
+<span class="sd">                The values from one of the kernels from the kernel_functions</span>
+<span class="sd">                module. Only used for smoothed images.</span>
 <span class="sd">            kernel_threshold (float)</span>
 <span class="sd">                The kernel&#39;s impact parameter threshold (by default 1).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
