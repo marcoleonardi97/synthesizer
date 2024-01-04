@@ -388,6 +388,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PowerLaw&quot;</span><span class="p">,</span> <span class="s2">&quot;MW_N18&quot;</span><span class="p">,</span> <span class="s2">&quot;Calzetti2000&quot;</span><span class="p">,</span> <span class="s2">&quot;GrainsWD01&quot;</span><span class="p">]</span>
 
+
 <div class="viewcode-block" id="N09_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.N09_tau">[docs]</a><span class="k">def</span> <span class="nf">N09_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">cent_lam</span><span class="p">,</span> <span class="n">ampl</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attenuation curve using a modified version of the Calzetti</span>
@@ -396,7 +397,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (array-like, float)</span>
-<span class="sd">            The input wavelength array (expected in AA units, </span>
+<span class="sd">            The input wavelength array (expected in AA units,</span>
 <span class="sd">            global unit).</span>
 
 <span class="sd">        slope (float)</span>
@@ -418,44 +419,51 @@
 
     <span class="c1"># Wavelength in microns</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;um&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">/</span><span class="mf">1e4</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">/</span> <span class="mf">1e4</span>
     <span class="n">lam_v</span> <span class="o">=</span> <span class="mf">0.55</span>
     <span class="n">k_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">lam_micron</span><span class="p">)</span>
 
     <span class="c1"># Masking for different regimes in the Calzetti curve</span>
-    <span class="n">ok1</span> <span class="o">=</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&gt;=</span> <span class="mf">0.12</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">0.63</span><span class="p">)</span> <span class="c1"># 0.12um&lt;=lam&lt;0.63um</span>
-    <span class="n">ok2</span> <span class="o">=</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&gt;=</span> <span class="mf">0.63</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">31.</span><span class="p">)</span> <span class="c1"># 0.63um&lt;=lam&lt;=31um</span>
-    <span class="n">ok3</span> <span class="o">=</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">0.12</span><span class="p">)</span> <span class="c1"># lam&lt;0.12um</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ok1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># equation 1</span>
-        <span class="n">k_lam</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.156</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.509</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">])</span> \
-            <span class="o">-</span> <span class="p">(</span><span class="mf">0.198</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> \
-            <span class="o">+</span> <span class="p">(</span><span class="mf">0.011</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">func</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">],</span> <span class="n">k_lam</span><span class="p">[</span><span class="n">ok1</span><span class="p">],</span>
-                                <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ok2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># equation 2</span>
+    <span class="n">ok1</span> <span class="o">=</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&gt;=</span> <span class="mf">0.12</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">0.63</span><span class="p">)</span>  <span class="c1"># 0.12um&lt;=lam&lt;0.63um</span>
+    <span class="n">ok2</span> <span class="o">=</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&gt;=</span> <span class="mf">0.63</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">31.0</span><span class="p">)</span>  <span class="c1"># 0.63um&lt;=lam&lt;=31um</span>
+    <span class="n">ok3</span> <span class="o">=</span> <span class="n">lam_micron</span> <span class="o">&lt;</span> <span class="mf">0.12</span>  <span class="c1"># lam&lt;0.12um</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ok1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># equation 1</span>
+        <span class="n">k_lam</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="mf">2.156</span>
+            <span class="o">+</span> <span class="p">(</span><span class="mf">1.509</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">])</span>
+            <span class="o">-</span> <span class="p">(</span><span class="mf">0.198</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="o">+</span> <span class="p">(</span><span class="mf">0.011</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">]</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok1</span><span class="p">],</span> <span class="n">k_lam</span><span class="p">[</span><span class="n">ok1</span><span class="p">],</span> <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ok2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># equation 2</span>
         <span class="n">k_lam</span><span class="p">[</span><span class="n">ok2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.857</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.040</span> <span class="o">/</span> <span class="n">lam_micron</span><span class="p">[</span><span class="n">ok2</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ok3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># Extrapolating the 0.12um&lt;=lam&lt;0.63um regime</span>
         <span class="n">k_lam</span><span class="p">[</span><span class="n">ok3</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">lam_micron</span><span class="p">[</span><span class="n">ok3</span><span class="p">])</span>
-    
-    <span class="c1"># Using the Calzetti attenuation curve normalised </span>
+
+    <span class="c1"># Using the Calzetti attenuation curve normalised</span>
     <span class="c1"># to Av=4.05</span>
     <span class="n">k_lam</span> <span class="o">=</span> <span class="mf">4.05</span> <span class="o">+</span> <span class="mf">2.659</span> <span class="o">*</span> <span class="n">k_lam</span>
-    <span class="n">k_v</span> <span class="o">=</span> <span class="mf">4.05</span> <span class="o">+</span> <span class="mf">2.659</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.156</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.509</span> <span class="o">/</span> <span class="n">lam_v</span><span class="p">)</span>
-        <span class="o">-</span> <span class="p">(</span><span class="mf">0.198</span> <span class="o">/</span> <span class="n">lam_v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="o">+</span> <span class="p">(</span><span class="mf">0.011</span> <span class="o">/</span> <span class="n">lam_v</span><span class="o">**</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">k_v</span> <span class="o">=</span> <span class="mf">4.05</span> <span class="o">+</span> <span class="mf">2.659</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">2.156</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.509</span> <span class="o">/</span> <span class="n">lam_v</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">0.198</span> <span class="o">/</span> <span class="n">lam_v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.011</span> <span class="o">/</span> <span class="n">lam_v</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="c1"># UV bump feature expression from Noll+2009</span>
-    <span class="n">D_lam</span> <span class="o">=</span> <span class="n">ampl</span> <span class="o">*</span> <span class="p">((</span><span class="n">lam_micron</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> \
-        <span class="o">/</span> <span class="p">((</span><span class="n">lam_micron</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">cent_lam</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-    
-    <span class="c1"># Normalising with the value at 0.55um, to obtain </span>
-    <span class="c1"># normalised optical depth</span>
-    <span class="n">tau_x_v</span> <span class="o">=</span> <span class="p">(</span><span class="n">k_lam</span> <span class="o">+</span> <span class="n">D_lam</span><span class="p">)</span><span class="o">/</span><span class="n">k_v</span>              
+    <span class="n">D_lam</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ampl</span>
+        <span class="o">*</span> <span class="p">((</span><span class="n">lam_micron</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="o">/</span> <span class="p">((</span><span class="n">lam_micron</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">cent_lam</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">tau_x_v</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span><span class="o">/</span><span class="n">lam_v</span><span class="p">)</span><span class="o">**</span><span class="n">slope</span></div>
+    <span class="c1"># Normalising with the value at 0.55um, to obtain</span>
+    <span class="c1"># normalised optical depth</span>
+    <span class="n">tau_x_v</span> <span class="o">=</span> <span class="p">(</span><span class="n">k_lam</span> <span class="o">+</span> <span class="n">D_lam</span><span class="p">)</span> <span class="o">/</span> <span class="n">k_v</span>
+
+    <span class="k">return</span> <span class="n">tau_x_v</span> <span class="o">*</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="n">lam_v</span><span class="p">)</span> <span class="o">**</span> <span class="n">slope</span></div>
 
 
 <div class="viewcode-block" id="AttenuationLaw"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.AttenuationLaw">[docs]</a><span class="k">class</span> <span class="nc">AttenuationLaw</span><span class="p">:</span>
@@ -483,8 +491,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
             <span class="s2">&quot;AttenuationLaw should not be instantiated directly!&quot;</span>
-            <span class="s2">&quot; Instead use one to child models (&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">__all__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+            <span class="s2">&quot; Instead use one to child models (&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">__all__</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="AttenuationLaw.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.AttenuationLaw.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
@@ -628,7 +635,7 @@
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
 
@@ -763,10 +770,10 @@
 <span class="sd">                The optical depth.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="p">((</span><span class="n">_lam</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">())</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="p">((</span><span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="GrainsWD01.get_transmission"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.GrainsWD01.get_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -788,10 +795,12 @@
 <span class="sd">                is an array.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;Angstrom&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+            <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="o">.</span><span class="n">extinguish</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">_lam</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">(),</span> <span class="n">Av</span><span class="o">=</span><span class="mf">1.086</span> <span class="o">*</span> <span class="n">tau_v</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="o">.</span><span class="n">extinguish</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">(),</span> <span class="n">Av</span><span class="o">=</span><span class="mf">1.086</span> <span class="o">*</span> <span class="n">tau_v</span>
+        <span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

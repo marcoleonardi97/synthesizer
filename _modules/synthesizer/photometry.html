@@ -554,9 +554,7 @@
 
         <span class="c1"># Combine everything into the final table</span>
         <span class="k">for</span> <span class="n">filt</span><span class="p">,</span> <span class="n">phot</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filters_col</span><span class="p">,</span> <span class="n">value_col</span><span class="p">):</span>
-            <span class="n">table</span> <span class="o">+=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="n">filt</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">filter_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">phot</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">phot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|</span><span class="se">\n</span><span class="s2">|</span><span class="si">{</span><span class="n">sep</span><span class="si">}</span><span class="s2">|</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="n">table</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="n">filt</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">filter_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|</span><span class="si">{</span><span class="n">phot</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">phot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|</span><span class="se">\n</span><span class="s2">|</span><span class="si">{</span><span class="n">sep</span><span class="si">}</span><span class="s2">|</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="c1"># Clean up the final separator</span>
         <span class="n">table</span> <span class="o">=</span> <span class="n">table</span><span class="p">[:</span> <span class="o">-</span><span class="n">tot_width</span> <span class="o">-</span> <span class="mi">3</span><span class="p">]</span>
@@ -631,7 +629,9 @@
                 <span class="n">max_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
 
         <span class="c1"># Get the photometry</span>
-        <span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_photometry</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_photometry</span>
+        <span class="n">photometry</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rest_photometry</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_photometry</span>
+        <span class="p">)</span>
 
         <span class="c1"># Plot the photometry</span>
         <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">phot</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span> <span class="n">photometry</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
@@ -695,7 +695,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda_\mathrm</span><span class="si">{obs}</span><span class="s2">/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;$\lambda_\mathrm</span><span class="si">{obs}</span><span class="s2">/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Label the y axis handling all possibilities</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span><span class="p">:</span>

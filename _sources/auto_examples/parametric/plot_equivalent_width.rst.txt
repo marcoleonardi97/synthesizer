@@ -25,7 +25,7 @@ Example for generating the equivalent width for a set of UV indices from a param
 - build a parametric galaxy (see make_sfzh)
 - calculate equivalent width (see sed.py)
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-205
+.. GENERATED FROM PYTHON SOURCE LINES 9-216
 
 
 
@@ -150,10 +150,12 @@ Example for generating the equivalent width for a set of UV indices from a param
 
             for k in range(0, len(Z)):
                 eqw.append(
-                measure_equivalent_width(index, feature, blue, red, Z[k], stellar_mass, grid, eqw, 0)
+                    measure_equivalent_width(
+                        index, feature, blue, red, Z[k], stellar_mass, grid, eqw, 0
+                    )
                 )
 
-            print('Mean Equivalent width [', index, ']:', np.mean(eqw))
+            print("Mean Equivalent width [", index, "]:", np.mean(eqw))
 
             # Configure plot figure
             plt.rcParams["figure.dpi"] = 200
@@ -173,10 +175,10 @@ Example for generating the equivalent width for a set of UV indices from a param
             _, y_max = plt.ylim()
 
             plt.title(label, fontsize=8, transform=plt.gca().transAxes, y=0.8)
-        
+
             if len(np.array(eqw).shape) != 1:
                 grid.metallicity = [[x, x] for x in grid.metallicity]
-        
+
             plt.scatter(
                 grid.metallicity,
                 eqw,
@@ -195,8 +197,11 @@ Example for generating the equivalent width for a set of UV indices from a param
 
             if i == len(uv_index) - 1:
                 plt.show()
-            
-    def measure_equivalent_width(index, feature, blue, red, Z, smass, grid, eqw, mode):
+
+
+    def measure_equivalent_width(
+        index, feature, blue, red, Z, smass, grid, eqw, mode
+    ):
         """
         Calculate equivalent width for a specified UV index.
 
@@ -216,9 +221,9 @@ Example for generating the equivalent width for a set of UV indices from a param
         """
 
         stellar_mass = smass
-    
+
         Z_p = {"metallicity": Z}
-        metal_dist = ZDist.DeltaConstant(**Z_p) # constant metallicity
+        metal_dist = ZDist.DeltaConstant(**Z_p)  # constant metallicity
         sfh_p = {"duration": 100 * Myr}
         sfh = SFH.Constant(**sfh_p)  # constant star formation
 
@@ -242,23 +247,29 @@ Example for generating the equivalent width for a set of UV indices from a param
             sed = galaxy.stars.get_spectra_intrinsic(grid, fesc=0.5)
 
         return sed.measure_index(
-        	feature, 
-        	blue, 
-        	red,
+            feature,
+            blue,
+            red,
         )
+
 
     if __name__ == "__main__":
         grid_name = "test_grid"
         grid_dir = "../../tests/test_grid/"
 
-        index, index_window, blue_window, red_window = set_index()  # Retrieve UV indices
+        (
+            index,
+            index_window,
+            blue_window,
+            red_window,
+        ) = set_index()  # Retrieve UV indices
 
         equivalent_width(grid_name, index, index_window, blue_window, red_window)
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.522 seconds)
+   **Total running time of the script:** (0 minutes 2.492 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_equivalent_width.py:

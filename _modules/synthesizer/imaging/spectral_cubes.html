@@ -602,7 +602,7 @@
 <div class="viewcode-block" id="ParticleSpectralCube.get_hist_ifu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.imaging.spectral_cubes.html#synthesizer.imaging.spectral_cubes.ParticleSpectralCube.get_hist_ifu">[docs]</a>    <span class="k">def</span> <span class="nf">get_hist_ifu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A method to calculate an IFU with no smoothing.</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns:</span>
 <span class="sd">            img (array_like, float)</span>
 <span class="sd">                A 3D array containing the pixel values sorted into individual</span>
@@ -625,9 +625,9 @@
             <span class="p">):</span>
                 <span class="k">continue</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">ifu</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pix_pos</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pix_pos</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sed_values</span><span class="p">[</span>
-                <span class="n">ind</span><span class="p">,</span> <span class="p">:</span>
-            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ifu</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pix_pos</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pix_pos</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:</span>
+            <span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sed_values</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ifu</span></div>
 
@@ -762,10 +762,14 @@
         <span class="c1"># Define 1D bin centres of each pixel</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatial_unit</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">angle</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatial_unit</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;mas&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">bin_centres</span> <span class="o">=</span> <span class="n">res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
+            <span class="n">bin_centres</span> <span class="o">=</span> <span class="n">res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatial_unit</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;kpc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">bin_centres</span> <span class="o">=</span> <span class="n">res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
+            <span class="n">bin_centres</span> <span class="o">=</span> <span class="n">res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">npix</span>
+            <span class="p">)</span>
 
         <span class="c1"># Convert the 1D grid into 2D grids coordinate grids</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_xx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">bin_centres</span><span class="p">,</span> <span class="n">bin_centres</span><span class="p">)</span>

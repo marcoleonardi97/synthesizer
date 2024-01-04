@@ -598,13 +598,17 @@
         <span class="c1"># could instead check the first and last entry and the shape.</span>
         <span class="c1"># In rare instances this could fail though.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lam</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span><span class="s2">&quot;Wavelength grids must be identical&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
+                <span class="s2">&quot;Wavelength grids must be identical&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Ensure the lnu arrays are compatible</span>
         <span class="c1"># This check is redudant for Sed.lnu.shape = (nlam, ) spectra but will</span>
         <span class="c1"># not erroneously error. Nor is it expensive.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span><span class="s2">&quot;SEDs must have same dimensions&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
+                <span class="s2">&quot;SEDs must have same dimensions&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># They&#39;re compatible, add them</span>
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
@@ -814,7 +818,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_lnu_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -959,14 +964,18 @@
             <span class="c1"># base units.</span>
             <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">window</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
             <span class="n">luminosity</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span>
+                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+                <span class="o">*</span> <span class="n">Hz</span>
             <span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
             <span class="c1"># Define a pseudo transmission function</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
@@ -1029,7 +1038,9 @@
                 <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                         <span class="p">[</span>
-                            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">_lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span><span class="p">)</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                                <span class="n">_lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span>
+                            <span class="p">)</span>
                             <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span><span class="p">)</span>
                             <span class="k">for</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span>
                         <span class="p">]</span>
@@ -1054,7 +1065,9 @@
             <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
                 <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x</span>
 
-            <span class="n">Lnu</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
 
             <span class="n">Lnu</span> <span class="o">=</span> <span class="n">Lnu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
@@ -1156,7 +1169,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                     <span class="p">[</span>
-                        <span class="n">linregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">_lnu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">s</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">linregress</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">_lnu</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">s</span><span class="p">])</span>
+                        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="o">-</span> <span class="mf">2.0</span>
                         <span class="k">for</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span>
                     <span class="p">]</span>
@@ -1164,7 +1179,10 @@
 
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">linregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">s</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">2.0</span>
+                    <span class="n">linregress</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">s</span><span class="p">]))[</span>
+                        <span class="mi">0</span>
+                    <span class="p">]</span>
+                    <span class="o">-</span> <span class="mf">2.0</span>
                 <span class="p">)</span>
 
         <span class="c1"># If two windows are provided</span>
@@ -1179,7 +1197,8 @@
 
             <span class="c1"># Measure beta</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lnu_blue</span> <span class="o">/</span> <span class="n">lnu_red</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">))</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">lnu_blue</span> <span class="o">/</span> <span class="n">lnu_red</span><span class="p">)</span>
+                <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">red</span><span class="p">))</span>
                 <span class="o">-</span> <span class="mf">2.0</span>
             <span class="p">)</span>
 
@@ -1241,7 +1260,9 @@
 
         <span class="c1"># Finally, compute the flux SED and apply unit conversions to get</span>
         <span class="c1"># to nJy</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">luminosity_distance</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">luminosity_distance</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># If we are applying an IGM model apply it</span>
         <span class="k">if</span> <span class="n">igm</span><span class="p">:</span>
@@ -1369,7 +1390,9 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f1</span><span class="p">]</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.measure_index"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_index">[docs]</a>    <span class="k">def</span> <span class="nf">measure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1407,7 +1430,9 @@
             <span class="c1"># Multiple spectra case</span>
 
             <span class="c1"># Perform polyfit for the continuum fit for all spectra</span>
-            <span class="n">continuum_fits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">([</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">continuum_fits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span>
+            <span class="p">)</span>
             <span class="c1"># Use the continuum fit to define the continuum for all spectra</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span>
@@ -1421,16 +1446,22 @@
 
             <span class="c1"># Define the continuum subtracted spectrum for all SEDs</span>
             <span class="n">feature_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[:,</span> <span class="n">transmission</span><span class="p">]</span>
-            <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
+            <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
+            <span class="p">)</span>
 
             <span class="c1"># Measure index for all SEDs</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
+                <span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Single spectra case</span>
 
             <span class="c1"># Perform polyfit for the continuum fit</span>
-            <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">([</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">continuum_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">mean_blue</span><span class="p">,</span> <span class="n">mean_red</span><span class="p">],</span> <span class="p">[</span><span class="n">lnu_blue</span><span class="p">,</span> <span class="n">lnu_red</span><span class="p">],</span> <span class="mi">1</span>
+            <span class="p">)</span>
 
             <span class="c1"># Use the continuum fit to define the continuum</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="p">(</span>
@@ -1440,7 +1471,9 @@
 
             <span class="c1"># Define the continuum subtracted spectrum</span>
             <span class="n">feature_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[</span><span class="n">transmission</span><span class="p">]</span>
-            <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
+            <span class="n">feature_lum_continuum_subtracted</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="p">(</span><span class="n">feature_lum</span> <span class="o">-</span> <span class="n">continuum</span><span class="p">)</span> <span class="o">/</span> <span class="n">continuum</span>
+            <span class="p">)</span>
 
             <span class="c1"># Measure index</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">feature_lum_continuum_subtracted</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">feature_lam</span><span class="p">)</span>

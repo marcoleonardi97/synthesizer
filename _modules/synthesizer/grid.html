@@ -616,7 +616,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span> <span class="o">=</span> <span class="n">grid_dir</span>
 
         <span class="c1"># Have we been passed an extension?</span>
-        <span class="k">if</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hdf5&quot;</span> <span class="ow">or</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;hdf5&quot;</span>
+            <span class="ow">or</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;h5&quot;</span>
+        <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span> <span class="o">=</span> <span class="s2">&quot;hdf5&quot;</span>
@@ -625,7 +628,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span> <span class="o">=</span> <span class="n">grid_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="c1"># Construct the full path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grid_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_filename</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_ext</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
         <span class="c1"># Flags for reading behaviour</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_lines</span> <span class="o">=</span> <span class="n">read_lines</span>
@@ -647,7 +652,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">])</span>
 
             <span class="c1"># Put the values of each axis in a dictionary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">axes_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">axis</span><span class="p">:</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">][</span><span class="n">axis</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axes_values</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">axis</span><span class="p">:</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">][</span><span class="n">axis</span><span class="p">][:]</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span>
+            <span class="p">}</span>
 
             <span class="c1"># Set the values of each axis as an attribute</span>
             <span class="c1"># e.g. self.log10age == self.axes_values[&#39;log10age&#39;]</span>
@@ -667,7 +674,9 @@
         <span class="k">if</span> <span class="n">read_spectra</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
                 <span class="c1"># Get list of available spectra</span>
                 <span class="n">spectra_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="s2">&quot;spectra&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
@@ -722,14 +731,20 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">read_lines</span> <span class="o">=</span> <span class="n">get_available_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="p">)</span>
 
-            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_name</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span>
+            <span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_lines</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span>
                         <span class="s2">&quot;wavelength&quot;</span>
                     <span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">][:]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">][:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span>
+                        <span class="s2">&quot;luminosity&quot;</span>
+                    <span class="p">][:]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;lines&quot;</span><span class="p">][</span><span class="n">line</span><span class="p">][</span>
+                        <span class="s2">&quot;continuum&quot;</span>
+                    <span class="p">][:]</span>
 
             <span class="c1"># Save list of available lines</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -783,7 +798,9 @@
                 <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">new_spectra</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Evaluate the function at the desired wavelengths</span>
-                <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span>
+                <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span>
+                    <span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+                <span class="p">)</span>
 
             <span class="c1"># Update this spectra</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_spectra</span>
@@ -1085,7 +1102,9 @@
         <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">cmapper</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
         <span class="n">cax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">tick_top</span><span class="p">()</span>
         <span class="n">cax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
-        <span class="n">cax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\dot</span><span class="si">{n}</span><span class="s2">_{&quot;</span> <span class="o">+</span> <span class="n">ion</span> <span class="o">+</span> <span class="s2">&quot;}/s^{-1}\ M_{\odot}^{-1})$&quot;</span><span class="p">)</span>
+        <span class="n">cax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\dot</span><span class="si">{n}</span><span class="s2">_{&quot;</span> <span class="o">+</span> <span class="n">ion</span> <span class="o">+</span> <span class="s2">&quot;}/s^{-1}\ M_{\odot}^{-1})$&quot;</span>
+        <span class="p">)</span>
         <span class="n">cax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
 
         <span class="c1"># Set custom tick marks</span>

@@ -468,7 +468,9 @@
 
         <span class="c1"># Ensure the offset has units</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">offset</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;The offset must be provided with units&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+                <span class="s2">&quot;The offset must be provided with units&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Initialise morphology using the in-built point-source class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">morphology</span> <span class="o">=</span> <span class="n">PointSource</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
@@ -548,7 +550,10 @@
                 <span class="c1"># line region parameters)</span>
                 <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
 
-            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
                 <span class="c1"># Line region parameters required from the emission_model</span>
                 <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">))</span>
 
@@ -558,8 +563,13 @@
                 <span class="p">)</span>
 
         <span class="c1"># Remove units from any unyt_arrays and make contiguous</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
 
         <span class="c1"># For black holes mass is a grid parameter but we still need to</span>
         <span class="c1"># multiply by mass in the extensions so just multiply by 1</span>

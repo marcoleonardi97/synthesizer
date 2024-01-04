@@ -517,7 +517,9 @@
 
                 <span class="c1"># mass weighted gas phase metallicity</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                    <span class="p">)</span>
                     <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span>
                 <span class="p">)</span></div>
 
@@ -667,7 +669,9 @@
                 <span class="s2">&quot;Star object is missing coordinates!&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;Gas object is missing coordinates!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Gas object is missing coordinates!&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">smoothing_lengths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;Gas object is missing smoothing lengths!&quot;</span>
@@ -677,7 +681,9 @@
                 <span class="s2">&quot;Gas object is missing metallicities!&quot;</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;Gas object is missing masses!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Gas object is missing masses!&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;Gas object is missing DTMs (dust_to_metal_ratio)!&quot;</span>
@@ -695,12 +701,17 @@
 
         <span class="c1"># Set up the gas inputs to the C function.</span>
         <span class="n">gas_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">gas_sml</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_smoothing_lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">gas_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">gas_sml</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_smoothing_lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
+        <span class="n">gas_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
         <span class="n">gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_masses</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
             <span class="n">gas_dtm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">gas_mass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">gas_mass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">gas_dtm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
@@ -934,9 +945,9 @@
         <span class="k">elif</span> <span class="n">stellar_mass</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma_min</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">C</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">sf_gas_metallicity</span> <span class="o">/</span> <span class="n">Z_norm</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sf_gas_mass</span> <span class="o">/</span> <span class="n">stellar_mass</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
-                <span class="mf">1.0</span> <span class="o">/</span> <span class="n">beta</span>
-            <span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">sf_gas_metallicity</span> <span class="o">/</span> <span class="n">Z_norm</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="n">sf_gas_mass</span> <span class="o">/</span> <span class="n">stellar_mass</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">beta</span><span class="p">)</span>
             <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">gamma_max</span> <span class="o">-</span> <span class="n">gamma_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">C</span>
 
         <span class="k">return</span> <span class="n">gamma</span></div>
@@ -1143,9 +1154,14 @@
         <span class="c1"># Combine images</span>
         <span class="k">if</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">stellar_img</span>
-        <span class="k">elif</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">stellar_img</span> <span class="o">+</span> <span class="n">blackhole_img</span>
-        <span class="k">elif</span> <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="n">stellar_spectra_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blackhole_spectra_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">blackhole_img</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">img</span> <span class="o">=</span> <span class="n">stellar_img</span>  <span class="c1"># pixel_value case</span>
@@ -1208,7 +1224,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span>
+                <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">img</span></div>
@@ -1270,7 +1287,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span>
+                <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">img</span></div>
@@ -1334,7 +1352,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span>
+                <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
             <span class="p">)</span>
 
         <span class="c1"># Set up the initial mass image</span>
@@ -1714,7 +1733,8 @@
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownImageType</span><span class="p">(</span>
-                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span> <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
+                <span class="s2">&quot;Unknown img_type </span><span class="si">%s</span><span class="s2">. (Options are &#39;hist&#39; or &quot;</span>
+                <span class="s2">&quot;&#39;smoothed&#39;)&quot;</span> <span class="o">%</span> <span class="n">img_type</span>
             <span class="p">)</span>
 
         <span class="c1"># Convert the initial mass map to SFR</span>

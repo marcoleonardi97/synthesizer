@@ -551,7 +551,9 @@
         <span class="c1"># If inclination, calculate the cosine of the inclination, required by</span>
         <span class="c1"># some models (e.g. AGNSED).</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclination</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cosine_inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;radian&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cosine_inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;radian&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -687,7 +689,9 @@
 <span class="sd">                The black hole bolometric luminosity</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">accretion_rate</span> <span class="o">*</span> <span class="n">c</span><span class="o">**</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">accretion_rate</span> <span class="o">*</span> <span class="n">c</span><span class="o">**</span><span class="mi">2</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span></div>
 
@@ -715,7 +719,9 @@
 <span class="sd">                The black hole eddington ratio</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">eddington_ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bolometric_luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eddington_luminosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eddington_ratio</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bolometric_luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eddington_luminosity</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eddington_ratio</span></div>
 
@@ -992,7 +998,9 @@
 
             <span class="c1"># Remember the previous values to be returned after getting the</span>
             <span class="c1"># spectra</span>
-            <span class="n">used_varaibles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">)))</span>
+            <span class="n">used_varaibles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="p">)</span>
 
             <span class="c1"># Set the passed value</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
@@ -1152,7 +1160,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span>
 
                 <span class="c1"># Calculate total spectrum</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
 
         <span class="k">elif</span> <span class="p">(</span><span class="n">dust_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tau_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingArgument</span><span class="p">(</span>

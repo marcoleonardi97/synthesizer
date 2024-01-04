@@ -532,7 +532,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log10ages_lims</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
 
         <span class="c1"># Set the metallicity grid properties</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metallicities_lims</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metallicities_lims</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">metallicities</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities_lims</span> <span class="o">=</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -618,7 +621,12 @@
             <span class="c1"># Regular linearly</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_grid_type</span> <span class="o">=</span> <span class="s2">&quot;Z&quot;</span>
 
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="p">)</span>
+            <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">):</span>
             <span class="c1"># Regular in logspace</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_grid_type</span> <span class="o">=</span> <span class="s2">&quot;log10Z&quot;</span>
 
@@ -643,7 +651,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If no units assume unit system</span>
-        <span class="k">if</span> <span class="n">instant_sf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">instant_sf</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">instant_sf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">instant_sf</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+        <span class="p">):</span>
             <span class="n">instant_sf</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="o">.</span><span class="n">units</span>
 
         <span class="c1"># Handle the instantaneous SFH case</span>
@@ -667,7 +677,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
 
             <span class="c1"># Get the bin</span>
-            <span class="n">imetal</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">-</span> <span class="n">instant_metallicity</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+            <span class="n">imetal</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">-</span> <span class="n">instant_metallicity</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span><span class="p">[</span><span class="n">imetal</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_mass</span>
 
         <span class="c1"># Calculate SFH from function if necessary</span>
@@ -679,7 +691,9 @@
             <span class="n">min_age</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">ia</span><span class="p">,</span> <span class="n">age</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="n">max_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">[</span><span class="n">ia</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">[</span><span class="n">ia</span><span class="p">]])</span>
-                <span class="n">sf</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span><span class="o">.</span><span class="n">get_sfr</span><span class="p">,</span> <span class="n">min_age</span><span class="p">,</span> <span class="n">max_age</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">sf</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist_func</span><span class="o">.</span><span class="n">get_sfr</span><span class="p">,</span> <span class="n">min_age</span><span class="p">,</span> <span class="n">max_age</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span><span class="p">[</span><span class="n">ia</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span>
                 <span class="n">min_age</span> <span class="o">=</span> <span class="n">max_age</span>
 
@@ -693,7 +707,10 @@
             <span class="n">min_metal</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">imetal</span><span class="p">,</span> <span class="n">metal</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                 <span class="n">max_metal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
-                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">imetal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">imetal</span><span class="p">]]</span>
+                    <span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">imetal</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">imetal</span><span class="p">],</span>
+                    <span class="p">]</span>
                 <span class="p">)</span>
                 <span class="n">sf</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span><span class="o">.</span><span class="n">get_dist_weight</span><span class="p">,</span> <span class="n">min_metal</span><span class="p">,</span> <span class="n">max_metal</span>
@@ -768,7 +785,10 @@
         <span class="n">sfzh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="c1"># Account for the SFZH mask in the non-zero indices</span>
-        <span class="n">non_zero_inds</span> <span class="o">=</span> <span class="p">(</span><span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">],</span> <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">])</span>
+        <span class="n">non_zero_inds</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">],</span>
+            <span class="n">non_zero_inds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">sfzh_mask</span><span class="p">],</span>
+        <span class="p">)</span>
 
         <span class="c1"># Compute the spectra</span>
         <span class="n">spectra</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
@@ -890,9 +910,13 @@
         <span class="n">pstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;SUMMARY OF BINNED SFZH&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;median age: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_median_age</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Myr&quot;</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;median age: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_median_age</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Myr&quot;</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;mean age: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_age</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Myr&quot;</span><span class="p">)</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;mean metallicity: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_metallicity</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;mean metallicity: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_mean_metallicity</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="k">return</span> <span class="n">pstr</span>
@@ -916,7 +940,9 @@
             <span class="n">new_sfzh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">+</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">sfzh</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span><span class="s2">&quot;SFZH must be the same shape&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
+                <span class="s2">&quot;SFZH must be the same shape&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Stars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">sfzh</span><span class="o">=</span><span class="n">new_sfzh</span><span class="p">)</span>
 
@@ -951,7 +977,9 @@
 
         <span class="c1"># Check we have units</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lum</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lum must be given with unyt units&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span>
+                <span class="s2">&quot;lum must be given with unyt units&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Calculate the current luminosity in scale_filter</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
@@ -1004,7 +1032,9 @@
 
         <span class="c1"># Check we have units</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">flux</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lum must be given with unyt units&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span>
+                <span class="s2">&quot;lum must be given with unyt units&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Get the sed object</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>

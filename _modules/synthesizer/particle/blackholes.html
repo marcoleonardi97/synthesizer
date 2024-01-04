@@ -661,7 +661,10 @@
                 <span class="c1"># line region parameters)</span>
                 <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
 
-            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
                 <span class="c1"># Line region parameters required from the emission_model</span>
                 <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">axis</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">line_region</span><span class="p">))</span>
 
@@ -674,7 +677,10 @@
         <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
 
         <span class="c1"># Remove units from any unyt_arrays</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
 
         <span class="c1"># Ensure any parameters inherited from the emission model have</span>
         <span class="c1"># as many values as particles</span>
@@ -685,7 +691,10 @@
                 <span class="n">props</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">npart</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
 
         <span class="c1"># Apply the mask to each property and make contiguous</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
 
         <span class="c1"># For black holes mass is a grid parameter but we still need to</span>
         <span class="c1"># multiply by mass in the extensions so just multiply by 1</span>
@@ -870,7 +879,9 @@
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;disc_transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">nlr_spectra</span> <span class="o">+</span> <span class="n">blr_spectra</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;disc_transmitted&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+            <span class="n">lam</span><span class="p">,</span> <span class="n">nlr_spectra</span> <span class="o">+</span> <span class="n">blr_spectra</span>
+        <span class="p">)</span>
 
         <span class="c1"># calculate the escaping spectra.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;disc_escaped&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -974,7 +985,9 @@
         <span class="p">)</span> <span class="o">*</span> <span class="n">disc_spectra</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
 
         <span class="c1"># Create torus spectra</span>
-        <span class="n">torus_sed</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">torus_emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">disc_spectra</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">torus_sed</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">torus_emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">disc_spectra</span><span class="o">.</span><span class="n">lam</span>
+        <span class="p">)</span>
 
         <span class="c1"># This is normalised to a bolometric luminosity of 1 so we need to</span>
         <span class="c1"># scale by the bolometric luminosity and create a spectra per particle.</span>
@@ -1017,7 +1030,8 @@
         <span class="c1"># return the template scaled by bolometric luminosity</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">,</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">,</span>
+                <span class="n">emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span>
 
@@ -1031,7 +1045,9 @@
 
             <span class="c1"># Remember the previous values to be returned after getting the</span>
             <span class="c1"># spectra</span>
-            <span class="n">used_varaibles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">)))</span>
+            <span class="n">used_varaibles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="p">)</span>
 
             <span class="c1"># Set the passed value</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
@@ -1103,7 +1119,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
-                <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="s2">&quot;intrinsic&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">spectra_id</span><span class="p">,</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">):</span>
@@ -1178,16 +1196,21 @@
                 <span class="p">)</span>
 
                 <span class="c1"># Calculate normalised dust emission spectrum</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dust_emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="s2">&quot;dust&quot;</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">dust_emission_model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Scale the dust spectra by the dust_bolometric_luminosity.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="s2">&quot;dust&quot;</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">value</span>
 
                 <span class="c1"># Calculate total spectrum</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span>
                 <span class="p">)</span>
 
         <span class="k">elif</span> <span class="p">(</span><span class="n">dust_curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">tau_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>

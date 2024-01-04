@@ -458,9 +458,9 @@
 
     <span class="c1"># check which kind of object we&#39;re loading</span>
     <span class="k">if</span> <span class="n">load_halo</span><span class="p">:</span>
-        <span class="n">obj_str</span> <span class="o">=</span> <span class="s1">&#39;halo_data&#39;</span>
+        <span class="n">obj_str</span> <span class="o">=</span> <span class="s2">&quot;halo_data&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">obj_str</span> <span class="o">=</span> <span class="s1">&#39;galaxy_data&#39;</span>
+        <span class="n">obj_str</span> <span class="o">=</span> <span class="s2">&quot;galaxy_data&quot;</span>
 
     <span class="k">if</span> <span class="n">caesar_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">caesar_directory</span> <span class="o">=</span> <span class="n">directory</span>
@@ -491,17 +491,16 @@
         <span class="n">end</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obj_str</span><span class="si">}</span><span class="s2">/glist_end&quot;</span><span class="p">][:]</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
-
         <span class="c1"># Use the H2 masses computed in Simba directly to</span>
         <span class="c1"># estimate the star forming gas mass and metallicity.</span>
         <span class="c1"># Alternative to setting star_forming property on</span>
         <span class="c1"># each gas particle</span>
         <span class="n">h2_masses</span> <span class="o">=</span> <span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_h2fraction</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span><span class="p">)</span>
-        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span>\
-                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span> <span class="o">*</span> <span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">])</span> <span class="o">/</span>\
-                <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span>
-        
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span> <span class="o">*</span> <span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">])</span> <span class="o">/</span> <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span>
+        <span class="p">)</span>
+
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
             <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
             <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
