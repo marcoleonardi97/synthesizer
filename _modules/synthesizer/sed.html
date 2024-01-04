@@ -328,6 +328,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.photoionisation.photoionisation.html">synthesizer.photoionisation.photoionisation</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.photometry.html">synthesizer.photometry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.plt.html">synthesizer.plt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.sed.html">synthesizer.sed</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.stats.html">synthesizer.stats</a></li>
@@ -397,6 +398,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.photometry</span> <span class="kn">import</span> <span class="n">PhotometryCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">rebin_1d</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
@@ -1187,31 +1189,6 @@
 
         <span class="k">return</span> <span class="n">beta</span></div>
 
-<div class="viewcode-block" id="Sed.get_broadband_luminosities"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_broadband_luminosities">[docs]</a>    <span class="k">def</span> <span class="nf">get_broadband_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate broadband luminosities using a FilterCollection object</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            broadband_luminosities (dict)</span>
-<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Intialise result dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Loop over filters</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
-            <span class="c1"># Apply the filter transmission curve and store the resulting</span>
-            <span class="c1"># luminosity</span>
-            <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span></div>
-
 <div class="viewcode-block" id="Sed.get_fnu0"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_fnu0">[docs]</a>    <span class="k">def</span> <span class="nf">get_fnu0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate a dummy observed frame spectral energy distribution.</span>
@@ -1271,17 +1248,62 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span></div>
 
-<div class="viewcode-block" id="Sed.get_broadband_fluxes"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_broadband_fluxes">[docs]</a>    <span class="k">def</span> <span class="nf">get_broadband_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>  <span class="c1"># broad band flux/nJy</span>
+<div class="viewcode-block" id="Sed.get_broadband_luminosities"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_broadband_luminosities">[docs]</a>    <span class="k">def</span> <span class="nf">get_broadband_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate broadband luminosities using a FilterCollection object</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            fc (object)</span>
+<span class="sd">            filters (filters.FilterCollection)</span>
 <span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            broadband_luminosities (dict)</span>
+<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Intialise result dictionary</span>
+        <span class="n">broadband_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Loop over filters</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+            <span class="c1"># Check whether the filter transmission curve wavelength grid</span>
+            <span class="c1"># and the spectral grid are the same array</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="s2">&quot;WARNING: filter wavelength grid is not &quot;</span>
+                            <span class="s2">&quot;the same as the SED wavelength grid.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># Apply the filter transmission curve and store the resulting</span>
+            <span class="c1"># luminosity</span>
+            <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span>
+            <span class="n">broadband_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span>
+
+        <span class="c1"># Create the photometry collection and store it in the object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span>
+            <span class="n">filters</span><span class="p">,</span> <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">broadband_luminosities</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_luminosities</span></div>
+
+<div class="viewcode-block" id="Sed.get_broadband_fluxes"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_broadband_fluxes">[docs]</a>    <span class="k">def</span> <span class="nf">get_broadband_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate broadband fluxes using a FilterCollection object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (object)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (dict)</span>
-<span class="sd">                A dictionary of fluxes in each filter in fc.</span>
+<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Ensure fluxes actually exist</span>
@@ -1295,10 +1317,10 @@
             <span class="p">)</span>
 
         <span class="c1"># Set up flux dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">broadband_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Loop over filters in filter collection</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="c1"># Check whether the filter transmission curve wavelength grid</span>
             <span class="c1"># and the spectral grid are the same array</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">):</span>
@@ -1311,8 +1333,13 @@
                     <span class="p">)</span>
 
             <span class="c1"># Calculate and store the broadband flux in this filter</span>
-            <span class="n">bb_flux</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obsnu</span><span class="p">)</span> <span class="o">*</span> <span class="n">nJy</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span>
+            <span class="n">bb_flux</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obsnu</span><span class="p">)</span>
+            <span class="n">broadband_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span>
+
+        <span class="c1"># Create the photometry collection and store it in the object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span>
+            <span class="n">filters</span><span class="p">,</span> <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">broadband_fluxes</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">broadband_fluxes</span></div>
 
