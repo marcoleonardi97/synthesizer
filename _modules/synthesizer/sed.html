@@ -606,6 +606,28 @@
         <span class="c1"># They&#39;re compatible, add them</span>
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_sed</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overloads &quot;reflected&quot; addition to allow sed objects to be added</span>
+<span class="sd">        together when in reverse order, i.e. second_sed + self.</span>
+
+<span class="sd">        This may seem superfluous, but it is needed to enable the use of sum()</span>
+<span class="sd">        on lists of Seds.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Sed</span>
+<span class="sd">                A new instance of Sed with added lnu arrays.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InconsistentAddition</span>
+<span class="sd">                If wavelength arrays or lnu arrays are incompatible an error</span>
+<span class="sd">                is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Handle the int case explictly which is triggered by the use of sum</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">second_sed</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">second_sed</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">second_sed</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Overide multiplication operator to allow lnu to be scaled.</span>

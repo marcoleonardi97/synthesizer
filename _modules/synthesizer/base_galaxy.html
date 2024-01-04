@@ -559,6 +559,43 @@
 
         <span class="c1"># TODO: Once implemented do this for gas and black holes too</span>
 
+<div class="viewcode-block" id="BaseGalaxy.get_spectra_combined"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_spectra_combined">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_combined</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combine all common component spectra from components onto the galaxy,</span>
+<span class="sd">        e.g.:</span>
+<span class="sd">            intrinsc = stellar_intrinsic + black_hole_intrinsic.</span>
+
+<span class="sd">        For any combined spectra all components with a valid spectra will be</span>
+<span class="sd">        combined and stored in Galaxy.spectra under the same key, but only if</span>
+<span class="sd">        there are instances of that spectra key on more than 1 component.</span>
+
+<span class="sd">        Possible combined spectra are:</span>
+<span class="sd">            - &quot;total&quot;</span>
+<span class="sd">            - &quot;intrinsic&quot;</span>
+<span class="sd">            - &quot;emergent&quot;</span>
+
+<span class="sd">        Note that this process is only applicable to integrated spectra.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the spectra we have on the components to combine</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;intrinsic&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;emergent&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="c1"># Now combine all spectra that have more than one contributing</span>
+        <span class="c1"># component.</span>
+        <span class="c1"># Note that sum when applied to a list of spectra</span>
+        <span class="c1"># with overloaded __add__ methods will produce an Sed object</span>
+        <span class="c1"># containing the combined spectra.</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="BaseGalaxy.plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
