@@ -443,41 +443,39 @@
 <span class="sd">        Calculates dust emission spectra using the attenuated and intrinsic</span>
 <span class="sd">        spectra that have already been generated and an emission model.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        emissionmodel : obj</span>
-<span class="sd">            The spectral frid</span>
+<span class="sd">        Args:</span>
+<span class="sd">            emissionmodel (synthesizer.dust.emission.*)</span>
+<span class="sd">                The emission model from the dust module used to create dust</span>
+<span class="sd">                emission.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        obj (Sed)</span>
-<span class="sd">             A Sed object containing the dust attenuated spectra</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Sed</span>
+<span class="sd">                A Sed object containing the dust emission spectra</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># use wavelength grid from attenuated spectra</span>
-        <span class="c1"># NOTE: in future it might be good to allow a custom wavelength grid</span>
+        <span class="c1"># Use wavelength grid from attenuated spectra</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span>
 
-        <span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span>
-
-        <span class="c1"># calculate the bolometric dust lunminosity as the difference between</span>
+        <span class="c1"># Calculate the bolometric dust luminosity as the difference between</span>
         <span class="c1"># the intrinsic and attenuated</span>
-
         <span class="n">dust_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
         <span class="p">)</span>
 
-        <span class="c1"># get the spectrum and normalise it properly</span>
+        <span class="c1"># Get the spectrum and normalise it properly</span>
         <span class="n">lnu</span> <span class="o">=</span> <span class="n">dust_bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">emissionmodel</span><span class="o">.</span><span class="n">lnu</span><span class="p">(</span>
             <span class="n">lam</span>
         <span class="p">)</span>
 
-        <span class="c1"># create new Sed object containing dust spectra</span>
+        <span class="c1"># Create new Sed object containing dust emission spectra</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span>
 
-        <span class="c1"># associate that with the component&#39;s spectra dictionarity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
+        <span class="c1"># Associate that with the component&#39;s spectra dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;dust&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">sed</span></div>
 
