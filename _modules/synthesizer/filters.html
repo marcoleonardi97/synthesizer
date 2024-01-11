@@ -483,6 +483,7 @@
         <span class="n">filter_codes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tophat_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">generic_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -493,7 +494,7 @@
 <span class="sd">            filter_codes  (list, string)</span>
 <span class="sd">                A list of SVO filter codes, used to retrieve filter data from</span>
 <span class="sd">                the database.</span>
-<span class="sd">            tophat_dict (dict, Filter)</span>
+<span class="sd">            tophat_dict (dict)</span>
 <span class="sd">                A dictionary containing the data to make a collection of top</span>
 <span class="sd">                hat filters from user defined properties. The dictionary must</span>
 <span class="sd">                have the form:</span>
@@ -509,6 +510,9 @@
 <span class="sd">                must have the form:</span>
 <span class="sd">                    {&lt;filter_code1&gt; : {&quot;transmission&quot;: &lt;transmission_array&gt;}}.</span>
 <span class="sd">                For generic filters new_lam must be provided.</span>
+<span class="sd">            filters (list, Filter)</span>
+<span class="sd">                A list of existing `Filter` objects to be added to the</span>
+<span class="sd">                collection.</span>
 <span class="sd">            path (string)</span>
 <span class="sd">                A filepath defining the HDF5 file from which to load the</span>
 <span class="sd">                FilterCollection.</span>
@@ -559,11 +563,13 @@
 
             <span class="c1"># Let&#39;s make the filters</span>
             <span class="k">if</span> <span class="n">filter_codes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_make_svo_collection</span><span class="p">(</span><span class="n">filter_codes</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_include_svo_filters</span><span class="p">(</span><span class="n">filter_codes</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tophat_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_make_top_hat_collection</span><span class="p">(</span><span class="n">tophat_dict</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_include_top_hat_filters</span><span class="p">(</span><span class="n">tophat_dict</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">generic_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_make_generic_collection</span><span class="p">(</span><span class="n">generic_dict</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_include_generic_filters</span><span class="p">(</span><span class="n">generic_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_include_synthesizer_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 
             <span class="c1"># How many filters are there?</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nfilters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">)</span>
@@ -677,9 +683,9 @@
 
         <span class="n">hdf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_make_svo_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_codes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_include_svo_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_codes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Populate the FilterCollection with filters from SVO.</span>
+<span class="sd">        Populate the `FilterCollection` with filters from SVO.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            filter_codes (list, string)</span>
@@ -696,9 +702,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_top_hat_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tophat_dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_include_top_hat_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tophat_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Populate the FilterCollection with user defined top hat filters.</span>
+<span class="sd">        Populate the `FilterCollection` with user defined top-hat filters.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            tophat_dict (dict)</span>
@@ -747,9 +753,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_generic_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generic_dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_include_generic_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generic_dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Populate the FilterCollection with user defined filters.</span>
+<span class="sd">        Populate the `FilterCollection` with user defined filters.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            generic_dict (dict)</span>
@@ -768,6 +774,23 @@
             <span class="c1"># Instantiate the filter</span>
             <span class="n">_filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">transmission</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
+            <span class="c1"># Store the filter and its code</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_include_synthesizer_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Populate the `FilterCollection` with a list of individual</span>
+<span class="sd">        `Filter` objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filter_codes (list, string)</span>
+<span class="sd">                A list of SVO filter codes, used to retrieve filter data from</span>
+<span class="sd">                the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Loop over the given filter codes</span>
+        <span class="k">for</span> <span class="n">_filter</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="c1"># Store the filter and its code</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">_filter</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_filter</span><span class="o">.</span><span class="n">filter_code</span><span class="p">)</span>
@@ -806,6 +829,16 @@
 
         <span class="c1"># Update the number of filters we have</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nfilters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">)</span>
+
+        <span class="c1"># Now resample the filters onto the filter collection&#39;s wavelength</span>
+        <span class="c1"># array,</span>
+        <span class="c1"># NOTE: If the new filter extends beyond the filter collection&#39;s</span>
+        <span class="c1"># wavlength array a warning is given and that filter curve will</span>
+        <span class="c1"># truncated at the limits. This is because we can&#39;t have the</span>
+        <span class="c1"># filter collection&#39;s wavelength array modified, if that were</span>
+        <span class="c1"># to happen it could become inconsistent with Sed wavelength arrays</span>
+        <span class="c1"># and photometry would be impossible.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resample_filters</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -974,6 +1007,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">new_lam</span>
 
         <span class="c1"># Loop over filters unifying them onto this wavelength array</span>
+        <span class="c1"># NOTE: Filters already on self.lam will be uneffected but doing a</span>
+        <span class="c1"># np.all condition to check for matches and skip them is more expensive</span>
+        <span class="c1"># than just doing the interpolation for all filters</span>
         <span class="k">for</span> <span class="n">fcode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fcode</span><span class="p">]</span>
             <span class="n">f</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>
@@ -1541,6 +1577,22 @@
         <span class="c1"># If we&#39;ve been handed a wavelength array we must overwrite the</span>
         <span class="c1"># current one</span>
         <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Warn the user if we&#39;re about to truncate the existing wavelength</span>
+            <span class="c1"># array</span>
+            <span class="n">truncated</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+                <span class="n">truncated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+                <span class="n">truncated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">truncated</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_code</span><span class="si">}</span><span class="s2"> is being truncated &quot;</span>
+                    <span class="s2">&quot;(old_lam_bounds = &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">), &quot;</span>
+                    <span class="s2">&quot;new_lam_bounds = &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">))&quot;</span>
+                <span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">new_lam</span>
 
         <span class="c1"># Perform interpolation</span>
