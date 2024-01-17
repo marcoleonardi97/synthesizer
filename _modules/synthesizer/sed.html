@@ -515,6 +515,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
 
+<div class="viewcode-block" id="Sed.sum"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.sum">[docs]</a>    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For multidimensional `sed`&#39;s, sum the luminosity to provide a 1D</span>
+<span class="sd">        integrated SED.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sed (object, Sed)</span>
+<span class="sd">                Summed 1D SED.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check that the lnu array is multidimensional</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Return a new sed object with the first Lnu dimension collapsed</span>
+            <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If 1D, just return the original array</span>
+            <span class="k">return</span> <span class="bp">self</span></div>
+
 <div class="viewcode-block" id="Sed.concat"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.concat">[docs]</a>    <span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">other_seds</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Concatenate the spectra arrays of multiple Sed objects.</span>
@@ -2135,6 +2153,24 @@
         <span class="n">intrinsic_sed</span><span class="p">,</span>
         <span class="n">attenuated_sed</span><span class="p">,</span>
     <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="combine_list_of_seds"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.combine_list_of_seds">[docs]</a><span class="k">def</span> <span class="nf">combine_list_of_seds</span><span class="p">(</span><span class="n">sed_list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Combine a list of `Sed` objects (length `Ngal`) into a single</span>
+<span class="sd">    `Sed` object, with dimensions `Ngal x Nlam`. Each `Sed` object</span>
+<span class="sd">    in the list should have an identical wavelength range.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sed_list (list)</span>
+<span class="sd">            list of `Sed` objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">out_sed</span> <span class="o">=</span> <span class="n">sed_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">sed_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">out_sed</span> <span class="o">=</span> <span class="n">out_sed</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sed</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_sed</span></div>
 </pre></div>
         </article>
       </div>

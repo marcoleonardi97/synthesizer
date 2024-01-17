@@ -497,7 +497,13 @@
 
         <span class="c1"># Define integrated properties of this galaxy</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">)</span>
+                    <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span>
+                <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Galaxy.calculate_integrated_gas_properties"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.calculate_integrated_gas_properties">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_integrated_gas_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -507,6 +513,12 @@
         <span class="c1"># Define integrated properties of this galaxy</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span>
+
+            <span class="c1"># mass weighted gas phase metallicity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_weighted_gas_metallicity</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
+                <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_mass</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">star_forming</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">star_forming</span>
@@ -844,6 +856,10 @@
 <span class="sd">            threshold (float)</span>
 <span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
 <span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
+<span class="sd">            force_loop (bool)</span>
+<span class="sd">                By default (False) the C function will only loop over nearby</span>
+<span class="sd">                gas particles to search for contributions to the LOS surface</span>
+<span class="sd">                density. This forces the loop over *all* gas particles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span> <span class="nn">..extensions.los</span> <span class="kn">import</span> <span class="n">compute_dust_surface_dens</span>
@@ -856,7 +872,9 @@
         <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_los_args</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">force_loop</span><span class="p">)</span>
 
         <span class="c1"># Compute the dust surface densities</span>
-        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="n">compute_dust_surface_dens</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="n">compute_dust_surface_dens</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>  <span class="c1"># Msun / Mpc**2</span>
+
+        <span class="n">los_dustsds</span> <span class="o">/=</span> <span class="p">(</span><span class="mf">1e6</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Msun / pc**2</span>
 
         <span class="c1"># Finalise the calculation</span>
         <span class="n">tau_v</span> <span class="o">=</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">los_dustsds</span>
@@ -936,13 +954,13 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No sf_gas_mass provided&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span>  <span class="c1"># Msun</span>
+                <span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># Msun</span>
 
         <span class="k">if</span> <span class="n">stellar_mass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No stellar_mass provided&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">stellar_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span>  <span class="c1"># Msun</span>
+                <span class="n">stellar_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span><span class="o">.</span><span class="n">value</span>  <span class="c1"># Msun</span>
 
         <span class="k">if</span> <span class="n">sf_gas_mass</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma_min</span>
@@ -955,6 +973,61 @@
             <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">gamma_max</span> <span class="o">-</span> <span class="n">gamma_min</span><span class="p">)</span> <span class="o">/</span> <span class="n">C</span>
 
         <span class="k">return</span> <span class="n">gamma</span></div>
+
+<div class="viewcode-block" id="Galaxy.dust_to_metal_vijayan19"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.dust_to_metal_vijayan19">[docs]</a>    <span class="k">def</span> <span class="nf">dust_to_metal_vijayan19</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stellar_mass_weighted_age</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ism_metallicity</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fitting function for the dust-to-metals ratio based on</span>
+<span class="sd">        galaxy properties, from L-GALAXIES dust modeling.</span>
+
+<span class="sd">        Vijayan+19: https://arxiv.org/abs/1904.02196</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            stellar_mass_weighted_age (float)</span>
+<span class="sd">                Mass weighted age of stars in Myr. Defaults to None,</span>
+<span class="sd">                and uses value provided on this galaxy object (in Gyr)</span>
+<span class="sd">                ism_metallicity (float)</span>
+<span class="sd">                Mass weighted gas-phase metallicity. Defaults to None,</span>
+<span class="sd">                and uses value provided on this galaxy object</span>
+<span class="sd">                (dimensionless)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">stellar_mass_weighted_age</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No stellar_mass_weighted_age provided&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Formula uses Age in Gyr while the supplied Age is in Myr</span>
+                <span class="n">stellar_mass_weighted_age</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="mf">1e6</span>
+                <span class="p">)</span>  <span class="c1"># Myr</span>
+
+        <span class="k">if</span> <span class="n">ism_metallicity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_weighted_gas_metallicity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No mass_weighted_gas_metallicity provided&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ism_metallicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_weighted_gas_metallicity</span>
+
+        <span class="c1"># Fixed parameters from Vijayan+21</span>
+        <span class="n">D0</span><span class="p">,</span> <span class="n">D1</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.008</span><span class="p">,</span> <span class="mf">0.329</span><span class="p">,</span> <span class="mf">0.017</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.337</span><span class="p">,</span> <span class="mf">2.122</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="mf">5e-5</span> <span class="o">/</span> <span class="p">(</span><span class="n">D0</span> <span class="o">*</span> <span class="n">ism_metallicity</span><span class="p">)</span>
+        <span class="n">dtm</span> <span class="o">=</span> <span class="n">D0</span> <span class="o">+</span> <span class="p">(</span><span class="n">D1</span> <span class="o">-</span> <span class="n">D0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="mf">1.0</span>
+            <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="o">-</span><span class="n">alpha</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">ism_metallicity</span><span class="o">**</span><span class="n">beta</span><span class="p">)</span>
+                <span class="o">*</span> <span class="p">((</span><span class="n">stellar_mass_weighted_age</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e3</span> <span class="o">*</span> <span class="n">tau</span><span class="p">))</span> <span class="o">**</span> <span class="n">gamma</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dtm</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">dtm</span><span class="p">):</span>
+            <span class="n">dtm</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="c1"># Save under gas properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">=</span> <span class="n">dtm</span>
+
+        <span class="k">return</span> <span class="n">dtm</span></div>
 
 <div class="viewcode-block" id="Galaxy.make_images"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.make_images">[docs]</a>    <span class="k">def</span> <span class="nf">make_images</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

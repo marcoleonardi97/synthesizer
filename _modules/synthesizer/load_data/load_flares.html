@@ -374,15 +374,16 @@
         </div>
         <article role="main">
           <h1>Source code for synthesizer.load_data.load_flares</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
 
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Mpc</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">..particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer.load_data.utils</span> <span class="kn">import</span> <span class="n">get_len</span>
 
 
-<div class="viewcode-block" id="load_FLARES"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_flares.html#synthesizer.load_data.load_flares.load_FLARES">[docs]</a><span class="k">def</span> <span class="nf">load_FLARES</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+<div class="viewcode-block" id="load_FLARES"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_flares.html#synthesizer.load_data.load_flares.load_FLARES">[docs]</a><span class="k">def</span> <span class="nf">load_FLARES</span><span class="p">(</span><span class="n">master_file</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load FLARES galaxies from a FLARES master file</span>
 
@@ -399,36 +400,76 @@
 <span class="sd">            `ParticleGalaxy` object containing stars</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
-        <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Galaxy/S_Length&quot;</span><span class="p">][:]</span>
+    <span class="n">zed</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tag</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">))</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">zed</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">master_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">slens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Galaxy/S_Length&quot;</span><span class="p">][:]</span>
+        <span class="n">glens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Galaxy/G_Length&quot;</span><span class="p">][:]</span>
+
         <span class="n">ages</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Age&quot;</span><span class="p">][:]</span>  <span class="c1"># Gyr</span>
-        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Coordinates&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">mass</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Mass&quot;</span><span class="p">][:]</span>  <span class="c1"># 1e10 Msol</span>
-        <span class="n">imass</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_MassInitial&quot;</span><span class="p">][:]</span>  <span class="c1"># 1e10 Msol</span>
-        <span class="c1"># metals = hf[f&#39;{region}/{tag}/Particle/S_Z&#39;][:]</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Coordinates&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">scale_factor</span>
+        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Mass&quot;</span><span class="p">][:]</span>  <span class="c1"># 1e10 Msol</span>
+        <span class="n">imasses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_MassInitial&quot;</span><span class="p">][:]</span>  <span class="c1"># 1e10 Msol</span>
+
         <span class="n">metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Z_smooth&quot;</span><span class="p">][:]</span>
         <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Abundance_Oxygen&quot;</span><span class="p">][:]</span>
         <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/S_Abundance_Hydrogen&quot;</span><span class="p">][:]</span>
-        <span class="c1"># ids = hf[f&#39;{region}/{tag}/Particle/S_ID&#39;][:]</span>
-        <span class="c1"># index = hf[f&#39;{region}/{tag}/Particle/S_Index&#39;][:]</span>
-        <span class="c1"># hf[f&#39;{pre}/S_Vel&#39;]</span>
 
+        <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/G_SFR&quot;</span><span class="p">][:]</span>  <span class="c1"># Msol / yr</span>
+        <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/G_Mass&quot;</span><span class="p">][:]</span>  <span class="c1"># 1e10 Msol</span>
+        <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/G_Z_smooth&quot;</span><span class="p">][:]</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/G_Coordinates&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">scale_factor</span>
+        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">/Particle/G_sml&quot;</span><span class="p">][</span>
+            <span class="p">:</span>
+        <span class="p">]</span>  <span class="c1"># Mpc (physical)</span>
+
+    <span class="c1"># Convert units</span>
     <span class="n">ages</span> <span class="o">=</span> <span class="n">ages</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
-    <span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># Msol</span>
-    <span class="n">imass</span> <span class="o">=</span> <span class="n">imass</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># Msol</span>
+    <span class="n">masses</span> <span class="o">=</span> <span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># Msol</span>
+    <span class="n">imasses</span> <span class="o">=</span> <span class="n">imasses</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># Msol</span>
+    <span class="n">g_masses</span> <span class="o">=</span> <span class="n">g_masses</span> <span class="o">*</span> <span class="mf">1e10</span>  <span class="c1"># Msol</span>
 
-    <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_len</span><span class="p">(</span><span class="n">lens</span><span class="p">)</span>
+    <span class="c1"># Get the star particle begin / end indices</span>
+    <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_len</span><span class="p">(</span><span class="n">slens</span><span class="p">)</span>
 
     <span class="n">galaxies</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">begin</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
-        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
+        <span class="c1"># Create the individual galaxy objects</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">redshift</span><span class="o">=</span><span class="n">zed</span><span class="p">)</span>
+
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
-            <span class="n">mass</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">imasses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
             <span class="n">ages</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
             <span class="n">metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
             <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
+            <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Get the gas particle begin / end indices</span>
+    <span class="n">begin</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_len</span><span class="p">(</span><span class="n">glens</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
+        <span class="c1"># Use gas particle SFR for star forming mask</span>
+        <span class="n">sf_mask</span> <span class="o">=</span> <span class="n">g_sfr</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">][</span><span class="n">sf_mask</span><span class="p">])</span> <span class="o">*</span> <span class="n">Msun</span>
+
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">][</span><span class="n">sf_mask</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">][</span><span class="n">sf_mask</span><span class="p">])</span>
+            <span class="o">/</span> <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">)</span>
+
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
+            <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">metals</span><span class="o">=</span><span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">],</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">galaxies</span></div>

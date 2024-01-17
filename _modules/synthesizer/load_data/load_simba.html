@@ -418,8 +418,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">snap_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span>
+        <span class="n">Om0</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Omega0&quot;</span><span class="p">]</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
+
         <span class="n">form_time</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/StellarFormationTime&quot;</span><span class="p">][:]</span>
-        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>  <span class="c1"># Mpc (physical)</span>
         <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Masses&quot;</span><span class="p">][:]</span>
 
         <span class="n">imasses</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masses</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.00155</span>
@@ -431,14 +435,12 @@
         <span class="n">g_h2fraction</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/FractionH2&quot;</span><span class="p">][:]</span>
         <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Metallicity&quot;</span><span class="p">][:][:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span>
-        <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SmoothingLength&quot;</span><span class="p">][:]</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>
+        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SmoothingLength&quot;</span><span class="p">][:]</span>  <span class="c1"># Mpc</span>
 
         <span class="n">g_dustmass</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Dust_Masses&quot;</span><span class="p">][:]</span>
-
-        <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span>
-        <span class="n">Om0</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Omega0&quot;</span><span class="p">]</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
 
     <span class="c1"># convert units</span>
     <span class="n">masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
@@ -497,7 +499,7 @@
         <span class="c1"># Alternative to setting star_forming property on</span>
         <span class="c1"># each gas particle</span>
         <span class="n">h2_masses</span> <span class="o">=</span> <span class="n">g_masses</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_h2fraction</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">]</span>
-        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span><span class="p">)</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span><span class="p">)</span> <span class="o">*</span> <span class="n">Msun</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">h2_masses</span> <span class="o">*</span> <span class="n">g_metals</span><span class="p">[</span><span class="n">b</span><span class="p">:</span><span class="n">e</span><span class="p">])</span> <span class="o">/</span> <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sf_gas_mass</span>
         <span class="p">)</span>

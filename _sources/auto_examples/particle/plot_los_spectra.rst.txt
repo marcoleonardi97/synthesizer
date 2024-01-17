@@ -24,7 +24,7 @@ Plot line of sight diagnostics
 This example shows how to compute line of sight dust surface densities,
 and plots some diagnostics.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-133
+.. GENERATED FROM PYTHON SOURCE LINES 8-135
 
 
 
@@ -61,7 +61,7 @@ and plots some diagnostics.
     from synthesizer.particle.gas import Gas
     from synthesizer.particle.galaxy import Galaxy
     from synthesizer.particle.particles import CoordinateGenerator
-    from synthesizer.kernel_functions import kernel
+    from synthesizer.kernel_functions import Kernel
 
 
     plt.rcParams["font.family"] = "DeJavu Serif"
@@ -158,11 +158,13 @@ and plots some diagnostics.
     galaxy.stars.get_particle_spectra_incident(grid)
 
     # Get the SPH kernel
-    sph_kernel = kernel()
+    sph_kernel = Kernel()
     kernel_data = sph_kernel.get_kernel()
 
     # Calculate the tau_vs
-    tau_v = galaxy.calculate_los_tau_v(kappa=0.07, kernel=kernel_data)
+    tau_v = galaxy.calculate_los_tau_v(
+        kappa=0.07, kernel=kernel_data, force_loop=True
+    )
 
     # Get the attenuated spectra
     galaxy.stars.particle_spectra["attenuated"] = galaxy.stars.particle_spectra[
@@ -178,7 +180,7 @@ and plots some diagnostics.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.700 seconds)
+   **Total running time of the script:** (0 minutes 0.651 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_los_spectra.py:
