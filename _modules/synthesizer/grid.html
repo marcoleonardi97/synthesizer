@@ -670,7 +670,17 @@
             <span class="c1"># Number of axes</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">naxes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
 
+            <span class="c1"># If specific ionising photon luminosity is available set this</span>
+            <span class="c1"># as an attribute as well</span>
+            <span class="k">if</span> <span class="s2">&quot;log10_specific_ionising_luminosity&quot;</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10_specific_ionising_lum</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;log10_specific_ionising_luminosity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log10_specific_ionising_lum</span><span class="p">[</span><span class="n">ion</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span>
+                        <span class="s2">&quot;log10_specific_ionising_luminosity&quot;</span>
+                    <span class="p">][</span><span class="n">ion</span><span class="p">][:]</span>
+
             <span class="c1"># If log10Q is available set this as an attribute as well</span>
+            <span class="c1"># TODO: This needs to die</span>
             <span class="k">if</span> <span class="s2">&quot;log10Q&quot;</span> <span class="ow">in</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">for</span> <span class="n">ion</span> <span class="ow">in</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;log10Q&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -1062,12 +1072,17 @@
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="p">))</span>
 
         <span class="c1"># Select grid for specific ion</span>
-        <span class="n">log10Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span><span class="p">[</span><span class="n">ion</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;log10_specific_ionising_lum&quot;</span><span class="p">):</span>
+            <span class="n">log10_specific_ionising_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10_specific_ionising_lum</span><span class="p">[</span><span class="n">ion</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log10_specific_ionising_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10Q</span><span class="p">[</span><span class="n">ion</span><span class="p">]</span>
 
         <span class="c1"># Truncate grid if max age provided</span>
         <span class="k">if</span> <span class="n">max_log10age</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ia_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_nearest_index</span><span class="p">(</span><span class="n">max_log10age</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log10age</span><span class="p">)</span>
-            <span class="n">log10Q</span> <span class="o">=</span> <span class="n">log10Q</span><span class="p">[:</span><span class="n">ia_max</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">log10_specific_ionising_lum</span> <span class="o">=</span> <span class="n">log10_specific_ionising_lum</span><span class="p">[</span>
+                <span class="p">:</span><span class="n">ia_max</span><span class="p">,</span> <span class="p">:</span>
+            <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ia_max</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
@@ -1080,13 +1095,13 @@
                 <span class="n">vmax</span> <span class="o">=</span> <span class="mf">47.5</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">vmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">log10Q</span><span class="p">)</span>
+                <span class="n">vmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">log10_specific_ionising_lum</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">vmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log10Q</span><span class="p">)</span>
+                <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log10_specific_ionising_lum</span><span class="p">)</span>
 
-        <span class="c1"># Plot the grid of log10Q</span>
+        <span class="c1"># Plot the grid of log10_specific_ionising_lum</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
-            <span class="n">log10Q</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">log10_specific_ionising_lum</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
             <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
             <span class="n">extent</span><span class="o">=</span><span class="p">[</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log10age</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
