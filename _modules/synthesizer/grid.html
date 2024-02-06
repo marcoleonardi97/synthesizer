@@ -387,6 +387,8 @@
 <span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
@@ -1172,7 +1174,97 @@
 <span class="sd">            Sed</span>
 <span class="sd">                The spectra grid as an Sed object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span></div></div>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Grid.animate_grid"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.animate_grid">[docs]</a>    <span class="k">def</span> <span class="nf">animate_grid</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fps</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an animation of the grid stepping through wavelength.</span>
+
+<span class="sd">        Each frame of the animation is a wavelength bin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            show (bool):</span>
+<span class="sd">                Should the animation be shown?</span>
+<span class="sd">            save_path (str, optional):</span>
+<span class="sd">                Path to save the animation. If not specified, the</span>
+<span class="sd">                animation is not saved.</span>
+<span class="sd">            fps (int, optional):</span>
+<span class="sd">                the number of frames per second in the output animation.</span>
+<span class="sd">                Default is 30 frames per second.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            matplotlib.animation.FuncAnimation: The animation object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create the figure and axes</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+
+        <span class="c1"># Get the spectra grid</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+
+        <span class="c1"># Get the normalisation</span>
+        <span class="n">vmin</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">10</span>
+        <span class="n">vmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="mf">99.9</span><span class="p">)</span>
+
+        <span class="c1"># Define the norm</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">LogNorm</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Create a placeholder image</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+            <span class="n">spectra</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">extent</span><span class="o">=</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10age</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10age</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+            <span class="p">],</span>
+            <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+            <span class="n">animated</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span>
+            <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;$L_{\nu}/[\mathrm{erg s}^{-1}\mathrm{ Hz}^{-1} &quot;</span>
+            <span class="sa">r</span><span class="s2">&quot;\mathrm{ M_\odot}^{-1}]$&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wavelength: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">log_</span><span class="si">{10}</span><span class="s2">(</span><span class="se">\\</span><span class="s2">mathrm</span><span class="si">{age}</span><span class="s2">/</span><span class="se">\\</span><span class="s2">mathrm</span><span class="si">{yr}</span><span class="s2">)$&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;$Z$&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+            <span class="c1"># Update the image for the ith frame</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">spectra</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wavelength: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">img</span><span class="p">,</span>
+            <span class="p">]</span>
+
+        <span class="c1"># Calculate interval in milliseconds based on fps</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">fps</span>
+
+        <span class="c1"># Create the animation</span>
+        <span class="n">anim</span> <span class="o">=</span> <span class="n">FuncAnimation</span><span class="p">(</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">frames</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">blit</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Save if a path is provided</span>
+        <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">anim</span></div></div>
 </pre></div>
         </article>
       </div>
