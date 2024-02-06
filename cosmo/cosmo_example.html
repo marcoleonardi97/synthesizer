@@ -762,10 +762,11 @@ unyt_array([0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,
 
 <span class="n">_UVJ</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">_UVJ</span><span class="p">)</span>
+<span class="n">_UVJ</span><span class="o">.</span><span class="n">plot_photometry</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -780,7 +781,25 @@ unyt_array([0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,
 | J (λ = 1.22e+04 Å) | 1.66e+20 erg/(Hz*cm**2*s) |
 --------------------------------------------------
 
+erg/(Hz*cm**2*s)
 </pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 350x500 with 2 Axes&gt;,
+ &lt;Axes: xlabel=&#39;$\\lambda_\\mathrm{obs}/[\\mathrm{Å}]$&#39;, ylabel=&#39;$F/[\\mathrm{erg\\ / \\ (Hz\\ cm^2\\ s)}]$&#39;&gt;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/cosmo_cosmo_example_36_2.png" src="../_images/cosmo_cosmo_example_36_2.png" />
+</div>
 </div>
 <p>Do for multiple, plot UVJ diagram, coloured by <span class="math notranslate nohighlight">\(M_{\star}\)</span></p>
 <div class="nbinput nblast docutils container">
@@ -816,7 +835,7 @@ unyt_array([0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.colorbar.Colorbar at 0x7f396e4638b0&gt;
+&lt;matplotlib.colorbar.Colorbar at 0x7fcc55707d30&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -827,6 +846,38 @@ unyt_array([0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,
 </div>
 </div>
 </section>
+</section>
+<section id="Collective-operations">
+<h2>Collective operations<a class="headerlink" href="#Collective-operations" title="Permalink to this heading">#</a></h2>
+<p>It is often useful to collectively do different operations on a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code>. Synthesizer enables this via some wrapper methods on a galaxy which will operate on it’s components to, for instance, get the observed spectra or photometry for all spectra nested in a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
+
+
+<span class="c1"># Get observed spectra for all spectra</span>
+<span class="n">g</span><span class="o">.</span><span class="n">get_observed_spectra</span><span class="p">(</span><span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">)</span>
+
+<span class="c1"># Get UVJ photometry for all spectra</span>
+<span class="n">g</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stellar luminosities available:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">photo_luminosities</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stellar fluxes available:&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Stellar luminosities available: [&#39;incident&#39;, &#39;nebular&#39;, &#39;transmitted&#39;, &#39;escaped&#39;, &#39;reprocessed&#39;, &#39;intrinsic&#39;, &#39;emergent&#39;, &#39;young_incident&#39;, &#39;young_transmitted&#39;, &#39;young_nebular&#39;, &#39;young_reprocessed&#39;, &#39;young_intrinsic&#39;, &#39;old_incident&#39;, &#39;old_transmitted&#39;, &#39;old_nebular&#39;, &#39;old_reprocessed&#39;, &#39;old_intrinsic&#39;, &#39;young_attenuated_BC&#39;, &#39;young_attenuated&#39;, &#39;old_attenuated&#39;, &#39;attenuated&#39;, &#39;young_emergent&#39;, &#39;old_emergent&#39;]
+Stellar fluxes available: [&#39;incident&#39;, &#39;nebular&#39;, &#39;transmitted&#39;, &#39;escaped&#39;, &#39;reprocessed&#39;, &#39;intrinsic&#39;, &#39;emergent&#39;, &#39;young_incident&#39;, &#39;young_transmitted&#39;, &#39;young_nebular&#39;, &#39;young_reprocessed&#39;, &#39;young_intrinsic&#39;, &#39;old_incident&#39;, &#39;old_transmitted&#39;, &#39;old_nebular&#39;, &#39;old_reprocessed&#39;, &#39;old_intrinsic&#39;, &#39;young_attenuated_BC&#39;, &#39;young_attenuated&#39;, &#39;old_attenuated&#39;, &#39;attenuated&#39;, &#39;young_emergent&#39;, &#39;old_emergent&#39;]
+</pre></div></div>
+</div>
 </section>
 </section>
 
@@ -893,6 +944,7 @@ unyt_array([0.00000000e+00, 0.00000000e+00, 0.00000000e+00, ...,
 <li><a class="reference internal" href="#Calculate-broadband-luminosities">Calculate broadband luminosities</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#Collective-operations">Collective operations</a></li>
 </ul>
 </li>
 </ul>

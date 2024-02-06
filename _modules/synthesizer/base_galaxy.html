@@ -427,6 +427,10 @@
         <span class="c1"># Add some place holder attributes which are overloaded on the children</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># Initialise the photometry dictionaries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="c1"># Attach the components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">stars</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="o">=</span> <span class="n">gas</span>
@@ -524,7 +528,12 @@
 <span class="sd">        - Galaxy.spectra</span>
 <span class="sd">        - Galaxy.stars.spectra</span>
 <span class="sd">        - Galaxy.gas.spectra (WIP)</span>
-<span class="sd">        - Galaxy.black_holes.spectra (WIP)</span>
+<span class="sd">        - Galaxy.black_holes.spectra</span>
+
+<span class="sd">        And in the case of particle galaxies</span>
+<span class="sd">        - Galaxy.stars.particle_spectra</span>
+<span class="sd">        - Galaxy.gas.particle_spectra (WIP)</span>
+<span class="sd">        - Galaxy.black_holes.particle_spectra</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            cosmo (astropy.cosmology.Cosmology)</span>
@@ -535,9 +544,10 @@
 <span class="sd">                Inoue14).</span>
 
 <span class="sd">        Raises:</span>
+<span class="sd">            MissingAttribute</span>
+<span class="sd">                If a galaxy has no redshift we can&#39;t get the observed spectra.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Ensure we have a redshift</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingAttribute</span><span class="p">(</span>
@@ -554,20 +564,52 @@
                 <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="c1"># Loop over all stellar spectra</span>
-        <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="c1"># Calculate the observed spectra</span>
-            <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
-                <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
-                <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
-                <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
-            <span class="p">)</span></div>
+        <span class="c1"># Do we have stars?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Loop over all stellar spectra</span>
+            <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="c1"># Calculate the observed spectra</span>
+                <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                    <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                    <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                    <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+                <span class="p">)</span>
 
-        <span class="c1"># TODO: Once implemented do this for gas and black holes too</span>
+            <span class="c1"># Loop over all stellar particle spectra</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="c1"># Calculate the observed spectra</span>
+                    <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                        <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                        <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                        <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+        <span class="c1"># Do we have black holes?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Loop over all black hole spectra</span>
+            <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="c1"># Calculate the observed spectra</span>
+                <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                    <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                    <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                    <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Loop over all black hole particle spectra</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="c1"># Calculate the observed spectra</span>
+                    <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span>
+                        <span class="n">cosmo</span><span class="o">=</span><span class="n">cosmo</span><span class="p">,</span>
+                        <span class="n">z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span>
+                        <span class="n">igm</span><span class="o">=</span><span class="n">igm</span><span class="p">,</span>
+                    <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseGalaxy.get_spectra_combined"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_spectra_combined">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_combined</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Combine all common component spectra from components onto the galaxy,</span>
+<span class="sd">        Combine all common component spectra from components onto the galaxy.</span>
+
 <span class="sd">        e.g.:</span>
 <span class="sd">            intrinsc = stellar_intrinsic + black_hole_intrinsic.</span>
 
@@ -582,7 +624,6 @@
 
 <span class="sd">        Note that this process is only applicable to integrated spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Get the spectra we have on the components to combine</span>
         <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;intrinsic&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;emergent&quot;</span><span class="p">:</span> <span class="p">[]}</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
@@ -604,6 +645,82 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGalaxy.get_photo_luminosities"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_luminosities">[docs]</a>    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (filters.FilterCollection)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get stellar photometry</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+            <span class="c1"># If we have particle spectra do that too (not applicable to</span>
+            <span class="c1"># parametric Galaxy)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="c1"># Get black hole photometry</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+            <span class="c1"># If we have particle spectra do that too (not applicable to</span>
+            <span class="c1"># parametric Galaxy)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_luminosities</span><span class="p">(</span>
+                    <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Get the combined photometry</span>
+        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="c1"># Create the photometry collection and store it in the object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
+                <span class="n">spectra</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGalaxy.get_photo_fluxes"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_fluxes">[docs]</a>    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (object)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (dict)</span>
+<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get stellar photometry</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+            <span class="c1"># If we have particle spectra do that too (not applicable to</span>
+            <span class="c1"># parametric Galaxy)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="c1"># Get black hole photometry</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+            <span class="c1"># If we have particle spectra do that too (not applicable to</span>
+            <span class="c1"># parametric Galaxy)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="c1"># Get the combined photometry</span>
+        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+            <span class="c1"># Create the photometry collection and store it in the object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
+                <span class="n">spectra</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseGalaxy.plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
