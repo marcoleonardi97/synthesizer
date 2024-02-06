@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2023.09.10 -->
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
         <title>synthesizer.sed - synthesizer 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -1330,11 +1330,11 @@
             <span class="c1"># Apply the filter transmission curve and store the resulting</span>
             <span class="c1"># luminosity</span>
             <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span>
-            <span class="n">photo_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span>
+            <span class="n">photo_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
         <span class="c1"># Create the photometry collection and store it in the object</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span>
-            <span class="n">filters</span><span class="p">,</span> <span class="n">rest_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_luminosities</span>
+            <span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_luminosities</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span></div>
@@ -1382,12 +1382,10 @@
 
             <span class="c1"># Calculate and store the broadband flux in this filter</span>
             <span class="n">bb_flux</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obsnu</span><span class="p">)</span>
-            <span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span>
+            <span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="o">.</span><span class="n">units</span>
 
         <span class="c1"># Create the photometry collection and store it in the object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span>
-            <span class="n">filters</span><span class="p">,</span> <span class="n">rest_frame</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_fluxes</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_fluxes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span></div>
 

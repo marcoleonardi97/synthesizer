@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2023.09.10 -->
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
         <title>synthesizer.photometry - synthesizer 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -391,18 +391,22 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">default_units</span>
 
 
 <div class="viewcode-block" id="PhotometryCollection"><a class="viewcode-back" href="../../_autosummary/synthesizer.photometry.html#synthesizer.photometry.PhotometryCollection">[docs]</a><span class="k">class</span> <span class="nc">PhotometryCollection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents a collection of photometry values and provides unit</span>
+<span class="sd">    A container for photometry data.</span>
+
+<span class="sd">    This represents a collection of photometry values and provides unit</span>
 <span class="sd">    association and plotting functionality.</span>
 
-<span class="sd">    This is a utility class returned by functions else where. Although not</span>
+<span class="sd">    This is a utility class returned by functions elsewhere. Although not</span>
 <span class="sd">    an issue if it is this should never really be directly instantiated.</span>
 
 <span class="sd">    Attributes:</span>
+<span class="sd">        photometry (Quantity):</span>
+<span class="sd">            Quantity instance representing photometry data.</span>
 <span class="sd">        photo_luminosities (Quantity):</span>
 <span class="sd">            Quantity instance representing photometry data in the rest frame.</span>
 <span class="sd">        photo_fluxes (Quantity):</span>
@@ -415,33 +419,29 @@
 <span class="sd">        _look_up (dict):</span>
 <span class="sd">            A dictionary for easy access to photometry values using</span>
 <span class="sd">            filter codes.</span>
-<span class="sd">        rest_frame (bool):</span>
-<span class="sd">            A flag indicating whether the photometry is in the rest frame</span>
-<span class="sd">            (True) or observer frame (False).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define quantities (there has to be one for rest and observer frame)</span>
     <span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">rest_frame</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Instantiate the photometry collection.</span>
 
 <span class="sd">        To enable quantities a PhotometryCollection will store the data</span>
 <span class="sd">        as arrays but enable access via dictionary syntax.</span>
 
+<span class="sd">        Whether the photometry is flux or luminosity is determined by the</span>
+<span class="sd">        units of the photometry passed.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            filters (FilterCollection)</span>
 <span class="sd">                The FilterCollection used to produce the photometry.</span>
-<span class="sd">            rest_frame (bool)</span>
-<span class="sd">                A flag for whether the photometry is rest frame luminosity or</span>
-<span class="sd">                observer frame flux.</span>
 <span class="sd">            kwargs (dict)</span>
 <span class="sd">                A dictionary of keyword arguments containing all the photometry</span>
 <span class="sd">                of the form {&quot;filter_code&quot;: photometry}.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Store the filter collection</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
 
@@ -449,18 +449,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
         <span class="c1"># Get the photometry</span>
-        <span class="n">photometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">photometry</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-        <span class="c1"># Put the photometry in the right place (we need to draw a distinction</span>
-        <span class="c1"># between rest and observer frame for units)</span>
-        <span class="k">if</span> <span class="n">rest_frame</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">photometry</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Get the dimensions of a flux for testing</span>
+        <span class="n">flux_dimensions</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="s2">&quot;photo_fluxes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span>
+
+        <span class="c1"># Check if the photometry is flux or luminosity</span>
+        <span class="k">if</span> <span class="n">photometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">flux_dimensions</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">photometry</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">photometry</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span>
 
         <span class="c1"># Construct a dict for the look up, importantly we here store</span>
         <span class="c1"># the values in photometry not _photometry meaning they have units.</span>
@@ -472,12 +474,10 @@
             <span class="p">)</span>
         <span class="p">}</span>
 
-        <span class="c1"># Store the rest frame flag for convinience</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span> <span class="o">=</span> <span class="n">rest_frame</span>
-
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Enable dictionary key look up syntax to extract specific photometry,</span>
+<span class="sd">        Enable dictionary key look up syntax to extract specific photometry.</span>
+
 <span class="sd">        e.g. Sed.photo_luminosities[&quot;JWST/NIRCam.F150W&quot;].</span>
 
 <span class="sd">        NOTE: this will always return photometry with units. Unitless</span>
@@ -490,31 +490,47 @@
 <span class="sd">            filter_code (str)</span>
 <span class="sd">                The filter code of the desired photometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Perform the look up</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_up</span><span class="p">[</span><span class="n">filter_code</span><span class="p">]</span>
 
 <div class="viewcode-block" id="PhotometryCollection.keys"><a class="viewcode-back" href="../../_autosummary/synthesizer.photometry.html#synthesizer.photometry.PhotometryCollection.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enable dict.keys() behaviour.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list</span>
+<span class="sd">                A list of filter codes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_up</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PhotometryCollection.values"><a class="viewcode-back" href="../../_autosummary/synthesizer.photometry.html#synthesizer.photometry.PhotometryCollection.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enable dict.values() behaviour.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict_values</span>
+<span class="sd">                A dict_values object containing the photometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_up</span><span class="o">.</span><span class="n">values</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="PhotometryCollection.items"><a class="viewcode-back" href="../../_autosummary/synthesizer.photometry.html#synthesizer.photometry.PhotometryCollection.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Enables dict.items() behaviour.</span>
+<span class="sd">        Enable dict.items() behaviour.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict_items</span>
+<span class="sd">                A dict_items object containing the filter codes and</span>
+<span class="sd">                photometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_look_up</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enable dict iter behaviour.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            iter</span>
+<span class="sd">                An iterator over the filter codes and photometry.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_look_up</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
@@ -525,7 +541,6 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            str: A formatted string representation of the PhotometryCollection.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Define the filter code column</span>
         <span class="n">filters_col</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span>
@@ -556,10 +571,10 @@
         <span class="n">table</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">sep</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="c1"># Create the centered title</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span><span class="p">:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;REST FRAME PHOTOMETRY&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;PHOTOMETRY (LUMINOSITY)&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;OBSERVED PHOTOMETRY&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;PHOTOMETRY (FLUX)&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
         <span class="n">table</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n</span><span class="s2">|</span><span class="si">{</span><span class="n">sep</span><span class="si">}</span><span class="s2">|</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="c1"># Combine everything into the final table</span>
@@ -642,9 +657,7 @@
                 <span class="n">max_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
 
         <span class="c1"># Get the photometry</span>
-        <span class="n">photometry</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">obs_photometry</span>
-        <span class="p">)</span>
+        <span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span>
 
         <span class="c1"># Plot the photometry</span>
         <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">phot</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span> <span class="n">photometry</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
@@ -701,11 +714,20 @@
         <span class="c1"># Parse the units for the labels and make them pretty</span>
         <span class="n">x_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
         <span class="n">y_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">photometry</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
-        <span class="n">x_units</span> <span class="o">=</span> <span class="n">x_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
-        <span class="n">y_units</span> <span class="o">=</span> <span class="n">y_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">y_units</span><span class="p">)</span>
+        <span class="n">x_units</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">x_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;**&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ &quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">y_units</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">y_units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ / \ &quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;**&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\ &quot;</span><span class="p">)</span>
+        <span class="p">)</span>
 
         <span class="c1"># Label the x axis</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
@@ -713,7 +735,7 @@
             <span class="p">)</span>
 
         <span class="c1"># Label the y axis handling all possibilities</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_frame</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
