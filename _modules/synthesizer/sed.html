@@ -1260,6 +1260,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the observed frame spectral energy distribution.</span>
 
+<span class="sd">        NOTE: if a redshift of 0 is passed the flux return will be calculated</span>
+<span class="sd">        assuming a distance of 10 pc omitting IGM since at this distance</span>
+<span class="sd">        IGM contribution makes no sense.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            cosmo (astropy.cosmology)</span>
 <span class="sd">                astropy cosmology instance.</span>
@@ -1276,6 +1280,11 @@
 
         <span class="c1"># Store the redshift for later use</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">z</span>
+
+        <span class="c1"># If we have a redshift of 0 then the below will break since the</span>
+        <span class="c1"># distance will be 0. Instead call get_fnu0 to get the flux at 10 pc</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fnu0</span><span class="p">()</span>
 
         <span class="c1"># Get the observed wavelength and frequency arrays</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obslam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
