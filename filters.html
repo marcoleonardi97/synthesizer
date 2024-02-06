@@ -401,7 +401,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">Filter</span><span class="p">,</span> <span class="n">FilterCollection</span>
-<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">WavelengthOutOfRange</span>
+<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">WavelengthOutOfRange</span><span class="p">,</span> <span class="n">InconsistentWavelengths</span>
 </pre></div>
 </div>
 </div>
@@ -525,7 +525,8 @@
 </pre></div>
 </div>
 </div>
-<p>One important thing to note when creating a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> is that all <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s in a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> will always be interpolated onto a common wavelength array. If a wavelength array hasn’t been passed to <code class="docutils literal notranslate"><span class="pre">new_lam</span></code> then a wavelength array encompassing all <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s will be found but if <code class="docutils literal notranslate"><span class="pre">new_lam</span></code> has been provided then all transmission curves will be interpolated on to it.</p>
+<p>One important thing to note when creating a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> is that all <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s in a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> will always be interpolated onto a common wavelength array. If a wavelength array has been passed to <code class="docutils literal notranslate"><span class="pre">new_lam</span></code> then all transmission curves will be interpolated on to it, otherwise, a common wavelength array is found including the wavelength arrays of all filters with any gaps filled with values at the minimum mean resolution of all filters. Any overlaping areas will adopt the
+wavelength array of the higher resolution filter.</p>
 </section>
 <section id="Working-with-a-FilterCollection">
 <h2>Working with a FilterCollection<a class="headerlink" href="#Working-with-a-FilterCollection" title="Permalink to this heading">#</a></h2>
@@ -632,7 +633,7 @@ JWST/NIRCam.F090W
 My combined Filters: [&#39;JWST/NIRCam.F090W&#39;, &#39;JWST/NIRCam.F250M&#39;, &#39;U&#39;, &#39;V&#39;, &#39;J&#39;, &#39;generic_filter3&#39;, &#39;top_hat/filter.1&#39;, &#39;top_hat/filter.2&#39;, &#39;top_hat1&#39;, &#39;top_hat12&#39;, &#39;generic_filter1&#39;, &#39;generic_filter2&#39;]
 </pre></div></div>
 </div>
-<p>Note that adding <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s or <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>s to a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> will result in interpolation of the transmission curves onto the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>’s wavelength array. In the event the wavelength arrays differ, the wavelengths of the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> being added to are maintained and a warning is printed if this will truncate the transmission curve of the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> being added.</p>
+<p>Note that adding <code class="docutils literal notranslate"><span class="pre">Filter</span></code>s or <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>s to a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> will result in interpolation of the transmission curves onto the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>’s wavelength array. In the event the wavelength arrays differ, the wavelengths of the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> being added to are maintained and a warning is printed if this will truncate the transmission curve of the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> being added. If the truncation results in 0 transmission then an error is raised.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -641,7 +642,10 @@ My combined Filters: [&#39;JWST/NIRCam.F090W&#39;, &#39;JWST/NIRCam.F250M&#39;, 
 <span class="n">new_filters2</span> <span class="o">=</span> <span class="n">FilterCollection</span><span class="p">(</span><span class="n">filter_codes</span><span class="o">=</span><span class="n">filter_codes</span><span class="p">)</span>
 <span class="n">out_of_range_filt</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;JWST/MIRI.F2550W&quot;</span><span class="p">)</span>
 
-<span class="n">new_filters2</span> <span class="o">=</span> <span class="n">new_filters2</span> <span class="o">+</span> <span class="n">out_of_range_filt</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">new_filters2</span> <span class="o">=</span> <span class="n">new_filters2</span> <span class="o">+</span> <span class="n">out_of_range_filt</span>
+<span class="k">except</span> <span class="n">InconsistentWavelengths</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;InconsistentWavelengths:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -653,7 +657,7 @@ My combined Filters: [&#39;JWST/NIRCam.F090W&#39;, &#39;JWST/NIRCam.F250M&#39;, 
 Calculated wavelength array:
 min = 6.03e+03 Angstrom
 max = 5.10e+04 Angstrom
-FilterCollection.lam.size = 44965
+FilterCollection.lam.size = 26851
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -661,7 +665,8 @@ FilterCollection.lam.size = 44965
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Warning: JWST/MIRI.F2550W is being truncated (old_lam_bounds = (2.14e+05 Å, 3.00e+05 Å), new_lam_bounds = (6.03e+03 Å, 5.10e+04 Å))
+Warning: JWST/MIRI.F2550W will be truncated where transmission is non-zero (old_lam_bounds = (2.14e+05 Å, 3.00e+05 Å), new_lam_bounds = (6.03e+03 Å, 5.10e+04 Å))
+InconsistentWavelengths: Interpolated transmission curve has no non-zero values. Consider removing this filter or extending the wavelength range.
 </pre></div></div>
 </div>
 <section id="Helper-methods">

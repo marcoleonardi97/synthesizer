@@ -492,6 +492,7 @@
         <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fill_gaps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the FilterCollection.</span>
@@ -525,6 +526,14 @@
 <span class="sd">            new_lam (array-like, float)</span>
 <span class="sd">                The wavelength array to define the transmission curve on. Can</span>
 <span class="sd">                have units but Angstrom assumed.</span>
+<span class="sd">            fill_gaps (bool)</span>
+<span class="sd">                Are we filling gaps in the wavelength array? Defaults to True.</span>
+<span class="sd">                This is only needed if new_lam has not been passed. In that</span>
+<span class="sd">                case the filters will be resampled onto a universal wavelength</span>
+<span class="sd">                grid and any gaps between filters can be filled with the</span>
+<span class="sd">                minimum average resolution of all filters if fill_gaps is True.</span>
+<span class="sd">                NOTE: This will inflate the memory footprint of the filters</span>
+<span class="sd">                outside the region where transmission is non-zero.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Define lists to hold our filters and filter codes</span>
@@ -583,7 +592,7 @@
             <span class="c1"># If we weren&#39;t passed a wavelength grid we need to resample the</span>
             <span class="c1"># filters onto a universal wavelength grid.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">resample_filters</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resample_filters</span><span class="p">(</span><span class="n">fill_gaps</span><span class="o">=</span><span class="n">fill_gaps</span><span class="p">)</span>
 
         <span class="c1"># Calculate mean and pivot wavelengths for each filter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mean_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_mean_lams</span><span class="p">()</span>
@@ -953,14 +962,94 @@
 <span class="sd">                When the filter does not exist in self.filters an error is</span>
 <span class="sd">                raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
-<div class="viewcode-block" id="FilterCollection.resample_filters"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.resample_filters">[docs]</a>    <span class="k">def</span> <span class="nf">resample_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lam_resolution</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_merge_filter_lams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_gaps</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Resamples all filters onto a single wavelength array. If no wavelength</span>
-<span class="sd">        grid is provided an array encompassing all filter transmission curves</span>
-<span class="sd">        is derived with resolution stated by lam_resolution.</span>
+<span class="sd">        Merge the wavelength arrays of multiple filters.</span>
+
+<span class="sd">        Overlapping transmission adopt the values of one of the arrays.</span>
+
+<span class="sd">        If a gap is found between filters it can be populated with the minimum</span>
+<span class="sd">        average wavelength resolution of all filters if fill_gaps is True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray</span>
+<span class="sd">                The combined wavelength array with gaps filled and overlaps</span>
+<span class="sd">                removed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the indices sorted by pivot wavelength</span>
+        <span class="n">piv_lams</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="n">sinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">piv_lams</span><span class="p">)</span>
+
+        <span class="c1"># Get filter arrays in pivot wavelength order</span>
+        <span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fc</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fc</span><span class="p">]</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">fc</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">)[</span><span class="n">sinds</span><span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Combine everything together in order</span>
+        <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+
+        <span class="c1"># Remove any duplicate values</span>
+        <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+
+        <span class="c1"># Get the smallest difference between adjacent values</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+
+        <span class="c1"># New remove any overlaps by iteratively removing negative differences</span>
+        <span class="c1"># between adjacent elements</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">diffs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">end_val</span> <span class="o">=</span> <span class="n">new_lam</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">new_lam</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">diffs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">end_val</span><span class="p">)</span>
+            <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+
+        <span class="c1"># Are we filling gaps?</span>
+        <span class="k">if</span> <span class="n">fill_gaps</span><span class="p">:</span>
+            <span class="c1"># Get the minimum resolution (largest gap between bins) of</span>
+            <span class="c1"># each filter for gap filling</span>
+            <span class="n">min_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span> <span class="k">for</span> <span class="n">arr</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">])</span>
+
+            <span class="c1"># Get the minimum resolution of the new array</span>
+            <span class="n">min_res_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">))</span>
+
+            <span class="c1"># Fill any gaps until the minimum resolution is reached</span>
+            <span class="k">while</span> <span class="n">min_res_new</span> <span class="o">&gt;</span> <span class="n">min_res</span><span class="p">:</span>
+                <span class="c1"># Get the indices of the gaps</span>
+                <span class="n">gaps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diffs</span> <span class="o">&gt;</span> <span class="n">min_res</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># Loop over the gaps and fill them</span>
+                <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">gaps</span><span class="p">:</span>
+                    <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                        <span class="n">new_lam</span><span class="p">,</span> <span class="n">g</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">new_lam</span><span class="p">[</span><span class="n">g</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_lam</span><span class="p">[</span><span class="n">g</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Get the new minimum resolution</span>
+                <span class="n">diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
+                <span class="n">min_res_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">new_lam</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">new_lam</span>
+
+<div class="viewcode-block" id="FilterCollection.resample_filters"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.resample_filters">[docs]</a>    <span class="k">def</span> <span class="nf">resample_filters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lam_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fill_gaps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resample all filters onto a single wavelength array.</span>
+
+<span class="sd">        If no wavelength grid is provided then the wavelength array of each</span>
+<span class="sd">        individual Filter will be combined to cover the full range of the</span>
+<span class="sd">        FilterCollection. Any overlapping ranges will take the values from one</span>
+<span class="sd">        of the overlapping filters, any gaps between filters can be filled</span>
+<span class="sd">        with the minimum average resolution of all filters to ensure a</span>
+<span class="sd">        continuous array without needlessly inflating the memory footprint</span>
+<span class="sd">        of any lam sized arrays.</span>
+
+<span class="sd">        Alternatively, if new_lam is not passed, lam_size can be passed</span>
+<span class="sd">        in which case a wavelength array from the minimum Filter wavelength</span>
+<span class="sd">        to the maximum Filter wavelength will be generated with lam_size</span>
+<span class="sd">        wavelength bins.</span>
 
 <span class="sd">        Warning:</span>
 <span class="sd">            If working with a Grid without passing the Grid wavelength</span>
@@ -973,13 +1062,14 @@
 <span class="sd">                Wavelength array on which to sample filters. Wavelengths</span>
 <span class="sd">                should be in Angstrom. Defaults to None and an array is</span>
 <span class="sd">                derived.</span>
-<span class="sd">            lam_resolution (float)</span>
-<span class="sd">                The desired resolution of the derived wavelength array. Only</span>
-<span class="sd">                used when new_lam is not provided.</span>
+<span class="sd">            lam_size (int)</span>
+<span class="sd">                The desired number of wavelength bins in the new wavelength</span>
+<span class="sd">                array, if no explicit array has been passed.</span>
+<span class="sd">            fill_gaps (bool)</span>
+<span class="sd">                Are we filling gaps in the wavelength array? Defaults to False.</span>
 <span class="sd">            verbose (bool)</span>
 <span class="sd">                Are we talking?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Do we need to find a wavelength array from the filters?</span>
         <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Set up values for looping</span>
@@ -996,16 +1086,21 @@
                 <span class="k">if</span> <span class="n">this_max</span> <span class="o">&gt;</span> <span class="n">max_lam</span><span class="p">:</span>
                     <span class="n">max_lam</span> <span class="o">=</span> <span class="n">this_max</span>
 
-            <span class="c1"># Create wavelength array</span>
-            <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
-                <span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">+</span> <span class="n">lam_resolution</span><span class="p">,</span> <span class="n">lam_resolution</span>
-            <span class="p">)</span>
+            <span class="c1"># Are we making an array with a fixed size?</span>
+            <span class="k">if</span> <span class="n">lam_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Create wavelength array</span>
+                <span class="n">new_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span><span class="p">,</span> <span class="n">lam_size</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Ok, we are trying to be clever, merge the filter wavelength</span>
+                <span class="c1"># arrays into a single array.</span>
+                <span class="n">new_lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_filter_lams</span><span class="p">(</span><span class="n">fill_gaps</span><span class="o">=</span><span class="n">fill_gaps</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="s2">&quot;Calculated wavelength array: </span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="o">+</span> <span class="s2">&quot;min = </span><span class="si">%.2e</span><span class="s2"> Angstrom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">min_lam</span>
-                    <span class="o">+</span> <span class="s2">&quot;max = </span><span class="si">%.2e</span><span class="s2"> Angstrom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">max_lam</span>
+                    <span class="o">+</span> <span class="s2">&quot;min = </span><span class="si">%.2e</span><span class="s2"> Angstrom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                    <span class="o">+</span> <span class="s2">&quot;max = </span><span class="si">%.2e</span><span class="s2"> Angstrom</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
                     <span class="o">+</span> <span class="s2">&quot;FilterCollection.lam.size = </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">size</span>
                 <span class="p">)</span>
 
@@ -1018,7 +1113,7 @@
         <span class="c1"># than just doing the interpolation for all filters</span>
         <span class="k">for</span> <span class="n">fcode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fcode</span><span class="p">]</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>
+            <span class="n">f</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_transmission_curve_ax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1043,11 +1138,7 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm T_{\lambda}$&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FilterCollection.plot_transmission_curves"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.plot_transmission_curves">[docs]</a>    <span class="k">def</span> <span class="nf">plot_transmission_curves</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a filter transmission curve plot of all Filters in the</span>
@@ -1487,6 +1578,34 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
+        <span class="c1"># Ensure transmission curves are in a valid range (we expect 0-1,</span>
+        <span class="c1"># some SVO curves return strange values above this e.g. ~60-80)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clip_transmission</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Alias for self.t.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+
+<div class="viewcode-block" id="Filter.clip_transmission"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.clip_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">clip_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clips transmission curve between 0 and 1.</span>
+
+<span class="sd">        Some transmission curves from SVO can come with strange</span>
+<span class="sd">        upper limits, the way we use them requires the maxiumum of a</span>
+<span class="sd">        transmission curve is at most 1. So for one final check lets</span>
+<span class="sd">        clip the transmission curve between 0 and 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Warn the user we are are doing this</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Warning: Out of range transmission values found &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(min=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">). &quot;</span>
+                <span class="s2">&quot;Transmission will be clipped to [0-1]&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_make_top_hat_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a top hat filter from the Filter&#39;s attributes.</span>
@@ -1569,7 +1688,7 @@
         <span class="c1"># If a new wavelength grid is provided, interpolate</span>
         <span class="c1"># the transmission curve on to that grid</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span>
@@ -1595,15 +1714,17 @@
             <span class="c1"># Warn the user if we&#39;re about to truncate the existing wavelength</span>
             <span class="c1"># array</span>
             <span class="n">truncated</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
                 <span class="n">truncated</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
                 <span class="n">truncated</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">truncated</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_code</span><span class="si">}</span><span class="s2"> is being truncated &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_code</span><span class="si">}</span><span class="s2"> will be truncated where &quot;</span>
+                    <span class="s2">&quot;transmission is non-zero &quot;</span>
                     <span class="s2">&quot;(old_lam_bounds = &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">), &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">), &quot;</span>
                     <span class="s2">&quot;new_lam_bounds = &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">new_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">new_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">))&quot;</span>
                 <span class="p">)</span>
@@ -1611,9 +1732,20 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">new_lam</span>
 
         <span class="c1"># Perform interpolation</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
         <span class="p">)</span>
+
+        <span class="c1"># Ensure we don&#39;t have 0 transmission</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentWavelengths</span><span class="p">(</span>
+                <span class="s2">&quot;Interpolated transmission curve has no non-zero values. &quot;</span>
+                <span class="s2">&quot;Consider removing this filter or extending the wavelength &quot;</span>
+                <span class="s2">&quot;range.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># And ensure transmission is in expected range</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clip_transmission</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Filter.apply_filter"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
