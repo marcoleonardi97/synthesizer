@@ -196,8 +196,11 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/parametric_data_cube.html">Creating Spectral Data Cubes from a Parametric Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_data_cube.html">Creating Spectral Data Cubes from Galaxy Particle distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../imaging/parametric_imaging.html">Creating Images From Parametric Galaxies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/property_maps.html">Making maps</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -300,9 +303,9 @@
 <li class="toctree-l5"><a class="reference internal" href="../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.image.html">synthesizer.imaging.image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.image_collection.html">synthesizer.imaging.image_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
@@ -497,11 +500,13 @@
 <span class="c1"># Generate stellar spectra</span>
 <span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
+<span class="c1"># Get photometry</span>
+<span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+
 <span class="c1"># Make images</span>
-<span class="n">disk_img</span> <span class="o">=</span> <span class="n">disk</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
+<span class="n">disk_img</span> <span class="o">=</span> <span class="n">disk</span><span class="o">.</span><span class="n">get_images_luminosity</span><span class="p">(</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-    <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-    <span class="n">stellar_spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+    <span class="n">stellar_photometry</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -580,15 +585,17 @@ available images: []
 <span class="c1"># Get galaxy object</span>
 <span class="n">bulge</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">stars</span><span class="o">=</span><span class="n">stars</span><span class="p">)</span>
 
-<span class="c1"># Get specrtra</span>
+<span class="c1"># Get spectra</span>
 <span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
 
+<span class="c1"># Get photometry</span>
+<span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+
 <span class="c1"># make images</span>
-<span class="n">bulge_img</span> <span class="o">=</span> <span class="n">bulge</span><span class="o">.</span><span class="n">make_images</span><span class="p">(</span>
+<span class="n">bulge_img</span> <span class="o">=</span> <span class="n">bulge</span><span class="o">.</span><span class="n">get_images_luminosity</span><span class="p">(</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-    <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
-    <span class="n">stellar_spectra_type</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
-    <span class="n">npix</span><span class="o">=</span><span class="n">npix</span><span class="p">,</span>
+    <span class="n">stellar_photometry</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
+    <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Make and plot an rgb image</span>

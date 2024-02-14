@@ -195,8 +195,11 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/parametric_data_cube.html">Creating Spectral Data Cubes from a Parametric Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_data_cube.html">Creating Spectral Data Cubes from Galaxy Particle distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../imaging/parametric_imaging.html">Creating Images From Parametric Galaxies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../imaging/property_maps.html">Making maps</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -299,9 +302,9 @@
 <li class="toctree-l5"><a class="reference internal" href="synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
-<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.image.html">synthesizer.imaging.image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.image_collection.html">synthesizer.imaging.image_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
@@ -485,10 +488,357 @@ and uses value provided on this galaxy object
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_data_cube">
+<span class="sig-name descname"><span class="pre">get_data_cube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cube_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_spectra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blackhole_spectra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lnu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_data_cube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_data_cube" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a SpectralCube from an Sed held by this galaxy.</p>
+<p>Data cubes are calculated by smoothing spectra over the component
+morphology. The Sed used is defined by &lt;component&gt;_spectra.</p>
+<p>If multiple components are requested they will be combined into a
+single output data cube.</p>
+<p>NOTE: Either npix or fov must be defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity"><em>Quantity</em></a><em>, </em><em>float</em>) – The size of a pixel.
+(Ignoring any supersampling defined by psf_resample_factor)</p></li>
+<li><p><strong>fov</strong> – float
+The width of the image in image coordinates.</p></li>
+<li><p><strong>lam</strong> (<em>unyt_array</em><em>, </em><em>float</em>) – The wavelength array to use for the data cube.</p></li>
+<li><p><strong>cube_type</strong> (<em>str</em>) – The type of data cube to make. Either “smoothed” to smooth
+particle spectra over a kernel or “hist” to sort particle
+spectra into individual spaxels.</p></li>
+<li><p><strong>stellar_spectra</strong> (<em>string</em>) – The stellar spectra key to make into a data cube.</p></li>
+<li><p><strong>blackhole_spectra</strong> (<em>string</em>) – The black hole spectra key to make into a data cube.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+<li><p><strong>quantity</strong> (<em>str</em>) – The Sed attribute/quantity to sort into the data cube, i.e.
+“lnu”, “llam”, “luminosity”, “fnu”, “flam” or “flux”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>SpectralCube</dt><dd><p>The spectral data cube object containing the derived
+data cube.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_images_flux">
+<span class="sig-name descname"><span class="pre">get_images_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_photometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blackhole_photometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_images_flux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_images_flux" title="Permalink to this definition">#</a></dt>
+<dd><p>Make an ImageCollection from fluxes.</p>
+<p>Images can either be a simple histogram (“hist”) or an image with
+particles smoothed over their SPH kernel. The photometry used for these
+images is extracted from the Sed stored on a component under the key
+defined by &lt;component&gt;_spectra.</p>
+<p>Note that black holes will never be smoothed and only produce a
+histogram due to the point source nature of black holes.</p>
+<p>If multiple components are requested they will be combined into a
+single output image.</p>
+<p>NOTE: Either npix or fov must be defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity"><em>Quantity</em></a><em>, </em><em>float</em>) – The size of a pixel.
+(Ignoring any supersampling defined by psf_resample_factor)</p></li>
+<li><p><strong>fov</strong> – float
+The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> – str
+The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>stellar_photometry</strong> (<em>string</em>) – The stellar spectra key from which to extract photometry
+to use for the image.</p></li>
+<li><p><strong>blackhole_photometry</strong> (<em>string</em>) – The black hole spectra key from which to extract photometry
+to use for the image.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>array-like</dt><dd><p>A 2D array containing the image.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.imaging.image.html#synthesizer.imaging.image.Image" title="synthesizer.imaging.image.Image">Image</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_images_luminosity">
+<span class="sig-name descname"><span class="pre">get_images_luminosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_photometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blackhole_photometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_images_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_images_luminosity" title="Permalink to this definition">#</a></dt>
+<dd><p>Make an ImageCollection from luminosities.</p>
+<p>Images can either be a simple histogram (“hist”) or an image with
+particles smoothed over their SPH kernel. The photometry used for these
+images is extracted from the Sed stored on a component under the key
+defined by &lt;component&gt;_spectra.</p>
+<p>Note that black holes will never be smoothed and only produce a
+histogram due to the point source nature of black holes.</p>
+<p>If multiple components are requested they will be combined into a
+single output image.</p>
+<p>NOTE: Either npix or fov must be defined.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity"><em>Quantity</em></a><em>, </em><em>float</em>) – The size of a pixel.
+(Ignoring any supersampling defined by psf_resample_factor)</p></li>
+<li><p><strong>fov</strong> – float
+The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> – str
+The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>stellar_photometry</strong> (<em>string</em>) – The stellar spectra key from which to extract photometry
+to use for the image.</p></li>
+<li><p><strong>blackhole_photometry</strong> (<em>string</em>) – The black hole spectra key from which to extract photometry
+to use for the image.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>array-like</dt><dd><p>A 2D array containing the image.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.imaging.image.html#synthesizer.imaging.image.Image" title="synthesizer.imaging.image.Image">Image</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_line_los">
 <span class="sig-name descname"><span class="pre">get_line_los</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_line_los"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_line_los" title="Permalink to this definition">#</a></dt>
 <dd><p>ParticleGalaxy specific method for obtaining the line luminosities
 subject to line of sight attenuation to each star particle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_gas_mass">
+<span class="sig-name descname"><span class="pre">get_map_gas_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_gas_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_mass" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a mass map, either with or without smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_gas_metal_mass">
+<span class="sig-name descname"><span class="pre">get_map_gas_metal_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_gas_metal_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_metal_mass" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a gas metal mass map, either with or without smoothing.</p>
+<p>TODO: make dust map!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_gas_metallicity">
+<span class="sig-name descname"><span class="pre">get_map_gas_metallicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_gas_metallicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_metallicity" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a gas metallicity map, either with or without smoothing.</p>
+<p>The metallicity in a pixel is the mass weighted average metallicity in
+that pixel.</p>
+<p>TODO: make dust map!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_sfr">
+<span class="sig-name descname"><span class="pre">get_map_sfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(100,</span> <span class="pre">'Myr')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_sfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_sfr" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a SFR map, either with or without smoothing.</p>
+<p>Only stars younger than age_bin are included in the map. This is
+calculated by computing the initial mass map for stars in the age bin
+and then dividing by the size of the age bin.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+<li><p><strong>age_bin</strong> (<em>unyt_quantity/float</em>) – The size of the age bin used to calculate the star formation
+rate. If supplied without units, the unit system is assumed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_ssfr">
+<span class="sig-name descname"><span class="pre">get_map_ssfr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(100,</span> <span class="pre">'Myr')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_ssfr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_ssfr" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a SFR map, either with or without smoothing.</p>
+<p>Only stars younger than age_bin are included in the map. This is
+calculated by computing the initial mass map for stars in the age bin
+and then dividing by the size of the age bin and stellar mass of
+the galaxy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+<li><p><strong>age_bin</strong> (<em>unyt_quantity/float</em>) – The size of the age bin used to calculate the star formation
+rate. If supplied without units, the unit system is assumed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_stellar_age">
+<span class="sig-name descname"><span class="pre">get_map_stellar_age</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_stellar_age"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_age" title="Permalink to this definition">#</a></dt>
+<dd><p>Make an age map, either with or without smoothing.</p>
+<p>The age in a pixel is the initial mass weighted average age in that
+pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_stellar_mass">
+<span class="sig-name descname"><span class="pre">get_map_stellar_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_stellar_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_mass" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a mass map, either with or without smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_stellar_metal_mass">
+<span class="sig-name descname"><span class="pre">get_map_stellar_metal_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_stellar_metal_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metal_mass" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a stellar metal mass map, either with or without smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_map_stellar_metallicity">
+<span class="sig-name descname"><span class="pre">get_map_stellar_metallicity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_map_stellar_metallicity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metallicity" title="Permalink to this definition">#</a></dt>
+<dd><p>Make a stellar metallicity map, either with or without smoothing.</p>
+<p>The metallicity in a pixel is the mass weighted average metallicity in
+that pixel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
+<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
+<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
+“smoothed” -&gt; particles smoothed over a kernel.</p></li>
+<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
+module. Only used for smoothed images.</p></li>
+<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Image</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -535,303 +885,6 @@ and attach to this galaxy object</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_gas_mass_map">
-<span class="sig-name descname"><span class="pre">make_gas_mass_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_gas_mass_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_gas_mass_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a mass map, either with or without smoothing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_gas_metal_mass_map">
-<span class="sig-name descname"><span class="pre">make_gas_metal_mass_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_gas_metal_mass_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_gas_metal_mass_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a gas metal mass map, either with or without smoothing.</p>
-<p>TODO: make dust map!</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_gas_metallicity_map">
-<span class="sig-name descname"><span class="pre">make_gas_metallicity_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_gas_metallicity_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_gas_metallicity_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a gas metallicity map, either with or without smoothing. The
-metallicity in a pixel is the mass weighted average metallicity in that
-pixel.</p>
-<p>TODO: make dust map!</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_images">
-<span class="sig-name descname"><span class="pre">make_images</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stellar_spectra_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blackhole_spectra_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snrs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aperture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noises</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rest_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">psf_resample_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_images"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_images" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes images, either one or one per filter. This is a generic method
-that will make every sort of image using every possible combination of
-arguments allowed by the ParticleImage class. These methods can be
-either a simple histogram or smoothing particles over a kernel. Either
-of these operations can be done with or without a PSF and noise.</p>
-<p>If multiple components are requested they will be combined into a
-single output image.</p>
-<p>NOTE: Either npix or fov must be defined.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<a class="reference internal" href="synthesizer.units.html#synthesizer.units.Quantity" title="synthesizer.units.Quantity"><em>Quantity</em></a><em>, </em><em>float</em>) – The size of a pixel.
-(Ignoring any supersampling defined by psf_resample_factor)</p></li>
-<li><p><strong>fov</strong> – float
-The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> – str
-The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>stellar_spectra_type</strong> (<em>string</em>) – The stellar spectra key to use for the image.</p></li>
-<li><p><strong>blackhole_spectra_type</strong> (<em>string</em>) – The black hole spectra key to use for the image.</p></li>
-<li><p><strong>filters</strong> – obj (FilterCollection)
-An imutable collection of Filter objects. If provided images
-are made for each filter.</p></li>
-<li><p><strong>pixel_values</strong> – array-like (float)
-The values to be sorted/smoothed into pixels. Only needed if
-an sed and filters are not used.</p></li>
-<li><p><strong>psfs</strong> – dict
-A dictionary containing the psf in each filter where the key is
-each filter code and the value is the psf in that filter.</p></li>
-<li><p><strong>depths</strong> – dict
-A dictionary containing the depth of an observation in each
-filter where the key is each filter code and the value is the
-depth in that filter.</p></li>
-<li><p><strong>aperture</strong> – float/dict
-Either a float describing the size of the aperture in which the
-depth is defined or a dictionary containing the size of the
-depth aperture in each filter.</p></li>
-<li><p><strong>rest_frame</strong> – bool
-Are we making an observation in the rest frame?</p></li>
-<li><p><strong>cosmo</strong> – obj (astropy.cosmology)
-A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>psf_resample_factor</strong> – float
-The factor by which the image should be resampled for robust
-PSF convolution. Note the images after PSF application will be
-downsampled to the native pixel scale.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>Image</strong> – A 2D array containing the image.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array-like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_sfr_map">
-<span class="sig-name descname"><span class="pre">make_sfr_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(100,</span> <span class="pre">'Myr')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_sfr_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_sfr_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a SFR map, either with or without smoothing. Only stars younger
-than age_bin are included in the map. This is calculated by computing
-the initial mass map for stars in the age bin and then dividing by the
-size of the age bin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-<li><p><strong>age_bin</strong> (<em>unyt_quantity/float</em>) – The size of the age bin used to calculate the star formation
-rate. If supplied without units, the unit system is assumed.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_ssfr_map">
-<span class="sig-name descname"><span class="pre">make_ssfr_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">age_bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(100,</span> <span class="pre">'Myr')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_ssfr_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_ssfr_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a SFR map, either with or without smoothing. Only stars younger
-than age_bin are included in the map. This is calculated by computing
-the initial mass map for stars in the age bin and then dividing by the
-size of the age bin.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-<li><p><strong>age_bin</strong> (<em>unyt_quantity/float</em>) – The size of the age bin used to calculate the star formation
-rate. If supplied without units, the unit system is assumed.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_stellar_age_map">
-<span class="sig-name descname"><span class="pre">make_stellar_age_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_stellar_age_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_age_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a age map, either with or without smoothing. The
-age in a pixel is the initial mass weighted average age in that
-pixel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_stellar_mass_map">
-<span class="sig-name descname"><span class="pre">make_stellar_mass_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_stellar_mass_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_mass_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a mass map, either with or without smoothing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_stellar_metal_mass_map">
-<span class="sig-name descname"><span class="pre">make_stellar_metal_mass_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_stellar_metal_mass_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_metal_mass_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a stellar metal mass map, either with or without smoothing.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.make_stellar_metallicity_map">
-<span class="sig-name descname"><span class="pre">make_stellar_metallicity_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hist'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.make_stellar_metallicity_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_metallicity_map" title="Permalink to this definition">#</a></dt>
-<dd><p>Makes a stellar metallicity map, either with or without smoothing. The
-metallicity in a pixel is the mass weighted average metallicity in that
-pixel.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>resolution</strong> (<em>float</em>) – The size of a pixel.</p></li>
-<li><p><strong>fov</strong> (<em>float</em>) – The width of the image in image coordinates.</p></li>
-<li><p><strong>img_type</strong> (<em>str</em>) – The type of image to be made, either “hist” -&gt; a histogram, or
-“smoothed” -&gt; particles smoothed over a kernel.</p></li>
-<li><p><strong>cosmo</strong> (<em>astropy.cosmology</em>) – A cosmology object from astropy, used for cosmological
-calculations when converting rest frame luminosity to flux.</p></li>
-<li><p><strong>kernel</strong> (<em>array-like</em><em>, </em><em>float</em>) – The values from one of the kernels from the kernel_functions
-module. Only used for smoothed images.</p></li>
-<li><p><strong>kernel_threshold</strong> (<em>float</em>) – The kernel’s impact parameter threshold (by default 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Image</p>
 </dd>
 </dl>
 </dd></dl>
@@ -945,20 +998,22 @@ defaults to value attached to this galaxy object.</p></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_integrated_stellar_properties"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_integrated_stellar_properties()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_los_tau_v"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_los_tau_v()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.dust_to_metal_vijayan19"><code class="docutils literal notranslate"><span class="pre">Galaxy.dust_to_metal_vijayan19()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_data_cube"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_data_cube()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_images_flux"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_images_flux()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_images_luminosity"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_images_luminosity()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_line_los"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_line_los()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_gas_mass()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_metal_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_gas_metal_mass()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_gas_metallicity"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_gas_metallicity()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_sfr"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_sfr()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_ssfr"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_ssfr()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_age"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_age()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_mass()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metal_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_metal_mass()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metallicity"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_metallicity()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.integrate_particle_spectra"><code class="docutils literal notranslate"><span class="pre">Galaxy.integrate_particle_spectra()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.load_gas"><code class="docutils literal notranslate"><span class="pre">Galaxy.load_gas()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.load_stars"><code class="docutils literal notranslate"><span class="pre">Galaxy.load_stars()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_gas_mass_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_gas_mass_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_gas_metal_mass_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_gas_metal_mass_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_gas_metallicity_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_gas_metallicity_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_images"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_images()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_sfr_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_sfr_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_ssfr_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_ssfr_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_age_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_stellar_age_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_mass_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_stellar_mass_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_metal_mass_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_stellar_metal_mass_map()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.make_stellar_metallicity_map"><code class="docutils literal notranslate"><span class="pre">Galaxy.make_stellar_metallicity_map()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter"><code class="docutils literal notranslate"><span class="pre">Galaxy.screen_dust_gamma_parameter()</span></code></a></li>
 </ul>
 </li>

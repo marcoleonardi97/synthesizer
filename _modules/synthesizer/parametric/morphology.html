@@ -194,8 +194,11 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../imaging/parametric_data_cube.html">Creating Spectral Data Cubes from a Parametric Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../imaging/particle_data_cube.html">Creating Spectral Data Cubes from Galaxy Particle distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../imaging/parametric_imaging.html">Creating Images From Parametric Galaxies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../imaging/property_maps.html">Making maps</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -298,9 +301,9 @@
 <li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.image.html">synthesizer.imaging.image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.image_collection.html">synthesizer.imaging.image_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
@@ -425,7 +428,50 @@
             <span class="n">vmin</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MorphologyBase.compute_density_grid_from_arrays"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.MorphologyBase.compute_density_grid_from_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid_from_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the density grid from coordinate grids.</span>
+
+<span class="sd">        This is a place holder method to be overwritten by child classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">NotImplemented</span><span class="p">(</span>
+            <span class="s2">&quot;This method should be overwritten by child classes&quot;</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MorphologyBase.get_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.MorphologyBase.get_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">npix</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the density grid based on resolution and npix.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (unyt_quantity)</span>
+<span class="sd">                The resolution of the grid.</span>
+<span class="sd">            npix (tuple, int)</span>
+<span class="sd">                The number of pixels in each dimension.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define 1D bin centres of each pixel</span>
+        <span class="k">if</span> <span class="n">resolution</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">angle</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">resolution</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;mas&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">resolution</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;kpc&quot;</span><span class="p">)</span>
+        <span class="n">xbin_centres</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">npix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">npix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">npix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">ybin_centres</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">npix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">npix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">npix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Convert the 1D grid into 2D grids coordinate grids</span>
+        <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xbin_centres</span><span class="p">,</span> <span class="n">ybin_centres</span><span class="p">)</span>
+
+        <span class="c1"># Extract the density grid from the morphology function</span>
+        <span class="n">density_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_density_grid_from_arrays</span><span class="p">(</span>
+            <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">res</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span>
+
+        <span class="c1"># And normalise it...</span>
+        <span class="k">return</span> <span class="n">density_grid</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">density_grid</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Sersic2D"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.Sersic2D">[docs]</a><span class="k">class</span> <span class="nc">Sersic2D</span><span class="p">(</span><span class="n">MorphologyBase</span><span class="p">):</span>
@@ -552,7 +598,7 @@
                 <span class="s2">&quot;comoslogical calculations.&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="Sersic2D.compute_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.Sersic2D.compute_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">kpc</span><span class="p">):</span>
+<div class="viewcode-block" id="Sersic2D.compute_density_grid_from_arrays"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.Sersic2D.compute_density_grid_from_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid_from_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">kpc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the density grid defined by this morphology as a function of</span>
 <span class="sd">        the input coordinate grids.</span>
@@ -658,7 +704,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">offset_kpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset_mas</span> <span class="o">*</span> <span class="n">kpc_proper_per_mas</span>
 
-<div class="viewcode-block" id="PointSource.compute_density_grid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.PointSource.compute_density_grid">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">kpc</span><span class="p">):</span>
+<div class="viewcode-block" id="PointSource.compute_density_grid_from_arrays"><a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.morphology.html#synthesizer.parametric.morphology.PointSource.compute_density_grid_from_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">compute_density_grid_from_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">kpc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Compute the density grid defined by this morphology as a function of</span>
 <span class="sd">        the input coordinate grids.</span>

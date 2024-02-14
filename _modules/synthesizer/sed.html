@@ -194,8 +194,11 @@
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/parametric_data_cube.html">Creating Spectral Data Cubes from a Parametric Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/particle_data_cube.html">Creating Spectral Data Cubes from Galaxy Particle distributions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../imaging/parametric_imaging.html">Creating Images From Parametric Galaxies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/particle_imaging.html">Creating Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/property_maps.html">Making maps</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -298,9 +301,9 @@
 <li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.images.html">synthesizer.imaging.images</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.scene.html">synthesizer.imaging.scene</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cubes.html">synthesizer.imaging.spectral_cubes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.image.html">synthesizer.imaging.image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.image_collection.html">synthesizer.imaging.image_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
@@ -534,8 +537,17 @@
 
         <span class="c1"># Check that the lnu array is multidimensional</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Return a new sed object with the first Lnu dimension collapsed</span>
-            <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="c1"># Create a new sed object with the first Lnu dimension collapsed</span>
+            <span class="n">new_sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="c1"># If fnu exists, sum that too</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">new_sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">new_sed</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span>
+                <span class="n">new_sed</span><span class="o">.</span><span class="n">obslam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obslam</span>
+                <span class="n">new_sed</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
+
+            <span class="k">return</span> <span class="n">new_sed</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If 1D, just return the original array</span>
             <span class="k">return</span> <span class="bp">self</span></div>
@@ -609,7 +621,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Sed</span>
-<span class="sd">                A new instance of Sed with added lnu arrays.</span>
+<span class="sd">                A new instance of Sed with added lnu and fnu arrays.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            InconsistentAddition</span>
@@ -634,8 +646,17 @@
                 <span class="s2">&quot;SEDs must have same dimensions&quot;</span>
             <span class="p">)</span>
 
-        <span class="c1"># They&#39;re compatible, add them</span>
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+        <span class="c1"># They&#39;re compatible, add them and make a new Sed</span>
+        <span class="n">new_sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+
+        <span class="c1"># If fnu exists on both then we need to add those too</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">second_sed</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">new_sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">+</span> <span class="n">second_sed</span><span class="o">.</span><span class="n">fnu</span>
+            <span class="n">new_sed</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span>
+            <span class="n">new_sed</span><span class="o">.</span><span class="n">obslam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obslam</span>
+            <span class="n">new_sed</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
+
+        <span class="k">return</span> <span class="n">new_sed</span>
 
     <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_sed</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1520,9 +1541,6 @@
 <span class="sd">        elements per original wavelength element (i.e. up sampling),</span>
 <span class="sd">        or by providing a new wavelength grid to resample on to.</span>
 
-<span class="sd">        NOTE: This only resamples the rest frame spectra. For fluxes, `get_fnu`</span>
-<span class="sd">        must be called again after resampling.</span>
-
 <span class="sd">        Args:</span>
 <span class="sd">            resample_factor (int)</span>
 <span class="sd">                The number of additional wavelength elements to</span>
@@ -1555,10 +1573,18 @@
             <span class="n">new_lam</span> <span class="o">=</span> <span class="n">rebin_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">resample_factor</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
 
         <span class="c1"># Evaluate the function at the desired wavelengths</span>
-        <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
+        <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
 
         <span class="c1"># Instantiate the new Sed</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">new_spectra</span><span class="p">)</span>
+
+        <span class="c1"># If self also has fnu we should resample those too and store the</span>
+        <span class="c1"># shifted wavelengths and frequencies</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">_lam</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">)</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">_nu</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">)</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obslam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">)</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
 
         <span class="k">return</span> <span class="n">sed</span></div>
 
