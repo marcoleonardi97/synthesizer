@@ -967,6 +967,37 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
+<div class="viewcode-block" id="FilterCollection.get_non_zero_lam_lims"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.get_non_zero_lam_lims">[docs]</a>    <span class="k">def</span> <span class="nf">get_non_zero_lam_lims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the minimum and maximum wavelengths with non-zero transmission.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            unyt_quantity</span>
+<span class="sd">                Minimum wavelength with non-zero transmission.</span>
+<span class="sd">            unyt_quantity</span>
+<span class="sd">                Maximum wavelength with non-zero transmission.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the minimum and maximum wavelength at which transmission is</span>
+        <span class="c1"># non-zero</span>
+        <span class="n">min_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="n">max_lam</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
+            <span class="n">this_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">this_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">this_min</span> <span class="o">&lt;</span> <span class="n">min_lam</span><span class="p">:</span>
+                <span class="n">min_lam</span> <span class="o">=</span> <span class="n">this_min</span>
+            <span class="k">if</span> <span class="n">this_max</span> <span class="o">&gt;</span> <span class="n">max_lam</span><span class="p">:</span>
+                <span class="n">max_lam</span> <span class="o">=</span> <span class="n">this_max</span>
+
+        <span class="c1"># It&#39;s possible to be here without having set self.lam, in that</span>
+        <span class="c1"># case we use the last filter in the iteration.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">min_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">min_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+            <span class="n">max_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_merge_filter_lams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_gaps</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Merge the wavelength arrays of multiple filters.</span>
@@ -1075,19 +1106,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Do we need to find a wavelength array from the filters?</span>
         <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Set up values for looping</span>
-            <span class="n">min_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-            <span class="n">max_lam</span> <span class="o">=</span> <span class="mi">0</span>
-
-            <span class="c1"># Loop over filters getting the minimum and maximum wavelengths,</span>
-            <span class="c1"># and highest resolution from the individual filters.</span>
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
-                <span class="n">this_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
-                <span class="n">this_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">this_min</span> <span class="o">&lt;</span> <span class="n">min_lam</span><span class="p">:</span>
-                    <span class="n">min_lam</span> <span class="o">=</span> <span class="n">this_min</span>
-                <span class="k">if</span> <span class="n">this_max</span> <span class="o">&gt;</span> <span class="n">max_lam</span><span class="p">:</span>
-                    <span class="n">max_lam</span> <span class="o">=</span> <span class="n">this_max</span>
+            <span class="c1"># Get the wavelength limits</span>
+            <span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_non_zero_lam_lims</span><span class="p">()</span>
 
             <span class="c1"># Are we making an array with a fixed size?</span>
             <span class="k">if</span> <span class="n">lam_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1117,6 +1137,24 @@
         <span class="k">for</span> <span class="n">fcode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fcode</span><span class="p">]</span>
             <span class="n">f</span><span class="o">.</span><span class="n">_interpolate_wavelength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FilterCollection.unify_with_grid"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.unify_with_grid">[docs]</a>    <span class="k">def</span> <span class="nf">unify_with_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">loop_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Unify a grid with this FilterCollection.</span>
+
+<span class="sd">        This will interpolate the grid onto the wavelength grid of this</span>
+<span class="sd">        FilterCollection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (object)</span>
+<span class="sd">                The grid to be unified with this FilterCollection.</span>
+<span class="sd">            loop_spectra (bool)</span>
+<span class="sd">                Flag for whether to do the interpolation over the whole</span>
+<span class="sd">                grid, or loop over the first axes. The latter is less memory</span>
+<span class="sd">                intensive, but slower. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Interpolate the grid onto this wavelength grid</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">interp_spectra</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">loop_spectra</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_transmission_curve_ax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
