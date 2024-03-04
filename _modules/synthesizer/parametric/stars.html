@@ -582,7 +582,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="n">metal_dist</span>  <span class="c1"># a ZDist function</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metal_dist</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)):</span>
             <span class="n">instant_metallicity</span> <span class="o">=</span> <span class="n">metal_dist</span>  <span class="c1"># an instantaneous SFH</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">=</span> <span class="kc">None</span>
@@ -949,6 +949,30 @@
 <span class="sd">        Add two Stars instances together.</span>
 
 <span class="sd">        In simple terms this sums the SFZH grids of both Stars instances.</span>
+
+<span class="sd">        This will only work for Stars objects with the same SFZH grid axes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_stars (parametric.Stars)</span>
+<span class="sd">                The other instance of Stars to add to this one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">log10ages</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">==</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">metallicities</span>
+        <span class="p">):</span>
+            <span class="n">new_sfzh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">+</span> <span class="n">other_stars</span><span class="o">.</span><span class="n">sfzh</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentAddition</span><span class="p">(</span>
+                <span class="s2">&quot;SFZH must be the same shape&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Stars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">sfzh</span><span class="o">=</span><span class="n">new_sfzh</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_stars</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overloads &quot;reflected&quot; addition to allow two Stars instances to be added</span>
+<span class="sd">        together when in reverse order, i.e. second_stars + self.</span>
 
 <span class="sd">        This will only work for Stars objects with the same SFZH grid axes.</span>
 

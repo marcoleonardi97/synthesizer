@@ -404,6 +404,7 @@
 <span class="sd">                        smoothing_lengths=smoothing_lengths,</span>
 <span class="sd">                        tau_v=tau_vs, coordinates=coordinates, ...)</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -418,6 +419,8 @@
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">Para_Stars</span>
 
 
 <div class="viewcode-block" id="Stars"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars">[docs]</a><span class="k">class</span> <span class="nc">Stars</span><span class="p">(</span><span class="n">Particles</span><span class="p">,</span> <span class="n">StarsComponent</span><span class="p">):</span>
@@ -760,6 +763,8 @@
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+        <span class="n">parametric_young_stars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parametric_sfh</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the integrated rest frame spectra for a given grid key</span>
@@ -796,6 +801,14 @@
 <span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
 <span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
 <span class="sd">                Defaults to cic.</span>
+<span class="sd">            parametric_young_stars (bool/float)</span>
+<span class="sd">                If not None, specifies age in Myr below which we replace</span>
+<span class="sd">                individual star particles with a parametric SFH.</span>
+<span class="sd">            parametric_sfh (string)</span>
+<span class="sd">                Form of the parametric SFH to use for young stars.</span>
+<span class="sd">                Currently two are supported, `Constant` and</span>
+<span class="sd">                `TruncatedExponential`, selected using the keyword</span>
+<span class="sd">                arguments `constant` and `exponential`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
@@ -881,6 +894,21 @@
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
 
+        <span class="k">if</span> <span class="n">parametric_young_stars</span><span class="p">:</span>
+            <span class="c1"># Get mask for particles we&#39;re going to replace with parametric</span>
+            <span class="n">pmask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">parametric_young_stars</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># Update the young/old mask to ignore those we&#39;re replacing</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">pmask</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">lnu_parametric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametric_young_stars</span><span class="p">(</span>
+                <span class="n">pmask</span><span class="o">=</span><span class="n">pmask</span><span class="p">,</span>
+                <span class="n">age</span><span class="o">=</span><span class="n">parametric_young_stars</span><span class="p">,</span>
+                <span class="n">parametric_sfh</span><span class="o">=</span><span class="n">parametric_sfh</span><span class="p">,</span>
+                <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+                <span class="n">spectra_name</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="kn">from</span> <span class="nn">..extensions.integrated_spectra</span> <span class="kn">import</span> <span class="n">compute_integrated_sed</span>
 
         <span class="c1"># Prepare the arguments for the C function.</span>
@@ -893,7 +921,81 @@
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
-        <span class="k">return</span> <span class="n">compute_integrated_sed</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+        <span class="n">lnu_particle</span> <span class="o">=</span> <span class="n">compute_integrated_sed</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">parametric_young_stars</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lnu_particle</span> <span class="o">+</span> <span class="n">lnu_parametric</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lnu_particle</span></div>
+
+    <span class="k">def</span> <span class="nf">_parametric_young_stars</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pmask</span><span class="p">,</span>
+        <span class="n">age</span><span class="p">,</span>
+        <span class="n">parametric_sfh</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">spectra_name</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replace young stars with individual parametric SFH&#39;s. Can be either a</span>
+<span class="sd">        constant or truncated exponential, selected with the `parametric_sfh`</span>
+<span class="sd">        argument. Returns the emission from these replaced particles assuming</span>
+<span class="sd">        this SFH. The metallicity is set to the metallicity of the parent</span>
+<span class="sd">        star particle.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pmask (bool array)</span>
+<span class="sd">                Star particles to replace</span>
+<span class="sd">            age (float)</span>
+<span class="sd">                Age in Myr below which we replace Star particles.</span>
+<span class="sd">                Used to set the duration of parametric SFH</span>
+<span class="sd">            parametric_sfh (string)</span>
+<span class="sd">                Form of the parametric SFH to use for young stars.</span>
+<span class="sd">                Currently two are supported, `Constant` and</span>
+<span class="sd">                `TruncatedExponential`, selected using the keyword</span>
+<span class="sd">                arguments `constant` and `exponential`.</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The spectral grid object.</span>
+<span class="sd">            spectra_name (string)</span>
+<span class="sd">                The name of the target spectra inside the grid file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialise SFH object</span>
+        <span class="k">if</span> <span class="n">parametric_sfh</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+            <span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="n">age</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">parametric_sfh</span> <span class="o">==</span> <span class="s2">&quot;exponential&quot;</span><span class="p">:</span>
+            <span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">TruncatedExponential</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">age</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">age</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;Value of `parametric_sfh` provided, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">parametric_sfh</span><span class="si">}</span><span class="s2">`, is not supported.&quot;</span>
+                    <span class="s2">&quot;Please use &#39;constant&#39; or &#39;exponential&#39;.&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">stars</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmask</span><span class="p">)</span>
+
+        <span class="c1"># Loop through particles to be replaced</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_pmask</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pmask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+
+            <span class="c1"># Create a parametric Stars object</span>
+            <span class="n">stars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Para_Stars</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span>
+                <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span>
+                <span class="n">metal_dist</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">_pmask</span><span class="p">],</span>
+                <span class="n">initial_mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">[</span><span class="n">_pmask</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Combine the individual parametric forms for each particle</span>
+        <span class="n">stars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">stars</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">stars</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Get the spectra for this parametric form</span>
+        <span class="k">return</span> <span class="n">stars</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Stars.generate_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
