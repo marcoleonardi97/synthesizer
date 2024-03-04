@@ -397,6 +397,7 @@
 <span class="sd">    stars.get_spectra_incident(grid)</span>
 <span class="sd">    stars.plot_spectra()</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span>
@@ -707,6 +708,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span><span class="p">[</span><span class="n">ia</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span>
                 <span class="n">min_age</span> <span class="o">=</span> <span class="n">max_age</span>
 
+            <span class="c1"># Normalise SFH array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span><span class="p">)</span>
+
+            <span class="c1"># Multiply by initial stellar mass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_mass</span>
+
         <span class="c1"># Calculate SFH from function if necessary</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Set up SFH array</span>
@@ -727,6 +734,12 @@
                 <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span><span class="p">[</span><span class="n">imetal</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span>
                 <span class="n">min_metal</span> <span class="o">=</span> <span class="n">max_metal</span>
+
+            <span class="c1"># Normalise ZH array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span><span class="p">)</span>
+
+            <span class="c1"># Multiply by initial stellar mass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_mass</span>
 
         <span class="c1"># Ensure that by this point we have an array for SFH and ZH</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_hist</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal_dist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
