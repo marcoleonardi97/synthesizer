@@ -165,6 +165,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="grids.html">Grids</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Passing-wavelength-limits">Passing wavelength limits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../abundances.html">Abundances</a></li>
@@ -206,6 +207,8 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/cosmo/test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/cosmo/test_aperture_mask.html">Aperture Mask Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/cosmo/test_parametric_young_stars.html">Parametric Young Stars Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/cosmo/plot_sc-sam.html">SC-SAM example</a></li>
 </ul>
 </li>
@@ -267,6 +270,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.download_data.html">synthesizer.download_data</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.dust.html">synthesizer.dust</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.dust</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.dust.attenuation.html">synthesizer.dust.attenuation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.dust.emission.html">synthesizer.dust.emission</a></li>
@@ -484,21 +488,71 @@ available spectra: [&#39;incident&#39;, &#39;linecont&#39;, &#39;nebular&#39;, &
 
 </pre></div></div>
 </div>
-<section id="Plot-a-single-grid-point">
-<h2>Plot a single grid point<a class="headerlink" href="#Plot-a-single-grid-point" title="Permalink to this heading">#</a></h2>
-<p>We can plot the spectra at the location of a single point in our grid. First, we choose some age and metallicity</p>
-<div class="nbinput nblast docutils container">
+<p>A <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can also take various arguments to limit the size of the grid by isolating the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> to a region of interest. This is particularly useful when making a large number of spectra from a high resolution <code class="docutils literal notranslate"><span class="pre">Grid</span></code> where the memory footprint can become large.</p>
+<section id="Passing-a-wavelength-array">
+<h2>Passing a wavelength array<a class="headerlink" href="#Passing-a-wavelength-array" title="Permalink to this heading">#</a></h2>
+<p>If you only care about a grid of specific wavelength values you can pass this array and the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> will automatically be interpolated onto the new wavelength array using <code class="docutils literal notranslate"><span class="pre">spectres</span></code>.</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">log10age</span> <span class="o">=</span> <span class="mf">6.0</span>  <span class="c1"># log10(age/yr)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a new set of wavelengths</span>
+<span class="n">new_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="c1"># Create a new grid</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">new_lams</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(51, 13, 1000)
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Passing-wavelength-limits">
+<h1>Passing wavelength limits<a class="headerlink" href="#Passing-wavelength-limits" title="Permalink to this heading">#</a></h1>
+<p>If you don’t want to modify the underlying grid resolution but only care about a specific wavelength range you can pass limits to truncate the grid at.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a new grid</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">lam_lims</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(51, 13, 691)
+</pre></div></div>
+</div>
+<p>You can also pass a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> to isolate the grid to the filter curves you care about. For more details see the the <a class="reference internal" href="../filters.html"><span class="doc">filter docs</span></a>.</p>
+<p>We can plot the spectra at the location of a single point in our grid. First, we choose some age and metallicity</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Return to the unmodified grid</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">)</span>
+
+<span class="n">log10age</span> <span class="o">=</span> <span class="mf">6.0</span>  <span class="c1"># log10(age/yr)</span>
 <span class="n">Z</span> <span class="o">=</span> <span class="mf">0.01</span>  <span class="c1"># metallicity</span>
 </pre></div>
 </div>
 </div>
 <p>We then get the index location of that grid point for this age and metallicity</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_point</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_grid_point</span><span class="p">((</span><span class="n">log10age</span><span class="p">,</span> <span class="n">Z</span><span class="p">))</span>
@@ -507,7 +561,7 @@ available spectra: [&#39;incident&#39;, &#39;linecont&#39;, &#39;nebular&#39;, &
 </div>
 <p>We can then loop over the available spectra (contained in <code class="docutils literal notranslate"><span class="pre">grid.spec_names</span></code>) and plot</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">spectra_id</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
@@ -533,7 +587,7 @@ available spectra: [&#39;incident&#39;, &#39;linecont&#39;, &#39;nebular&#39;, &
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -545,16 +599,13 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_11_2.png" src="../_images/grids_grids_example_11_2.png" />
+<img alt="../_images/grids_grids_example_16_2.png" src="../_images/grids_grids_example_16_2.png" />
 </div>
 </div>
-</section>
-<section id="Plot-ionising-luminosities">
-<h2>Plot ionising luminosities<a class="headerlink" href="#Plot-ionising-luminosities" title="Permalink to this heading">#</a></h2>
 <p>We can also plot properties over the entire age and metallicity grid, such as the ionising luminosity.</p>
 <p>In the examples below we plot ionising luminosities for HI and HeII</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">plot_specific_ionising_lum</span><span class="p">(</span><span class="n">ion</span><span class="o">=</span><span class="s2">&quot;HI&quot;</span><span class="p">)</span>
@@ -565,11 +616,11 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_13_0.png" src="../_images/grids_grids_example_13_0.png" />
+<img alt="../_images/grids_grids_example_18_0.png" src="../_images/grids_grids_example_18_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">plot_specific_ionising_lum</span><span class="p">(</span><span class="n">ion</span><span class="o">=</span><span class="s2">&quot;HeII&quot;</span><span class="p">)</span>
@@ -580,15 +631,12 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_14_0.png" src="../_images/grids_grids_example_14_0.png" />
+<img alt="../_images/grids_grids_example_19_0.png" src="../_images/grids_grids_example_19_0.png" />
 </div>
 </div>
-</section>
-<section id="3D-grids">
-<h2>3D grids<a class="headerlink" href="#3D-grids" title="Permalink to this heading">#</a></h2>
 <p>This functionality is currently in development - come back soon!</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># grid_name = &#39;test_grid3D&#39;</span>
@@ -598,20 +646,18 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 </pre></div>
 </div>
 </div>
-<section id="Resampling-Grids">
-<h3>Resampling Grids<a class="headerlink" href="#Resampling-Grids" title="Permalink to this heading">#</a></h3>
-<p>Some of the available grids have extremely high resolution wavelength grids. In many cases this is overkill and can lead to large memory overheads, while in other situations a particular wavelength grid may be required (matching a spectroscopic survey for instance). To handle these cases a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can be passed a new wavelength array at the point of instantiation to interpolate the SPS grid spectra onto.</p>
+<p>If you want to resample a grid after istantiation you can apply the <code class="docutils literal notranslate"><span class="pre">intrep_spectra</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a new set of wavelengths</span>
-<span class="n">new_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">new_lams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The old grid had dimensions:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
 <span class="c1"># Get the grid interpolated onto the new wavelength array</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">new_lams</span><span class="p">)</span>
+<span class="n">grid</span><span class="o">.</span><span class="n">interp_spectra</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="n">new_lams</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The interpolated grid has dimensions:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
@@ -630,16 +676,13 @@ The old grid had dimensions: (51, 13, 8228)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The interpolated grid has dimensions: (51, 13, 1000)
+The interpolated grid has dimensions: (51, 13, 10000)
 </pre></div></div>
 </div>
 <p>Note that this will overwrite the spectra and wavelengths read from the file. To get them back a separate <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can be instatiated without the modified wavelength array.</p>
-</section>
-<section id="Converting-a-Grid-into-an-Sed">
-<h3>Converting a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> into an <code class="docutils literal notranslate"><span class="pre">Sed</span></code><a class="headerlink" href="#Converting-a-Grid-into-an-Sed" title="Permalink to this heading">#</a></h3>
 <p>Any of the spectra arrays stored within a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> can be returned as <code class="docutils literal notranslate"><span class="pre">Sed</span></code> objects (see the <code class="docutils literal notranslate"><span class="pre">Sed</span></code> <a class="reference internal" href="../sed.html"><span class="doc">docs</span></a>). This enables all of the analysis methods provide on an Sed to be used on the whole spectra grid. To do this we simply call <code class="docutils literal notranslate"><span class="pre">get_sed</span></code> with the spectra type we want to extract and then use any of the included methods.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the sed object</span>
@@ -651,26 +694,23 @@ The interpolated grid has dimensions: (51, 13, 1000)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_array([[0.09007808, 0.04338335, 0.04025876, 0.03723838, 0.17190818],
-       [0.05418341, 0.05304544, 0.04978218, 0.06420265, 0.06266603],
-       [0.06894492, 0.06757742, 0.0654056 , 0.05850932, 0.04344247],
-       [0.08328064, 0.07390223, 0.06589888, 0.06274813, 0.04879659],
-       [0.09926472, 0.07950015, 0.06957076, 0.05840629, 0.05584724]], &#39;(dimensionless)&#39;)
+unyt_array([[0.08518092, 0.04107345, 0.03848784, 0.03598645, 0.16612903],
+       [0.05080407, 0.05062285, 0.04784261, 0.06253009, 0.06164604],
+       [0.06468213, 0.06470033, 0.06267823, 0.05629725, 0.0420861 ],
+       [0.07813083, 0.06881685, 0.0617963 , 0.06000003, 0.04734562],
+       [0.09209187, 0.07461474, 0.06562301, 0.05503354, 0.05379628]], &#39;(dimensionless)&#39;)
 </pre></div></div>
 </div>
-</section>
-<section id="Unifying-a-Grid-with-a-FilterCollection">
-<h3>Unifying a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> with a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code><a class="headerlink" href="#Unifying-a-Grid-with-a-FilterCollection" title="Permalink to this heading">#</a></h3>
 <p>It’s important when working with a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> and any <code class="docutils literal notranslate"><span class="pre">Filter</span></code> objects (see the filter <a class="reference internal" href="../filters.html"><span class="doc">docs</span></a>) to have a single wavelength array shared between the two to ensure filter transmission curves are applied correctly. Additionally, when focused on photometry in certain filters focus a <code class="docutils literal notranslate"><span class="pre">Grid</span></code>’s spectral range to that of the filters in question can drastically reduce the memory footprint of a calculation.</p>
 <p>To ensure the former and enable the latter a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> provides the <code class="docutils literal notranslate"><span class="pre">unify_with_filters</span></code> method. This method will take a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> as an arguement and interpolate the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> spectra onto the filters’ wavelength array. You can also initialise a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> by passing the filter collection via the <code class="docutils literal notranslate"><span class="pre">filters</span></code> keyword argument at instantiation.</p>
 <p>We demonstrate this below using a set of <code class="docutils literal notranslate"><span class="pre">UVJ</span></code> filters.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">UVJ</span>
@@ -698,19 +738,13 @@ unyt_array([[0.09007808, 0.04338335, 0.04025876, 0.03723838, 0.17190818],
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Calculated wavelength array:
-min = 3.32e+03 Angstrom
+min = 3.31e+03 Angstrom
 max = 1.33e+04 Angstrom
-FilterCollection.lam.size = 74954
-Shape before: (51, 13, 1000)
-Warning: U will be truncated where transmission is non-zero (old_lam_bounds = (3.32e+03 Å, 3.98e+03 Å), new_lam_bounds = (3.33e+03 Å, 1.32e+04 Å))
-Warning: J will be truncated where transmission is non-zero (old_lam_bounds = (1.11e+04 Å, 1.33e+04 Å), new_lam_bounds = (3.33e+03 Å, 1.32e+04 Å))
-Shape after: (51, 13, 200)
-Warning: U will be truncated where transmission is non-zero (old_lam_bounds = (3.33e+03 Å, 3.96e+03 Å), new_lam_bounds = (3.34e+03 Å, 1.32e+04 Å))
-Warning: J will be truncated where transmission is non-zero (old_lam_bounds = (1.12e+04 Å, 1.32e+04 Å), new_lam_bounds = (3.34e+03 Å, 1.32e+04 Å))
+FilterCollection.lam.size = 75014
+Shape before: (51, 13, 10000)
+Shape after: (51, 13, 2010)
 </pre></div></div>
 </div>
-</section>
-</section>
 </section>
 
         </article>
@@ -769,16 +803,10 @@ Warning: J will be truncated where transmission is non-zero (old_lam_bounds = (1
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Grids</a><ul>
-<li><a class="reference internal" href="#Plot-a-single-grid-point">Plot a single grid point</a></li>
-<li><a class="reference internal" href="#Plot-ionising-luminosities">Plot ionising luminosities</a></li>
-<li><a class="reference internal" href="#3D-grids">3D grids</a><ul>
-<li><a class="reference internal" href="#Resampling-Grids">Resampling Grids</a></li>
-<li><a class="reference internal" href="#Converting-a-Grid-into-an-Sed">Converting a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> into an <code class="docutils literal notranslate"><span class="pre">Sed</span></code></a></li>
-<li><a class="reference internal" href="#Unifying-a-Grid-with-a-FilterCollection">Unifying a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> with a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code></a></li>
+<li><a class="reference internal" href="#Passing-a-wavelength-array">Passing a wavelength array</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li><a class="reference internal" href="#Passing-wavelength-limits">Passing wavelength limits</a></li>
 </ul>
 
           </div>

@@ -163,6 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../grids/grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../grids/grids_example.html">Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../grids/grids_example.html#Passing-wavelength-limits">Passing wavelength limits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../abundances.html">Abundances</a></li>
@@ -204,6 +205,8 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/cosmo/test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/cosmo/test_aperture_mask.html">Aperture Mask Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/cosmo/test_parametric_young_stars.html">Parametric Young Stars Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/cosmo/plot_sc-sam.html">SC-SAM example</a></li>
 </ul>
 </li>
@@ -265,6 +268,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.download_data.html">synthesizer.download_data</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.dust.html">synthesizer.dust</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.dust</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.dust.attenuation.html">synthesizer.dust.attenuation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.dust.emission.html">synthesizer.dust.emission</a></li>
@@ -395,7 +399,7 @@
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">angstrom</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
@@ -603,6 +607,7 @@
         <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lam_lims</span><span class="o">=</span><span class="p">(),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initailise the grid object, open the grid file and extracting the</span>
@@ -625,6 +630,10 @@
 <span class="sd">                An optional FilterCollection object to unify the grids</span>
 <span class="sd">                wavelength grid with. If provided, this will override new_lam</span>
 <span class="sd">                whether passed or not.</span>
+<span class="sd">            lam_lims (tuple, float)</span>
+<span class="sd">                A tuple of the lower and upper wavelength limits to truncate</span>
+<span class="sd">                the grid to (i.e. (lower_lam, upper_lam)). If new_lam or</span>
+<span class="sd">                filters are provided these limits will be ignored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">grid_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">grid_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">),</span> <span class="s2">&quot;data/grids&quot;</span><span class="p">)</span>
@@ -776,6 +785,14 @@
             <span class="c1"># Save list of available lines</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
+        <span class="c1"># If we have both new_lam (or filters) and wavelength limits</span>
+        <span class="c1"># the limits become meaningless tell the user so.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Passing new_lam or filters and lam_lims is contradictory, &quot;</span>
+                <span class="s2">&quot;lam_lims will be ignored.&quot;</span>
+            <span class="p">)</span>
+
         <span class="c1"># Has a new wavelength grid been passed to interpolate</span>
         <span class="c1"># the spectra onto?</span>
         <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">filters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -808,6 +825,10 @@
                 <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">unify_with_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+
+        <span class="c1"># If we have been given wavelength limtis truncate the grid</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">filters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">truncate_grid_lam</span><span class="p">(</span><span class="o">*</span><span class="n">lam_lims</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Grid.interp_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.interp_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">interp_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_lam</span><span class="p">,</span> <span class="n">loop_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -878,6 +899,11 @@
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="k">return</span> <span class="n">pstr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the shape of the grid.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span>
 
 <div class="viewcode-block" id="Grid.get_nearest_index"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_nearest_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1205,6 +1231,33 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">])</span></div>
 
+<div class="viewcode-block" id="Grid.truncate_grid_lam"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.truncate_grid_lam">[docs]</a>    <span class="k">def</span> <span class="nf">truncate_grid_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Truncate the grid to a specific wavelength range.</span>
+
+<span class="sd">        If out of range wavlengths are requested, the grid will be</span>
+<span class="sd">        truncated to the nearest wavelength within the grid.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            min_lam (unyt_quantity)</span>
+<span class="sd">                The minimum wavelength to truncate the grid to.</span>
+
+<span class="sd">            max_lam (unyt_quantity)</span>
+<span class="sd">                The maximum wavelength to truncate the grid to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the indices of the wavelengths to keep</span>
+        <span class="n">okinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;=</span> <span class="n">min_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;=</span> <span class="n">max_lam</span><span class="p">)</span>
+
+        <span class="c1"># Apply the mask to the grid wavelengths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">okinds</span><span class="p">]</span>
+
+        <span class="c1"># Apply the mask to the spectra</span>
+        <span class="k">for</span> <span class="n">spectra_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">][</span>
+                <span class="o">...</span><span class="p">,</span> <span class="n">okinds</span>
+            <span class="p">]</span></div>
+
 <div class="viewcode-block" id="Grid.unify_with_filters"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.unify_with_filters">[docs]</a>    <span class="k">def</span> <span class="nf">unify_with_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Unify the grid with a FilterCollection object.</span>
@@ -1223,17 +1276,13 @@
         <span class="c1"># Get the minimum and maximum wavelengths with non-zero transmission</span>
         <span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">get_non_zero_lam_lims</span><span class="p">()</span>
 
-        <span class="c1"># Define the mask to eliminate wavelengths outside this range</span>
-        <span class="n">okinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;=</span> <span class="n">min_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;=</span> <span class="n">max_lam</span><span class="p">)</span>
+        <span class="c1"># Ensure we have at least 1 element with 0 transmission to solve</span>
+        <span class="c1"># any issues at the boundaries</span>
+        <span class="n">min_lam</span> <span class="o">-=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">angstrom</span>
+        <span class="n">max_lam</span> <span class="o">+=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">angstrom</span>
 
-        <span class="c1"># Apply the mask to the grid wavelengths</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">okinds</span><span class="p">]</span>
-
-        <span class="c1"># Apply the mask to the spectra</span>
-        <span class="k">for</span> <span class="n">spectra_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">available_spectra</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">][</span>
-                <span class="o">...</span><span class="p">,</span> <span class="n">okinds</span>
-            <span class="p">]</span>
+        <span class="c1"># Truncate the grid to these wavelength limits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">truncate_grid_lam</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span><span class="p">)</span>
 
         <span class="c1"># Interpolate the filters onto this new wavelength range</span>
         <span class="n">filters</span><span class="o">.</span><span class="n">resample_filters</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>

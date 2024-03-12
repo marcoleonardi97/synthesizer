@@ -163,6 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../grids/grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../grids/grids_example.html">Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../grids/grids_example.html#Passing-wavelength-limits">Passing wavelength limits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../abundances.html">Abundances</a></li>
@@ -204,6 +205,8 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_aperture_mask.html">Aperture Mask Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_parametric_young_stars.html">Parametric Young Stars Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_sc-sam.html">SC-SAM example</a></li>
 </ul>
 </li>
@@ -265,6 +268,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.download_data.html">synthesizer.download_data</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.html">synthesizer.dust</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.dust</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.attenuation.html">synthesizer.dust.attenuation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.emission.html">synthesizer.dust.emission</a></li>
@@ -409,6 +413,7 @@
     <span class="n">g_hsml</span><span class="p">,</span>
     <span class="n">star_forming</span><span class="p">,</span>
     <span class="n">redshift</span><span class="p">,</span>
+    <span class="n">centre</span><span class="p">,</span>
     <span class="n">s_hsml</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">):</span>
@@ -447,7 +452,10 @@
 <span class="sd">        star_forming (array):</span>
 <span class="sd">            boolean array flagging star forming gas particles</span>
 <span class="sd">        redshift (float):</span>
-<span class="sd">            galaxies redshift</span>
+<span class="sd">            Galaxies redshift</span>
+<span class="sd">        centre (array)</span>
+<span class="sd">            Coordinates of the galaxies centre. Can be defined</span>
+<span class="sd">            as required (e.g. can be centre of mass)</span>
 <span class="sd">        dtm (float):</span>
 <span class="sd">            dust-to-metals ratio to apply to all particles</span>
 
@@ -462,6 +470,7 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)):</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">centre</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span>
 
         <span class="k">if</span> <span class="n">s_hsml</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">s_hsml</span>
@@ -534,7 +543,7 @@
         <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
 
         <span class="n">form_time</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_StellarFormationTime&quot;</span><span class="p">][:]</span>
-        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
         <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">imasses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_InitialMass&quot;</span><span class="p">][:]</span>
         <span class="n">_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_Metals&quot;</span><span class="p">][:]</span>
@@ -544,15 +553,14 @@
         <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/StarFormationRate&quot;</span><span class="p">][:]</span>
         <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/GFM_Metallicity&quot;</span><span class="p">][:]</span>
-        <span class="n">g_coods</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (physical)</span>
         <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SubfindHsml&quot;</span><span class="p">][:]</span>
 
     <span class="k">if</span> <span class="n">fof_dir</span><span class="p">:</span>
         <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    remove wind particles</span>
@@ -593,12 +601,13 @@
     <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
     <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_metals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-    <span class="c1"># If asked, convert coordinates to physical kpc</span>
+    <span class="c1"># Convert comoving coordinates to physical kpc</span>
     <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
         <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
         <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
         <span class="n">hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
         <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
     <span class="c1"># convert formation times to ages</span>
     <span class="n">cosmo</span> <span class="o">=</span> <span class="n">FlatLambdaCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">h</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">)</span>
@@ -622,6 +631,7 @@
         <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
         <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
+        <span class="n">centre</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -632,6 +642,7 @@
     <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_090.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-Astrid galaxies</span>
@@ -661,7 +672,7 @@
         <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">form_time</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/GFM_StellarFormationTime&quot;</span><span class="p">][:]</span>
-        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
         <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Masses&quot;</span><span class="p">][:]</span>
 
         <span class="c1"># TODO: update with correct scaling</span>
@@ -673,9 +684,7 @@
         <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/StarFormationRate&quot;</span><span class="p">][:]</span>
         <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/GFM_Metallicity&quot;</span><span class="p">][:]</span>
-        <span class="n">g_coods</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
         <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SmoothingLength&quot;</span><span class="p">][:]</span>
 
     <span class="n">masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
@@ -697,6 +706,14 @@
         <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
+
+    <span class="c1"># Convert comoving coordinates to physical kpc</span>
+    <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+        <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
     <span class="k">return</span> <span class="n">_load_CAMELS</span><span class="p">(</span>
         <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
@@ -714,6 +731,7 @@
         <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
+        <span class="n">centre</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -723,6 +741,7 @@
     <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
     <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-SIMBA galaxies</span>
@@ -752,7 +771,7 @@
         <span class="n">h</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
 
         <span class="n">form_time</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/StellarFormationTime&quot;</span><span class="p">][:]</span>
-        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
         <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType4/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">imasses</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">masses</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.00155</span>
@@ -762,9 +781,7 @@
         <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/StarFormationRate&quot;</span><span class="p">][:]</span>
         <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Masses&quot;</span><span class="p">][:]</span>
         <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Metallicity&quot;</span><span class="p">][:][:,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">g_coods</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span> <span class="o">*</span> <span class="n">scale_factor</span>
-        <span class="p">)</span>  <span class="c1"># Mpc (physical)</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
         <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SmoothingLength&quot;</span><span class="p">][:]</span>
 
     <span class="n">masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
@@ -787,6 +804,14 @@
         <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
+
+    <span class="c1"># Convert comoving coordinates to physical kpc</span>
+    <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+        <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
     <span class="k">return</span> <span class="n">_load_CAMELS</span><span class="p">(</span>
         <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
@@ -804,6 +829,7 @@
         <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
         <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
+        <span class="n">centre</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
     <span class="p">)</span></div>
 </pre></div>
         </article>

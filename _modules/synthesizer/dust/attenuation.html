@@ -163,6 +163,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../grids/grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../grids/grids_example.html">Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../grids/grids_example.html#Passing-wavelength-limits">Passing wavelength limits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../abundances.html">Abundances</a></li>
@@ -204,6 +205,8 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_aperture_mask.html">Aperture Mask Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/test_parametric_young_stars.html">Parametric Young Stars Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_sc-sam.html">SC-SAM example</a></li>
 </ul>
 </li>
@@ -265,6 +268,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.download_data.html">synthesizer.download_data</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.html">synthesizer.dust</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of synthesizer.dust</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.attenuation.html">synthesizer.dust.attenuation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.dust.emission.html">synthesizer.dust.emission</a></li>
@@ -386,6 +390,7 @@
           <h1>Source code for synthesizer.dust.attenuation</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Module containing dust attenuation functionality</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">interpolate</span>
@@ -398,10 +403,10 @@
 
 <span class="n">this_dir</span><span class="p">,</span> <span class="n">this_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PowerLaw&quot;</span><span class="p">,</span> <span class="s2">&quot;MW_N18&quot;</span><span class="p">,</span> <span class="s2">&quot;Calzetti2000&quot;</span><span class="p">,</span> <span class="s2">&quot;GrainsWD01&quot;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PowerLaw&quot;</span><span class="p">,</span> <span class="s2">&quot;MWN18&quot;</span><span class="p">,</span> <span class="s2">&quot;Calzetti2000&quot;</span><span class="p">,</span> <span class="s2">&quot;GrainsWD01&quot;</span><span class="p">,</span> <span class="s2">&quot;ParametricLI08&quot;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="N09_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.N09_tau">[docs]</a><span class="k">def</span> <span class="nf">N09_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">cent_lam</span><span class="p">,</span> <span class="n">ampl</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+<div class="viewcode-block" id="N09Tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.N09Tau">[docs]</a><span class="k">def</span> <span class="nf">N09Tau</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">cent_lam</span><span class="p">,</span> <span class="n">ampl</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attenuation curve using a modified version of the Calzetti</span>
 <span class="sd">    attenuation (Calzetti+2000) law allowing for a varying UV slope</span>
@@ -596,7 +601,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_tau_at_lam</span><span class="p">(</span><span class="mf">5500.0</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="MW_N18"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18">[docs]</a><span class="k">class</span> <span class="nc">MW_N18</span><span class="p">(</span><span class="n">AttenuationLaw</span><span class="p">):</span>
+<div class="viewcode-block" id="MWN18"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MWN18">[docs]</a><span class="k">class</span> <span class="nc">MWN18</span><span class="p">(</span><span class="n">AttenuationLaw</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Milky Way attenuation curve used in Narayanan+2018.</span>
 
@@ -620,7 +625,7 @@
             <span class="mf">5500.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">mw_df_lam</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">mw_df_chi</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="MW_N18.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MW_N18.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="MWN18.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.MWN18.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s2">&quot;cubic&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate V-band normalised optical depth.</span>
 
@@ -707,7 +712,7 @@
 
 <div class="viewcode-block" id="Calzetti2000.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Calzetti2000.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate V-band normalised optical depth. (Uses the N09_tau function</span>
+<span class="sd">        Calculate V-band normalised optical depth. (Uses the N09Tau function</span>
 <span class="sd">        defined above.)</span>
 
 <span class="sd">        Args:</span>
@@ -719,7 +724,7 @@
 <span class="sd">            float/array-like, float</span>
 <span class="sd">                The optical depth.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">N09_tau</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">N09Tau</span><span class="p">(</span>
             <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
             <span class="n">slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span>
             <span class="n">cent_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cent_lam</span><span class="p">,</span>
@@ -814,6 +819,159 @@
             <span class="n">_lam</span> <span class="o">=</span> <span class="n">lam</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emodel</span><span class="o">.</span><span class="n">extinguish</span><span class="p">(</span>
             <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">to_astropy</span><span class="p">(),</span> <span class="n">Av</span><span class="o">=</span><span class="mf">1.086</span> <span class="o">*</span> <span class="n">tau_v</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Li08"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.Li08">[docs]</a><span class="k">def</span> <span class="nf">Li08</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">UV_slope</span><span class="p">,</span> <span class="n">OPT_NIR_slope</span><span class="p">,</span> <span class="n">FUV_slope</span><span class="p">,</span> <span class="n">bump</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Drude-like parametric expression for the attenuation curve from Li+08</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        lam (array-like, float)</span>
+<span class="sd">            The wavelengths (micron units) at which to calculate transmission.</span>
+<span class="sd">        UV_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the UV-FUV slope</span>
+<span class="sd">        OPT_NIR_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the optical/NIR slope</span>
+<span class="sd">        FUV_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the FUV slope</span>
+<span class="sd">        bump (float)</span>
+<span class="sd">            Dimensionless parameter describing the UV bump</span>
+<span class="sd">            strength (0&lt; bump &lt;1)</span>
+<span class="sd">        model (string)</span>
+<span class="sd">            Via this parameter one can choose one of the templates for</span>
+<span class="sd">            extinction/attenuation curves from: Calzetti, SMC, MW (R_V=3.1),</span>
+<span class="sd">            and LMC</span>
+
+<span class="sd">    # Returns:</span>
+<span class="sd">            tau/tau_v at each input wavelength (lam)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Empirical templates (Calzetti, SMC, MW RV=3.1, LMC)</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;Calzetti&quot;</span><span class="p">:</span>
+        <span class="n">UV_slope</span><span class="p">,</span> <span class="n">OPT_NIR_slope</span><span class="p">,</span> <span class="n">FUV_slope</span><span class="p">,</span> <span class="n">bump</span> <span class="o">=</span> <span class="mf">44.9</span><span class="p">,</span> <span class="mf">7.56</span><span class="p">,</span> <span class="mf">61.2</span><span class="p">,</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;SMC&quot;</span><span class="p">:</span>
+        <span class="n">UV_slope</span><span class="p">,</span> <span class="n">OPT_NIR_slope</span><span class="p">,</span> <span class="n">FUV_slope</span><span class="p">,</span> <span class="n">bump</span> <span class="o">=</span> <span class="mf">38.7</span><span class="p">,</span> <span class="mf">3.83</span><span class="p">,</span> <span class="mf">6.34</span><span class="p">,</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;MW&quot;</span><span class="p">:</span>
+        <span class="n">UV_slope</span><span class="p">,</span> <span class="n">OPT_NIR_slope</span><span class="p">,</span> <span class="n">FUV_slope</span><span class="p">,</span> <span class="n">bump</span> <span class="o">=</span> <span class="mf">14.4</span><span class="p">,</span> <span class="mf">6.52</span><span class="p">,</span> <span class="mf">2.04</span><span class="p">,</span> <span class="mf">0.0519</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;LMC&quot;</span><span class="p">:</span>
+        <span class="n">UV_slope</span><span class="p">,</span> <span class="n">OPT_NIR_slope</span><span class="p">,</span> <span class="n">FUV_slope</span><span class="p">,</span> <span class="n">bump</span> <span class="o">=</span> <span class="mf">4.47</span><span class="p">,</span> <span class="mf">2.39</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.988</span><span class="p">,</span> <span class="mf">0.0221</span>
+
+    <span class="c1"># Wavelength in microns</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;um&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">v</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lam_micron</span> <span class="o">=</span> <span class="n">lam</span> <span class="o">/</span> <span class="mf">1e4</span>
+
+    <span class="c1"># Attenuation curve (normalized to Av)</span>
+    <span class="n">term1</span> <span class="o">=</span> <span class="n">UV_slope</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.08</span><span class="p">)</span> <span class="o">**</span> <span class="n">OPT_NIR_slope</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.08</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="n">OPT_NIR_slope</span>
+        <span class="o">+</span> <span class="n">FUV_slope</span>
+    <span class="p">)</span>
+    <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">233.0</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">1</span>
+            <span class="o">-</span> <span class="n">UV_slope</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mf">6.88</span><span class="o">**</span><span class="n">OPT_NIR_slope</span> <span class="o">+</span> <span class="mf">0.145</span><span class="o">**</span><span class="n">OPT_NIR_slope</span> <span class="o">+</span> <span class="n">FUV_slope</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">bump</span> <span class="o">/</span> <span class="mf">4.6</span>
+        <span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.046</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.046</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">+</span> <span class="mf">90.0</span><span class="p">)</span>
+    <span class="n">term3</span> <span class="o">=</span> <span class="n">bump</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.2175</span><span class="p">)</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">lam_micron</span> <span class="o">/</span> <span class="mf">0.2175</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.95</span>
+    <span class="p">)</span>
+
+    <span class="n">AlamAV</span> <span class="o">=</span> <span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span> <span class="o">+</span> <span class="n">term3</span>
+
+    <span class="k">return</span> <span class="n">AlamAV</span></div>
+
+
+<div class="viewcode-block" id="ParametricLI08"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.ParametricLI08">[docs]</a><span class="k">class</span> <span class="nc">ParametricLI08</span><span class="p">(</span><span class="n">AttenuationLaw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parametric, empirical attenuation curve;</span>
+<span class="sd">    implemented in Li+08, Evolution of the parameters up to high-z</span>
+<span class="sd">    (z=12) studied in: Markov+23a,b</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        UV_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the UV-FUV slope</span>
+<span class="sd">        OPT_NIR_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the optical/NIR slope</span>
+<span class="sd">        FUV_slope (float)</span>
+<span class="sd">            Dimensionless parameter describing the FUV slope</span>
+<span class="sd">        bump (float)</span>
+<span class="sd">            Dimensionless parameter describing the UV bump</span>
+<span class="sd">            strength (0&lt; bump &lt;1)</span>
+<span class="sd">        model (string)</span>
+<span class="sd">            Fixing attenuation/extinction curve to one of the known</span>
+<span class="sd">            templates: MW, SMC, LMC, Calzetti</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UV_slope</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">OPT_NIR_slope</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">FUV_slope</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">bump</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;MW&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the dust curve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;Parametric attenuation curve; with option&quot;</span>
+            <span class="s2">&quot;for multiple slopes (UV_slope,OPT_NIR_slope,FUV_slope) and &quot;</span>
+            <span class="s2">&quot;varying UV-bump strength (bump).&quot;</span>
+            <span class="s2">&quot;Introduced in Li+08, see Markov+23,24 for application to &quot;</span>
+            <span class="s2">&quot;a high-z dataset.&quot;</span>
+            <span class="s2">&quot;Empirical extinction/attenuation curves (MW, SMC, LMC, &quot;</span>
+            <span class="s2">&quot;Calzetti) can be selected.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">AttenuationLaw</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+        <span class="c1"># Define the parameters of the model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UV_slope</span> <span class="o">=</span> <span class="n">UV_slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OPT_NIR_slope</span> <span class="o">=</span> <span class="n">OPT_NIR_slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FUV_slope</span> <span class="o">=</span> <span class="n">FUV_slope</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bump</span> <span class="o">=</span> <span class="n">bump</span>
+
+        <span class="c1"># Get the correct model string</span>
+        <span class="k">if</span> <span class="s2">&quot;MW&quot;</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;MW&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;LMC&quot;</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;LMC&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;SMC&quot;</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;SMC&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;Calzetti&quot;</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;Calzetti&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+
+<div class="viewcode-block" id="ParametricLI08.get_tau"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.attenuation.html#synthesizer.dust.attenuation.ParametricLI08.get_tau">[docs]</a>    <span class="k">def</span> <span class="nf">get_tau</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate V-band normalised optical depth. (Uses the Li_08 function</span>
+<span class="sd">        defined above.)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lam (float/array-like, float)</span>
+<span class="sd">                An array of wavelengths or a single wavlength at which to</span>
+<span class="sd">                calculate optical depths (in AA, global unit).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float/array-like, float</span>
+<span class="sd">                The optical depth.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Li08</span><span class="p">(</span>
+            <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+            <span class="n">UV_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">UV_slope</span><span class="p">,</span>
+            <span class="n">OPT_NIR_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">OPT_NIR_slope</span><span class="p">,</span>
+            <span class="n">FUV_slope</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">FUV_slope</span><span class="p">,</span>
+            <span class="n">bump</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bump</span><span class="p">,</span>
+            <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
         <span class="p">)</span></div></div>
 </pre></div>
         </article>
