@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Generating Lines from a Parametric Galaxy" href="generate_lines.html" /><link rel="prev" title="Making a Parametric Stellar Population" href="make_stars.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Generating Rest Frame SEDs from a Parametric Galaxy - synthesizer 0.1 documentation</title>
+        <title>Generating Rest Frame SEDs from a Parametric Galaxy - synthesizer 0.3.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -128,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">synthesizer 0.1 documentation</div></a>
+      <a href="../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -193,7 +193,6 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../cosmo/cosmo.html">Cosmological models</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Cosmological models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../cosmo/cosmo_example.html">Camels example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../cosmo/survey_example.html">CAMELS survey example</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -397,16 +396,12 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">FilterCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span><span class="p">,</span> <span class="n">Stars</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">Stars</span><span class="p">,</span> <span class="n">ZDist</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.plt</span> <span class="kn">import</span> <span class="n">single</span><span class="p">,</span> <span class="n">single_histxy</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Msun</span>
-<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Myr</span>
 </pre></div>
 </div>
 </div>
@@ -426,12 +421,19 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define the functional form of the star formation and metal enrichment histories</span>
-<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">)</span>  <span class="c1"># constant star formation</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>  <span class="c1"># print sfh summary</span>
-<span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">DeltaConstant</span><span class="p">(</span><span class="n">log10metallicity</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># constant metallicity</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the functional form of the star formation and</span>
+<span class="c1"># metal enrichment histories</span>
 
-<span class="c1"># get the 2D star formation and metal enrichment history for the given SPS grid. This is (age, Z).</span>
+<span class="c1"># Constant star formation</span>
+<span class="n">sfh</span> <span class="o">=</span> <span class="n">SFH</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">duration</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">)</span>
+
+<span class="c1"># Constant metallicity</span>
+<span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">DeltaConstant</span><span class="p">(</span><span class="n">log10metallicity</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">sfh</span><span class="p">)</span>  <span class="c1"># print sfh summary</span>
+
+<span class="c1"># Get the 2D star formation and metal enrichment history for</span>
+<span class="c1"># the given SPS grid. This is (age, Z).</span>
 <span class="n">stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span>
     <span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span>
@@ -776,7 +778,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="kn">from</span> <span class="nn">synthesizer.dust.emission</span> <span class="kn">import</span> <span class="n">Greybody</span><span class="p">,</span> <span class="n">IR_templates</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.dust.emission</span> <span class="kn">import</span> <span class="n">Greybody</span><span class="p">,</span> <span class="n">IR_templates</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">K</span>
 </pre></div>
 </div>
@@ -790,10 +792,17 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <span class="n">dust_emission_model</span> <span class="o">=</span> <span class="n">Greybody</span><span class="p">(</span><span class="mi">30</span> <span class="o">*</span> <span class="n">K</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
 
 <span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">tau_v</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dust_emission_model</span> <span class="o">=</span> <span class="n">dust_emission_model</span><span class="p">)</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;emergent&#39;</span><span class="p">,</span> <span class="s1">&#39;dust&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">])</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span>
+<span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">,</span> <span class="s2">&quot;dust&quot;</span><span class="p">,</span> <span class="s2">&quot;total&quot;</span><span class="p">])</span>
 
-<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span>
+    <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">]</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -811,7 +820,7 @@ Dust luminosity = 3.9768558538322655e+43 erg/s
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1813: RuntimeWarning: overflow encountered in exp
+/opt/hostedtoolcache/Python/3.10.13/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: overflow encountered in exp
   out_arr = func(np.asarray(inp), out=out_func, **kwargs)
 </pre></div></div>
 </div>
@@ -845,11 +854,26 @@ Dust luminosity = 3.9768558538322655e+43 erg/s
 <span class="p">)</span>
 
 
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">,</span> <span class="s1">&#39;young_dust_BC&#39;</span><span class="p">,</span> <span class="s1">&#39;young_dust_ISM&#39;</span><span class="p">,</span> <span class="s1">&#39;young_dust&#39;</span><span class="p">,</span> <span class="s1">&#39;dust&#39;</span><span class="p">])</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;old_total&#39;</span><span class="p">,</span> <span class="s1">&#39;young_total&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">1e4</span><span class="p">,</span><span class="mf">5e7</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
+    <span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;old_dust&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;young_dust_BC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;young_dust_ISM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;young_dust&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dust&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
+    <span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;old_total&quot;</span><span class="p">,</span> <span class="s2">&quot;young_total&quot;</span><span class="p">,</span> <span class="s2">&quot;total&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">1e4</span><span class="p">,</span> <span class="mf">5e7</span><span class="p">)</span>
 
-<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span>
+    <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">]</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -884,7 +908,9 @@ Dust luminosity = 3.375133107114719e+43 erg/s
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
 <span class="n">grid_name_ir</span> <span class="o">=</span> <span class="s2">&quot;MW3.1&quot;</span>
 <span class="n">grid_dir_ir</span> <span class="o">=</span> <span class="s2">&quot;../../../tests/test_grid/&quot;</span>
-<span class="n">grid_ir</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name_ir</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir_ir</span><span class="p">,</span> <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_lines</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">grid_ir</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span>
+    <span class="n">grid_name_ir</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir_ir</span><span class="p">,</span> <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_lines</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -898,7 +924,9 @@ Dust luminosity = 3.375133107114719e+43 erg/s
 Cell <span class="ansi-green-fg">In[20], line 4</span>
 <span class="ansi-green-intense-fg ansi-bold">      2</span> grid_name_ir <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">MW3.1</span><span style="color: rgb(175,0,0)">&#34;</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> grid_dir_ir <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">../../../tests/test_grid/</span><span style="color: rgb(175,0,0)">&#34;</span>
-<span class="ansi-green-fg">----&gt; 4</span> grid_ir <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Grid</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">grid_name_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">grid_dir</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">grid_dir_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_spectra</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_lines</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-fg">----&gt; 4</span> grid_ir <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Grid</span><span class="ansi-yellow-bg">(</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">grid_name_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">grid_dir</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">grid_dir_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_spectra</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_lines</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span>
+<span class="ansi-green-intense-fg ansi-bold">      6</span> <span class="ansi-yellow-bg">)</span>
 
 File <span class="ansi-green-fg">~/work/synthesizer/synthesizer/src/synthesizer/grid.py:284</span>, in <span class="ansi-cyan-fg">Grid.__init__</span><span class="ansi-blue-fg">(self, grid_name, grid_dir, read_spectra, read_lines, new_lam, filters, lam_lims)</span>
 <span class="ansi-green-intense-fg ansi-bold">    281</span>     read_lines <span style="color: rgb(98,98,98)">=</span> flatten_linelist(read_lines)
@@ -942,20 +970,33 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tau_v_ISM</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># ISM component of dust attenuation</span>
-<span class="n">tau_v_BC</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># birth-cloud componest of dust attenuation</span>
+<span class="n">tau_v_BC</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># birth-cloud componest of dust attenuation</span>
 <span class="n">tau_v</span> <span class="o">=</span> <span class="p">[</span><span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">tau_v_BC</span><span class="p">]</span>
 <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3</span><span class="p">]</span>
-<span class="n">mdust</span> <span class="o">=</span> <span class="mf">5e9</span><span class="o">*</span><span class="n">Msun</span>
+<span class="n">mdust</span> <span class="o">=</span> <span class="mf">5e9</span> <span class="o">*</span> <span class="n">Msun</span>
 <span class="n">dust_emission_model</span> <span class="o">=</span> <span class="n">IR_templates</span><span class="p">(</span><span class="n">grid_ir</span><span class="p">,</span> <span class="n">mdust</span><span class="o">=</span><span class="n">mdust</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">tau_v</span> <span class="o">=</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">young_old_thresh</span> <span class="o">=</span> <span class="mf">1e7</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span>
+    <span class="n">grid</span><span class="p">,</span>
+    <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+    <span class="n">young_old_thresh</span><span class="o">=</span><span class="mf">1e7</span> <span class="o">*</span> <span class="n">Myr</span><span class="p">,</span>
+    <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">,</span>
+<span class="p">)</span>
 
 
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;old_dust&#39;</span><span class="p">,</span> <span class="s1">&#39;young_dust&#39;</span><span class="p">,</span> <span class="s1">&#39;dust&#39;</span><span class="p">])</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;old_total&#39;</span><span class="p">,</span> <span class="s1">&#39;young_total&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">])</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">1e4</span><span class="p">,</span><span class="mf">5e7</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;old_dust&quot;</span><span class="p">,</span> <span class="s2">&quot;young_dust&quot;</span><span class="p">,</span> <span class="s2">&quot;dust&quot;</span><span class="p">])</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
+    <span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;old_total&quot;</span><span class="p">,</span> <span class="s2">&quot;young_total&quot;</span><span class="p">,</span> <span class="s2">&quot;total&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mf">1e4</span><span class="p">,</span> <span class="mf">5e7</span><span class="p">)</span>
 
-<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span><span class="o">*</span><span class="n">Angstrom</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;Dust luminosity =&quot;</span><span class="p">,</span>
+    <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mf">1e4</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1e7</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">]</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -968,10 +1009,15 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
 Cell <span class="ansi-green-fg">In[21], line 6</span>
 <span class="ansi-green-intense-fg ansi-bold">      4</span> alpha <span style="color: rgb(98,98,98)">=</span> [<span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">0.7</span>, <span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">1.3</span>]
-<span class="ansi-green-intense-fg ansi-bold">      5</span> mdust <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5e9</span><span style="color: rgb(98,98,98)">*</span>Msun
+<span class="ansi-green-intense-fg ansi-bold">      5</span> mdust <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5e9</span> <span style="color: rgb(98,98,98)">*</span> Msun
 <span class="ansi-green-fg">----&gt; 6</span> dust_emission_model <span style="color: rgb(98,98,98)">=</span> IR_templates(<span class="ansi-yellow-bg">grid_ir</span>, mdust<span style="color: rgb(98,98,98)">=</span>mdust, gamma<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">0.05</span>)
-<span class="ansi-green-intense-fg ansi-bold">      8</span> galaxy<span style="color: rgb(98,98,98)">.</span>stars<span style="color: rgb(98,98,98)">.</span>get_spectra_pacman(grid, tau_v <span style="color: rgb(98,98,98)">=</span> tau_v, alpha <span style="color: rgb(98,98,98)">=</span> alpha, young_old_thresh <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">1e7</span> <span style="color: rgb(98,98,98)">*</span> Myr, dust_emission_model<span style="color: rgb(98,98,98)">=</span>dust_emission_model)
-<span class="ansi-green-intense-fg ansi-bold">     11</span> galaxy<span style="color: rgb(98,98,98)">.</span>stars<span style="color: rgb(98,98,98)">.</span>plot_spectra(spectra_to_plot <span style="color: rgb(98,98,98)">=</span> [<span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">old_dust</span><span style="color: rgb(175,0,0)">&#39;</span>, <span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">young_dust</span><span style="color: rgb(175,0,0)">&#39;</span>, <span style="color: rgb(175,0,0)">&#39;</span><span style="color: rgb(175,0,0)">dust</span><span style="color: rgb(175,0,0)">&#39;</span>])
+<span class="ansi-green-intense-fg ansi-bold">      8</span> galaxy<span style="color: rgb(98,98,98)">.</span>stars<span style="color: rgb(98,98,98)">.</span>get_spectra_pacman(
+<span class="ansi-green-intense-fg ansi-bold">      9</span>     grid,
+<span class="ansi-green-intense-fg ansi-bold">     10</span>     tau_v<span style="color: rgb(98,98,98)">=</span>tau_v,
+<span class="ansi-green-fg">   (...)</span>
+<span class="ansi-green-intense-fg ansi-bold">     13</span>     dust_emission_model<span style="color: rgb(98,98,98)">=</span>dust_emission_model,
+<span class="ansi-green-intense-fg ansi-bold">     14</span> )
+<span class="ansi-green-intense-fg ansi-bold">     17</span> galaxy<span style="color: rgb(98,98,98)">.</span>stars<span style="color: rgb(98,98,98)">.</span>plot_spectra(spectra_to_plot<span style="color: rgb(98,98,98)">=</span>[<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">old_dust</span><span style="color: rgb(175,0,0)">&#34;</span>, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">young_dust</span><span style="color: rgb(175,0,0)">&#34;</span>, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">dust</span><span style="color: rgb(175,0,0)">&#34;</span>])
 
 <span class="ansi-red-fg">NameError</span>: name &#39;grid_ir&#39; is not defined
 </pre></div></div>
@@ -1108,7 +1154,7 @@ available images: []
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
+                Copyright &#169; 2024, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1151,7 +1197,7 @@ available images: []
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e031e9a9"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>

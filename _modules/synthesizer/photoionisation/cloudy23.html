@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.photoionisation.cloudy23 - synthesizer 0.1 documentation</title>
+        <title>synthesizer.photoionisation.cloudy23 - synthesizer 0.3.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
@@ -126,7 +126,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.1 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -191,7 +191,6 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../cosmo/cosmo.html">Cosmological models</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Cosmological models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../cosmo/cosmo_example.html">Camels example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../cosmo/survey_example.html">CAMELS survey example</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -393,14 +392,15 @@
 <span class="sd">grid. Can optionally generate an array of input files for selected parameters.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">unyt_array</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">unyt_array</span>
+
 <span class="kn">from</span> <span class="nn">synthesizer.photoionisation</span> <span class="kn">import</span> <span class="n">calculate_Q_from_U</span>
 
 
 <div class="viewcode-block" id="ShapeCommands"><a class="viewcode-back" href="../../../_autosummary/synthesizer.photoionisation.cloudy23.html#synthesizer.photoionisation.cloudy23.ShapeCommands">[docs]</a><span class="k">class</span> <span class="nc">ShapeCommands</span><span class="p">:</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for holding different cloudy shape commands</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -627,10 +627,12 @@
 
         <span class="c1"># If grain physics are required, add this self-consistently</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-            <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span><span class="o">**</span><span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
+            <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
             <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
             <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
-            <span class="n">delta_Si</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span><span class="o">**</span><span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
+            <span class="n">delta_Si</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="n">orion_C_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.6259</span>
             <span class="n">orion_Si_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.5547</span>
             <span class="n">PAH_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.446</span>
@@ -648,8 +650,7 @@
 
     <span class="c1"># Jenkins 2009 depletion model as implemented by cloudy.</span>
     <span class="c1"># See 2023 release paper section 5</span>
-    <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Jenkins2009&#39;</span><span class="p">:</span>
-
+    <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Jenkins2009&quot;</span><span class="p">:</span>
         <span class="c1"># Define the chemical composition, because Jenkins2009 applies</span>
         <span class="c1"># depletion as a cloudy command we use total abundances and there</span>
         <span class="c1"># is no need to use the &quot;no grains&quot; command.</span>
@@ -674,20 +675,21 @@
 
             <span class="c1"># turn on grains</span>
             <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-
                 <span class="c1"># for non-default (!= 0.5) fstar values, grains needs to be</span>
                 <span class="c1"># scaled.</span>
 
                 <span class="c1"># calculate the dust mass fraction for the default parameter</span>
                 <span class="c1"># choice.</span>
                 <span class="n">default_dust_mass_fraction</span> <span class="o">=</span> <span class="n">abundances</span><span class="o">.</span><span class="n">apply_depletion</span><span class="p">(</span>
-                    <span class="n">depletion_model</span><span class="o">=</span><span class="s1">&#39;Jenkins2009&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dust_abundance</span>
+                    <span class="n">depletion_model</span><span class="o">=</span><span class="s2">&quot;Jenkins2009&quot;</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">dust_abundance</span>
 
                 <span class="c1"># calculate the dust mass fraction for the provided value of</span>
                 <span class="c1"># fstar.</span>
                 <span class="n">dust_mass_fraction</span> <span class="o">=</span> <span class="n">abundances</span><span class="o">.</span><span class="n">apply_depletion</span><span class="p">(</span>
-                    <span class="n">depletion_model</span><span class="o">=</span><span class="s1">&#39;Jenkins2009&#39;</span><span class="p">,</span>
-                    <span class="n">depletion_scaling</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;fstar&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">dust_abundance</span>
+                    <span class="n">depletion_model</span><span class="o">=</span><span class="s2">&quot;Jenkins2009&quot;</span><span class="p">,</span>
+                    <span class="n">depletion_scaling</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;fstar&quot;</span><span class="p">],</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">dust_abundance</span>
                 <span class="n">ratio</span> <span class="o">=</span> <span class="n">dust_mass_fraction</span> <span class="o">/</span> <span class="n">default_dust_mass_fraction</span>
                 <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grains </span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -700,15 +702,18 @@
     <span class="c1"># plane parallel geometry</span>
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;planeparallel&quot;</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;ionization parameter = </span><span class="si">{</span><span class="n">log10ionisation_parameter</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="sa">f</span><span class="s2">&quot;ionization parameter = </span><span class="si">{</span><span class="n">log10ionisation_parameter</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># spherical geometry</span>
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;spherical&quot;</span><span class="p">:</span>
         <span class="c1"># in the spherical geometry case I think U is some average U, not U at</span>
         <span class="c1"># the inner face of the cloud.</span>
-        <span class="n">log10ionising_luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">calculate_Q_from_U</span><span class="p">(</span>
-            <span class="n">ionisation_parameter</span><span class="p">,</span>
-            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]))</span>
+        <span class="n">log10ionising_luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+            <span class="n">calculate_Q_from_U</span><span class="p">(</span>
+                <span class="n">ionisation_parameter</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Q(H) = </span><span class="si">{</span><span class="n">log10ionising_luminosity</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;radius </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;radius&quot;</span><span class="p">])</span><span class="si">}</span><span class="s1"> log parsecs</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;sphere</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1031,7 +1036,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
+                Copyright &#169; 2024, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1051,7 +1056,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=e031e9a9"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>

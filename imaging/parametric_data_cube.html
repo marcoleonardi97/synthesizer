@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Creating Spectral Data Cubes from Galaxy Particle distributions" href="particle_data_cube.html" /><link rel="prev" title="Imaging" href="imaging.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Creating Spectral Data Cubes from a Parametric Galaxy - synthesizer 0.1 documentation</title>
+        <title>Creating Spectral Data Cubes from a Parametric Galaxy - synthesizer 0.3.0-beta documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
@@ -128,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">synthesizer 0.1 documentation</div></a>
+      <a href="../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -193,7 +193,6 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../cosmo/cosmo.html">Cosmological models</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Cosmological models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../cosmo/cosmo_example.html">Camels example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../cosmo/survey_example.html">CAMELS survey example</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="imaging.html">Imaging</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -399,22 +398,16 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">cm</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">mas</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">degree</span>
-<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
 
-<span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span><span class="p">,</span> <span class="n">Stars</span>
-<span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">Sersic2D</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.imaging</span> <span class="kn">import</span> <span class="n">SpectralCube</span>
-
+<span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">Stars</span><span class="p">,</span> <span class="n">ZDist</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
+<span class="kn">from</span> <span class="nn">synthesizer.parametric.morphology</span> <span class="kn">import</span> <span class="n">Sersic2D</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">kpc</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DeJavu Serif&quot;</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Times New Roman&quot;</span><span class="p">]</span>
@@ -449,7 +442,10 @@
 
 <span class="c1"># Define the morphology using a simple effective radius and slope</span>
 <span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span>
-    <span class="n">r_eff</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">sersic_index</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">ellipticity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">degree</span><span class="p">,</span>
+    <span class="n">r_eff</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+    <span class="n">sersic_index</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ellipticity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">theta</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">degree</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
@@ -459,7 +455,7 @@
     <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span>
     <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span>
     <span class="n">morphology</span><span class="o">=</span><span class="n">morph</span><span class="p">,</span>
-    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.0</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Initialise a parametric Galaxy for the bulge</span>
@@ -471,7 +467,10 @@
 
 <span class="c1"># Define the morphology using a simple effective radius and slope</span>
 <span class="n">morph</span> <span class="o">=</span> <span class="n">Sersic2D</span><span class="p">(</span>
-    <span class="n">r_eff</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">sersic_index</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">ellipticity</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">degree</span><span class="p">,</span>
+    <span class="n">r_eff</span><span class="o">=</span><span class="mi">5</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+    <span class="n">sersic_index</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">ellipticity</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">theta</span><span class="o">=</span><span class="mi">1</span> <span class="o">*</span> <span class="n">degree</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Create the Stars object</span>
@@ -488,7 +487,7 @@
 <span class="n">disk</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">stars</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Galaxies created, took:&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">gal_start</span><span class="p">)</span>
-<br/><br/></pre></div>
+</pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -496,7 +495,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Galaxies created, took: 0.01604747772216797
+Galaxies created, took: 0.01983046531677246
 </pre></div></div>
 </div>
 <p>With our galaxy morphologies made we can get the spectra for each.</p>
@@ -519,7 +518,7 @@ Galaxies created, took: 0.01604747772216797
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Spectra created, took: 0.006002187728881836
+Spectra created, took: 0.0065975189208984375
 </pre></div></div>
 </div>
 </section>
@@ -533,7 +532,8 @@ Spectra created, took: 0.006002187728881836
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the width of the image</span>
 <span class="n">width</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">*</span> <span class="n">kpc</span>
 
-<span class="c1"># Define image resolution (here we arbitrarily set it to 100 pixels along an axis)</span>
+<span class="c1"># Define image resolution (here we arbitrarily set it to 100 pixels</span>
+<span class="c1"># along an axis)</span>
 <span class="n">resolution</span> <span class="o">=</span> <span class="n">width</span> <span class="o">/</span> <span class="mi">200</span>
 
 <span class="c1"># Define the wavelength array</span>
@@ -567,8 +567,20 @@ to have been called). We will make a cube populated with <code class="docutils l
 <span class="n">disk_cube</span> <span class="o">=</span> <span class="n">SpectralCube</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
 
 <span class="c1"># And get the cube itself</span>
-<span class="n">bulge_cube</span><span class="o">.</span><span class="n">get_data_cube_smoothed</span><span class="p">(</span><span class="n">bulge_sed</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span> <span class="n">density_grid</span><span class="o">=</span><span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="o">.</span><span class="n">get_density_grid</span><span class="p">(</span><span class="n">bulge_cube</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">bulge_cube</span><span class="o">.</span><span class="n">npix</span><span class="p">))</span>
-<span class="n">disk_cube</span><span class="o">.</span><span class="n">get_data_cube_smoothed</span><span class="p">(</span><span class="n">disk_sed</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span> <span class="n">density_grid</span><span class="o">=</span><span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="o">.</span><span class="n">get_density_grid</span><span class="p">(</span><span class="n">disk_cube</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">disk_cube</span><span class="o">.</span><span class="n">npix</span><span class="p">))</span>
+<span class="n">bulge_cube</span><span class="o">.</span><span class="n">get_data_cube_smoothed</span><span class="p">(</span>
+    <span class="n">bulge_sed</span><span class="p">,</span>
+    <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span>
+    <span class="n">density_grid</span><span class="o">=</span><span class="n">bulge</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="o">.</span><span class="n">get_density_grid</span><span class="p">(</span>
+        <span class="n">bulge_cube</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">bulge_cube</span><span class="o">.</span><span class="n">npix</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">disk_cube</span><span class="o">.</span><span class="n">get_data_cube_smoothed</span><span class="p">(</span>
+    <span class="n">disk_sed</span><span class="p">,</span>
+    <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;lnu&quot;</span><span class="p">,</span>
+    <span class="n">density_grid</span><span class="o">=</span><span class="n">disk</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">morphology</span><span class="o">.</span><span class="n">get_density_grid</span><span class="p">(</span>
+        <span class="n">disk_cube</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">disk_cube</span><span class="o">.</span><span class="n">npix</span>
+    <span class="p">),</span>
+<span class="p">)</span>
 
 <span class="c1"># Combine each individual component</span>
 <span class="n">cube</span> <span class="o">=</span> <span class="n">bulge_cube</span> <span class="o">+</span> <span class="n">disk_cube</span>
@@ -582,7 +594,7 @@ to have been called). We will make a cube populated with <code class="docutils l
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Spectral data cube created, took: 0.24177002906799316
+Spectral data cube created, took: 0.23952364921569824
 </pre></div></div>
 </div>
 <p>Now we have our parametric spectral data cube. We can see what we’ve made by making an animation.</p>
@@ -609,8 +621,12 @@ Spectral data cube created, took: 0.24177002906799316
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bulge_cube</span> <span class="o">=</span> <span class="n">bulge</span><span class="o">.</span><span class="n">get_data_cube</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;luminosity&quot;</span><span class="p">)</span>
-<span class="n">disk_cube</span> <span class="o">=</span> <span class="n">disk</span><span class="o">.</span><span class="n">get_data_cube</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;luminosity&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bulge_cube</span> <span class="o">=</span> <span class="n">bulge</span><span class="o">.</span><span class="n">get_data_cube</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;luminosity&quot;</span>
+<span class="p">)</span>
+<span class="n">disk_cube</span> <span class="o">=</span> <span class="n">disk</span><span class="o">.</span><span class="n">get_data_cube</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="n">quantity</span><span class="o">=</span><span class="s2">&quot;luminosity&quot;</span>
+<span class="p">)</span>
 <span class="n">cube</span> <span class="o">=</span> <span class="n">bulge_cube</span> <span class="o">+</span> <span class="n">disk_cube</span>
 </pre></div>
 </div>
@@ -648,7 +664,7 @@ Spectral data cube created, took: 0.24177002906799316
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
+                Copyright &#169; 2024, Chris Lovell, Stephen Wilkins, Aswin Vijayan, Will Roper
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -691,7 +707,7 @@ Spectral data cube created, took: 0.24177002906799316
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e031e9a9"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
