@@ -255,7 +255,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.abundance_patterns.html">synthesizer.abundances.abundance_patterns</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.abundance_scalings.html">synthesizer.abundances.abundance_scalings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.depletion_models.html">synthesizer.abundances.depletion_models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.solar_abundance_patterns.html">synthesizer.abundances.solar_abundance_patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.elements.html">synthesizer.abundances.elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
@@ -389,12 +390,26 @@
           <h1>Source code for synthesizer.line</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module containing functionality for working with spectral lines.</span>
 
-<span class="sd">TODO: Complete doc string.</span>
+<span class="sd">The primary class is Line which holds information about an individual or</span>
+<span class="sd">blended emission line, including its identification, wavelength, luminosity,</span>
+<span class="sd">and the strength of the continuum. From these the equivalent width is</span>
+<span class="sd">automatically calculated. Combined with a redshift and cosmology the flux can</span>
+<span class="sd">also be calcualted.</span>
 
-<span class="sd">Example usage:</span>
+<span class="sd">A second class is LineCollection which holds a collection of Line objects and</span>
+<span class="sd">provides additional functionality such as calcualting line ratios and diagrams</span>
+<span class="sd">(e.g. BPT-NII, OHNO).</span>
+
+<span class="sd">Several functions exist for obtaining line, ratio, and diagram labels for use</span>
+<span class="sd">in plots etc.</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
@@ -406,21 +421,115 @@
 <span class="sd">    A class representing a spectral line or set of lines (e.g. a doublet)</span>
 
 <span class="sd">    Arguments</span>
-<span class="sd">    ----------</span>
-<span class="sd">    id : str, list, tuple</span>
-<span class="sd">        a str, list, or tuple containing the id(s) of the lines</span>
+<span class="sd">        id (str, list, tuple)</span>
+<span class="sd">            a str, list, or tuple containing the id(s) of the lines</span>
 
 <span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    string</span>
-<span class="sd">        string representation of the id</span>
-
-<span class="sd">    &quot;&quot;&quot;</span> <span class="s2">&quot;H 1 6564.62A&quot;</span>
+<span class="sd">        id (str)</span>
+<span class="sd">            string representation of the id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">id</span></div>
+
+
+<div class="viewcode-block" id="get_line_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_line_label">[docs]</a><span class="k">def</span> <span class="nf">get_line_label</span><span class="p">(</span><span class="n">line_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a line label for a given line_id, ratio, or diagram.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># dictionary of common line labels to use by default</span>
+    <span class="n">special_line_labels</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;O 2 3726.03A,O 2 3728.81A&quot;</span><span class="p">:</span> <span class="s2">&quot;[OII]3726,3729&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;H\beta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;O 3 4958.91A,O 3 5006.84A&quot;</span><span class="p">:</span> <span class="s2">&quot;[OIII]4959,5007&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;H\alpha&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">:</span> <span class="s2">&quot;[OIII]5007&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;N 2 6583.45A&quot;</span><span class="p">:</span> <span class="s2">&quot;[NII]6583&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># if the line_id is a list (denoting a doublet or higher)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">line_id</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">special_line_labels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">line_label</span> <span class="o">=</span> <span class="n">special_line_labels</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">line_id</span> <span class="o">=</span> <span class="n">line_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="n">line_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="p">:</span>
+            <span class="c1"># get the element, ion, and wavelength</span>
+            <span class="n">element</span><span class="p">,</span> <span class="n">ion</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="n">line_id_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+            <span class="c1"># extract unit and convert to latex str</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">wavelength</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\AA&quot;</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;m&quot;</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\mu m&quot;</span>
+            <span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">unit</span>
+
+            <span class="n">line_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}{</span><span class="n">get_roman_numeral</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ion</span><span class="p">))</span><span class="si">}{</span><span class="n">wavelength</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">line_label</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_labels</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">line_label</span></div>
+
+
+<div class="viewcode-block" id="get_ratio_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_ratio_label">[docs]</a><span class="k">def</span> <span class="nf">get_ratio_label</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a label for a given ratio_id.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        ratio_id (str)</span>
+<span class="sd">            The ratio identificantion, e.g. R23.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        label (str)</span>
+<span class="sd">            A string representation of the label.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get the list of lines for a given ratio_id</span>
+
+    <span class="c1"># if the id is a string get the lines from the LineRatios class</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">ratio_line_ids</span> <span class="o">=</span> <span class="n">LineRatios</span><span class="p">()</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="n">ratio_id</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">ratio_line_ids</span> <span class="o">=</span> <span class="n">ratio_id</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">get_line_label</span><span class="p">(</span><span class="n">ratio_line_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">get_line_label</span><span class="p">(</span><span class="n">ratio_line_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">numerator</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">denominator</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">label</span></div>
+
+
+<div class="viewcode-block" id="get_diagram_labels"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_diagram_labels">[docs]</a><span class="k">def</span> <span class="nf">get_diagram_labels</span><span class="p">(</span><span class="n">diagram_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a x and y labels for a given diagram_id</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        diagram_id (str)</span>
+<span class="sd">            The diagram identificantion, e.g. OHNO.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        xlabel (str)</span>
+<span class="sd">            A string representation of the x-label.</span>
+<span class="sd">        ylabel (str)</span>
+<span class="sd">            A string representation of the y-label.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get the list of lines for a given ratio_id</span>
+    <span class="n">diagram_line_ids</span> <span class="o">=</span> <span class="n">LineRatios</span><span class="p">()</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="n">diagram_id</span><span class="p">]</span>
+    <span class="n">xlabel</span> <span class="o">=</span> <span class="n">get_ratio_label</span><span class="p">(</span><span class="n">diagram_line_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ylabel</span> <span class="o">=</span> <span class="n">get_ratio_label</span><span class="p">(</span><span class="n">diagram_line_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span></div>
 
 
 <div class="viewcode-block" id="get_roman_numeral"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_roman_numeral">[docs]</a><span class="k">def</span> <span class="nf">get_roman_numeral</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
@@ -429,10 +538,13 @@
 
 <span class="sd">    Used for renaming emission lines from the cloudy defaults.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    ---------</span>
-<span class="sd">    str</span>
-<span class="sd">        string reprensentation of the roman numeral</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        number (int)</span>
+<span class="sd">            The number to convert into a roman numeral.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        number_representation (str)</span>
+<span class="sd">            String reprensentation of the roman numeral.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">num</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">900</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
@@ -465,23 +577,6 @@
     <span class="k">return</span> <span class="n">roman</span></div>
 
 
-<div class="viewcode-block" id="get_fancy_line_id"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_fancy_line_id">[docs]</a><span class="k">def</span> <span class="nf">get_fancy_line_id</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to get a nicer line id, e.g. &quot;O 3 5008.24A&quot; -&gt; &quot;OIII5008&quot;</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    ---------</span>
-<span class="sd">    str</span>
-<span class="sd">        the fancy line id</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">element</span><span class="p">,</span> <span class="n">ion</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="nb">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
-
-    <span class="n">wavelength</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wavelength</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}{</span><span class="n">get_roman_numeral</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ion</span><span class="p">))</span><span class="si">}{</span><span class="n">wavelength</span><span class="si">:</span><span class="s2"> .4g</span><span class="si">}</span><span class="s2">&quot;</span></div>
-
-
 <div class="viewcode-block" id="get_bpt_kewley01"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.get_bpt_kewley01">[docs]</a><span class="k">def</span> <span class="nf">get_bpt_kewley01</span><span class="p">(</span><span class="n">logNII_Ha</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;BPT-NII demarcations from Kewley+2001</span>
 
@@ -489,7 +584,7 @@
 <span class="sd">    Demarcation defined by:</span>
 <span class="sd">        log([OIII]/Hb) = 0.61 / (log([NII]/Ha) - 0.47) + 1.19</span>
 
-<span class="sd">    Args:</span>
+<span class="sd">    Arguments:</span>
 <span class="sd">        logNII_Ha (array)</span>
 <span class="sd">            Array of log([NII]/Halpha) values to give the</span>
 <span class="sd">            SF-AGN demarcation line</span>
@@ -509,7 +604,7 @@
 <span class="sd">    Demarcation defined by:</span>
 <span class="sd">        log([OIII]/Hb) = 0.61 / (log([NII]/Ha) - 0.05) + 1.3</span>
 
-<span class="sd">     Args:</span>
+<span class="sd">    Args:</span>
 <span class="sd">        logNII_Ha (array)</span>
 <span class="sd">            Array of log([NII]/Halpha) values to give the</span>
 <span class="sd">            SF-AGN demarcation line</span>
@@ -522,129 +617,134 @@
     <span class="k">return</span> <span class="mf">0.61</span> <span class="o">/</span> <span class="p">(</span><span class="n">logNII_Ha</span> <span class="o">-</span> <span class="mf">0.05</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.3</span></div>
 
 
-<div class="viewcode-block" id="LineRatios"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineRatios">[docs]</a><span class="k">class</span> <span class="nc">LineRatios</span><span class="p">:</span>
+<div class="viewcode-block" id="LineRatios"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineRatios">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">LineRatios</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A dataclass holding useful line ratios (e.g. R23) and</span>
+<span class="sd">    A class holding useful line ratios (e.g. R23) and</span>
 <span class="sd">    diagrams (pairs of ratios), e.g. BPT.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># short-hand</span>
+    <span class="c1"># Shorthand for common lines</span>
+    <span class="n">O3b</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;O 3 4958.91A&quot;</span>
+    <span class="n">O3r</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;O 3 5006.84A&quot;</span>
+    <span class="n">O3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">O2b</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;O 2 3726.03A&quot;</span>
+    <span class="n">O2r</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;O 2 3728.81A&quot;</span>
+    <span class="n">O2</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 2 3728.81A&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">Hb</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;H 1 4862.69A&quot;</span>
+    <span class="n">Ha</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;H 1 6564.62A&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">O3b</span> <span class="o">=</span> <span class="s2">&quot;O 3 4958.91A&quot;</span>
-        <span class="n">O3r</span> <span class="o">=</span> <span class="s2">&quot;O 3 5006.84A&quot;</span>
-        <span class="n">O3</span> <span class="o">=</span> <span class="p">[</span><span class="n">O3b</span><span class="p">,</span> <span class="n">O3r</span><span class="p">]</span>
-        <span class="n">O2b</span> <span class="o">=</span> <span class="s2">&quot;O 2 3726.03A&quot;</span>
-        <span class="n">O2r</span> <span class="o">=</span> <span class="s2">&quot;O 2 3728.81A&quot;</span>
-        <span class="n">O2</span> <span class="o">=</span> <span class="p">[</span><span class="n">O2b</span><span class="p">,</span> <span class="n">O2r</span><span class="p">]</span>
-        <span class="n">Hb</span> <span class="o">=</span> <span class="s2">&quot;H 1 4862.69A&quot;</span>
-        <span class="n">Ha</span> <span class="o">=</span> <span class="s2">&quot;H 1 6564.62A&quot;</span>
+    <span class="c1"># Balmer decrement, should be [2.79--2.86] (Te, ne, dependent)</span>
+    <span class="c1"># for dust free</span>
+    <span class="n">ratios</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;BalmerDecrement&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;N2&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;N 2 6583.45A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;S2&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;S 2 6730.82A&quot;</span><span class="p">,</span> <span class="s2">&quot;S 2 6716.44A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;O1&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;O 1 6300.30A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;R2&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;R3&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;R23&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">[</span>
+                    <span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;O 2 3728.81A&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">],</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;O32&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">]],</span>
+            <span class="s2">&quot;Ne3O2&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;NE 3 3868.76A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">]],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">diagrams</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;OHNO&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">[[</span><span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">]],</span>
+                <span class="p">[[</span><span class="s2">&quot;NE 3 3868.76A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;O 2 3726.03A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 2 3728.81A&quot;</span><span class="p">]],</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;BPT-NII&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">[[</span><span class="s2">&quot;N 2 6583.45A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 6564.62A&quot;</span><span class="p">]],</span>
+                <span class="p">[[</span><span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">]],</span>
+            <span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
 
-        <span class="c1"># Balmer decrement, should be [2.79--2.86] (Te, ne, dependent)</span>
-        <span class="c1"># for dust free</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;BalmerDecrement&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">Ha</span><span class="p">],</span> <span class="p">[</span><span class="n">Hb</span><span class="p">]]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;N2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;N 2 6583.45A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">Ha</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;S2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">S2</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[</span><span class="s2">&quot;S 2 6730.82A&quot;</span><span class="p">,</span> <span class="s2">&quot;S 2 6716.44A&quot;</span><span class="p">],</span>
-            <span class="p">[</span><span class="n">Ha</span><span class="p">],</span>
-        <span class="p">]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;O1&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">O1</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;O 1 6300.30A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">Ha</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;R2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">O2b</span><span class="p">],</span> <span class="p">[</span><span class="n">Hb</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;R3&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">R3</span> <span class="o">=</span> <span class="p">[[</span><span class="n">O3r</span><span class="p">],</span> <span class="p">[</span><span class="n">Hb</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;R23&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">O3</span> <span class="o">+</span> <span class="n">O2</span><span class="p">,</span> <span class="p">[</span><span class="n">Hb</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;O32&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">O3r</span><span class="p">],</span> <span class="p">[</span><span class="n">O2b</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="s2">&quot;Ne3O2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;NE 3 3868.76A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">O2b</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">available_ratios</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="s2">&quot;OHNO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">R3</span><span class="p">,</span> <span class="p">[[</span><span class="s2">&quot;NE 3 3868.76A&quot;</span><span class="p">],</span> <span class="n">O2</span><span class="p">]]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="s2">&quot;BPT-NII&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[[</span><span class="s2">&quot;N 2 6583.45A&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">Ha</span><span class="p">]],</span>
-            <span class="n">R3</span><span class="p">,</span>
-        <span class="p">]</span>  <span class="c1"># add reference</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="s2">&quot;VO78-SII&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">S2</span><span class="p">,</span> <span class="p">[</span><span class="n">Ha</span><span class="p">]],</span> <span class="n">R3</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="s2">&quot;VO78-OI&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="n">O1</span><span class="p">,</span> <span class="p">[</span><span class="n">Ha</span><span class="p">]],</span> <span class="n">R3</span><span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">available_diagrams</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-
-<div class="viewcode-block" id="LineRatios.get_ratio_label_"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineRatios.get_ratio_label_">[docs]</a>    <span class="k">def</span> <span class="nf">get_ratio_label_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a line ratio label</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ab</span>
-<span class="sd">            a list of lists of lines, e.g. [[l1,l2], [l3]]</span>
-<span class="sd">        fancy</span>
-<span class="sd">            flag to return fancy label instead</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            a label</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ab</span>
-
-        <span class="k">if</span> <span class="n">fancy</span><span class="p">:</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">get_fancy_line_id</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">get_fancy_line_id</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="s1">&#39;+&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">)/(</span><span class="si">{</span><span class="s1">&#39;+&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
-
-<div class="viewcode-block" id="LineRatios.get_ratio_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineRatios.get_ratio_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_ratio_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio_id</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a line ratio label</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ratio_id</span>
-<span class="sd">            a ratio_id where the ratio lines are defined in LineRatios</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            a label</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="n">ratio_id</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ratio_id</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_label_</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span><span class="w"> </span><span class="n">fancy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fancy</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div></div>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Provide lists of what is included</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_ratios</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ratios</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_diagrams</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diagrams</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
 
 
 <div class="viewcode-block" id="LineCollection"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection">[docs]</a><span class="k">class</span> <span class="nc">LineCollection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class holding a collection of emission lines</span>
 
-<span class="sd">    Attributes</span>
-<span class="sd">    ----------</span>
-<span class="sd">    lines : dictionary of Line objects</span>
+<span class="sd">    Arguments</span>
+<span class="sd">        lines (dictionary of Line objects)</span>
+<span class="sd">            A dictionary of line objects.</span>
 
 <span class="sd">    Methods</span>
-<span class="sd">    -------</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        these should be filtered to only show ones that are available</span>
-<span class="sd">        for the available line_ids</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># create an array of line_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
         <span class="c1"># Atrributes to enable looping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nlines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span><span class="p">)</span>
 
+        <span class="c1"># create list of line wavelengths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">line</span><span class="o">.</span><span class="n">wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Angstrom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">Angstrom</span>
+        <span class="p">)</span>
+
+        <span class="c1"># get the arguments that would sort wavelength</span>
+        <span class="n">sorted_arguments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">)</span>
+
+        <span class="c1"># sort the line_ids and wavelengths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span><span class="p">[</span><span class="n">sorted_arguments</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelengths</span><span class="p">[</span><span class="n">sorted_arguments</span><span class="p">]</span>
+
+        <span class="c1"># include line ratio and diagram definitions dataclass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span> <span class="o">=</span> <span class="n">LineRatios</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">available_ratios</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">available_ratios</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">available_diagrams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">available_diagrams</span>
+        <span class="c1"># create list of available line ratios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ratio_id</span><span class="p">,</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">ratios</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># flatten line ratio list</span>
+            <span class="n">ratio_line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">ratio</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+
+            <span class="c1"># check if line ratio is available</span>
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">ratio_line_ids</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">available_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">)</span>
+
+        <span class="c1"># create list of available line diagnostics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_diagrams</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">diagram_id</span><span class="p">,</span> <span class="n">diagram</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">diagrams</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># flatten line ratio list</span>
+            <span class="n">diagram_line_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">diagram</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+                <span class="n">x</span> <span class="k">for</span> <span class="n">xs</span> <span class="ow">in</span> <span class="n">diagram</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span>
+            <span class="p">]</span>
+
+            <span class="c1"># check if line ratio is available</span>
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">diagram_line_ids</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">available_diagrams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">diagram_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_id</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
@@ -703,15 +803,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure (and return) a line ratio</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ab</span>
-<span class="sd">            a list of lists of lines, e.g. [[l1,l2], [l3]]</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            ab</span>
+<span class="sd">                a list of lists of lines, e.g. [[l1,l2], [l3]]</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            a line ratio</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float</span>
+<span class="sd">                a line ratio</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ab</span>
@@ -724,102 +822,49 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure (and return) a line ratio</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ratio_id</span>
-<span class="sd">            a ratio_id where the ratio lines are defined in LineRatios</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            ratio_id</span>
+<span class="sd">                a ratio_id where the ratio lines are defined in LineRatios</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            a line ratio</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            float</span>
+<span class="sd">                a line ratio</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="n">ratio_id</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_</span><span class="p">(</span><span class="n">ab</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LineCollection.get_ratio_label_"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_ratio_label_">[docs]</a>    <span class="k">def</span> <span class="nf">get_ratio_label_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ab</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a line ratio label</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ab</span>
-<span class="sd">            a list of lists of lines, e.g. [[l1,l2], [l3]]</span>
-<span class="sd">        fancy</span>
-<span class="sd">            flag to return fancy label instead</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            a label</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ab</span>
-
-        <span class="k">if</span> <span class="n">fancy</span><span class="p">:</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">get_fancy_line_id</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">get_fancy_line_id</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">)/(</span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
-
-<div class="viewcode-block" id="LineCollection.get_ratio_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_ratio_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_ratio_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio_id</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a line ratio label</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ratio_id</span>
-<span class="sd">            a ratio_id where the ratio lines are defined in LineRatios</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            a label</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">ratios</span><span class="p">[</span><span class="n">ratio_id</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ratio_id</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_label_</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span><span class="w"> </span><span class="n">fancy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fancy</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span></div>
-
 <div class="viewcode-block" id="LineCollection.get_diagram"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_diagram">[docs]</a>    <span class="k">def</span> <span class="nf">get_diagram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a pair of line ratios for a given diagram_id (E.g. BPT)</span>
 
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ratdiagram_idio_id</span>
-<span class="sd">            a diagram_id where the pairs of ratio lines are</span>
-<span class="sd">            defined in LineRatios</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            diagram_id</span>
+<span class="sd">                a diagram_id where the pairs of ratio lines are</span>
+<span class="sd">                defined in LineRatios</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tuple (float)</span>
-<span class="sd">            a pair of line ratios</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple (float)</span>
+<span class="sd">                a pair of line ratios</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ab</span><span class="p">,</span> <span class="n">cd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="n">diagram_id</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_</span><span class="p">(</span><span class="n">ab</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_</span><span class="p">(</span><span class="n">cd</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LineCollection.get_diagram_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_diagram_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_diagram_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram_id</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="LineCollection.get_ratio_label"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_ratio_label">[docs]</a>    <span class="k">def</span> <span class="nf">get_ratio_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ratio_id</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get a line ratio label</span>
-
-<span class="sd">        Arguments</span>
-<span class="sd">        -------</span>
-<span class="sd">        ab</span>
-<span class="sd">            a list of lists of lines, e.g. [[l1,l2], [l3]]</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            a label</span>
+<span class="sd">        Wrapper around get_ratio_label</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ab</span><span class="p">,</span> <span class="n">cd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineratios</span><span class="o">.</span><span class="n">diagrams</span><span class="p">[</span><span class="n">diagram_id</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_label_</span><span class="p">(</span><span class="n">ab</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="n">fancy</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ratio_label_</span><span class="p">(</span>
-            <span class="n">cd</span><span class="p">,</span> <span class="n">fancy</span><span class="o">=</span><span class="n">fancy</span>
-        <span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">get_ratio_label</span><span class="p">(</span><span class="n">ratio_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LineCollection.get_diagram_labels"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.get_diagram_labels">[docs]</a>    <span class="k">def</span> <span class="nf">get_diagram_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diagram_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper around get_ratio_label</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">get_diagram_labels</span><span class="p">(</span><span class="n">diagram_id</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.Line">[docs]</a><span class="k">class</span> <span class="nc">Line</span><span class="p">:</span>
@@ -864,7 +909,10 @@
 
         <span class="c1"># continuum at line wavelength, erg/s/AA</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">continuum_lam</span> <span class="o">=</span> <span class="n">lnu_to_llam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ew</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum_lam</span>  <span class="c1"># AA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equivalent_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum_lam</span>  <span class="c1"># AA</span>
+
+        <span class="c1"># element</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Function to print a basic summary of the Line object.</span>
@@ -890,7 +938,7 @@
             <span class="sa">f</span><span class="s2">&quot;log10(luminosity/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;equivalent width: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ew</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;equivalent width: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">equivalent_width</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flux</span><span class="p">:</span>
             <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;log10(flux/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flux</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">10</span>

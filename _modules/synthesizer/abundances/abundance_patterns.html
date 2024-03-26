@@ -255,7 +255,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html">synthesizer.abundances.abundance_patterns</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html">synthesizer.abundances.abundance_scalings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.depletion_models.html">synthesizer.abundances.depletion_models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.solar_abundance_patterns.html">synthesizer.abundances.solar_abundance_patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.elements.html">synthesizer.abundances.elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
@@ -396,9 +397,6 @@
 <span class="sd">The main current use of this code is in the creation cloudy input models when</span>
 <span class="sd">processing SPS incident grids to model nebular emission.</span>
 
-<span class="sd">This script is a modified version of</span>
-<span class="sd">https://github.com/stephenmwilkins/SPS_tools/blob/master/SPS_tools/cloudy/abundances.py</span>
-
 <span class="sd">Some notes on (standard) notation:</span>
 <span class="sd">- [X/H] = log10(N_X/N_H) - log10(N_X/N_H)_sol</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -411,168 +409,32 @@
 <span class="kn">from</span> <span class="nn">synthesizer.abundances</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">abundance_scalings</span><span class="p">,</span>
     <span class="n">depletion_models</span><span class="p">,</span>
-    <span class="n">solar_abundance_patterns</span><span class="p">,</span>
+    <span class="n">elements</span><span class="p">,</span>
+    <span class="n">reference_abundance_patterns</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="ElementDefinitions"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.ElementDefinitions">[docs]</a><span class="k">class</span> <span class="nc">ElementDefinitions</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A simple class containing various useful lists and dictionaries.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        non_metals (list, string)</span>
-<span class="sd">            A list of elements classified as non-metals.</span>
-<span class="sd">        metals (list, string)</span>
-<span class="sd">            A list of elements classified as metals.</span>
-<span class="sd">        all_elements (list, string)</span>
-<span class="sd">            A list of all elements, functionally the concatenation of metals</span>
-<span class="sd">            and non-metals.</span>
-<span class="sd">        alpha_elements (list, string)</span>
-<span class="sd">            A list of the elements classified as alpha-elements.</span>
-<span class="sd">        name (dict, string)</span>
-<span class="sd">            A dictionary holding the full name of each element.</span>
-<span class="sd">        A (dict, float)</span>
-<span class="sd">            Atomic mass of each element (in amus).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">non_metals</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;He&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="n">metals</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;Li&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Be&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;B&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;N&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;O&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;F&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ne&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Na&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Mg&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Al&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Si&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;P&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;S&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Cl&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ar&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ca&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Sc&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ti&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;V&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Cr&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Mn&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Fe&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Co&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ni&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Cu&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Zn&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="n">all_elements</span> <span class="o">=</span> <span class="n">non_metals</span> <span class="o">+</span> <span class="n">metals</span>
-
-    <span class="c1"># the alpha process elements</span>
-    <span class="n">alpha_elements</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;O&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ne&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Mg&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Si&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;S&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ar&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ca&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Ti&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Name</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hydrogen&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Helium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Li&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Lithium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Be&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Beryllium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Boron&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Carbon&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Nitrogen&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Oxygen&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;F&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Fluorine&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Ne&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Neon&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Na&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Sodium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Mg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Magnesium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Al&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Aluminium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Silicon&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Phosphorus&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Sulphur&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Cl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Chlorine&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Ar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Argon&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Potassium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Ca&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Calcium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Sc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Scandium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Ti&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Titanium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Vanadium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Cr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Chromium&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Mn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Manganese&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Fe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Iron&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Co&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Cobalt&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Ni&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Nickel&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Cu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Copper&quot;</span>
-    <span class="n">name</span><span class="p">[</span><span class="s2">&quot;Zn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Zinc&quot;</span>
-
-    <span class="c1"># mass of elements in amus</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.008</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4.003</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Li&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">6.940</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Be&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">9.012</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.81</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">12.011</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">14.007</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">15.999</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;F&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">18.998</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Ne&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">20.180</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Na&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">22.990</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Mg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">24.305</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Al&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">26.982</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">28.085</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;P&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">30.973</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;S&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">32.06</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Cl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">35.45</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Ar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">39.948</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;K&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">39.0983</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Ca&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">40.078</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Sc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">44.955</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Ti&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">47.867</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">50.9415</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Cr&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">51.9961</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Mn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">54.938</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Fe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">55.845</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Co&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">58.933</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Ni&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">58.693</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Cu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">63.546</span>
-    <span class="n">A</span><span class="p">[</span><span class="s2">&quot;Zn&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">65.38</span></div>
-
-
-<div class="viewcode-block" id="Abundances"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.Abundances">[docs]</a><span class="k">class</span> <span class="nc">Abundances</span><span class="p">(</span><span class="n">ElementDefinitions</span><span class="p">):</span>
+<div class="viewcode-block" id="Abundances"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.Abundances">[docs]</a><span class="k">class</span> <span class="nc">Abundances</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class for calculating elemental abundances including various</span>
 <span class="sd">    scaling and depletion on to dust.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        metallicity (float)</span>
-<span class="sd">            Mass fraction in metals, default is Solar metallicity.</span>
-<span class="sd">            Optional initialisation argument. Defaults to Solar metallicity</span>
-<span class="sd">            assuming Asplund (2009).</span>
+<span class="sd">            Mass fraction in metals, default is reference metallicity.</span>
+<span class="sd">            Optional initialisation argument. If not provided is calculated</span>
+<span class="sd">            from the provided abundance pattern.</span>
 <span class="sd">        alpha (float)</span>
-<span class="sd">            Enhancement of the alpha elements relative to the solar</span>
+<span class="sd">            Enhancement of the alpha elements relative to the reference</span>
 <span class="sd">            abundance pattern. Optional initialisation argument. Defaults to</span>
 <span class="sd">            0.0 (no alpha-enhancement).</span>
 <span class="sd">        abundances (dict, float/str)</span>
 <span class="sd">            A dictionary containing the abundances for specific elements or</span>
 <span class="sd">            functions to calculate them for the specified metallicity. Optional</span>
 <span class="sd">            initialisation argument. Defaults to None.</span>
-<span class="sd">        solar (object)</span>
-<span class="sd">            Solar abundance pattern. Optional initialisation argument.</span>
-<span class="sd">            Defaults to Asplund (2009) pattern.</span>
+<span class="sd">        reference (object)</span>
+<span class="sd">            reference abundance pattern. Optional initialisation argument.</span>
+<span class="sd">            Defaults to the GalacticConcordance pattern.</span>
 <span class="sd">        depletion (dict, float)</span>
 <span class="sd">            The depletion pattern to use. Should not be provided with</span>
 <span class="sd">            depletion_model. Optional initialisation argument. Defaults to</span>
@@ -609,7 +471,7 @@
         <span class="n">metallicity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
         <span class="n">abundances</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">solar</span><span class="o">=</span><span class="n">solar_abundance_patterns</span><span class="o">.</span><span class="n">Asplund2009</span><span class="p">,</span>
+        <span class="n">reference</span><span class="o">=</span><span class="n">reference_abundance_patterns</span><span class="o">.</span><span class="n">GalacticConcordance</span><span class="p">,</span>
         <span class="n">depletion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">depletion_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">depletion_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -619,15 +481,15 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            metallicity (float)</span>
-<span class="sd">                Mass fraction in metals, default is Solar metallicity.</span>
+<span class="sd">                Mass fraction in metals, default is reference metallicity.</span>
 <span class="sd">            alpha (float)</span>
-<span class="sd">                Enhancement of the alpha elements relative to the solar</span>
+<span class="sd">                Enhancement of the alpha elements relative to the reference</span>
 <span class="sd">                abundance pattern.</span>
 <span class="sd">            abundances (dict, float/str)</span>
 <span class="sd">                A dictionary containing the abundances for specific elements or</span>
 <span class="sd">                functions to calculate them for the specified metallicity.</span>
-<span class="sd">            solar (class or str)</span>
-<span class="sd">                Solar abundance pattern object or str defining the class.</span>
+<span class="sd">            reference (class or str)</span>
+<span class="sd">                Reference abundance pattern object or str defining the class.</span>
 <span class="sd">            depletion (dict, float)</span>
 <span class="sd">                The depletion pattern to use. Should not be provided with</span>
 <span class="sd">                depletion_model.</span>
@@ -640,10 +502,23 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># basic element info</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metals</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">metals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_metals</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">non_metals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">all_elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_elements</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">alpha_elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atomic_mass</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span><span class="o">.</span><span class="n">atomic_mass</span>
+
+        <span class="c1"># define dictionary for element_name to element_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_name_to_id</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">id</span> <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
         <span class="c1"># save all arguments to object</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">=</span> <span class="n">metallicity</span>  <span class="c1"># mass fraction in metals</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solar</span> <span class="o">=</span> <span class="n">solar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">reference</span>
         <span class="c1"># depletion on to dust</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span> <span class="o">=</span> <span class="n">depletion</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depletion_model</span> <span class="o">=</span> <span class="n">depletion_model</span>
@@ -651,17 +526,25 @@
 
         <span class="c1"># If depletion model is provided as a string use this to extract the</span>
         <span class="c1"># class.</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">solar</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">solar</span> <span class="ow">in</span> <span class="n">solar_abundance_patterns</span><span class="o">.</span><span class="n">available_patterns</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">solar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">solar_abundance_patterns</span><span class="p">,</span> <span class="n">solar</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">reference</span> <span class="ow">in</span> <span class="n">reference_abundance_patterns</span><span class="o">.</span><span class="n">available_patterns</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                    <span class="n">reference_abundance_patterns</span><span class="p">,</span> <span class="n">reference</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Solar abundance pattern</span>
-<span class="s2">                not recognised!&quot;&quot;&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;Reference abundance</span>
+<span class="sd">                pattern not recognised!&quot;&quot;&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># check if self.reference is instantiated and if not initialise class</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="p">()</span>
 
         <span class="c1"># If a metallicity is not provided use the metallicity assumed by the</span>
-        <span class="c1"># Solar abundance pattern.</span>
+        <span class="c1"># Reference abundance pattern.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">metallicity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">metallicity</span>
 
         <span class="c1"># Set helium mass fraction following Bressan et al. (2012)</span>
         <span class="c1"># 10.1111/j.1365-2966.2012.21948.x</span>
@@ -681,17 +564,17 @@
         <span class="n">total</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span>
             <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span>
-            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span>
+            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_mass</span><span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span>
         <span class="p">)</span>
 
-        <span class="c1"># Scale elemental abundances from solar abundances based on given</span>
+        <span class="c1"># Scale elemental abundances from reference abundances based on given</span>
         <span class="c1"># metallicity</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metals</span><span class="p">:</span>
-            <span class="n">total</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">metallicity</span>
+            <span class="n">total</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">metallicity</span>
             <span class="p">)</span>
 
-        <span class="c1"># Scale alpha-element abundances from solar abundances</span>
+        <span class="c1"># Scale alpha-element abundances from reference abundances</span>
         <span class="k">if</span> <span class="n">alpha</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="c1"># unscaled_metals = self.alpha_elements</span>
             <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_elements</span><span class="p">:</span>
@@ -702,29 +585,105 @@
 
         <span class="c1"># If abundances argument is provided go ahead and set the abundances.</span>
         <span class="k">if</span> <span class="n">abundances</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># loop over each element in the dictionary</span>
-            <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">abundances</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="c1"># Setting alpha, nitrogen_abundance, or carbon_abundance will</span>
-                <span class="c1"># result in the metallicity no longer being correct. To account</span>
-                <span class="c1"># for this we need to rescale the abundances to recover the</span>
-                <span class="c1"># correct metallicity. However, we don&#39;t want to rescale the</span>
-                <span class="c1"># things we&#39;ve changed. For this reason, here we record the</span>
-                <span class="c1"># elements which have changed. See below for the rescaling.</span>
-                <span class="n">unscaled_metals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="c1"># if abundances are given as a single string, then use that model</span>
+            <span class="c1"># to scale every available element.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">abundances</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># get the scaling study</span>
+                <span class="n">scaling_study</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">abundance_scalings</span><span class="p">,</span> <span class="n">abundances</span><span class="p">)()</span>
 
-                <span class="c1"># if value is a float simply set the abundance to this value.</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-                    <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-
-                <span class="c1"># if value is a str use this to call the specific function to</span>
-                <span class="c1"># calculate the abundance from the metallicity.</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                    <span class="c1"># get the class holding functions for this element</span>
-                    <span class="n">study_functions</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">abundance_scalings</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="c1"># loop over each element in the dictionary</span>
+                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">scaling_study</span><span class="o">.</span><span class="n">available_elements</span><span class="p">:</span>
+                    <span class="c1"># get the full element name since scaling methods are</span>
+                    <span class="c1"># labelled with the full name PEP8 reasons.</span>
+                    <span class="n">element_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
 
                     <span class="c1"># get the specific function request by value</span>
-                    <span class="n">scaling_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">study_functions</span><span class="p">,</span> <span class="n">element</span><span class="p">)</span>
+                    <span class="n">scaling_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scaling_study</span><span class="p">,</span> <span class="n">element_name</span><span class="p">)</span>
                     <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaling_function</span><span class="p">(</span><span class="n">metallicity</span><span class="p">)</span>
+
+                    <span class="c1"># Setting alpha or abundances will result in the</span>
+                    <span class="c1"># metallicity no longer being correct. To account for</span>
+                    <span class="c1"># this we need to rescale the abundances to recover</span>
+                    <span class="c1"># the correct metallicity. However, we don&#39;t want to</span>
+                    <span class="c1"># rescale the things we&#39;ve changed. For this reason,</span>
+                    <span class="c1"># here we record the elements which have changed. See</span>
+                    <span class="c1"># below for the rescaling.</span>
+                    <span class="n">unscaled_metals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">abundances</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># loop over each element in the dictionary</span>
+                <span class="k">for</span> <span class="n">element_key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">abundances</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="c1"># Let&#39;s check whether we&#39;re specifying an absolute value or</span>
+                    <span class="c1"># a relative ratio.</span>
+
+                    <span class="c1"># If it&#39;s a ratio, labelled as e.g. &quot;N/H&quot;. This is less</span>
+                    <span class="c1"># readable than the below.</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">element</span><span class="p">,</span> <span class="n">ratio_element</span> <span class="o">=</span> <span class="n">element_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+                        <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span><span class="p">[</span><span class="n">ratio_element</span><span class="p">]</span> <span class="o">+</span> <span class="n">value</span>
+
+                    <span class="c1"># If it&#39;s a ratio, labelled as e.g. &quot;nitrogen_to_oxygen&quot;.</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_to_&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># get element name and ration element name</span>
+                        <span class="n">element_name</span><span class="p">,</span> <span class="n">ratio_element_name</span> <span class="o">=</span> <span class="n">element_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                            <span class="s2">&quot;_to_&quot;</span>
+                        <span class="p">)</span>
+                        <span class="c1"># convert these names to element ids instead</span>
+                        <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name_to_id</span><span class="p">[</span><span class="n">element_name</span><span class="p">]</span>
+                        <span class="n">ratio_element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name_to_id</span><span class="p">[</span>
+                            <span class="n">ratio_element_name</span>
+                        <span class="p">]</span>
+
+                        <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span><span class="p">[</span><span class="n">ratio_element</span><span class="p">]</span> <span class="o">+</span> <span class="n">value</span>
+
+                    <span class="c1"># Else, if it&#39;s not a ratio simply set the abundance to</span>
+                    <span class="c1"># this value.</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Check the element key to see whether it&#39;s an ID or</span>
+                        <span class="c1"># name.</span>
+                        <span class="k">if</span> <span class="n">element_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">:</span>
+                            <span class="n">element</span> <span class="o">=</span> <span class="n">element_key</span>
+                        <span class="k">elif</span> <span class="n">element_key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                            <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name_to_id</span><span class="p">[</span><span class="n">element_key</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+<span class="w">                                </span><span class="sd">&quot;&quot;&quot;Element key not recognised. Use either an</span>
+<span class="sd">                                element ID (e.g. &#39;N&#39;) or element name (e.g.</span>
+<span class="sd">                                &#39;nitrogen&#39;).&quot;&quot;&quot;</span>
+                            <span class="p">)</span>
+
+                        <span class="c1"># If it&#39;s just a value just set the value.</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                            <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+                        <span class="c1"># if value is a str use this to call the specific</span>
+                        <span class="c1"># function to calculate the abundance from the</span>
+                        <span class="c1"># metallicity.</span>
+                        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                            <span class="c1"># get the class holding functions for this element</span>
+                            <span class="n">scaling_study</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                                <span class="n">abundance_scalings</span><span class="p">,</span> <span class="n">value</span>
+                            <span class="p">)()</span>
+
+                            <span class="c1"># get the full element name since scaling methods</span>
+                            <span class="c1"># are labelled with the full name PEP8 reasons.</span>
+                            <span class="n">element_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
+
+                            <span class="c1"># get the specific function request by value</span>
+                            <span class="n">scaling_function</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                                <span class="n">scaling_study</span><span class="p">,</span> <span class="n">element_name</span>
+                            <span class="p">)</span>
+
+                            <span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaling_function</span><span class="p">(</span><span class="n">metallicity</span><span class="p">)</span>
+
+                        <span class="c1"># Setting alpha or abundances will result in the</span>
+                        <span class="c1"># metallicity no longer being correct. To account for</span>
+                        <span class="c1"># this we need to rescale the abundances to recover</span>
+                        <span class="c1"># the correct metallicity. However, we don&#39;t want to</span>
+                        <span class="c1"># rescale the things we&#39;ve changed. For this reason,</span>
+                        <span class="c1"># here we record the elements which have changed. See</span>
+                        <span class="c1"># below for the rescaling.</span>
+                        <span class="n">unscaled_metals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
 
         <span class="c1"># Set of the metals to be scaled, see above.</span>
         <span class="n">scaled_metals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metals</span><span class="p">)</span> <span class="o">-</span> <span class="n">unscaled_metals</span>
@@ -809,8 +768,10 @@
             <span class="k">if</span> <span class="n">depletion_model</span> <span class="ow">in</span> <span class="n">depletion_models</span><span class="o">.</span><span class="n">available_patterns</span><span class="p">:</span>
                 <span class="n">depletion_model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">depletion_models</span><span class="p">,</span> <span class="n">depletion_model</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Depletion model not</span>
-<span class="s2">                recognised!&quot;&quot;&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;Depletion model not</span>
+<span class="sd">                recognised!&quot;&quot;&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Raise exception if both a depletion pattern and depletion_model is</span>
         <span class="c1"># provided.</span>
@@ -897,7 +858,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A method to return the logarithmic abundance for a particular element</span>
-<span class="sd">        relative to H or relative solar.</span>
+<span class="sd">        relative to H or relative reference.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            arg (str)</span>
@@ -906,7 +867,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (float)</span>
-<span class="sd">                The abundance relevant to H or relative to Solar when a</span>
+<span class="sd">                The abundance relevant to H or relative to reference when a</span>
 <span class="sd">                reference element is also provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -914,10 +875,10 @@
         <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
 
-        <span class="c1"># alternative case, return solar relative abundance [X/Y]</span>
+        <span class="c1"># alternative case, return reference relative abundance [X/Y]</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>
             <span class="n">element</span><span class="p">,</span> <span class="n">ref_element</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar_relative_abundance</span><span class="p">(</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_relative_abundance</span><span class="p">(</span>
                 <span class="n">element</span><span class="p">,</span> <span class="n">ref_element</span><span class="o">=</span><span class="n">ref_element</span>
             <span class="p">)</span>
 
@@ -939,7 +900,8 @@
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;X: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hydrogen_mass_fraction</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Y: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">helium_mass_fraction</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Z: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Z/Z_sol: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">metallicity</span><span class="si">:</span><span class="s2">.2g</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">metallicity</span>
+        <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Z/Z_ref: </span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.2g</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;alpha: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;dust mass fraction: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_mass_fraction</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="n">summary</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;dust-to-metal ratio: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -961,10 +923,10 @@
 
         <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_elements</span><span class="p">:</span>
             <span class="n">quantities</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="o">+</span><span class="mi">12</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">depletion</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dust</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -1016,7 +978,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span><span class="p">:</span>
             <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_mass</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="Abundances.calculate_mass_fraction"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.Abundances.calculate_mass_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_mass_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1039,7 +1001,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_mass</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">total_mass</span></div>
 
-<div class="viewcode-block" id="Abundances.solar_relative_abundance"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.Abundances.solar_relative_abundance">[docs]</a>    <span class="k">def</span> <span class="nf">solar_relative_abundance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ref_element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Abundances.reference_relative_abundance"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html#synthesizer.abundances.abundance_patterns.Abundances.reference_relative_abundance">[docs]</a>    <span class="k">def</span> <span class="nf">reference_relative_abundance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">ref_element</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A method to return an element&#39;s abundance relative to that in the Sun,</span>
 <span class="sd">        i.e. [X/H] = log10(N_X/N_H) - log10(N_X/N_H)_sol</span>
@@ -1057,7 +1019,8 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ref_element</span><span class="p">])</span> <span class="o">-</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">solar</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">ref_element</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
+            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">abundance</span><span class="p">[</span><span class="n">ref_element</span><span class="p">]</span>
         <span class="p">)</span></div></div>
 
 
@@ -1111,7 +1074,7 @@
 
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span>
-        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">all_elements</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mf">6.0</span>
+        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">all_elements</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mf">6.0</span>
     <span class="p">)</span>
 
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(X/H)$&quot;</span><span class="p">)</span>
@@ -1185,7 +1148,7 @@
 
     <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span>
-        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">all_elements</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mf">6.0</span>
+        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">all_elements</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">element_name</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mf">6.0</span>
     <span class="p">)</span>
 
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(X/H)$&quot;</span><span class="p">)</span>

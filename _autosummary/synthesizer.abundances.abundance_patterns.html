@@ -256,7 +256,8 @@
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">synthesizer.abundances.abundance_patterns</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.abundances.abundance_scalings.html">synthesizer.abundances.abundance_scalings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.abundances.depletion_models.html">synthesizer.abundances.depletion_models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="synthesizer.abundances.solar_abundance_patterns.html">synthesizer.abundances.solar_abundance_patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.abundances.elements.html">synthesizer.abundances.elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="synthesizer.art.html">synthesizer.art</a></li>
@@ -396,8 +397,6 @@ component of a galaxy (e.g. stars, gas, dust). This code is used to define
 abundance patterns as a function of metallicity, alpha enhancement, etc.</p>
 <p>The main current use of this code is in the creation cloudy input models when
 processing SPS incident grids to model nebular emission.</p>
-<p>This script is a modified version of
-<a class="reference external" href="https://github.com/stephenmwilkins/SPS_tools/blob/master/SPS_tools/cloudy/abundances.py">https://github.com/stephenmwilkins/SPS_tools/blob/master/SPS_tools/cloudy/abundances.py</a></p>
 <p>Some notes on (standard) notation:
 - [X/H] = log10(N_X/N_H) - log10(N_X/N_H)_sol</p>
 <p class="rubric">Functions</p>
@@ -449,15 +448,15 @@ components.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.abundances.abundance_patterns.</span></span><span class="sig-name descname"><span class="pre">Abundances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metallicity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abundances=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar=&lt;class</span> <span class="pre">'synthesizer.abundances.solar_abundance_patterns.Asplund2009'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion_model=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion_scale=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/abundances/abundance_patterns.html#Abundances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.abundances.abundance_patterns.</span></span><span class="sig-name descname"><span class="pre">Abundances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metallicity=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abundances=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference=&lt;class</span> <span class="pre">'synthesizer.abundances.reference_abundance_patterns.GalacticConcordance'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion_model=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depletion_scale=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/abundances/abundance_patterns.html#Abundances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances" title="Permalink to this definition">#</a></dt>
 <dd><p>A class for calculating elemental abundances including various
 scaling and depletion on to dust.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.metallicity">
 <span class="sig-name descname"><span class="pre">metallicity</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.metallicity" title="Permalink to this definition">#</a></dt>
-<dd><p>Mass fraction in metals, default is Solar metallicity.
-Optional initialisation argument. Defaults to Solar metallicity
-assuming Asplund (2009).</p>
+<dd><p>Mass fraction in metals, default is reference metallicity.
+Optional initialisation argument. If not provided is calculated
+from the provided abundance pattern.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
@@ -468,7 +467,7 @@ assuming Asplund (2009).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.alpha">
 <span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.alpha" title="Permalink to this definition">#</a></dt>
-<dd><p>Enhancement of the alpha elements relative to the solar
+<dd><p>Enhancement of the alpha elements relative to the reference
 abundance pattern. Optional initialisation argument. Defaults to
 0.0 (no alpha-enhancement).</p>
 <dl class="field-list simple">
@@ -492,10 +491,10 @@ initialisation argument. Defaults to None.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.solar">
-<span class="sig-name descname"><span class="pre">solar</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.solar" title="Permalink to this definition">#</a></dt>
-<dd><p>Solar abundance pattern. Optional initialisation argument.
-Defaults to Asplund (2009) pattern.</p>
+<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.reference">
+<span class="sig-name descname"><span class="pre">reference</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.reference" title="Permalink to this definition">#</a></dt>
+<dd><p>reference abundance pattern. Optional initialisation argument.
+Defaults to the GalacticConcordance pattern.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>object</p>
@@ -733,8 +732,8 @@ normalised to be useful.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.solar_relative_abundance">
-<span class="sig-name descname"><span class="pre">solar_relative_abundance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/abundances/abundance_patterns.html#Abundances.solar_relative_abundance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.solar_relative_abundance" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.Abundances.reference_relative_abundance">
+<span class="sig-name descname"><span class="pre">reference_relative_abundance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_element</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/abundances/abundance_patterns.html#Abundances.reference_relative_abundance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.Abundances.reference_relative_abundance" title="Permalink to this definition">#</a></dt>
 <dd><p>A method to return an element’s abundance relative to that in the Sun,
 i.e. [X/H] = log10(N_X/N_H) - log10(N_X/N_H)_sol</p>
 <dl class="field-list simple">
@@ -757,80 +756,7 @@ the sun.</p>
 
 </dd></dl>
 
-<span class="target" id="sphx-glr-backref-synthesizer-abundances-abundance-patterns-abundances"></span><dl class="py class">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">synthesizer.abundances.abundance_patterns.</span></span><span class="sig-name descname"><span class="pre">ElementDefinitions</span></span><a class="reference internal" href="../_modules/synthesizer/abundances/abundance_patterns.html#ElementDefinitions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions" title="Permalink to this definition">#</a></dt>
-<dd><p>A simple class containing various useful lists and dictionaries.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.non_metals">
-<span class="sig-name descname"><span class="pre">non_metals</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.non_metals" title="Permalink to this definition">#</a></dt>
-<dd><p>A list of elements classified as non-metals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list, string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.metals">
-<span class="sig-name descname"><span class="pre">metals</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.metals" title="Permalink to this definition">#</a></dt>
-<dd><p>A list of elements classified as metals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list, string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.all_elements">
-<span class="sig-name descname"><span class="pre">all_elements</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.all_elements" title="Permalink to this definition">#</a></dt>
-<dd><p>A list of all elements, functionally the concatenation of metals
-and non-metals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list, string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.alpha_elements">
-<span class="sig-name descname"><span class="pre">alpha_elements</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.alpha_elements" title="Permalink to this definition">#</a></dt>
-<dd><p>A list of the elements classified as alpha-elements.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list, string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.name" title="Permalink to this definition">#</a></dt>
-<dd><p>A dictionary holding the full name of each element.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict, string</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="synthesizer.abundances.abundance_patterns.ElementDefinitions.A">
-<span class="sig-name descname"><span class="pre">A</span></span><a class="headerlink" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.A" title="Permalink to this definition">#</a></dt>
-<dd><p>Atomic mass of each element (in amus).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict, float</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="sphx-glr-backref-synthesizer-abundances-abundance-patterns-elementdefinitions"></span></section>
+<span class="target" id="sphx-glr-backref-synthesizer-abundances-abundance-patterns-abundances"></span></section>
 
         </article>
       </div>
@@ -894,7 +820,7 @@ and non-metals.</p>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.metallicity"><code class="docutils literal notranslate"><span class="pre">Abundances.metallicity</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.alpha"><code class="docutils literal notranslate"><span class="pre">Abundances.alpha</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.abundances"><code class="docutils literal notranslate"><span class="pre">Abundances.abundances</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.solar"><code class="docutils literal notranslate"><span class="pre">Abundances.solar</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.reference"><code class="docutils literal notranslate"><span class="pre">Abundances.reference</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.depletion"><code class="docutils literal notranslate"><span class="pre">Abundances.depletion</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.depletion_model"><code class="docutils literal notranslate"><span class="pre">Abundances.depletion_model</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.depletion_scale"><code class="docutils literal notranslate"><span class="pre">Abundances.depletion_scale</span></code></a></li>
@@ -910,16 +836,7 @@ and non-metals.</p>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.calculate_integrated_abundance"><code class="docutils literal notranslate"><span class="pre">Abundances.calculate_integrated_abundance()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.calculate_mass"><code class="docutils literal notranslate"><span class="pre">Abundances.calculate_mass()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.calculate_mass_fraction"><code class="docutils literal notranslate"><span class="pre">Abundances.calculate_mass_fraction()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.solar_relative_abundance"><code class="docutils literal notranslate"><span class="pre">Abundances.solar_relative_abundance()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions</span></code></a><ul>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.non_metals"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.non_metals</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.metals"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.metals</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.all_elements"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.all_elements</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.alpha_elements"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.alpha_elements</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.name"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.name</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.ElementDefinitions.A"><code class="docutils literal notranslate"><span class="pre">ElementDefinitions.A</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.abundances.abundance_patterns.Abundances.reference_relative_abundance"><code class="docutils literal notranslate"><span class="pre">Abundances.reference_relative_abundance()</span></code></a></li>
 </ul>
 </li>
 </ul>

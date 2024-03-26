@@ -255,7 +255,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.abundance_patterns.html">synthesizer.abundances.abundance_patterns</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html">synthesizer.abundances.abundance_scalings</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.depletion_models.html">synthesizer.abundances.depletion_models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.solar_abundance_patterns.html">synthesizer.abundances.solar_abundance_patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.elements.html">synthesizer.abundances.elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.art.html">synthesizer.art</a></li>
@@ -387,20 +388,43 @@
         </div>
         <article role="main">
           <h1>Source code for synthesizer.abundances.abundance_scalings</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module containing various elemental abundance scalings. These provide methods</span>
+<span class="sd">to scale various elements with metallicity instead of simply linearly.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">available_scalings</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Dopita2006&quot;</span><span class="p">]</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">synthesizer.abundances</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">elements</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># list of available scalings</span>
+<span class="n">available_scalings</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Dopita2006&quot;</span><span class="p">,</span> <span class="s2">&quot;GalacticConcordance&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Dopita2006"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.Dopita2006">[docs]</a><span class="k">class</span> <span class="nc">Dopita2006</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scaling functions for Nitrogen.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Dopita (2006) model for abundance scalings.</span>
 
-    <span class="n">ads</span> <span class="o">=</span> <span class="s2">&quot;https://ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/abstract&quot;</span>
-    <span class="n">doi</span> <span class="o">=</span> <span class="s2">&quot;10.1086/508261&quot;</span>
-    <span class="n">available_elements</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">]</span>
+<span class="sd">    This includes scalings for Nitrogen and Carbon.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Dopita2006.N"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.Dopita2006.N">[docs]</a>    <span class="k">def</span> <span class="nf">N</span><span class="p">(</span><span class="n">metallicity</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the Dopita2006 scalings.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ads</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;https://ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/&quot;</span> <span class="s2">&quot;abstract&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doi</span> <span class="o">=</span> <span class="s2">&quot;10.1086/508261&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_elements</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">]</span>
+
+        <span class="c1"># the reference metallicity for the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span> <span class="o">=</span> <span class="mf">0.016</span>
+
+<div class="viewcode-block" id="Dopita2006.nitrogen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.Dopita2006.nitrogen">[docs]</a>    <span class="k">def</span> <span class="nf">nitrogen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scaling function for Nitrogen.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            metallicity (float)</span>
@@ -408,13 +432,12 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            abundance (float)</span>
-<span class="sd">                The logarithmic abundance relative to Hydrogen.</span>
+<span class="sd">                The logarithmic abundance of Nitrogen relative to Hydrogen.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># the metallicity scaled to the Dopita (2006) value</span>
-        <span class="n">dopita_solar_metallicity</span> <span class="o">=</span> <span class="mf">0.016</span>
-        <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="n">dopita_solar_metallicity</span>
+        <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span>
 
         <span class="n">abundance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
             <span class="mf">1.1e-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">4.9e-5</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
@@ -422,7 +445,7 @@
 
         <span class="k">return</span> <span class="n">abundance</span></div>
 
-<div class="viewcode-block" id="Dopita2006.C"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.Dopita2006.C">[docs]</a>    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">metallicity</span><span class="p">):</span>
+<div class="viewcode-block" id="Dopita2006.carbon"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.Dopita2006.carbon">[docs]</a>    <span class="k">def</span> <span class="nf">carbon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Scaling functions for Carbon.</span>
 
@@ -432,16 +455,316 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            abundance (float)</span>
-<span class="sd">                The logarithmic abundance relative to Hydrogen.</span>
+<span class="sd">                The logarithmic abundance of Carbon relative to Hydrogen.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># the metallicity scaled to the Dopita (2006) value</span>
-        <span class="n">dopita_solar_metallicity</span> <span class="o">=</span> <span class="mf">0.016</span>
-        <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="n">dopita_solar_metallicity</span>
+        <span class="n">scaled_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span>
 
         <span class="n">abundance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
             <span class="mf">6e-5</span> <span class="o">*</span> <span class="n">scaled_metallicity</span> <span class="o">+</span> <span class="mf">2e-4</span> <span class="o">*</span> <span class="p">(</span><span class="n">scaled_metallicity</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">abundance</span></div></div>
+
+
+<div class="viewcode-block" id="GalacticConcordance"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance">[docs]</a><span class="k">class</span> <span class="nc">GalacticConcordance</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The &quot;Galactic Concordance&quot; model from Nicholls et al. 2017.</span>
+
+<span class="sd">    In addition to providing a reference abundance pattern Nicholls et al.</span>
+<span class="sd">    2017 provide scalings for a large range of elements.</span>
+
+<span class="sd">    For most of these the scaling, relative to Oxygen, is a simple linear</span>
+<span class="sd">    scaling with plataus at low and high O/H.</span>
+
+<span class="sd">    For Nitrogen and Carbon a more complicated scheme is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># meta information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ads</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;https://ui.adsabs.harvard.edu/abs/2017MNRAS.466.4403N/&quot;</span> <span class="s2">&quot;abstract&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doi</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/10.1093/mnras/stw3235&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">arxiv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bibcode</span> <span class="o">=</span> <span class="s2">&quot;2017MNRAS.466.4403N&quot;</span>
+
+        <span class="c1"># the reference metallicity (mass fraction in metals), i.e. Z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span> <span class="o">=</span> <span class="mf">0.015</span>
+
+        <span class="c1"># logarthmic abundances, i.e. log10(N_element/N_H)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_abundance</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+            <span class="s2">&quot;He&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.09</span><span class="p">,</span>
+            <span class="s2">&quot;Li&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">8.722</span><span class="p">,</span>
+            <span class="s2">&quot;Be&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">10.68</span><span class="p">,</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">9.193</span><span class="p">,</span>
+            <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.577</span><span class="p">,</span>
+            <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.21</span><span class="p">,</span>
+            <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.24</span><span class="p">,</span>
+            <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.56</span><span class="p">,</span>
+            <span class="s2">&quot;Ne&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.91</span><span class="p">,</span>
+            <span class="s2">&quot;Na&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.79</span><span class="p">,</span>
+            <span class="s2">&quot;Mg&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.44</span><span class="p">,</span>
+            <span class="s2">&quot;Al&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.57</span><span class="p">,</span>
+            <span class="s2">&quot;Si&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.50</span><span class="p">,</span>
+            <span class="s2">&quot;P&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.59</span><span class="p">,</span>
+            <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.88</span><span class="p">,</span>
+            <span class="s2">&quot;Cl&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.75</span><span class="p">,</span>
+            <span class="s2">&quot;Ar&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.60</span><span class="p">,</span>
+            <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.96</span><span class="p">,</span>
+            <span class="s2">&quot;Ca&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.68</span><span class="p">,</span>
+            <span class="s2">&quot;Sc&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">8.84</span><span class="p">,</span>
+            <span class="s2">&quot;Ti&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.07</span><span class="p">,</span>
+            <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">8.11</span><span class="p">,</span>
+            <span class="s2">&quot;Cr&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.38</span><span class="p">,</span>
+            <span class="s2">&quot;Mn&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.58</span><span class="p">,</span>
+            <span class="s2">&quot;Fe&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.48</span><span class="p">,</span>
+            <span class="s2">&quot;Co&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.07</span><span class="p">,</span>
+            <span class="s2">&quot;Ni&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">5.80</span><span class="p">,</span>
+            <span class="s2">&quot;Cu&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.82</span><span class="p">,</span>
+            <span class="s2">&quot;Zn&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">7.44</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># the reference oxygen abundance for GalacticConcordance, i.e. [O/H]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_oxygen_abundance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_abundance</span><span class="p">[</span><span class="s2">&quot;O&quot;</span><span class="p">]</span>
+
+        <span class="c1"># these are the scaling parameters used for elements other than CNO</span>
+        <span class="c1"># and a handful of light elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="mf">0.00</span><span class="p">,</span>
+            <span class="s2">&quot;Ne&quot;</span><span class="p">:</span> <span class="mf">0.00</span><span class="p">,</span>
+            <span class="s2">&quot;Na&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.30</span><span class="p">,</span>
+            <span class="s2">&quot;Mg&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span>
+            <span class="s2">&quot;Al&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span>
+            <span class="s2">&quot;Si&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span>
+            <span class="s2">&quot;P&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span>
+            <span class="s2">&quot;Cl&quot;</span><span class="p">:</span> <span class="mf">0.00</span><span class="p">,</span>
+            <span class="s2">&quot;Ar&quot;</span><span class="p">:</span> <span class="mf">0.00</span><span class="p">,</span>
+            <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.10</span><span class="p">,</span>
+            <span class="s2">&quot;Ca&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span>
+            <span class="s2">&quot;Sc&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.25</span><span class="p">,</span>
+            <span class="s2">&quot;Ti&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span>
+            <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Cr&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Mn&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Fe&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Co&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Ni&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Cu&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.50</span><span class="p">,</span>
+            <span class="s2">&quot;Zn&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.30</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># elements that have a predefined method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_elements</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_elements_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;nitrogen&quot;</span><span class="p">,</span> <span class="s2">&quot;carbon&quot;</span><span class="p">]</span>
+
+        <span class="c1"># initialise elements dataclass to access dictionary mapping id to name</span>
+        <span class="n">element_info</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">Elements</span><span class="p">()</span>
+
+        <span class="c1"># create a method for every element contained in scaling_parameters</span>
+        <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">scaling_parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># get element name</span>
+            <span class="n">element_name</span> <span class="o">=</span> <span class="n">element_info</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">element</span><span class="p">]</span>
+
+            <span class="c1"># create method</span>
+            <span class="nb">setattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">element_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scaling_method_creator</span><span class="p">(</span>
+                    <span class="n">element</span><span class="p">,</span>
+                    <span class="n">scaling_parameter</span><span class="p">,</span>
+                    <span class="n">reference_abundances</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_abundance</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># append element to available element list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">available_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">available_elements_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element_name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GalacticConcordance.scaling_method_creator"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.scaling_method_creator">[docs]</a>    <span class="k">class</span> <span class="nc">scaling_method_creator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a class for making the scaling methods for individual elements</span>
+<span class="sd">        using the dictionary above.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">element</span><span class="p">,</span>
+            <span class="n">scaling_parameter</span><span class="p">,</span>
+            <span class="n">lower_break</span><span class="o">=-</span><span class="mf">0.25</span><span class="p">,</span>
+            <span class="n">upper_break</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">reference_metallicity</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span>
+            <span class="n">reference_abundances</span><span class="o">=</span><span class="p">{},</span>
+        <span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Initialiation for a specific element.</span>
+
+<span class="sd">            Arguments:</span>
+<span class="sd">                element (str)</span>
+<span class="sd">                    The element</span>
+<span class="sd">                scaling_parameter (float)</span>
+<span class="sd">                    The scaling parameter, the slope of of the scaling</span>
+<span class="sd">                    relation.</span>
+<span class="sd">                lower_break (float)</span>
+<span class="sd">                    The lower-break (O/H) below which the abundance simply</span>
+<span class="sd">                    scales with metallicity. By default -0.25.</span>
+<span class="sd">                upper_break (float)</span>
+<span class="sd">                    The upper-break (O/H) above which the abundance simply</span>
+<span class="sd">                    scales with metallicity. By default 0.5.</span>
+<span class="sd">                reference_metallicity (float)</span>
+<span class="sd">                    The reference metallicity.</span>
+<span class="sd">                reference_abundances (dict, float)</span>
+<span class="sd">                    Dictionary of reference abundances.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                abundance (float)</span>
+<span class="sd">                    The abundance of the specific element.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="n">element</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lower_break</span> <span class="o">=</span> <span class="n">lower_break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">upper_break</span> <span class="o">=</span> <span class="n">upper_break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameter</span> <span class="o">=</span> <span class="n">scaling_parameter</span>
+
+            <span class="c1"># should try and inherit these</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span> <span class="o">=</span> <span class="n">reference_metallicity</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reference_abundances</span> <span class="o">=</span> <span class="n">reference_abundances</span>
+
+        <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Calculate the abundance for a given metallicity.</span>
+
+<span class="sd">            Arguments:</span>
+<span class="sd">                metallicity (float)</span>
+<span class="sd">                    The metallicity.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                abundance (float)</span>
+<span class="sd">                    The abundance of the specific element.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c1"># calculate log10(oxygen to hydrogen) for a given metallicity</span>
+            <span class="n">log10xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">log10xi</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_break</span><span class="p">:</span>
+                <span class="n">delta_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameter</span>
+            <span class="k">elif</span> <span class="n">log10xi</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_break</span><span class="p">:</span>
+                <span class="n">delta_x</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameter</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_break</span>
+                <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">delta_x</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_parameter</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_break</span><span class="p">)</span> <span class="o">*</span> <span class="n">log10xi</span>
+
+            <span class="n">abundance</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reference_abundances</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">element</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_x</span> <span class="o">+</span> <span class="n">log10xi</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">abundance</span></div>
+
+<div class="viewcode-block" id="GalacticConcordance.oxygen_to_hydrogen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.oxygen_to_hydrogen">[docs]</a>    <span class="k">def</span> <span class="nf">oxygen_to_hydrogen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the oxygen to hydrogen ratio (O/H) for the provided</span>
+<span class="sd">        metallicity.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            metallicity (float)</span>
+<span class="sd">                The metallicity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            oxygen_to_hydrogen (float)</span>
+<span class="sd">                The Oxygen to Hydrogen ratio (O/H).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># calculate oxygen to hydroge for a given metallicity</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_oxygen_abundance</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+            <span class="n">metallicity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_metallicity</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GalacticConcordance.nitrogen_to_oxygen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.nitrogen_to_oxygen">[docs]</a>    <span class="k">def</span> <span class="nf">nitrogen_to_oxygen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oxygen_to_hydrogen</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Nitrogen to Oxygen abundance for a given (O/H).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            oxygen_to_hydrogen (float)</span>
+<span class="sd">                The log of the Oxygen to Hydrogen ratio, i.e. (O/H).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            nitrogen_to_oxygen (float)</span>
+<span class="sd">                The logarithmic abundance relative to Oxygen.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.732</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="mf">2.19</span>
+        <span class="n">nitrogen_to_oxygen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">a</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">oxygen_to_hydrogen</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">nitrogen_to_oxygen</span></div>
+
+<div class="viewcode-block" id="GalacticConcordance.nitrogen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.nitrogen">[docs]</a>    <span class="k">def</span> <span class="nf">nitrogen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Nitrogen abundance (N/H) for a given metallicity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metallicity (float)</span>
+<span class="sd">                The metallicity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            abundance (float)</span>
+<span class="sd">                The logarithmic Nitrogen abundance, i.e. (N/H).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># calculate oxygen to hydrogen for a given metallicity</span>
+        <span class="n">oxygen_to_hydrogen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxygen_to_hydrogen</span><span class="p">(</span><span class="n">metallicity</span><span class="p">)</span>
+
+        <span class="n">abundance</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nitrogen_to_oxygen</span><span class="p">(</span><span class="n">oxygen_to_hydrogen</span><span class="p">)</span> <span class="o">+</span> <span class="n">oxygen_to_hydrogen</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">abundance</span></div>
+
+<div class="viewcode-block" id="GalacticConcordance.carbon_to_oxygen"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.carbon_to_oxygen">[docs]</a>    <span class="k">def</span> <span class="nf">carbon_to_oxygen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oxygen_to_hydrogen</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Carbon to Oxygen abundance for a given (O/H).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            oxygen_to_hydrogen (float)</span>
+<span class="sd">                The log of the Oxygen to Hydrogen ratio, i.e. (O/H).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            carbon_to_oxygen (float)</span>
+<span class="sd">                The logarithmic abundance relative to Oxygen.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.8</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="mf">2.72</span>
+        <span class="n">carbon_to_oxygen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">a</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">oxygen_to_hydrogen</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">carbon_to_oxygen</span></div>
+
+<div class="viewcode-block" id="GalacticConcordance.carbon"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.abundance_scalings.html#synthesizer.abundances.abundance_scalings.GalacticConcordance.carbon">[docs]</a>    <span class="k">def</span> <span class="nf">carbon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metallicity</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Carbon abundance (C/H) for a given metallicity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metallicity (float)</span>
+<span class="sd">                The metallicity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            abundance (float)</span>
+<span class="sd">                The logarithmic Carbon abundance, i.e. (C/H).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># calculate oxygen to hydrogen for a given metallicity</span>
+        <span class="n">oxygen_to_hydrogen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oxygen_to_hydrogen</span><span class="p">(</span><span class="n">metallicity</span><span class="p">)</span>
+
+        <span class="n">abundance</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">carbon_to_oxygen</span><span class="p">(</span><span class="n">oxygen_to_hydrogen</span><span class="p">)</span> <span class="o">+</span> <span class="n">oxygen_to_hydrogen</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">abundance</span></div></div>
