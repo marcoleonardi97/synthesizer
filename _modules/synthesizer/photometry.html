@@ -401,7 +401,9 @@
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">default_units</span>
 
 
@@ -461,6 +463,15 @@
 
         <span class="c1"># Get the photometry</span>
         <span class="n">photometry</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="c1"># Ensure we have units, if not something terrible has happened</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">photometry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Photometry must be passed as a dict of unyt_quantities.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Convert it from a list of unyt_quantities to a unyt_array</span>
+        <span class="n">photometry</span> <span class="o">=</span> <span class="n">unyt_array</span><span class="p">(</span><span class="n">photometry</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">photometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
 
         <span class="c1"># Get the dimensions of a flux for testing</span>
         <span class="n">flux_dimensions</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="s2">&quot;photo_fluxes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span>
