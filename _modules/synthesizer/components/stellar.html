@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.components.stellar - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.components.stellar - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.components.stellar</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module for particle and parametric stars.</span>
 
@@ -478,6 +482,65 @@
                 <span class="s2">&quot;You should not be seeing this!!!&quot;</span>
             <span class="p">)</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="StarsComponent.get_spectra_nebular_continuum"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra_nebular_continuum">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_nebular_continuum</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">fesc_LyA</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">young</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the nebular continuum spectra. This is only invoked if</span>
+<span class="sd">        fesc_LyA &lt; 1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (obj):</span>
+<span class="sd">                Spectral grid object.</span>
+<span class="sd">            fesc (float):</span>
+<span class="sd">                Fraction of stellar emission that escapeds unattenuated from</span>
+<span class="sd">                the birth cloud (defaults to 0.0).</span>
+<span class="sd">            fesc_LyA (float)</span>
+<span class="sd">                Fraction of Lyman-alpha emission that can escape unimpeded</span>
+<span class="sd">                by the ISM/IGM.</span>
+<span class="sd">            young (unyt_quantity):</span>
+<span class="sd">                If not None, specifies age in Myr at which to filter</span>
+<span class="sd">                for young star particles.</span>
+<span class="sd">            old (unyt_quantity):</span>
+<span class="sd">                If not None, specifies age in Myr at which to filter</span>
+<span class="sd">                for old star particles.</span>
+<span class="sd">            kwargs</span>
+<span class="sd">                Any keyword arguments which can be passed to</span>
+<span class="sd">                generate_lnu.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.ndarray</span>
+<span class="sd">                The line contribution spectra.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Make sure young and old in Myr, if provided</span>
+        <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
+
+        <span class="c1"># Generate contribution of line emission alone and reduce the</span>
+        <span class="c1"># contribution of Lyman-alpha</span>
+        <span class="n">nebcont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">spectra_name</span><span class="o">=</span><span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span>
+            <span class="n">old</span><span class="o">=</span><span class="n">old</span><span class="p">,</span>
+            <span class="n">young</span><span class="o">=</span><span class="n">young</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Multiply by the Lyamn-continuum escape fraction</span>
+        <span class="n">nebcont</span> <span class="o">*=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span>
+
+        <span class="c1"># Get index of Lyman-alpha</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_nearest_index</span><span class="p">(</span><span class="mf">1216.0</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
+        <span class="n">nebcont</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*=</span> <span class="n">fesc_LyA</span>  <span class="c1"># reduce the contribution of Lyman-alpha</span>
+
+        <span class="k">return</span> <span class="n">nebcont</span></div>
 
 <div class="viewcode-block" id="StarsComponent.get_spectra_linecont"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra_linecont">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra_linecont</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -728,8 +791,8 @@
 <span class="sd">        spectra this saves the incident, nebular, and escaped spectra.</span>
 
 <span class="sd">        Note, if a grid that has not been post-processed through a</span>
-<span class="sd">        photoionisation code is provided (i.e. read_lines=False) this will</span>
-<span class="sd">        just call `get_spectra_incident`.</span>
+<span class="sd">        photoionisation code is provided (i.e. grid.reprocessed=False) this</span>
+<span class="sd">        will just call `get_spectra_incident`.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            grid (obj):</span>
@@ -774,7 +837,7 @@
         <span class="n">young</span><span class="p">,</span> <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_young_old_units</span><span class="p">(</span><span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
 
         <span class="c1"># Check if grid has been run through a photoionisation code</span>
-        <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">grid</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="p">(</span>
@@ -933,12 +996,12 @@
         <span class="p">)</span>
 
         <span class="c1"># Apply the dust screen</span>
-        <span class="n">emergent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+        <span class="n">emergent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">intrinsic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
             <span class="n">tau_v</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span>
         <span class="p">)</span>
 
         <span class="c1"># Store the Sed object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">emergent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">emergent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">emergent</span>
 
         <span class="k">return</span> <span class="n">emergent</span></div>
 
@@ -1065,7 +1128,7 @@
                 <span class="p">)</span>
 
         <span class="c1"># If grid has photoinoisation outputs, use the reprocessed outputs</span>
-        <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">:</span>
             <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s2">&quot;reprocessed&quot;</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># otherwise just use the intrinsic stellar spectra</span>
             <span class="n">reprocessed_name</span> <span class="o">=</span> <span class="s2">&quot;intrinsic&quot;</span>
@@ -1118,8 +1181,9 @@
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c1"># Combine young and old spectra</span>
-            <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">read_lines</span><span class="p">:</span>
+            <span class="c1"># Combine young and old spectra (only if the grid has been</span>
+            <span class="c1"># reprocessed through photoionisation code)</span>
+            <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;young_incident&quot;</span><span class="p">]</span>
                     <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;old_incident&quot;</span><span class="p">]</span>
@@ -1487,7 +1551,6 @@
             <span class="n">grid</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">fesc_LyA</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(),</span>
             <span class="n">tau_v</span><span class="o">=</span><span class="p">[</span><span class="n">tau_v_ISM</span><span class="p">,</span> <span class="n">tau_v_BC</span><span class="p">],</span>
             <span class="n">alpha</span><span class="o">=</span><span class="p">[</span><span class="n">alpha_ISM</span><span class="p">,</span> <span class="n">alpha_BC</span><span class="p">],</span>
             <span class="n">young_old_thresh</span><span class="o">=</span><span class="n">young_old_thresh</span><span class="p">,</span>
@@ -1857,7 +1920,7 @@
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

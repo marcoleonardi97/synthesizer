@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Generating Lines from a Parametric Galaxy" href="generate_lines.html" /><link rel="prev" title="Making a Parametric Stellar Population" href="make_stars.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Generating Rest Frame SEDs from a Parametric Galaxy - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>Generating Rest Frame SEDs from a Parametric Galaxy - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -117,6 +117,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -128,7 +130,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -221,6 +223,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -352,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -389,9 +393,9 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="Generating-Rest-Frame-SEDs-from-a-Parametric-Galaxy">
-<h1>Generating Rest Frame SEDs from a Parametric Galaxy<a class="headerlink" href="#Generating-Rest-Frame-SEDs-from-a-Parametric-Galaxy" title="Permalink to this heading">#</a></h1>
+<h1>Generating Rest Frame SEDs from a Parametric Galaxy<a class="headerlink" href="#Generating-Rest-Frame-SEDs-from-a-Parametric-Galaxy" title="Permalink to this heading">¶</a></h1>
 <p>Building on the <code class="docutils literal notranslate"><span class="pre">make_sfzh</span></code> documents we can now see how to generate a galaxy and produce its rest-frame spectral energy distribution.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -402,6 +406,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">Stars</span><span class="p">,</span> <span class="n">ZDist</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra_as_rainbow</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Myr</span>
 </pre></div>
 </div>
@@ -552,9 +557,25 @@ log10(Bolometric luminosity/erg/s):43.70291841018614----------
 <img alt="../_images/parametric_generate_sed_15_0.png" src="../_images/parametric_generate_sed_15_0.png" />
 </div>
 </div>
-<p>Next, we can generate spectra including nebular emission. In the parlance of <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> these are reprocessed spectra. This introduces a new free parameter, the Lyman-continuum escape fraction, <code class="docutils literal notranslate"><span class="pre">fesc</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra_as_rainbow</span><span class="p">(</span><span class="n">sed</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/parametric_generate_sed_16_0.png" src="../_images/parametric_generate_sed_16_0.png" />
+</div>
+</div>
+<p>Next, we can generate spectra including nebular emission. In the parlance of <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> these are reprocessed spectra. This introduces a new free parameter, the Lyman-continuum escape fraction, <code class="docutils literal notranslate"><span class="pre">fesc</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_reprocessed</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -563,7 +584,7 @@ log10(Bolometric luminosity/erg/s):43.70291841018614----------
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -576,13 +597,13 @@ log10(Bolometric luminosity/erg/s):43.70291841018614----------
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_17_1.png" src="../_images/parametric_generate_sed_17_1.png" />
+<img alt="../_images/parametric_generate_sed_18_1.png" src="../_images/parametric_generate_sed_18_1.png" />
 </div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">get_spectra_reprocessed()</span></code> actually generates more than just the reprocessed spectra, if also generates the <code class="docutils literal notranslate"><span class="pre">incident</span></code>, <code class="docutils literal notranslate"><span class="pre">transmitted</span></code>, <code class="docutils literal notranslate"><span class="pre">nebular</span></code>, and <code class="docutils literal notranslate"><span class="pre">intrinsic</span></code> <code class="docutils literal notranslate"><span class="pre">spectra</span></code>. If <code class="docutils literal notranslate"><span class="pre">fesc&gt;0</span></code> it also generates <code class="docutils literal notranslate"><span class="pre">escaped</span></code>. The definitions of all of these are described in the spectra docs.</p>
 <p>At anytime we can get a list of the spectra associated with a galaxy using:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -597,9 +618,37 @@ log10(Bolometric luminosity/erg/s):43.70291841018614----------
 dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;escaped&#39;, &#39;reprocessed&#39;, &#39;intrinsic&#39;])
 </pre></div></div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra_as_rainbow</span><span class="p">(</span><span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra_as_rainbow</span><span class="p">(</span>
+    <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">],</span> <span class="n">logged</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/parametric_generate_sed_22_0.png" src="../_images/parametric_generate_sed_22_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/parametric_generate_sed_22_1.png" src="../_images/parametric_generate_sed_22_1.png" />
+</div>
+</div>
 <p><code class="docutils literal notranslate"><span class="pre">get_spectra_reprocessed()</span></code> also includes a parameter allowing us to suppress Lyman-alpha emission, the Lyman-alpha escape fraction <code class="docutils literal notranslate"><span class="pre">fesc_LyA</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
@@ -609,7 +658,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -622,7 +671,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_22_1.png" src="../_images/parametric_generate_sed_22_1.png" />
+<img alt="../_images/parametric_generate_sed_24_1.png" src="../_images/parametric_generate_sed_24_1.png" />
 </div>
 </div>
 <p>Dust attenuation in <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> is implemented via the flexible <strong>Pacman</strong> model. This model has a few features:</p>
@@ -635,7 +684,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </ul>
 <p>First, let’s add dust attenuation using a simple screen model with a V-band optical depth <code class="docutils literal notranslate"><span class="pre">tau_v=0.5</span></code> and a power-law attenuation curve with <code class="docutils literal notranslate"><span class="pre">alpha=-1</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
@@ -647,37 +696,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-(&lt;Figure size 350x500 with 1 Axes&gt;,
- &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{\\AA}]$&#39;, ylabel=&#39;$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$&#39;&gt;)
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_25_1.png" src="../_images/parametric_generate_sed_25_1.png" />
-</div>
-</div>
-<p>Next, let’s allow <code class="docutils literal notranslate"><span class="pre">fesc</span></code> to vary. In the pacman model the fraction of light escaping reprocessing by gas also escape dust attenuation.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
-    <span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="s2">&quot;attenuated&quot;</span><span class="p">,</span> <span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -693,9 +712,39 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <img alt="../_images/parametric_generate_sed_27_1.png" src="../_images/parametric_generate_sed_27_1.png" />
 </div>
 </div>
+<p>Next, let’s allow <code class="docutils literal notranslate"><span class="pre">fesc</span></code> to vary. In the pacman model the fraction of light escaping reprocessing by gas also escape dust attenuation.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_pacman</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
+    <span class="n">spectra_to_plot</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="s2">&quot;attenuated&quot;</span><span class="p">,</span> <span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 350x500 with 1 Axes&gt;,
+ &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{\\AA}]$&#39;, ylabel=&#39;$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$&#39;&gt;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/parametric_generate_sed_29_1.png" src="../_images/parametric_generate_sed_29_1.png" />
+</div>
+</div>
 <p>Note, that despite the same <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> the actual attenuation is much less. Fortunately if we want to know the true attenuation there is a method <code class="docutils literal notranslate"><span class="pre">A()</span></code> on Galaxy for that which take the wavelength.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># FIX COMING SOON</span>
@@ -705,7 +754,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">get_spectra_pacman()</span></code> can also implement dust attenuation separately for both young and old components (where the threshold is set by <code class="docutils literal notranslate"><span class="pre">young_old_thresh</span></code> which is log10(threshold/yr)). In this case it is also necessary to provide <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> and <code class="docutils literal notranslate"><span class="pre">alpha</span></code> as pairs of values describing the ISM and birth-cloud components. Note, young stellar populations feel attenuation from both the ISM and birth-cloud components.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
@@ -723,7 +772,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -736,12 +785,12 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_31_1.png" src="../_images/parametric_generate_sed_31_1.png" />
+<img alt="../_images/parametric_generate_sed_33_1.png" src="../_images/parametric_generate_sed_33_1.png" />
 </div>
 </div>
 <p>For users more familiar with the Charlot and Fall (2000) two component dust model <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> also includes a <code class="docutils literal notranslate"><span class="pre">get_spectra_CharlotFall()</span></code> method, which is really a wrapper around the more generic <code class="docutils literal notranslate"><span class="pre">get_spectra_pacman()</span></code> method. The difference is that <code class="docutils literal notranslate"><span class="pre">fesc</span></code> is implicitly assumed to <code class="docutils literal notranslate"><span class="pre">0.0</span></code> and there is a more familiar way of setting the parameters.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra_CharlotFall</span><span class="p">(</span>
@@ -755,7 +804,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -768,15 +817,15 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_33_1.png" src="../_images/parametric_generate_sed_33_1.png" />
+<img alt="../_images/parametric_generate_sed_35_1.png" src="../_images/parametric_generate_sed_35_1.png" />
 </div>
 </div>
 <p>Here we also demonstrate that the luminosity can be plotted instead of the spectral luminosity density by passing <code class="docutils literal notranslate"><span class="pre">quantity_to_plot=&quot;luminosity&quot;</span></code> to the <code class="docutils literal notranslate"><span class="pre">plot_spectra</span></code> method. In fact, any quantity stored on an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> can be passed to this argument to plot the respective quantity. These options include “lnu”, “luminosity” or “llam” for rest frame spectra or “fnu”, “flam” or “flux” for observed spectra.</p>
 <section id="Dust-emission">
-<h2>Dust emission<a class="headerlink" href="#Dust-emission" title="Permalink to this heading">#</a></h2>
+<h2>Dust emission<a class="headerlink" href="#Dust-emission" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> can also be used to model emission through a simple energy balance approach. To do this we can supply a method that calculates an attenuated spectrum a <code class="docutils literal notranslate"><span class="pre">synthesizer.dust.emission.DustEmission</span></code> object. <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> has several built-in and these are described in <strong>insert referenc</strong>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.dust.emission</span> <span class="kn">import</span> <span class="n">Greybody</span><span class="p">,</span> <span class="n">IR_templates</span>
@@ -786,7 +835,7 @@ dict_keys([&#39;incident&#39;, &#39;transmitted&#39;, &#39;nebular&#39;, &#39;es
 </div>
 <p>If we provide a single attenuation (and curve) we need to only provide a single dust_emission model:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialise a greybody dust emission model</span>
@@ -829,12 +878,12 @@ Dust luminosity = 3.9768558538322655e+43 erg/s
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_37_2.png" src="../_images/parametric_generate_sed_37_2.png" />
+<img alt="../_images/parametric_generate_sed_39_2.png" src="../_images/parametric_generate_sed_39_2.png" />
 </div>
 </div>
 <p>We can also specificy different dust emission models for the birth cloud and ISM (diffuse) dust separately:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
@@ -890,20 +939,20 @@ Dust luminosity = 3.375133107114719e+43 erg/s
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_39_1.png" src="../_images/parametric_generate_sed_39_1.png" />
+<img alt="../_images/parametric_generate_sed_41_1.png" src="../_images/parametric_generate_sed_41_1.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_39_2.png" src="../_images/parametric_generate_sed_39_2.png" />
+<img alt="../_images/parametric_generate_sed_41_2.png" src="../_images/parametric_generate_sed_41_2.png" />
 </div>
 </div>
 <section id="We-can-instead-specify-IR-template-spectra-as-well">
-<h3>We can instead specify IR template spectra as well<a class="headerlink" href="#We-can-instead-specify-IR-template-spectra-as-well" title="Permalink to this heading">#</a></h3>
+<h3>We can instead specify IR template spectra as well<a class="headerlink" href="#We-can-instead-specify-IR-template-spectra-as-well" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># reset spectra</span>
@@ -922,19 +971,26 @@ Dust luminosity = 3.375133107114719e+43 erg/s
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[20], line 4</span>
+Cell <span class="ansi-green-fg">In[22], line 4</span>
 <span class="ansi-green-intense-fg ansi-bold">      2</span> grid_name_ir <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">MW3.1</span><span style="color: rgb(175,0,0)">&#34;</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> grid_dir_ir <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">../../../tests/test_grid/</span><span style="color: rgb(175,0,0)">&#34;</span>
 <span class="ansi-green-fg">----&gt; 4</span> grid_ir <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Grid</span><span class="ansi-yellow-bg">(</span>
 <span class="ansi-green-intense-fg ansi-bold">      5</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">grid_name_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">grid_dir</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">grid_dir_ir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_spectra</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_lines</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span>
 <span class="ansi-green-intense-fg ansi-bold">      6</span> <span class="ansi-yellow-bg">)</span>
 
-File <span class="ansi-green-fg">~/work/synthesizer/synthesizer/src/synthesizer/grid.py:284</span>, in <span class="ansi-cyan-fg">Grid.__init__</span><span class="ansi-blue-fg">(self, grid_name, grid_dir, read_spectra, read_lines, new_lam, filters, lam_lims)</span>
-<span class="ansi-green-intense-fg ansi-bold">    281</span>     read_lines <span style="color: rgb(98,98,98)">=</span> flatten_linelist(read_lines)
-<span class="ansi-green-intense-fg ansi-bold">    283</span> <span style="color: rgb(95,135,135)"># Get basic info of the grid</span>
-<span class="ansi-green-fg">--&gt; 284</span> <span class="ansi-bold" style="color: rgb(0,135,0)">with</span> <span class="ansi-yellow-bg">h5py</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">File</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">grid_filename</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">r</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg">)</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> hf:
-<span class="ansi-green-intense-fg ansi-bold">    285</span>     <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>parameters <span style="color: rgb(98,98,98)">=</span> {k: v <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> k, v <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> hf<span style="color: rgb(98,98,98)">.</span>attrs<span style="color: rgb(98,98,98)">.</span>items()}
-<span class="ansi-green-intense-fg ansi-bold">    287</span>     <span style="color: rgb(95,135,135)"># Get list of axes</span>
+File <span class="ansi-green-fg">~/work/synthesizer/synthesizer/src/synthesizer/grid.py:170</span>, in <span class="ansi-cyan-fg">Grid.__init__</span><span class="ansi-blue-fg">(self, grid_name, grid_dir, read_spectra, read_lines, new_lam, filters, lam_lims)</span>
+<span class="ansi-green-intense-fg ansi-bold">    167</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>parameters <span style="color: rgb(98,98,98)">=</span> {}
+<span class="ansi-green-intense-fg ansi-bold">    169</span> <span style="color: rgb(95,135,135)"># Get the axes of the grid from the HDF5 file</span>
+<span class="ansi-green-fg">--&gt; 170</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_get_axes</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    172</span> <span style="color: rgb(95,135,135)"># Get the ionising luminosity (if available)</span>
+<span class="ansi-green-intense-fg ansi-bold">    173</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_get_ionising_luminosity()
+
+File <span class="ansi-green-fg">~/work/synthesizer/synthesizer/src/synthesizer/grid.py:215</span>, in <span class="ansi-cyan-fg">Grid._get_axes</span><span class="ansi-blue-fg">(self)</span>
+<span class="ansi-green-intense-fg ansi-bold">    213</span> <span style="color: rgb(175,0,0)">&#34;&#34;&#34;Get the grid axes from the HDF5 file.&#34;&#34;&#34;</span>
+<span class="ansi-green-intense-fg ansi-bold">    214</span> <span style="color: rgb(95,135,135)"># Get basic info of the grid</span>
+<span class="ansi-green-fg">--&gt; 215</span> <span class="ansi-bold" style="color: rgb(0,135,0)">with</span> <span class="ansi-yellow-bg">h5py</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">File</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">grid_filename</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">r</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">&#34;</span><span class="ansi-yellow-bg">)</span> <span class="ansi-bold" style="color: rgb(0,135,0)">as</span> hf:
+<span class="ansi-green-intense-fg ansi-bold">    216</span>     <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>parameters <span style="color: rgb(98,98,98)">=</span> {k: v <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> k, v <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> hf<span style="color: rgb(98,98,98)">.</span>attrs<span style="color: rgb(98,98,98)">.</span>items()}
+<span class="ansi-green-intense-fg ansi-bold">    218</span>     <span style="color: rgb(95,135,135)"># Get list of axes</span>
 
 File <span class="ansi-green-fg">/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/h5py/_hl/files.py:562</span>, in <span class="ansi-cyan-fg">File.__init__</span><span class="ansi-blue-fg">(self, name, mode, driver, libver, userblock_size, swmr, rdcc_nslots, rdcc_nbytes, rdcc_w0, track_order, fs_strategy, fs_persist, fs_threshold, fs_page_size, page_buf_size, min_meta_keep, min_raw_keep, locking, alignment_threshold, alignment_interval, meta_block_size, **kwds)</span>
 <span class="ansi-green-intense-fg ansi-bold">    553</span>     fapl <span style="color: rgb(98,98,98)">=</span> make_fapl(driver, libver, rdcc_nslots, rdcc_nbytes, rdcc_w0,
@@ -967,7 +1023,7 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tau_v_ISM</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># ISM component of dust attenuation</span>
@@ -1008,7 +1064,7 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[21], line 6</span>
+Cell <span class="ansi-green-fg">In[23], line 6</span>
 <span class="ansi-green-intense-fg ansi-bold">      4</span> alpha <span style="color: rgb(98,98,98)">=</span> [<span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">0.7</span>, <span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">1.3</span>]
 <span class="ansi-green-intense-fg ansi-bold">      5</span> mdust <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">5e9</span> <span style="color: rgb(98,98,98)">*</span> Msun
 <span class="ansi-green-fg">----&gt; 6</span> dust_emission_model <span style="color: rgb(98,98,98)">=</span> IR_templates(<span class="ansi-yellow-bg">grid_ir</span>, mdust<span style="color: rgb(98,98,98)">=</span>mdust, gamma<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">0.05</span>)
@@ -1026,10 +1082,10 @@ Cell <span class="ansi-green-fg">In[21], line 6</span>
 </section>
 </section>
 <section id="Galaxy-summary">
-<h2>Galaxy summary<a class="headerlink" href="#Galaxy-summary" title="Permalink to this heading">#</a></h2>
+<h2>Galaxy summary<a class="headerlink" href="#Galaxy-summary" title="Permalink to this heading">¶</a></h2>
 <p>Like other objects in <code class="docutils literal notranslate"><span class="pre">synthesizer</span></code> we can also get a useful summary of the <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> object just using the <code class="docutils literal notranslate"><span class="pre">print</span></code> function:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">galaxy</span><span class="p">)</span>
@@ -1079,7 +1135,7 @@ available images: []
 </div>
 <p>We can also extract an spectra and generate broadband photometry. See the <code class="docutils literal notranslate"><span class="pre">Sed</span></code> and <code class="docutils literal notranslate"><span class="pre">Filter</span></code> tutorials:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]</span>
@@ -1120,7 +1176,7 @@ available images: []
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/parametric_generate_sed_47_1.png" src="../_images/parametric_generate_sed_47_1.png" />
+<img alt="../_images/parametric_generate_sed_49_1.png" src="../_images/parametric_generate_sed_49_1.png" />
 </div>
 </div>
 </section>
@@ -1201,7 +1257,7 @@ available images: []
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

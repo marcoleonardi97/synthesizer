@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.photoionisation.cloudy17 - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.photoionisation.cloudy17 - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.photoionisation.cloudy17</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Given an SED (from an SPS model, for example), generate a cloudy atmosphere</span>
@@ -570,7 +574,7 @@
     <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">abundances</span><span class="o">.</span><span class="n">metals</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> no grains</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -624,7 +628,7 @@
 <span class="sd">    which will again introduce issues on mass conservation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
         <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
         <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
@@ -636,9 +640,9 @@
         <span class="n">f_Si</span> <span class="o">=</span> <span class="n">delta_Si</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">orion_Si_abund</span><span class="p">))</span>
         <span class="n">f_pah</span> <span class="o">=</span> <span class="n">delta_PAH</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">PAH_abund</span><span class="p">))</span>
         <span class="n">command</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;grains Orion graphite </span><span class="si">{</span><span class="n">f_graphite</span><span class="si">}</span><span class="s2"> &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">grains Orion silicate </span><span class="si">{</span><span class="n">f_Si</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">grains &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;PAH </span><span class="si">{</span><span class="n">f_pah</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;grains Orion graphite </span><span class="si">{</span><span class="n">f_graphite</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;grains Orion silicate </span><span class="si">{</span><span class="n">f_Si</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;grains PAH </span><span class="si">{</span><span class="n">f_pah</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1007,7 +1011,7 @@
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

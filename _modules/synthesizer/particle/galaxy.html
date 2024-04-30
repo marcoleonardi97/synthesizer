@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.particle.galaxy - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.particle.galaxy - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.particle.galaxy</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module containing all the funtionality for Particle based galaxies.</span>
 
@@ -560,7 +564,12 @@
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Galaxy.load_stars"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.load_stars">[docs]</a>    <span class="k">def</span> <span class="nf">load_stars</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">initial_masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">initial_masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metallicities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load arrays for star properties into a `Stars`  object,</span>
@@ -571,7 +580,7 @@
 <span class="sd">                Initial stellar particle masses (mass at birth), Msol</span>
 <span class="sd">            ages (array_like, float)</span>
 <span class="sd">                Star particle age, Myr</span>
-<span class="sd">            metals (array_like, float)</span>
+<span class="sd">            metallicities (array_like, float)</span>
 <span class="sd">                Star particle metallicity (total metal fraction)</span>
 <span class="sd">            stars (stars particle object)</span>
 <span class="sd">                A pre-existing stars particle object to use. Defaults to None.</span>
@@ -586,12 +595,18 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">stars</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If nothing has been provided, just set to None and return</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">initial_masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">ages</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">metals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">initial_masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">ages</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">metallicities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Create a new Stars object from particle arrays</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span><span class="n">initial_masses</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metals</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">Stars</span><span class="p">(</span>
+                    <span class="n">initial_masses</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_integrated_stellar_properties</span><span class="p">()</span>
 
@@ -599,7 +614,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span></div>
 
-<div class="viewcode-block" id="Galaxy.load_gas"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.load_gas">[docs]</a>    <span class="k">def</span> <span class="nf">load_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Galaxy.load_gas"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.load_gas">[docs]</a>    <span class="k">def</span> <span class="nf">load_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metallicities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load arrays for gas particle properties into a `Gas` object,</span>
 <span class="sd">        and attach to this galaxy object</span>
@@ -607,7 +622,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            masses : array_like (float)</span>
 <span class="sd">                gas particle masses, Msol</span>
-<span class="sd">            metals : array_like (float)</span>
+<span class="sd">            metallicities : array_like (float)</span>
 <span class="sd">                gas particle metallicity (total metal fraction)</span>
 <span class="sd">            gas (gas particle object)</span>
 <span class="sd">                A pre-existing gas particle object to use. Defaults to None.</span>
@@ -621,10 +636,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="o">=</span> <span class="n">gas</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If nothing has been provided, just set to None and return</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">metals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">metallicities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">return</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="o">=</span> <span class="n">Gas</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="n">metals</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="o">=</span> <span class="n">Gas</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_integrated_gas_properties</span><span class="p">()</span>
 
@@ -668,11 +683,11 @@
         <span class="p">)</span>
 
         <span class="c1"># Loop over black holes</span>
-        <span class="n">metals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">nbh</span><span class="p">)</span>
+        <span class="n">metallicities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">nbh</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">gas_in_range</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inds</span><span class="p">):</span>
             <span class="c1"># Handle black holes with no neighbouring gas</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gas_in_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">metals</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_metallicity</span>
+                <span class="n">metallicities</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_metallicity</span>
 
             <span class="c1"># Calculate the separation between the black hole and gas particles</span>
             <span class="n">sep</span> <span class="o">=</span> <span class="p">(</span>
@@ -688,17 +703,17 @@
 
             <span class="c1"># The above operation can remove all gas neighbours...</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gas_in_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">metals</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_metallicity</span>
+                <span class="n">metallicities</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_metallicity</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Calculate the mass weight metallicity of this black holes region</span>
-            <span class="n">metals</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
+            <span class="n">metallicities</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">gas_in_range</span><span class="p">],</span>
                 <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_masses</span><span class="p">[</span><span class="n">gas_in_range</span><span class="p">],</span>
             <span class="p">)</span>
 
         <span class="c1"># Assign the metallicity we have found</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metals</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metallicities</span></div>
 
     <span class="k">def</span> <span class="nf">_prepare_los_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">force_loop</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2039,7 +2054,7 @@
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

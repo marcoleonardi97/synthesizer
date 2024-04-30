@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.abundances.depletion_models - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.abundances.depletion_models - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,23 +390,29 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.abundances.depletion_models</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Module containing various depletion models. Depletion models relate the gas</span>
 <span class="sd">phase depleted abundances to the total abundances, i.e.:</span>
 <span class="sd">    (X/H)_{gas,dep} = D_{x}\times (X/H)_{total}</span>
 <span class="sd">    (X/H)_{dust} = (1-D_{x})\times (X/H)_{total}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="c1"># list of available models included in this module</span>
-<span class="n">available_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Jenkins2009&quot;</span><span class="p">,</span> <span class="s2">&quot;CloudyClassic&quot;</span><span class="p">,</span> <span class="s2">&quot;Gutkin2016&quot;</span><span class="p">]</span>
+<span class="n">available_patterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;Jenkins2009_Gunasekera2021&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CloudyClassic&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Gutkin2016&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 
 
-<div class="viewcode-block" id="Jenkins2009"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.depletion_models.html#synthesizer.abundances.depletion_models.Jenkins2009">[docs]</a><span class="k">class</span> <span class="nc">Jenkins2009</span><span class="p">:</span>
+<div class="viewcode-block" id="Jenkins2009_Gunasekera2021"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.depletion_models.html#synthesizer.abundances.depletion_models.Jenkins2009_Gunasekera2021">[docs]</a><span class="k">class</span> <span class="nc">Jenkins2009_Gunasekera2021</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Implemention of the Jenkins (2009) depletion pattern that is built into</span>
-<span class="sd">    cloudy23.</span>
+<span class="sd">    cloudy23 as described by Gunasekera (2021). This modification adds in</span>
+<span class="sd">    additional elements that were not considered by Jenkins (2009).</span>
 
 <span class="sd">    In this model the depletion (D_x) is written as:</span>
 <span class="sd">        D_x = 10**(B_x +A_x (F_* − z_x ))</span>
@@ -417,8 +427,8 @@
         <span class="c1"># &quot;He&quot;: 1.0,</span>
         <span class="s2">&quot;Li&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.136</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.246</span><span class="p">,</span> <span class="mf">0.000</span><span class="p">),</span>
         <span class="c1"># &quot;Be&quot;: 0.6,</span>
-        <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.101</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.193</span><span class="p">,</span> <span class="mf">0.803</span><span class="p">),</span>
-        <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.10</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.19</span><span class="p">,</span> <span class="mf">0.80</span><span class="p">),</span>
+        <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.849</span><span class="p">,</span> <span class="mf">0.698</span><span class="p">,</span> <span class="mf">0.000</span><span class="p">),</span>
+        <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.101</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.193</span><span class="p">,</span> <span class="mf">0.803</span><span class="p">),</span>
         <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.11</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">),</span>
         <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.23</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.60</span><span class="p">),</span>
         <span class="c1"># &quot;F&quot;: 0.3,</span>
@@ -445,7 +455,7 @@
         <span class="s2">&quot;Zn&quot;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.61</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.28</span><span class="p">,</span> <span class="mf">0.56</span><span class="p">),</span>
     <span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fstar</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fstar</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the class.</span>
 
@@ -458,8 +468,10 @@
         <span class="k">for</span> <span class="n">element</span><span class="p">,</span> <span class="n">parameters</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># unpack parameters. Despite convention I&#39;ve chosen to use</span>
             <span class="n">a_x</span><span class="p">,</span> <span class="n">b_x</span><span class="p">,</span> <span class="n">z_x</span> <span class="o">=</span> <span class="n">parameters</span>
-            <span class="c1"># calculate depletion</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">+</span> <span class="n">a_x</span> <span class="o">*</span> <span class="p">(</span><span class="n">fstar</span> <span class="o">-</span> <span class="n">z_x</span><span class="p">))</span></div>
+            <span class="c1"># calculate depletion, including limit</span>
+
+            <span class="n">depletion</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">limit</span><span class="p">,</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">b_x</span> <span class="o">+</span> <span class="n">a_x</span> <span class="o">*</span> <span class="p">(</span><span class="n">fstar</span> <span class="o">-</span> <span class="n">z_x</span><span class="p">))])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">depletion</span><span class="p">[</span><span class="n">element</span><span class="p">]</span> <span class="o">=</span> <span class="n">depletion</span></div>
 
 
 <div class="viewcode-block" id="CloudyClassic"><a class="viewcode-back" href="../../../_autosummary/synthesizer.abundances.depletion_models.html#synthesizer.abundances.depletion_models.CloudyClassic">[docs]</a><span class="k">class</span> <span class="nc">CloudyClassic</span><span class="p">:</span>
@@ -517,14 +529,11 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Depletion pattern created for Synthesizer 2024.</span>
 
-<span class="sd">    Gutkin+2016:</span>
-<span class="sd">        https://ui.adsabs.harvard.edu/abs/2016MNRAS.462.1757G/abstract</span>
+<span class="sd">    Gutkin+2016 (ui.adsabs.harvard.edu/abs/2016MNRAS.462.1757G/abstract)</span>
 
-<span class="sd">    Note: in previous version we adjusted N (&quot;N&quot;: 0.89) following:</span>
-<span class="sd">    Dopita+2013:</span>
-<span class="sd">        https://ui.adsabs.harvard.edu/abs/2013ApJS..208...10D/abstract</span>
-<span class="sd">    Dopita+2006:</span>
-<span class="sd">        https://ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/abstract</span>
+<span class="sd">    Note: in previous version we adjusted N (&quot;N&quot;: 0.89) following Dopita+2006</span>
+<span class="sd">    (ui.adsabs.harvard.edu/abs/2013ApJS..208...10D/abstrac) and Dopita+2013</span>
+<span class="sd">    (ui.adsabs.harvard.edu/abs/2006ApJS..167..177D/abstract)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># This is the inverse depletion</span>
@@ -606,7 +615,7 @@
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

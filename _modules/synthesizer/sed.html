@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.sed - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.sed - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.sed</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functionality related to spectra storage and manipulation.</span>
 
@@ -419,7 +423,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
 <span class="kn">from</span> <span class="nn">synthesizer.photometry</span> <span class="kn">import</span> <span class="n">PhotometryCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
-<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span><span class="p">,</span> <span class="n">rebin_1d</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span><span class="p">,</span> <span class="n">rebin_1d</span><span class="p">,</span> <span class="n">wavelength_to_rgba</span>
 
 
 <div class="viewcode-block" id="Sed"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed">[docs]</a><span class="k">class</span> <span class="nc">Sed</span><span class="p">:</span>
@@ -1693,7 +1697,25 @@
             <span class="mi">0</span><span class="p">,</span>
             <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div></div>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Sed.plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A wrapper for synthesizer.sed.plot_spectra()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">plot_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sed.plot_observed_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.plot_observed_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_observed_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A wrapper for synthesizer.sed.plot_observed_spectra()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">plot_observed_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sed.plot_spectra_as_rainbow"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.plot_spectra_as_rainbow">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra_as_rainbow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A wrapper for synthesizer.sed.plot_spectra_as_rainbow()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">plot_spectra_as_rainbow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.plot_spectra">[docs]</a><span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
@@ -2079,6 +2101,105 @@
     <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
+<div class="viewcode-block" id="plot_spectra_as_rainbow"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.plot_spectra_as_rainbow">[docs]</a><span class="k">def</span> <span class="nf">plot_spectra_as_rainbow</span><span class="p">(</span>
+    <span class="n">sed</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">lam_min</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>
+    <span class="n">lam_max</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span>
+    <span class="n">include_xaxis</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">logged</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_log_lnu</span><span class="o">=-</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">use_fnu</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a plot of the spectrum as a rainbow.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        sed (synthesizer.sed.Sed)</span>
+<span class="sd">            A synthesizer Sed object.</span>
+<span class="sd">        figsize (tuple)</span>
+<span class="sd">            Fig-size tuple (width, height).</span>
+<span class="sd">        lam_min (float)</span>
+<span class="sd">            The min wavelength to plot in Angstroms.</span>
+<span class="sd">        lam_max (float)</span>
+<span class="sd">            The max wavelength to plot in Angstroms.</span>
+<span class="sd">        include_xaxis (bool)</span>
+<span class="sd">            Flag whther to include x-axis ticks and label.</span>
+<span class="sd">        logged (bool)</span>
+<span class="sd">            Flag whether to use logged luminosity.</span>
+<span class="sd">        min_log_lnu (float)</span>
+<span class="sd">            Minium luminosity to plot relative to the maximum.</span>
+<span class="sd">        use_fnu (bool)</span>
+<span class="sd">            Whether to plot fluxes or luminosities. If True</span>
+<span class="sd">            fluxes are plotted, otherwise luminosities.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        fig (matplotlib.pyplot.figure)</span>
+<span class="sd">            The matplotlib figure object for the plot.</span>
+<span class="sd">        ax (matplotlib.axes)</span>
+<span class="sd">            The matplotlib axes object containing the plotted data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># take sum of Seds if two dimensional</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">use_fnu</span><span class="p">:</span>
+        <span class="c1"># define filter for spectra</span>
+        <span class="n">wavelength_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span> <span class="o">&lt;</span> <span class="n">lam_max</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span> <span class="o">&gt;</span> <span class="n">lam_min</span>
+        <span class="p">)</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">[</span><span class="n">wavelength_indices</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;nm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">_fnu</span><span class="p">[</span><span class="n">wavelength_indices</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># define filter for spectra</span>
+        <span class="n">wavelength_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">_lam</span> <span class="o">&lt;</span> <span class="n">lam_max</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">_lam</span> <span class="o">&gt;</span> <span class="n">lam_min</span>
+        <span class="p">)</span>
+        <span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">wavelength_indices</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;nm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">wavelength_indices</span><span class="p">]</span>
+
+    <span class="c1"># normalise spectrum</span>
+    <span class="n">spectra</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
+
+    <span class="c1"># if logged rescale to between 0 and 1 using min_log_lnu</span>
+    <span class="k">if</span> <span class="n">logged</span><span class="p">:</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span> <span class="o">-</span> <span class="n">min_log_lnu</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="o">-</span><span class="n">min_log_lnu</span><span class="p">)</span>
+        <span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span> <span class="o">&lt;</span> <span class="n">min_log_lnu</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># initialise figure</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="c1"># initialise axes</span>
+    <span class="k">if</span> <span class="n">include_xaxis</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/\AA$&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+
+    <span class="c1"># set background</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+    <span class="c1"># always turn off y-ticks</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+
+    <span class="c1"># get an array of colours</span>
+    <span class="n">colours</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">wavelength_to_rgba</span><span class="p">(</span><span class="n">lam_</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">spectra_</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">lam_</span><span class="p">,</span> <span class="n">spectra_</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># expand dimensions to get an image array</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">colours</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># show image</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">(</span><span class="n">lam_min</span><span class="p">,</span> <span class="n">lam_max</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
 <div class="viewcode-block" id="get_transmission"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_transmission">[docs]</a><span class="k">def</span> <span class="nf">get_transmission</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate transmission as a function of wavelength from an attenuated and</span>
@@ -2252,7 +2373,7 @@
 </div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.photoionisation.cloudy23 - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.photoionisation.cloudy23 - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.photoionisation.cloudy23</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Given an SED (from an SPS model, for example), generate a cloudy atmosphere</span>
@@ -398,6 +402,10 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">unyt_array</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InconsistentArguments</span><span class="p">,</span>
+    <span class="n">UnimplementedFunctionality</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">synthesizer.photoionisation</span> <span class="kn">import</span> <span class="n">calculate_Q_from_U</span>
 
 
@@ -492,7 +500,12 @@
 
 
 <div class="viewcode-block" id="create_cloudy_input"><a class="viewcode-back" href="../../../_autosummary/synthesizer.photoionisation.cloudy23.html#synthesizer.photoionisation.cloudy23.create_cloudy_input">[docs]</a><span class="k">def</span> <span class="nf">create_cloudy_input</span><span class="p">(</span>
-    <span class="n">model_name</span><span class="p">,</span> <span class="n">shape_commands</span><span class="p">,</span> <span class="n">abundances</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">model_name</span><span class="p">,</span>
+    <span class="n">shape_commands</span><span class="p">,</span>
+    <span class="n">abundances</span><span class="p">,</span>
+    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span>
+    <span class="n">copy_linelist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A generic function for creating a cloudy input file</span>
@@ -515,41 +528,48 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">default_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;no_grain_scaling&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="c1"># ionisation parameter</span>
-        <span class="s2">&quot;ionisation_parameter&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="s2">&quot;ionisation_parameter&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># radius in log10 parsecs, only important for spherical geometry</span>
-        <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="s2">&quot;radius&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># covering factor. Keep as 1 as it is more efficient to simply combine</span>
         <span class="c1"># SEDs to get != 1.0 values</span>
-        <span class="s2">&quot;covering_factor&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;covering_factor&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># K, if not provided the command is not used</span>
-        <span class="s2">&quot;stop_T&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;stop_T&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># if not provided the command is not used</span>
-        <span class="s2">&quot;stop_efrac&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;stop_efrac&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># log10(N_H/cm^2), if not provided the command is not used</span>
+        <span class="s2">&quot;stop_column_density&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># K, if not provided the command is not used</span>
-        <span class="s2">&quot;T_floor&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;T_floor&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># Hydrogen density</span>
-        <span class="s2">&quot;hydrogen_density&quot;</span><span class="p">:</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="mf">2.5</span><span class="p">),</span>
+        <span class="s2">&quot;hydrogen_density&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># redshift, only necessary if CMB heating included</span>
         <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="c1"># include CMB heating</span>
-        <span class="s2">&quot;CMB&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;CMB&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># include cosmic rays</span>
-        <span class="s2">&quot;cosmic_rays&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;cosmic_rays&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># include dust grains</span>
-        <span class="s2">&quot;grains&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;grains&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># the geometry</span>
-        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="s2">&quot;planeparallel&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># constant density flag</span>
+        <span class="s2">&quot;constant_density&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># constant pressure flag</span>
+        <span class="s2">&quot;constant_pressure&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># relative resolution the saved continuum spectra</span>
         <span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="c1"># output abundances</span>
-        <span class="s2">&quot;output_abundances&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;output_abundances&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># output continuum</span>
-        <span class="s2">&quot;output_cont&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;output_cont&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># output full list of all available lines</span>
-        <span class="s2">&quot;output_lines&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;output_lines&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># output linelist</span>
-        <span class="s2">&quot;output_linelist&quot;</span><span class="p">:</span> <span class="s2">&quot;linelist.dat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;output_linelist&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="c1"># update default_params with kwargs</span>
@@ -565,14 +585,18 @@
     <span class="c1"># add spectral shape commands</span>
     <span class="n">cinput</span> <span class="o">+=</span> <span class="n">shape_commands</span>
 
+    <span class="c1"># Check on depletion model and grains</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;Can not use grains without depletion &quot;</span><span class="p">)</span>
+
     <span class="c1"># The original method of handling depletion and grain</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CloudyClassic&quot;</span><span class="p">,</span> <span class="s2">&quot;Gutkin2016&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Define the chemical composition, here we use the depleted (gas-phase)</span>
         <span class="c1"># abundances and set &quot;no grains&quot;.</span>
         <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">abundances</span><span class="o">.</span><span class="n">metals</span><span class="p">:</span>
             <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> no grains</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -627,76 +651,75 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># If grain physics are required, add this self-consistently</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">abundances</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-            <span class="n">delta_C</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
-            <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
-            <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
-            <span class="n">delta_Si</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">orion_C_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.6259</span>
-            <span class="n">orion_Si_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.5547</span>
-            <span class="n">PAH_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.446</span>
-            <span class="n">f_graphite</span> <span class="o">=</span> <span class="n">delta_graphite</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">orion_C_abund</span><span class="p">))</span>
-            <span class="n">f_Si</span> <span class="o">=</span> <span class="n">delta_Si</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">orion_Si_abund</span><span class="p">))</span>
-            <span class="n">f_pah</span> <span class="o">=</span> <span class="n">delta_PAH</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">PAH_abund</span><span class="p">))</span>
-            <span class="n">command</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;grains Orion graphite </span><span class="si">{</span><span class="n">f_graphite</span><span class="si">}</span><span class="s2"> &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">grains Orion silicate </span><span class="si">{</span><span class="n">f_Si</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">grains &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;PAH </span><span class="si">{</span><span class="n">f_pah</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-            <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">f_graphite</span><span class="p">,</span> <span class="n">f_Si</span><span class="p">,</span> <span class="n">f_pah</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
 
-    <span class="c1"># Jenkins 2009 depletion model as implemented by cloudy.</span>
-    <span class="c1"># See 2023 release paper section 5</span>
-    <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;depletion_model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Jenkins2009&quot;</span><span class="p">:</span>
-        <span class="c1"># Define the chemical composition, because Jenkins2009 applies</span>
-        <span class="c1"># depletion as a cloudy command we use total abundances and there</span>
-        <span class="c1"># is no need to use the &quot;no grains&quot; command.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;no_grain_scaling&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">delta_C</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">delta_PAH</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">])</span>
+                <span class="n">delta_graphite</span> <span class="o">=</span> <span class="n">delta_C</span> <span class="o">-</span> <span class="n">delta_PAH</span>
+                <span class="n">delta_Si</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">abundances</span><span class="o">.</span><span class="n">gas</span><span class="p">[</span><span class="s2">&quot;Si&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+                <span class="c1"># define the reference abundances for the different grain types</span>
+                <span class="c1"># this should be the dust-phase abundance in the particular</span>
+                <span class="c1"># reference environment.</span>
+                <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Orion&quot;</span><span class="p">:</span>
+                    <span class="n">reference_C_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.6259</span>
+                    <span class="n">reference_Si_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.5547</span>
+                <span class="c1"># this is incorrect since the abundance in the ISM is probably</span>
+                <span class="c1"># different.</span>
+                <span class="k">elif</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ISM&quot;</span><span class="p">:</span>
+                    <span class="n">reference_C_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3.6259</span>
+                    <span class="n">reference_Si_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.5547</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">UnimplementedFunctionality</span><span class="p">(</span>
+                        <span class="s2">&quot;Only Orion grains are currently implemented&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="n">PAH_abund</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.446</span>
+                <span class="n">f_graphite</span> <span class="o">=</span> <span class="n">delta_graphite</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">reference_C_abund</span><span class="p">))</span>
+                <span class="n">f_Si</span> <span class="o">=</span> <span class="n">delta_Si</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">reference_Si_abund</span><span class="p">))</span>
+                <span class="n">f_pah</span> <span class="o">=</span> <span class="n">delta_PAH</span> <span class="o">/</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">PAH_abund</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f_graphite</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">f_Si</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">f_pah</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+            <span class="n">command</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;grains </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;grains&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> graphite </span><span class="si">{</span><span class="n">f_graphite</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;grains </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;grains&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> silicate </span><span class="si">{</span><span class="n">f_Si</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;grains PAH </span><span class="si">{</span><span class="n">f_pah</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">command</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># cloudy c23.01 now has the Jenkins depletion model built in which could</span>
+    <span class="c1"># in theory replace the above. However, after testing I wasn&#39;t not</span>
+    <span class="c1"># convinced it works as advertised since grains continue to have a strong</span>
+    <span class="c1"># impact at low metallicity. A query has been raised on the cloudy forum</span>
+    <span class="c1"># but no reply as yet. A working implementation is available on the</span>
+    <span class="c1"># cloudy_builtin_Jenkins_depletion branch.</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: No depletion (or unrecognised depletion) specified&quot;</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;He&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">abundances</span><span class="o">.</span><span class="n">metals</span><span class="p">:</span>
             <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;element abundance </span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">element_name</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">abundances</span><span class="o">.</span><span class="n">total</span><span class="p">[</span><span class="n">ele</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;fstar&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.5</span><span class="p">:</span>
-            <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;metals deplete Jenkins 2009&quot;</span><span class="p">)</span>
-
-            <span class="c1"># turn on grains</span>
-            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-                <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;grains&quot;</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;fstar&quot;</span><span class="p">]</span>
-            <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;metals depletion jenkins 2009 fstar </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="c1"># turn on grains</span>
-            <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;grains&quot;</span><span class="p">]:</span>
-                <span class="c1"># for non-default (!= 0.5) fstar values, grains needs to be</span>
-                <span class="c1"># scaled.</span>
-
-                <span class="c1"># calculate the dust mass fraction for the default parameter</span>
-                <span class="c1"># choice.</span>
-                <span class="n">default_dust_mass_fraction</span> <span class="o">=</span> <span class="n">abundances</span><span class="o">.</span><span class="n">apply_depletion</span><span class="p">(</span>
-                    <span class="n">depletion_model</span><span class="o">=</span><span class="s2">&quot;Jenkins2009&quot;</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">dust_abundance</span>
-
-                <span class="c1"># calculate the dust mass fraction for the provided value of</span>
-                <span class="c1"># fstar.</span>
-                <span class="n">dust_mass_fraction</span> <span class="o">=</span> <span class="n">abundances</span><span class="o">.</span><span class="n">apply_depletion</span><span class="p">(</span>
-                    <span class="n">depletion_model</span><span class="o">=</span><span class="s2">&quot;Jenkins2009&quot;</span><span class="p">,</span>
-                    <span class="n">depletion_scaling</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;fstar&quot;</span><span class="p">],</span>
-                <span class="p">)</span><span class="o">.</span><span class="n">dust_abundance</span>
-                <span class="n">ratio</span> <span class="o">=</span> <span class="n">dust_mass_fraction</span> <span class="o">/</span> <span class="n">default_dust_mass_fraction</span>
-                <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grains </span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># In this case it would be inconsistent to turn on grains, so don&#39;t.</span>
 
     <span class="n">ionisation_parameter</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;ionisation_parameter&quot;</span><span class="p">]</span>
-
-    <span class="c1"># print(&#39;ionisisation parameter:&#39;, ionisation_parameter)</span>
 
     <span class="n">log10ionisation_parameter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">ionisation_parameter</span><span class="p">)</span>
 
@@ -720,36 +743,53 @@
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;sphere</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># add background continuum</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;cosmic_rays&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;cosmic_rays&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;cosmic rays, background</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;CMB&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;CMB&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;CMB </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;z&quot;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="c1"># define hydrogend density</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]:</span>
-        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;hden </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;hydrogen_density&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; log constant &quot;</span>
-                <span class="s2">&quot;density</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+    <span class="c1"># define hydrogen density</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;hydrogen_density&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;hden </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;hydrogen_density&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2"> log</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># constant density flag</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;constant_density&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;constant density</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># constant pressure flag</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;constant_pressure&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;constant pressure</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;constant_density&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;constant_pressure&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InconsistentArguments</span><span class="p">(</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Cannot specify both constant pressure and density&quot;&quot;&quot;</span>
         <span class="p">)</span>
 
     <span class="c1"># covering factor</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;covering_factor&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;covering_factor&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;covering factor </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;covering_factor&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> linear</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># Processing commands</span>
-    <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;iterate to convergence</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;T_floor&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;iterate_to_convergence&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;iterate to convergence</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;T_floor&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;set temperature floor </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;T_floor&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> linear</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_T&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_T&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;stop temperature </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_T&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">K</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_efrac&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_efrac&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;stop efrac </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_efrac&quot;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_column_density&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;stop column density </span><span class="si">{</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;stop_column_density&quot;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># For some horrible reason the above is ignored in favour of a</span>
+        <span class="c1"># built in temperature stop (4000K) unless that is turned off.</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;stop temperature off</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># --- output commands</span>
 
@@ -782,18 +822,27 @@
 
     <span class="c1"># output linelist</span>
     <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;output_linelist&quot;</span><span class="p">]:</span>
+        <span class="c1"># save intrinsic lines</span>
         <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;save linelist column emergent absolute last units angstroms </span><span class="se">\</span>
-<span class="s1">                  &quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">.elin&quot; &quot;linelist.dat&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;save line list column absolute last units angstroms </span><span class="se">\</span>
+<span class="s1">                  &quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">.intrinsic_elin&quot; &quot;linelist.dat&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># save emergent lines</span>
+        <span class="n">cinput</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;save line list emergent column absolute last units angstroms </span><span class="se">\</span>
+<span class="s1">                  &quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">.emergent_elin&quot; &quot;linelist.dat&quot;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="p">)</span>
 
         <span class="c1"># make copy of linelist</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span>
-            <span class="n">params</span><span class="p">[</span><span class="s2">&quot;output_linelist&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/linelist.dat&quot;</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">copy_linelist</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">&quot;output_linelist&quot;</span><span class="p">],</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/linelist.dat&quot;</span>
+            <span class="p">)</span>
 
     <span class="c1"># save input file</span>
     <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;created input file: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.in&quot;</span><span class="p">)</span>
         <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.in&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">cinput</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">cinput</span></div>
@@ -916,6 +965,9 @@
 
             <span class="c1"># convert luminosity to float</span>
             <span class="n">lum</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lum</span><span class="p">)</span>
+
+            <span class="c1"># change the units of luminosity</span>
+            <span class="n">lum</span> <span class="o">/=</span> <span class="mf">1e7</span>
 
             <span class="n">line_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
             <span class="n">wavelengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span>
@@ -1060,7 +1112,7 @@
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

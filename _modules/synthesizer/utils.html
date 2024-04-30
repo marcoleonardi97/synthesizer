@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>synthesizer.utils - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>synthesizer.utils - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -115,6 +115,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -126,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -219,6 +221,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -350,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -386,7 +390,7 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.utils</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A module containing general utility functions.</span>
 
@@ -539,6 +543,158 @@
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">arr</span></div>
+
+
+<div class="viewcode-block" id="parse_grid_id"><a class="viewcode-back" href="../../_autosummary/synthesizer.utils.html#synthesizer.utils.parse_grid_id">[docs]</a><span class="k">def</span> <span class="nf">parse_grid_id</span><span class="p">(</span><span class="n">grid_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a grid name for the properties of the grid.</span>
+
+<span class="sd">    This is used for parsing a grid ID to return the SPS model,</span>
+<span class="sd">    version, and IMF</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        grid_id (str)</span>
+<span class="sd">            string grid identifier</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">sps_model_</span><span class="p">,</span> <span class="n">imf_</span> <span class="o">=</span> <span class="n">grid_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+        <span class="n">cloudy</span> <span class="o">=</span> <span class="n">cloudy_model</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">sps_model_</span><span class="p">,</span> <span class="n">imf_</span><span class="p">,</span> <span class="n">cloudy</span><span class="p">,</span> <span class="n">cloudy_model</span> <span class="o">=</span> <span class="n">grid_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sps_model</span> <span class="o">=</span> <span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sps_model_version</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">sps_model</span> <span class="o">=</span> <span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sps_model_version</span> <span class="o">=</span> <span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">sps_model</span> <span class="o">=</span> <span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sps_model_version</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sps_model_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imf_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="n">imf_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">imf_hmc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imf_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="n">imf_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">imf_hmc</span> <span class="o">=</span> <span class="n">imf_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">imf</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;chab&quot;</span><span class="p">,</span> <span class="s2">&quot;chabrier03&quot;</span><span class="p">,</span> <span class="s2">&quot;Chabrier03&quot;</span><span class="p">]:</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="s2">&quot;Chabrier (2003)&quot;</span>
+    <span class="k">if</span> <span class="n">imf</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;kroupa&quot;</span><span class="p">]:</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="s2">&quot;Kroupa (2003)&quot;</span>
+    <span class="k">if</span> <span class="n">imf</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;salpeter&quot;</span><span class="p">,</span> <span class="s2">&quot;135all&quot;</span><span class="p">]:</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="s2">&quot;Salpeter (1955)&quot;</span>
+    <span class="k">if</span> <span class="n">imf</span><span class="o">.</span><span class="n">isnumeric</span><span class="p">():</span>
+        <span class="n">imf</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;$\alpha=</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">imf</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="si">}</span><span class="s2">$&quot;</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;sps_model&quot;</span><span class="p">:</span> <span class="n">sps_model</span><span class="p">,</span>
+        <span class="s2">&quot;sps_model_version&quot;</span><span class="p">:</span> <span class="n">sps_model_version</span><span class="p">,</span>
+        <span class="s2">&quot;imf&quot;</span><span class="p">:</span> <span class="n">imf</span><span class="p">,</span>
+        <span class="s2">&quot;imf_hmc&quot;</span><span class="p">:</span> <span class="n">imf_hmc</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="wavelength_to_rgba"><a class="viewcode-back" href="../../_autosummary/synthesizer.utils.html#synthesizer.utils.wavelength_to_rgba">[docs]</a><span class="k">def</span> <span class="nf">wavelength_to_rgba</span><span class="p">(</span>
+    <span class="n">wavelength</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">fill_red</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">fill_blue</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert wavelength float to RGBA tuple.</span>
+
+<span class="sd">    Taken from https://stackoverflow.com/questions/44959955/\</span>
+<span class="sd">        matplotlib-color-under-curve-based-on-spectral-color</span>
+
+<span class="sd">    Who originally took it from http://www.noah.org/wiki/\</span>
+<span class="sd">        Wavelength_to_RGB_in_Python</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        wavelength (float)</span>
+<span class="sd">            Wavelength in nm.</span>
+<span class="sd">        gamma (float)</span>
+<span class="sd">            Gamma value.</span>
+<span class="sd">        fill_red (bool or tuple)</span>
+<span class="sd">            The colour (RGBA) to use for wavelengths red of the visible. If</span>
+<span class="sd">            None use final nearest visible colour.</span>
+<span class="sd">        fill_blue (bool or tuple)</span>
+<span class="sd">            The colour (RGBA) to use for wavelengths red of the visible. If</span>
+<span class="sd">            None use final nearest visible colour.</span>
+<span class="sd">        alpha (float)</span>
+<span class="sd">            The value of the alpha channel (between 0 and 1).</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">        rgba (tuple)</span>
+<span class="sd">            RGBA tuple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">wavelength</span> <span class="o">&lt;</span> <span class="mi">380</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fill_blue</span>
+    <span class="k">if</span> <span class="n">wavelength</span> <span class="o">&gt;</span> <span class="mi">750</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fill_red</span>
+    <span class="k">if</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">380</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">440</span><span class="p">:</span>
+        <span class="n">attenuation</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="o">+</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="p">(</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">380</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">440</span> <span class="o">-</span> <span class="mi">380</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="p">((</span><span class="o">-</span><span class="p">(</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">440</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">440</span> <span class="o">-</span> <span class="mi">380</span><span class="p">))</span> <span class="o">*</span> <span class="n">attenuation</span><span class="p">)</span> <span class="o">**</span> <span class="n">gamma</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">attenuation</span><span class="p">)</span> <span class="o">**</span> <span class="n">gamma</span>
+    <span class="k">elif</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">440</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">490</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="p">((</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">440</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">490</span> <span class="o">-</span> <span class="mi">440</span><span class="p">))</span> <span class="o">**</span> <span class="n">gamma</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">elif</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">490</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">510</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">510</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">510</span> <span class="o">-</span> <span class="mi">490</span><span class="p">))</span> <span class="o">**</span> <span class="n">gamma</span>
+    <span class="k">elif</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">510</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">580</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="p">((</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">510</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">580</span> <span class="o">-</span> <span class="mi">510</span><span class="p">))</span> <span class="o">**</span> <span class="n">gamma</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">elif</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">580</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">645</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">wavelength</span> <span class="o">-</span> <span class="mi">645</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">645</span> <span class="o">-</span> <span class="mi">580</span><span class="p">))</span> <span class="o">**</span> <span class="n">gamma</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">elif</span> <span class="n">wavelength</span> <span class="o">&gt;=</span> <span class="mi">645</span> <span class="ow">and</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mi">750</span><span class="p">:</span>
+        <span class="n">attenuation</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="o">+</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="p">(</span><span class="mi">750</span> <span class="o">-</span> <span class="n">wavelength</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">750</span> <span class="o">-</span> <span class="mi">645</span><span class="p">)</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">*</span> <span class="n">attenuation</span><span class="p">)</span> <span class="o">**</span> <span class="n">gamma</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="wavelengths_to_rgba"><a class="viewcode-back" href="../../_autosummary/synthesizer.utils.html#synthesizer.utils.wavelengths_to_rgba">[docs]</a><span class="k">def</span> <span class="nf">wavelengths_to_rgba</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert wavelength array to RGBA list.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        wavelength (unyt_array)</span>
+<span class="sd">            Wavelength in nm.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        rgba (list)</span>
+<span class="sd">            list of RGBA tuples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If wavelengths provided as a unyt_array convert to nm otherwise assume</span>
+    <span class="c1"># in Angstrom and convert.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelengths</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+        <span class="n">wavelengths_</span> <span class="o">=</span> <span class="n">wavelengths</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;nm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wavelengths_</span> <span class="o">=</span> <span class="n">wavelengths</span> <span class="o">/</span> <span class="mf">10.0</span>
+
+    <span class="n">rgba</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">wavelength</span> <span class="ow">in</span> <span class="n">wavelengths_</span><span class="p">:</span>
+        <span class="n">rgba</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wavelength_to_rgba</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">rgba</span></div>
 </pre></div>
         </article>
       </div>
@@ -574,7 +730,7 @@
 </div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     </body>
 </html>

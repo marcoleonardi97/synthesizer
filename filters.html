@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Black holes" href="blackholes/blackholes.html" /><link rel="prev" title="Emission lines" href="lines.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Working with Filters - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>Working with Filters - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -117,6 +117,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -128,7 +130,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -221,6 +223,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -352,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -389,9 +393,9 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="Working-with-Filters">
-<h1>Working with Filters<a class="headerlink" href="#Working-with-Filters" title="Permalink to this heading">#</a></h1>
+<h1>Working with Filters<a class="headerlink" href="#Working-with-Filters" title="Permalink to this heading">¶</a></h1>
 <p>In synthesizer we encapsulate all filter based functionality in two objects:</p>
 <ul class="simple">
 <li><p>A <code class="docutils literal notranslate"><span class="pre">Filter</span></code>: Individual filters with methods and attributes to work with a filters wavelength coverage and transmission.</p></li>
@@ -417,7 +421,7 @@
 </div>
 </div>
 <section id="Defining-a-wavelength-array">
-<h2>Defining a wavelength array<a class="headerlink" href="#Defining-a-wavelength-array" title="Permalink to this heading">#</a></h2>
+<h2>Defining a wavelength array<a class="headerlink" href="#Defining-a-wavelength-array" title="Permalink to this heading">¶</a></h2>
 <p>Here we define some wavelengths (in Angstrom) over which we want to define our filters. We can pass this wavelength array to the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> at initialisation and the <code class="docutils literal notranslate"><span class="pre">Filter</span></code>’s tranmission curve will be defined on the passed wavelength array. In practice we would normally use the wavelength array on the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> object to avoid confusion between wavelength arrays on different objects but here we will ignore this.</p>
 <p>Additionally, it is not required, but it is recommended to initialise a <code class="docutils literal notranslate"><span class="pre">Filter</span></code>/<code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> with a rest frame wavelength grid (i.e. the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> wavelength array). Although nothing will break if you use an observer frame wavelength grid, the code expects rest frame wavelengths to ensure <code class="docutils literal notranslate"><span class="pre">*.lam</span></code> arrays agree across Synthesizer objects. Any redshifting of <code class="docutils literal notranslate"><span class="pre">Filter</span></code> transmission curves is then handled automatically with minimal overhead.</p>
 <p>One exception to this rule is when calculating photometry for a large number of objects all at a specific redshift. In that case it is more efficient to use an observer frame wavelength grid on a <code class="docutils literal notranslate"><span class="pre">Filter</span></code>/<code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> and simply be aware that <code class="docutils literal notranslate"><span class="pre">Filter.lam</span></code> differs from <code class="docutils literal notranslate"><span class="pre">Grid.lam</span></code> and <code class="docutils literal notranslate"><span class="pre">SED.lam</span></code>.</p>
@@ -431,7 +435,7 @@
 </div>
 </section>
 <section id="Creating-different-types-of-Filter">
-<h2>Creating different types of Filter<a class="headerlink" href="#Creating-different-types-of-Filter" title="Permalink to this heading">#</a></h2>
+<h2>Creating different types of Filter<a class="headerlink" href="#Creating-different-types-of-Filter" title="Permalink to this heading">¶</a></h2>
 <p>To define a generic <code class="docutils literal notranslate"><span class="pre">Filter</span></code> we need to define some arbitray transmission curve that maps onto our wavelength array.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -472,7 +476,7 @@
 </div>
 </section>
 <section id="Creating-a-FilterCollection">
-<h2>Creating a FilterCollection<a class="headerlink" href="#Creating-a-FilterCollection" title="Permalink to this heading">#</a></h2>
+<h2>Creating a FilterCollection<a class="headerlink" href="#Creating-a-FilterCollection" title="Permalink to this heading">¶</a></h2>
 <p>We can intitialise a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> for each different type of <code class="docutils literal notranslate"><span class="pre">Filter</span></code> in a very similar way to what is shown above. However, now the inputs are ensembles of filter properties. You may have noticed in the above examples that each <code class="docutils literal notranslate"><span class="pre">Filter</span></code> was intialised with a string identifier regardless of whether it was an SVO filter or not. These are the <code class="docutils literal notranslate"><span class="pre">Filter</span></code>’s “filter code”. These are used to identify each filter and act as a <code class="docutils literal notranslate"><span class="pre">Filter</span></code>’s key in dictionaries when required.</p>
 <p>For a set of generic filters we must provide a dictionary of transmission curves where the key is the <code class="docutils literal notranslate"><span class="pre">Filter</span></code>’s filter code.</p>
 <div class="nbinput nblast docutils container">
@@ -544,7 +548,7 @@
 wavelength array of the higher resolution filter.</p>
 </section>
 <section id="Working-with-a-FilterCollection">
-<h2>Working with a FilterCollection<a class="headerlink" href="#Working-with-a-FilterCollection" title="Permalink to this heading">#</a></h2>
+<h2>Working with a FilterCollection<a class="headerlink" href="#Working-with-a-FilterCollection" title="Permalink to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>s behave a bit like Python <code class="docutils literal notranslate"><span class="pre">list</span></code>s and a bit like Python <code class="docutils literal notranslate"><span class="pre">dict</span></code>s. As such you can treat them as you would either of these data structures. Additionally, some helpful Python operators have been overloaded to make working with <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>s easier.</p>
 <p>You can get their length:</p>
 <div class="nbinput docutils container">
@@ -664,7 +668,7 @@ My combined Filters: [&#39;JWST/NIRCam.F090W&#39;, &#39;JWST/NIRCam.F250M&#39;, 
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -673,19 +677,12 @@ Calculated wavelength array:
 min = 5.93e+03 Angstrom
 max = 5.11e+04 Angstrom
 FilterCollection.lam.size = 26891
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
 Warning: JWST/MIRI.F2550W will be truncated where transmission is non-zero (old_lam_bounds = (2.14e+05 Å, 3.00e+05 Å), new_lam_bounds = (5.93e+03 Å, 5.11e+04 Å))
 InconsistentWavelengths: Interpolated transmission curve has no non-zero values. Consider removing this filter or extending the wavelength range.
 </pre></div></div>
 </div>
 <section id="Helper-methods">
-<h3>Helper methods<a class="headerlink" href="#Helper-methods" title="Permalink to this heading">#</a></h3>
+<h3>Helper methods<a class="headerlink" href="#Helper-methods" title="Permalink to this heading">¶</a></h3>
 <p>We provide a number of helper methods and functions to make certain functionality quick and easy.</p>
 <p>You can easily plot the transmission curves.</p>
 <div class="nbinput docutils container">
@@ -774,7 +771,7 @@ The minimum and maximum wavelength (regardless of transmission) of JWST/NIRCam.F
 </section>
 </section>
 <section id="Saving-and-loading-FilterCollections">
-<h2>Saving and loading FilterCollections<a class="headerlink" href="#Saving-and-loading-FilterCollections" title="Permalink to this heading">#</a></h2>
+<h2>Saving and loading FilterCollections<a class="headerlink" href="#Saving-and-loading-FilterCollections" title="Permalink to this heading">¶</a></h2>
 <p>You may encounter situations where you want to save a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>. This can be particularly useful to avoid periods where the SVO database goes down or when using a single <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> across a number of MPI ranks where the multiple SVO database calls can cause failures.</p>
 <p>To do this you can simply call the <code class="docutils literal notranslate"><span class="pre">write_filters</span></code> method, passing the path where you want to save the file. This will create a HDF5 file containing the attributes and datasets defining the <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code>.</p>
 <div class="nbinput nblast docutils container">
@@ -811,7 +808,7 @@ True
 </div>
 </section>
 <section id="Finding-a-Filter">
-<h2>Finding a Filter<a class="headerlink" href="#Finding-a-Filter" title="Permalink to this heading">#</a></h2>
+<h2>Finding a Filter<a class="headerlink" href="#Finding-a-Filter" title="Permalink to this heading">¶</a></h2>
 <p>If you want to know the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> in a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> which will probe a particular wavelength we provide a method to calculate this. This can be done for either the filter which probes the desired wavelength in the rest frame, or by providing a redshift the filter that probes that rest frame wavelength in the observer frame can be found. The method will print the resulting filter code and return the <code class="docutils literal notranslate"><span class="pre">Filter</span></code> itself.</p>
 <p>This function takes a method argument. There are 3 methods implemented for doing this: - “pivot”: Find the filter with the closest pivot wavelength to the desired wavelength (the default). - “mean”: Find the filter with the closest mean wavelength to the desired wavelength. - “transmission”: Find the filter with the maximum transmission at the desired wavelength.</p>
 <div class="nbinput docutils container">
@@ -992,7 +989,7 @@ The wavelength (rest_frame_lam=2.00e+03 Angstrom, observed_lam=3.20e+04 Angstrom
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a5f2b424"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

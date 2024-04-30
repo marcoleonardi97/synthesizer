@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="The Sed object" href="sed.html" /><link rel="prev" title="Spectra" href="spectra.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Units - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>Units - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -117,6 +117,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -128,7 +130,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -221,6 +223,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -352,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -389,9 +393,9 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="Units">
-<h1>Units<a class="headerlink" href="#Units" title="Permalink to this heading">#</a></h1>
+<h1>Units<a class="headerlink" href="#Units" title="Permalink to this heading">¶</a></h1>
 <p>In <strong>Synthesizer</strong> all quantities a user interacts with (that are not dimensionless) have units associated to them to avoid confusion. We implement this functionality with the <strong>unyt</strong> package.</p>
 <p>When interfacing with <strong>Synthesizer</strong> objects and methods a user should provide quantites with units attached to them. This can be easily achieved with the <strong>unyt</strong> package.</p>
 <div class="nbinput docutils container">
@@ -438,7 +442,7 @@ x is now a unyt_quantity: type(x)= &lt;class &#39;unyt.array.unyt_quantity&#39;&
 </div>
 <p>As you can see, most units are defined symbollically, however, you may notice units such as <code class="docutils literal notranslate"><span class="pre">Msun</span></code> (the default used for masses) is defined as a compound unit in terms of <code class="docutils literal notranslate"><span class="pre">kg</span></code>s. Shortly we will cover working with the quantities returned by <strong>Synthesizer</strong> and how compound units work in practice.</p>
 <section id="The-Units-object">
-<h2>The <code class="docutils literal notranslate"><span class="pre">Units</span></code> object<a class="headerlink" href="#The-Units-object" title="Permalink to this heading">#</a></h2>
+<h2>The <code class="docutils literal notranslate"><span class="pre">Units</span></code> object<a class="headerlink" href="#The-Units-object" title="Permalink to this heading">¶</a></h2>
 <p>The unit system is defined by the <code class="docutils literal notranslate"><span class="pre">Units</span></code> object. This object contains a collection of attributes defining the units associated to each quantity throughout <strong>Synthesizer</strong> which is not dimensionless. Importantly, <code class="docutils literal notranslate"><span class="pre">Units</span></code> is a <code class="docutils literal notranslate"><span class="pre">Singleton</span></code> object. This means there can only ever be one instance of <code class="docutils literal notranslate"><span class="pre">Units</span></code>, if a second is instantiated then the first is returned. This ensures that the unit system remains consistent when running <strong>Synthesizer</strong>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -530,7 +534,7 @@ photo_fluxes:       erg/(Hz*cm**2*s)
 </div>
 </section>
 <section id="Modifying-the-default-unit-system">
-<h2>Modifying the default unit system<a class="headerlink" href="#Modifying-the-default-unit-system" title="Permalink to this heading">#</a></h2>
+<h2>Modifying the default unit system<a class="headerlink" href="#Modifying-the-default-unit-system" title="Permalink to this heading">¶</a></h2>
 <p>If the default unit system works for your needs then you don’t need to do anything. You will never interact with the <code class="docutils literal notranslate"><span class="pre">Units</span></code> object and all quantites will have the default units associated to them automatically. However, if you need to change one or more of the units used you can import <code class="docutils literal notranslate"><span class="pre">Units</span></code> and instantiate it with a dictionary of the modified quantities.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -696,7 +700,7 @@ photo_fluxes:       erg/(Hz*cm**2*s)
 </div>
 </section>
 <section id="Working-with-Quantitys">
-<h2>Working with <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>s<a class="headerlink" href="#Working-with-Quantitys" title="Permalink to this heading">#</a></h2>
+<h2>Working with <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>s<a class="headerlink" href="#Working-with-Quantitys" title="Permalink to this heading">¶</a></h2>
 <p>As previously mentioned, there is no need to work with the <code class="docutils literal notranslate"><span class="pre">Units</span></code> object itself beyond intially defining a modified unit system. Beyond this all unit operations are handled “behind the scenes”. This hidden functionality is enabled by the <code class="docutils literal notranslate"><span class="pre">Qunatity</span></code> object.</p>
 <p>All attributes on <strong>Synthesizer</strong> objects which carry units are in fact <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>s. <code class="docutils literal notranslate"><span class="pre">Quantitiy</span></code>s carry a reference to the global unit system and extract the appropriate units depending on the name of the variable storing the <code class="docutils literal notranslate"><span class="pre">Quantity</span></code>. As such a user will never instantiate a quantity themselves but there usage is important.</p>
 <p>The one simple thing to keep in mind is how to return the value with or without units. This is achieved by the application or omission of a leading underscore to a variable name.</p>
@@ -777,9 +781,8 @@ photo_fluxes:       erg/(Hz*cm**2*s)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[2.79809795e-01 8.02837308e-02 8.74404162e-04 4.34049236e-01
- 9.84910158e-01 9.72059225e-01 2.58063138e-02 2.31872177e-01
- 3.49747979e-01 3.24150911e-01] Msun
+[0.31731076 0.51998675 0.66018598 0.48662032 0.82945876 0.44024525
+ 0.67281289 0.18936548 0.66234852 0.30095501] Msun
 </pre></div></div>
 </div>
 <p>However, if we extract the values alone we get the values we expect in <span class="math notranslate nohighlight">\(M_\odot\)</span>.</p>
@@ -796,14 +799,13 @@ photo_fluxes:       erg/(Hz*cm**2*s)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[2.79809795e-01 8.02837308e-02 8.74404162e-04 4.34049236e-01
- 9.84910158e-01 9.72059225e-01 2.58063138e-02 2.31872177e-01
- 3.49747979e-01 3.24150911e-01]
+[0.31731076 0.51998675 0.66018598 0.48662032 0.82945876 0.44024525
+ 0.67281289 0.18936548 0.66234852 0.30095501]
 </pre></div></div>
 </div>
 <p>Its worth keeping this in mind whenever extracting masses from <strong>Synthesizer</strong> objects.</p>
 <section id="Automatic-unit-conversion">
-<h3>Automatic unit conversion<a class="headerlink" href="#Automatic-unit-conversion" title="Permalink to this heading">#</a></h3>
+<h3>Automatic unit conversion<a class="headerlink" href="#Automatic-unit-conversion" title="Permalink to this heading">¶</a></h3>
 <p>Finally lets utilise some automatic unit conversion. If we have a mixture of properties to input to a <strong>Synthesizer</strong> object, all with different units to the global unit system, we don’t have to convert them all before inputting them. As long as we pass them to <strong>Synthesizer</strong> with <strong>unyt</strong> units attached, the conversion will be handled automatically. Here we use a Stars object again to demonstrate.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -838,10 +840,10 @@ photo_fluxes:       erg/(Hz*cm**2*s)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-stars.initial_masses[0]= 4.59938812214202 Msun = 4.599388122142021 Msun
+stars.initial_masses[0]= 4.240722086910617 Msun = 4.240722086910618 Msun
 stars.ages[0]= 1000000.0 yr
-stars.coordinates[0]= [0.40808817 0.43870636 0.99994224] Mpc
-stars.smoothing_lengths[0]= 0.029355452022917252 Mpc
+stars.coordinates[0]= [0.31626141 0.55949203 0.08457147] Mpc
+stars.smoothing_lengths[0]= 0.2560159473500277 Mpc
 </pre></div></div>
 </div>
 </section>
@@ -924,7 +926,7 @@ stars.smoothing_lengths[0]= 0.029355452022917252 Mpc
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=a5f2b424"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

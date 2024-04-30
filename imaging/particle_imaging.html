@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Making maps" href="property_maps.html" /><link rel="prev" title="Creating Images From Parametric Galaxies" href="parametric_imaging.html" />
 
-    <!-- Generated with Sphinx 7.1.1 and Furo 2024.01.29 -->
-        <title>Creating Images From Galaxy Particle distributions - synthesizer 0.3.0-beta documentation</title>
+    <!-- Generated with Sphinx 7.1.1 and Furo 2024.04.27 -->
+        <title>Creating Images From Galaxy Particle distributions - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=437aa6ec" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -117,6 +117,8 @@
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
 
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
 
 
 <div class="page">
@@ -128,7 +130,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">synthesizer 0.3.0-beta documentation</div></a>
+      <a href="../index.html"><div class="brand">Synthesizer</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -221,6 +223,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/grids/index.html">Grid examples</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/line_cont.html">Plot the line continuum for a given grid point</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra.html">Plot spectra example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_lines.html">Get lines example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/grids/plot_spectra_by_age.html">Plot spectra by age</a></li>
@@ -352,6 +355,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.survey.html">synthesizer.survey</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.utils.html">synthesizer.utils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
 </ul>
 </li>
 </ul>
@@ -389,12 +393,12 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="Creating-Images-From-Galaxy-Particle-distributions">
-<h1>Creating Images From Galaxy Particle distributions<a class="headerlink" href="#Creating-Images-From-Galaxy-Particle-distributions" title="Permalink to this heading">#</a></h1>
+<h1>Creating Images From Galaxy Particle distributions<a class="headerlink" href="#Creating-Images-From-Galaxy-Particle-distributions" title="Permalink to this heading">¶</a></h1>
 <p>In this example we show how to create various different types of images and maps from stellar particles. For this purpose we need a stellar distribution and a galaxy. The first section will handle this setup using a CAMELS galaxy, feel free to skip over this section to get to the imaging as the process is well documented elsewhere (e.g. the CAMELS <a class="reference internal" href="../cosmo/cosmo_example.html"><span class="doc">docs</span></a>).</p>
 <section id="The-setup">
-<h2>The setup<a class="headerlink" href="#The-setup" title="Permalink to this heading">#</a></h2>
+<h2>The setup<a class="headerlink" href="#The-setup" title="Permalink to this heading">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -454,7 +458,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Galaxy created, took: 0.022118806838989258
+Galaxy created, took: 0.0229952335357666
 Galaxy has 473 stellar particles
 Galaxy gas 0 gas particles
 </pre></div></div>
@@ -469,7 +473,7 @@ Galaxy gas 0 gas particles
 </pre></div></div>
 </div>
 <section id="Getting-the-spectra">
-<h3>Getting the spectra<a class="headerlink" href="#Getting-the-spectra" title="Permalink to this heading">#</a></h3>
+<h3>Getting the spectra<a class="headerlink" href="#Getting-the-spectra" title="Permalink to this heading">¶</a></h3>
 <p>To make an image we need to map the stellar particle properties onto the SPS grid defined in the <code class="docutils literal notranslate"><span class="pre">grid</span></code> object. To do this we use the galaxy’s in built <code class="docutils literal notranslate"><span class="pre">generate_particle_spectra</span></code> method and create <code class="docutils literal notranslate"><span class="pre">&quot;total&quot;</span></code> SEDs with both stellar and nebular contributions. This returns an SED object containing lots of helper methods for working with spectra.</p>
 <p>Here we will use <code class="docutils literal notranslate"><span class="pre">get_fnu</span></code> to convert the rest frame SED into an observed SED which takes into account the previously set redshift stored on the <code class="docutils literal notranslate"><span class="pre">stars</span></code> object. By passing <code class="docutils literal notranslate"><span class="pre">igm=None</span></code> we assume the default <code class="docutils literal notranslate"><span class="pre">igm</span></code> contribution (<code class="docutils literal notranslate"><span class="pre">Inoue14</span></code>). This can be changed to <code class="docutils literal notranslate"><span class="pre">False</span></code> for no IGM or to another IGM model defined in <code class="docutils literal notranslate"><span class="pre">synthesizer.igm</span></code>.</p>
 <div class="nbinput docutils container">
@@ -493,12 +497,12 @@ Galaxy gas 0 gas particles
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Spectra created, took: 0.014023542404174805
+Spectra created, took: 0.014402627944946289
 </pre></div></div>
 </div>
 </section>
 <section id="Defining-filters">
-<h3>Defining filters<a class="headerlink" href="#Defining-filters" title="Permalink to this heading">#</a></h3>
+<h3>Defining filters<a class="headerlink" href="#Defining-filters" title="Permalink to this heading">¶</a></h3>
 <p>Next we need to define a set of filters we want photometric images for. This can be done in a number of ways using a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> (see the <a class="reference internal" href="../filters.html"><span class="doc">filter docs</span></a> for a full description). Here we will get Webb filters from the SVO database.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -525,12 +529,12 @@ Spectra created, took: 0.014023542404174805
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Filters created, took: 1.0123870372772217
+Filters created, took: 0.7222905158996582
 </pre></div></div>
 </div>
 </section>
 <section id="Getting-photometry">
-<h3>Getting photometry<a class="headerlink" href="#Getting-photometry" title="Permalink to this heading">#</a></h3>
+<h3>Getting photometry<a class="headerlink" href="#Getting-photometry" title="Permalink to this heading">¶</a></h3>
 <p>Prior to making the image itself we need to get the luminosity in the filters we just defined. To do this we can use the <code class="docutils literal notranslate"><span class="pre">Sed</span></code> method to get photometry from a spectra. Here we are making images of the incident flux so we only need to get the photometry for that spectra.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -549,13 +553,13 @@ Filters created, took: 1.0123870372772217
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Photometry computed, took: 0.002632617950439453
+Photometry computed, took: 0.003059864044189453
 </pre></div></div>
 </div>
 </section>
 </section>
 <section id="Imaging">
-<h2>Imaging<a class="headerlink" href="#Imaging" title="Permalink to this heading">#</a></h2>
+<h2>Imaging<a class="headerlink" href="#Imaging" title="Permalink to this heading">¶</a></h2>
 <p>The last step before we can make any images is to define the resolution of our images and the FOV (or width) of the images. These must have units associated to them to enable the code to internally transform all quantites to a consistent unit system.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -585,7 +589,7 @@ Image width is 30.00 kpc with 0.15 kpc resolution
 </div>
 </section>
 <section id="Photometric-imaging">
-<h2>Photometric imaging<a class="headerlink" href="#Photometric-imaging" title="Permalink to this heading">#</a></h2>
+<h2>Photometric imaging<a class="headerlink" href="#Photometric-imaging" title="Permalink to this heading">¶</a></h2>
 <p>Now we have everything we need to make images. Although it is possible to work with the low level <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> and <code class="docutils literal notranslate"><span class="pre">Image</span></code> methods we will here use the interface on a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> to do everything. There are two of these helper methods, <code class="docutils literal notranslate"><span class="pre">get_imgs_luminosity</span></code> for luminosity images, and <code class="docutils literal notranslate"><span class="pre">get_imgs_flux</span></code> for flux images. We will focus on the former here.</p>
 <p>The image helper methods both take the image properties we previously defined and a type of photometry for the image, these types can be any spectra for which you have calculated photometry, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;incident&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;intrinsic&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;attenuated&quot;</span></code>, for either stars (<code class="docutils literal notranslate"><span class="pre">stellar_photometry</span></code>) or black holes (<code class="docutils literal notranslate"><span class="pre">blackhole_photometry</span></code>). If both a stellar and black hole photometry type are passed then an image is made for each component before they are combined and returned.</p>
 <p>Images can either be simple 2D histograms or the particles can be smoothed over their kernels. What type of image is made is controlled by the <code class="docutils literal notranslate"><span class="pre">img_type</span></code> argument. Below we demonstrate both approaches, however, for the latter we also need to define a kernel, which we have already imported from the <code class="docutils literal notranslate"><span class="pre">kernel_functions</span></code> module.</p>
@@ -628,7 +632,7 @@ Image width is 30.00 kpc with 0.15 kpc resolution
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Images took: 0.09184837341308594
+Images took: 0.09108471870422363
 </pre></div></div>
 </div>
 <p>When making images in multiple bands the image arrays themselves are stored on the returned <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> in a dictionary called <code class="docutils literal notranslate"><span class="pre">imgs</span></code> of the form <code class="docutils literal notranslate"><span class="pre">{filter_code:</span> <span class="pre">Image}</span></code>, where an <code class="docutils literal notranslate"><span class="pre">Image</span></code> is a container including the image array itself (<code class="docutils literal notranslate"><span class="pre">arr</span></code>), unit information (<code class="docutils literal notranslate"><span class="pre">units</span></code>) and the <code class="docutils literal notranslate"><span class="pre">resolution</span></code> and <code class="docutils literal notranslate"><span class="pre">fov</span></code> of the image. An Image also includes a number of different methods for manipulating and visuallising individual <code class="docutils literal notranslate"><span class="pre">Image</span></code>s.</p>
@@ -720,7 +724,7 @@ Images took: 0.09184837341308594
 </div>
 </section>
 <section id="Applying-a-Point-Spread-Function-(PSF)">
-<h2>Applying a Point Spread Function (PSF)<a class="headerlink" href="#Applying-a-Point-Spread-Function-(PSF)" title="Permalink to this heading">#</a></h2>
+<h2>Applying a Point Spread Function (PSF)<a class="headerlink" href="#Applying-a-Point-Spread-Function-(PSF)" title="Permalink to this heading">¶</a></h2>
 <p>Of course, the smoothed distribution is only part of the story. To properly model observations by a particular observatory we need to take into account the smoothing due to the PSF of the telescope.</p>
 <p>To apply a PSF we can either use <code class="docutils literal notranslate"><span class="pre">Image.apply_psf</span></code> on individual <code class="docutils literal notranslate"><span class="pre">Image</span></code> objects or apply a dictionary of PSFs of the form <code class="docutils literal notranslate"><span class="pre">{filter_code:</span> <span class="pre">psf_array}</span></code>, to each image in an <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> with the <code class="docutils literal notranslate"><span class="pre">apply_psfs</span></code> method. Here we will just create a fake gaussian PSF for all filters but PSFs can be sourced however the user wishes (for Webb we recommend the <em>webbpsf</em> package) as long as a simple numpy array is passed within the psf dictionary for each filter.</p>
 <p>To get the most accurate result from the PSF convolution it is recommended to do the convolution on a super sampled image. Although we will here just supersample the images we just made, it is recommended to first make the images at the super sampled resolution and then subsequently downsample after the fact.</p>
@@ -755,7 +759,7 @@ Images took: 0.09184837341308594
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-PSF images made, took: 0.10711097717285156
+PSF images made, took: 0.08211970329284668
 </pre></div></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">apply_psfs</span></code> returns a new <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> containing the newly convolved <code class="docutils literal notranslate"><span class="pre">Image</span></code>s. We can now use the plotting helper function to plot these images with some normalisation.</p>
@@ -785,7 +789,7 @@ PSF images made, took: 0.10711097717285156
 </div>
 </section>
 <section id="Applying-noise">
-<h2>Applying noise<a class="headerlink" href="#Applying-noise" title="Permalink to this heading">#</a></h2>
+<h2>Applying noise<a class="headerlink" href="#Applying-noise" title="Permalink to this heading">¶</a></h2>
 <p>The final ingredient for a fully forward modelled synthetic image is a noise field. We include 4 different to approaches to include noise: - <code class="docutils literal notranslate"><span class="pre">apply_noise_array</span></code>: Add an exist noise field/array. - <code class="docutils literal notranslate"><span class="pre">apply_noise_from_std</span></code>: Derive a noise distribution, centered on 0, from a user specified standard deviation, and then generate and add a noise array. - <code class="docutils literal notranslate"><span class="pre">apply_noise_from_snr</span></code> (aperture): Derive a noise distribution from a Signal-to-Noise Ratio (SNR), defined in an aperture with size
 <code class="docutils literal notranslate"><span class="pre">aperture_radius</span></code> and a specified <code class="docutils literal notranslate"><span class="pre">depth</span></code>. This will derive the standard deviation of the nosie distribution assuming <span class="math notranslate nohighlight">\(SNR= S / \sigma\)</span> for an aperture before deriving the per pixel noise, computing the noise array and adding it. - <code class="docutils literal notranslate"><span class="pre">apply_noise_from_snr</span></code> (point source): Derive a noise distribution from a SNR and depth. This will derive the standard deviation of the noise distribution assuming <span class="math notranslate nohighlight">\(SNR= S / \sigma\)</span> for a pixel before computing the noise array and adding it. This
 behaviour can be achieved by omitting <code class="docutils literal notranslate"><span class="pre">aperture_radius</span></code> in the call to <code class="docutils literal notranslate"><span class="pre">apply_noise_from_snr</span></code></p>
@@ -794,7 +798,7 @@ behaviour can be achieved by omitting <code class="docutils literal notranslate"
 <p>Applying noise with any of the methods described above will return a new <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code>/<code class="docutils literal notranslate"><span class="pre">Image</span></code> contain the noisy image. In addition to the noisy image (stored under <code class="docutils literal notranslate"><span class="pre">Image.arr</span></code>) the new <code class="docutils literal notranslate"><span class="pre">Image</span></code> (or the new <code class="docutils literal notranslate"><span class="pre">Image</span></code>s within an <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code>) will contain the noise array stored in the <code class="docutils literal notranslate"><span class="pre">noise_arr</span></code> attribute and the weight map stored in the <code class="docutils literal notranslate"><span class="pre">weight_map</span></code> attribute on the <code class="docutils literal notranslate"><span class="pre">Image</span></code>.</p>
 <p>Below we demonstrate each method using the <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> interface. We will not explictly show the noise and weight maps but know they are there if you need them (at <code class="docutils literal notranslate"><span class="pre">Image.noise_arr</span></code> and <code class="docutils literal notranslate"><span class="pre">Image.weight_map</span></code>).</p>
 <section id="Noise-arrays">
-<h3>Noise arrays<a class="headerlink" href="#Noise-arrays" title="Permalink to this heading">#</a></h3>
+<h3>Noise arrays<a class="headerlink" href="#Noise-arrays" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -826,7 +830,7 @@ behaviour can be achieved by omitting <code class="docutils literal notranslate"
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.016165494918823242
+Noisy images made, took: 0.012898445129394531
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -838,7 +842,7 @@ Noisy images made, took: 0.016165494918823242
 </div>
 </section>
 <section id="Noise-from-standard-deviations">
-<h3>Noise from standard deviations<a class="headerlink" href="#Noise-from-standard-deviations" title="Permalink to this heading">#</a></h3>
+<h3>Noise from standard deviations<a class="headerlink" href="#Noise-from-standard-deviations" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -864,7 +868,7 @@ Noisy images made, took: 0.016165494918823242
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.0067021846771240234
+Noisy images made, took: 0.005444765090942383
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -876,7 +880,7 @@ Noisy images made, took: 0.0067021846771240234
 </div>
 </section>
 <section id="Noise-from-an-aperture-depth">
-<h3>Noise from an aperture depth<a class="headerlink" href="#Noise-from-an-aperture-depth" title="Permalink to this heading">#</a></h3>
+<h3>Noise from an aperture depth<a class="headerlink" href="#Noise-from-an-aperture-depth" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -903,7 +907,7 @@ Noisy images made, took: 0.0067021846771240234
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.15421342849731445
+Noisy images made, took: 0.1312696933746338
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -915,7 +919,7 @@ Noisy images made, took: 0.15421342849731445
 </div>
 </section>
 <section id="Noise-from-point-source-depth">
-<h3>Noise from point source depth<a class="headerlink" href="#Noise-from-point-source-depth" title="Permalink to this heading">#</a></h3>
+<h3>Noise from point source depth<a class="headerlink" href="#Noise-from-point-source-depth" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -940,7 +944,7 @@ Noisy images made, took: 0.15421342849731445
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.2993886470794678
+Noisy images made, took: 0.25464820861816406
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -953,7 +957,7 @@ Noisy images made, took: 0.2993886470794678
 </section>
 </section>
 <section id="Making-an-RGB-image">
-<h2>Making an RGB image<a class="headerlink" href="#Making-an-RGB-image" title="Permalink to this heading">#</a></h2>
+<h2>Making an RGB image<a class="headerlink" href="#Making-an-RGB-image" title="Permalink to this heading">¶</a></h2>
 <p>Finally we can use the RGB image method on the <code class="docutils literal notranslate"><span class="pre">ImageCollection</span></code> to make quick RGB images by simply providing a dictionary detailing which filters we want in which bands and optional weights for each filter which we will ignore here.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -1000,7 +1004,7 @@ Noisy images made, took: 0.2993886470794678
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Scaling to: 6.463236028226953e+25 -&gt; 3.02938595257907e+27
+Scaling to: 6.403687561558812e+25 -&gt; 3.0184009080908716e+27
 (200, 200, 3)
 </pre></div></div>
 </div>
@@ -1101,7 +1105,7 @@ Scaling to: 6.463236028226953e+25 -&gt; 3.02938595257907e+27
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=a5f2b424"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
-    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../_static/scripts/furo.js?v=4e2eecee"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
