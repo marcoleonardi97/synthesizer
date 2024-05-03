@@ -235,7 +235,6 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/parametric/index.html">Parametric galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Parametric galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/parametric/plot_delta_lambda.html">Plot delta_lambda for a grid.</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../auto_examples/parametric/generate_lines.html">Generate lines from parametric galaxy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/parametric/plot_create_image.html">Create image example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/parametric/plot_observed_sed.html">Generate parametric observed SED</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/parametric/plot_sed.html">Generate parametric galaxy SED</a></li>
@@ -317,6 +316,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.line.html">synthesizer.line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.load_data.html">synthesizer.load_data</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle navigation of synthesizer.load_data</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.load_data.load_camels.html">synthesizer.load_data.load_camels</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.load_data.load_flares.html">synthesizer.load_data.load_flares</a></li>
@@ -401,7 +401,8 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">synthesizer.line_ratios</span> <span class="k">as</span> <span class="nn">line_ratios</span>
+<span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">Stars</span><span class="p">,</span> <span class="n">ZDist</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span>
@@ -486,16 +487,18 @@ available images: []
 
 </pre></div></div>
 </div>
-<p>Let’s define a list of lines that we’re interested in. Note that we can provide multiples which are automatically summed.</p>
+<p>Let’s define a list of lines that we’re interested in. Note that we can provide multiples which are automatically summed as if they were blended.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;H 1 4862.69A&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">,</span>
-    <span class="p">[</span><span class="s2">&quot;O 3 4958.91A&quot;</span><span class="p">,</span> <span class="s2">&quot;O 3 5006.84A&quot;</span><span class="p">],</span>
+    <span class="n">line_ratios</span><span class="o">.</span><span class="n">Hb</span><span class="p">,</span>  <span class="c1"># &quot;H 1 4861.32A&quot;</span>
+    <span class="n">line_ratios</span><span class="o">.</span><span class="n">O3b</span><span class="p">,</span>  <span class="c1"># &quot;O 3 4958.91A&quot;</span>
+    <span class="n">line_ratios</span><span class="o">.</span><span class="n">O3r</span><span class="p">,</span>  <span class="c1"># &quot;O 3 5006.84A&quot;</span>
+    <span class="n">line_ratios</span><span class="o">.</span><span class="n">O3</span><span class="p">,</span>  <span class="c1"># [&quot;O 3 4958.91A&quot;, &quot;O 3 5006.84A&quot;]</span>
+    <span class="n">line_ratios</span><span class="o">.</span><span class="n">O3</span>
+    <span class="o">+</span> <span class="p">[</span><span class="n">line_ratios</span><span class="o">.</span><span class="n">Hb</span><span class="p">],</span>  <span class="c1"># [&quot;O 3 4958.91A&quot;, &quot;O 3 5006.84A&quot;, &quot;H 1 4861.32A&quot;]</span>
 <span class="p">]</span>
 </pre></div>
 </div>
@@ -525,15 +528,64 @@ available images: []
 <div class="highlight"><pre>
 ----------
 LINE COLLECTION
-lines: [&#39;H 1 4862.69A&#39; &#39;O 3 4958.91A&#39; &#39;O 3 4958.91A,O 3 5006.84A&#39; &#39;O 3 5006.84A&#39;]
+number of lines: 5
+lines: [&#39;H 1 4861.32A&#39; &#39;O 3 4958.91A,O 3 5006.84A,H 1 4861.32A&#39; &#39;O 3 4958.91A&#39;
+ &#39;O 3 4958.91A,O 3 5006.84A&#39; &#39;O 3 5006.84A&#39;]
 available ratios: [&#39;R3&#39;]
 available diagrams: []
 ----------
 </pre></div></div>
 </div>
-<p>Those lines are now associated with the <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> object, revealed by using the print function:</p>
+<p>Let’s now examine individual lines (or doublets):</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+----------
+SUMMARY OF H 1 4861.32A
+wavelength: 4861.3 Å
+log10(luminosity/erg/s): 41.55
+equivalent width: 98 Å
+----------
+----------
+SUMMARY OF O 3 4958.91A,O 3 5006.84A,H 1 4861.32A
+wavelength: 4942.4 Å
+log10(luminosity/erg/s): 42.44
+equivalent width: 694 Å
+----------
+----------
+SUMMARY OF O 3 4958.91A
+wavelength: 4958.9 Å
+log10(luminosity/erg/s): 41.77
+equivalent width: 145 Å
+----------
+----------
+SUMMARY OF O 3 4958.91A,O 3 5006.84A
+wavelength: 4982.9 Å
+log10(luminosity/erg/s): 42.37
+equivalent width: 584 Å
+----------
+----------
+SUMMARY OF O 3 5006.84A
+wavelength: 5006.8 Å
+log10(luminosity/erg/s): 42.25
+equivalent width: 443 Å
+----------
+</pre></div></div>
+</div>
+<p>Those lines are now associated with the <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> object, revealed by using the print function:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">galaxy</span><span class="p">)</span>
@@ -577,7 +629,7 @@ available images: []
 </div>
 <p>Next, lets get the attenuated line properties:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lines_att</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_line_attenuated</span><span class="p">(</span>
@@ -594,7 +646,9 @@ available images: []
 <div class="highlight"><pre>
 ----------
 LINE COLLECTION
-lines: [&#39;H 1 4862.69A&#39; &#39;O 3 4958.91A&#39; &#39;O 3 4958.91A,O 3 5006.84A&#39; &#39;O 3 5006.84A&#39;]
+number of lines: 5
+lines: [&#39;H 1 4861.32A&#39; &#39;O 3 4958.91A,O 3 5006.84A,H 1 4861.32A&#39; &#39;O 3 4958.91A&#39;
+ &#39;O 3 4958.91A,O 3 5006.84A&#39; &#39;O 3 5006.84A&#39;]
 available ratios: [&#39;R3&#39;]
 available diagrams: []
 ----------
