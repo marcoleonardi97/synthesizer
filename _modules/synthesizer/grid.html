@@ -483,7 +483,7 @@
 <span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
 <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LogNorm</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span><span class="p">,</span> <span class="n">flatten_linelist</span>
@@ -1127,9 +1127,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">line_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">line_id</span><span class="p">]</span>
 
-        <span class="n">wavelength</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Set up a list to hold all lines</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="p">:</span>
             <span class="c1"># Throw exception if tline_id not in list of available lines</span>
@@ -1139,12 +1138,20 @@
                     <span class="s2">&quot;of available lines.&quot;</span>
                 <span class="p">)</span>
 
+            <span class="c1"># Create the line</span>
+            <span class="c1"># TODO: Need to use units from the grid file but they currently</span>
+            <span class="c1"># aren&#39;t stored correctly.</span>
             <span class="n">line_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">]</span>
-            <span class="n">wavelength</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">])</span>
-            <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">][</span><span class="n">grid_point</span><span class="p">])</span>
-            <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">][</span><span class="n">grid_point</span><span class="p">])</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Line</span><span class="p">(</span>
+                    <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="o">=</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span>
+                    <span class="n">luminosity</span><span class="o">=</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">][</span><span class="n">grid_point</span><span class="p">]</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                    <span class="n">continuum</span><span class="o">=</span><span class="n">line_</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">][</span><span class="n">grid_point</span><span class="p">]</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="o">*</span><span class="n">lines</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Grid.get_lines"><a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.get_lines">[docs]</a>    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_point</span><span class="p">,</span> <span class="n">line_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

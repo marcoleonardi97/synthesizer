@@ -474,7 +474,7 @@
 <span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">kpc</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
@@ -1203,10 +1203,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;line_id must be a string&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Set up containers for the line information</span>
-        <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">wavelength</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Set up a list to hold each individual Line</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Loop over the ids in this container</span>
         <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
@@ -1214,7 +1212,9 @@
             <span class="n">line_id_</span> <span class="o">=</span> <span class="n">line_id_</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
             <span class="c1"># Get this line&#39;s wavelength</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
+            <span class="c1"># TODO: The units here should be extracted from the grid but aren&#39;t</span>
+            <span class="c1"># yet stored.</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span>
 
             <span class="c1"># Get the luminosity and continuum</span>
             <span class="n">lum</span><span class="p">,</span> <span class="n">cont</span> <span class="o">=</span> <span class="n">compute_integrated_line</span><span class="p">(</span>
@@ -1228,11 +1228,20 @@
             <span class="p">)</span>
 
             <span class="c1"># Append this lines values to the containers</span>
-            <span class="n">wavelength</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
-            <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lum</span><span class="p">)</span>
-            <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cont</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Line</span><span class="p">(</span>
+                    <span class="n">line_id</span><span class="o">=</span><span class="n">line_id_</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+                    <span class="n">luminosity</span><span class="o">=</span><span class="n">lum</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                    <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span><span class="p">)</span></div>
+        <span class="c1"># Don&#39;t init another line if there was only 1 in the first place</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="o">*</span><span class="n">lines</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Stars.generate_particle_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_particle_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_particle_lnu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1434,10 +1443,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;line_id must be a string&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Set up containers for the line information</span>
-        <span class="n">luminosity</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">continuum</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">wavelength</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Set up a list to hold each individual Line</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Loop over the ids in this container</span>
         <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
@@ -1445,7 +1452,9 @@
             <span class="n">line_id_</span> <span class="o">=</span> <span class="n">line_id_</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
             <span class="c1"># Get this line&#39;s wavelength</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
+            <span class="c1"># TODO: The units here should be extracted from the grid but aren&#39;t</span>
+            <span class="c1"># yet stored.</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span>
 
             <span class="c1"># Get the luminosity and continuum</span>
             <span class="n">lum</span><span class="p">,</span> <span class="n">cont</span> <span class="o">=</span> <span class="n">compute_particle_line</span><span class="p">(</span>
@@ -1459,11 +1468,20 @@
             <span class="p">)</span>
 
             <span class="c1"># Append this lines values to the containers</span>
-            <span class="n">wavelength</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
-            <span class="n">luminosity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lum</span><span class="p">)</span>
-            <span class="n">continuum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cont</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Line</span><span class="p">(</span>
+                    <span class="n">line_id</span><span class="o">=</span><span class="n">line_id_</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+                    <span class="n">luminosity</span><span class="o">=</span><span class="n">lum</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                    <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span><span class="p">)</span></div>
+        <span class="c1"># Don&#39;t init another line if there was only 1 in the first place</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="o">*</span><span class="n">lines</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_get_masks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">young</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2081,7 +2099,7 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_ids</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
             <span class="c1"># Convert all tuple or list line_ids to strings</span>
             <span class="n">line_ids</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span>
+                <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
                 <span class="k">else</span> <span class="n">line_id</span>
                 <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span>
@@ -2221,17 +2239,16 @@
             <span class="p">)</span>
 
             <span class="c1"># Apply attenuation</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*</span> <span class="n">T_nebular</span> <span class="o">*</span> <span class="n">T_stellar</span>
-            <span class="n">continuum</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">*</span> <span class="n">T_stellar</span>
+            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">*</span> <span class="n">T_nebular</span> <span class="o">*</span> <span class="n">T_stellar</span>
+            <span class="n">continuum</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">continuum</span> <span class="o">*</span> <span class="n">T_stellar</span>
 
             <span class="c1"># Create the line object</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
-                <span class="n">line_id</span><span class="p">,</span>
-                <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">_wavelength</span><span class="p">,</span>
-                <span class="n">luminosity</span><span class="p">,</span>
-                <span class="n">continuum</span><span class="p">,</span>
+                <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
+                <span class="n">wavelength</span><span class="o">=</span><span class="n">intrinsic_line</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span>
+                <span class="n">luminosity</span><span class="o">=</span><span class="n">luminosity</span><span class="p">,</span>
+                <span class="n">continuum</span><span class="o">=</span><span class="n">continuum</span><span class="p">,</span>
             <span class="p">)</span>
-
             <span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
 
         <span class="c1"># Create a line collection</span>
