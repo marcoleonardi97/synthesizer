@@ -1723,7 +1723,7 @@
 <span class="sd">            fesc (float)</span>
 <span class="sd">                The Lyman continuum escaped fraction, the fraction of</span>
 <span class="sd">                ionising photons that entirely escaped.</span>
-<span class="sd">            tau_v_BS (float)</span>
+<span class="sd">            tau_v_nebular (float)</span>
 <span class="sd">                V-band optical depth of the nebular emission.</span>
 <span class="sd">            tau_v_stellar (float)</span>
 <span class="sd">                V-band optical depth of the stellar emission.</span>
@@ -1773,6 +1773,18 @@
                 <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
             <span class="p">)</span>
 
+        <span class="c1"># Check that tau_v_nebular and tau_v_stellar are floats and raise</span>
+        <span class="c1"># an exception otherwise.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tau_v_nebular</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;tau_v_* must be a float (i.e. single value).&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tau_v_stellar</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;tau_v_* must be a float (i.e. single value).&quot;</span>
+            <span class="p">)</span>
+
         <span class="c1"># Get the intrinsic lines now we&#39;re sure they are there</span>
         <span class="n">intrinsic_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">]</span>
 
@@ -1794,7 +1806,7 @@
             <span class="p">)</span>
 
             <span class="c1"># Apply attenuation</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">*</span> <span class="n">T_nebular</span> <span class="o">*</span> <span class="n">T_stellar</span>
+            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">*</span> <span class="n">T_nebular</span>
             <span class="n">continuum</span> <span class="o">=</span> <span class="n">intrinsic_line</span><span class="o">.</span><span class="n">continuum</span> <span class="o">*</span> <span class="n">T_stellar</span>
 
             <span class="c1"># Create the line object</span>
@@ -1867,7 +1879,7 @@
             <span class="n">grid</span><span class="p">,</span>
             <span class="n">line_ids</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-            <span class="n">tau_v_nebular</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">tau_v_nebular</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">tau_v_stellar</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">dust_curve_nebular</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
             <span class="n">dust_curve_stellar</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
