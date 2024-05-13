@@ -853,6 +853,18 @@
             <span class="c1"># Return the filter</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">line_ids</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span>
 
+<div class="viewcode-block" id="LineCollection.sum"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.LineCollection.sum">[docs]</a>    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For collections containing lines from multiple particles calculate the</span>
+<span class="sd">        integrated line properties and create a new LineCollection object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">summed_lines</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">summed_lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">summed_lines</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_get_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line1</span><span class="p">,</span> <span class="n">line2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure (and return) a line ratio.</span>
@@ -1211,6 +1223,19 @@
 <span class="sd">                New instance of Line containing both lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_line</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Line.sum"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.Line.sum">[docs]</a>    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For objects containing lines of multiple particles sum them to produce</span>
+<span class="sd">        the integrated quantities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span>
+            <span class="n">line_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">wavelength</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span>
+            <span class="n">luminosity</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span><span class="p">),</span>
+            <span class="n">continuum</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">continuum</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Line.get_flux"><a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.Line.get_flux">[docs]</a>    <span class="k">def</span> <span class="nf">get_flux</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
