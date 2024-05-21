@@ -506,6 +506,7 @@
         <span class="n">black_holes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">centre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise a particle based Galaxy with objects derived from</span>
 <span class="sd">           Particles.</span>
@@ -541,6 +542,7 @@
 
         <span class="c1"># Set the type of galaxy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">galaxy_type</span> <span class="o">=</span> <span class="s2">&quot;Particle&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
         <span class="c1"># Instantiate the parent (load stars and gas below)</span>
         <span class="n">BaseGalaxy</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -586,6 +588,20 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">ages</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">current_masses</span><span class="p">)</span>
                     <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s2">&quot;Ages of stars not provided, &quot;</span>
+                        <span class="s2">&quot;setting stellar_mass_weighted_age to `None`&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stellar_mass_weighted_age</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Current mass of stars not provided, &quot;</span>
+                    <span class="s2">&quot;setting stellar_mass_weighted_age to `None`&quot;</span>
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Galaxy.calculate_integrated_gas_properties"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.calculate_integrated_gas_properties">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_integrated_gas_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -602,6 +618,13 @@
                 <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
                 <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas_mass</span>
             <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass_weighted_gas_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Mass of gas particles not provided, &quot;</span>
+                    <span class="s2">&quot;setting mass_weighted_gas_metallicity to `None`&quot;</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">star_forming</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">star_forming</span>
@@ -617,6 +640,14 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
                     <span class="p">)</span>
                     <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_mass</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sf_gas_metallicity</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Star forming gas particle mask not provided, &quot;</span>
+                    <span class="s2">&quot;setting sf_gas_mass and sf_gas_metallicity to `None`&quot;</span>
                 <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Galaxy.load_stars"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.load_stars">[docs]</a>    <span class="k">def</span> <span class="nf">load_stars</span><span class="p">(</span>
@@ -625,7 +656,6 @@
         <span class="n">ages</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metallicities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -641,8 +671,6 @@
 <span class="sd">                Star particle metallicity (total metal fraction)</span>
 <span class="sd">            stars (stars particle object)</span>
 <span class="sd">                A pre-existing stars particle object to use. Defaults to None.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                If True, print warnings and information messages.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                Arbitrary keyword arguments.</span>
 
@@ -659,7 +687,7 @@
                 <span class="o">|</span> <span class="p">(</span><span class="n">ages</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="o">|</span> <span class="p">(</span><span class="n">metallicities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
             <span class="p">):</span>
-                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
                         <span class="s2">&quot;In `load_stars`: one of either `initial_masses`&quot;</span>
                         <span class="s2">&quot;, `ages` or `metallicities` is not provided, setting &quot;</span>
@@ -684,7 +712,6 @@
         <span class="n">masses</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">metallicities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">gas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -698,8 +725,6 @@
 <span class="sd">                gas particle metallicity (total metal fraction)</span>
 <span class="sd">            gas (gas particle object)</span>
 <span class="sd">                A pre-existing gas particle object to use. Defaults to None.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                If True, print warnings and information messages.</span>
 <span class="sd">        **kwargs</span>
 
 <span class="sd">        Returns:</span>
@@ -711,7 +736,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># If nothing has been provided, just set to None and return</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">metallicities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span>
                         <span class="s2">&quot;In `load_stars`: one of either `masses`&quot;</span>
                         <span class="s2">&quot; or `metallicities` is not provided, setting &quot;</span>
