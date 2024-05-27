@@ -515,12 +515,13 @@
 <span class="sd">            Boolean array of selected galaxies from the subhalo catalogue.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Do some simple argument</span>
+    <span class="c1"># Do some simple argument preparation</span>
     <span class="n">snap_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">snap_number</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading header information...&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Get header information</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadHeader</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">)</span>
     <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
     <span class="n">redshift</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;Redshift&#39;</span><span class="p">]</span>
@@ -530,10 +531,14 @@
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading subhalo catalogue...&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Load subhalo properties (positions and stellar masses)</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SubhaloMassType&#39;</span><span class="p">,</span> <span class="s1">&#39;SubhaloPos&#39;</span><span class="p">]</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadSubhalos</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadSubhalos</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="c1"># Perform stellar mass masking</span>
     <span class="n">stellar_mass</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubhaloMassType&#39;</span><span class="p">][:,</span> <span class="mi">4</span><span class="p">]</span>
     <span class="n">subhalo_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">stellar_mass</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">stellar_mass_limit</span>
+
     <span class="n">subhalo_pos</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubhaloPos&#39;</span><span class="p">][</span><span class="n">subhalo_mask</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -562,6 +567,7 @@
         <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
             <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
+        <span class="c1"># Save subhalo centre</span>
         <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">*</span> <span class="n">kpc</span>
 
         <span class="n">star_fields</span> <span class="o">=</span> <span class="p">[</span>
@@ -650,7 +656,7 @@
             <span class="n">g_metals</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_Metallicity&#39;</span><span class="p">]</span>
 
             <span class="n">g_masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
-            <span class="n">star_forming</span> <span class="o">=</span> <span class="n">g_sfr</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+            <span class="n">star_forming</span> <span class="o">=</span> <span class="n">g_sfr</span> <span class="o">&gt;</span> <span class="mf">0.0</span>  <span class="c1"># star forming gas particles</span>
 
             <span class="c1"># Convert comoving coordinates to physical kpc</span>
             <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
