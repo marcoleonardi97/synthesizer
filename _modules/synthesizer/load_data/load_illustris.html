@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2024.05.06 -->
-        <title>synthesizer.particle.particles - Synthesizer</title>
+        <title>synthesizer.load_data.load_illustris - Synthesizer</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=387cc868" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
@@ -448,303 +448,226 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for synthesizer.particle.particles</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;The base module from which all other particle types inherit.</span>
+          <h1>Source code for synthesizer.load_data.load_illustris</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatLambdaCDM</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
-<span class="sd">This generic particle class forms the base class containing all attributes and</span>
-<span class="sd">methods common to all child particle types. It should rarely if ever be</span>
-<span class="sd">directly instantiated.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">illustris_python</span> <span class="k">as</span> <span class="nn">il</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;The `illustris_python` module is not installed. &quot;</span>
+        <span class="s2">&quot;Please refer to the website for installation instructions: &quot;</span>
+        <span class="s2">&quot;https://github.com/illustristng/illustris_python&quot;</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Exiting...&quot;</span>
+    <span class="p">)</span>
+    <span class="n">exit</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">multivariate_normal</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
-<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">..particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 
 
-<div class="viewcode-block" id="Particles"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles">[docs]</a><span class="k">class</span> <span class="nc">Particles</span><span class="p">:</span>
+<div class="viewcode-block" id="load_IllustrisTNG"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_illustris.html#synthesizer.load_data.load_illustris.load_IllustrisTNG">[docs]</a><span class="k">def</span> <span class="nf">load_IllustrisTNG</span><span class="p">(</span>
+    <span class="n">directory</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
+    <span class="n">snap_number</span><span class="o">=</span><span class="mi">99</span><span class="p">,</span>
+    <span class="n">stellar_mass_limit</span><span class="o">=</span><span class="mf">8.5e6</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">metals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base particle class.</span>
+<span class="sd">    Load IllustrisTNG particle data into galaxy objects</span>
 
-<span class="sd">    All attributes of this class are optional keyword arguments in the child</span>
-<span class="sd">    classes. Here we demand they are passed as positional arguments to protect</span>
-<span class="sd">    against future changes.</span>
+<span class="sd">    Uses the `illustris_python` module, which must be installed manually.</span>
+<span class="sd">    Loads the particles associated with each subhalo individually, rather than</span>
+<span class="sd">    the whole simulation volume particle arrays; this can be slower for certain</span>
+<span class="sd">    volumes, but avoids memory issues for higher resolution boxes.</span>
 
-<span class="sd">    Attributes:</span>
-<span class="sd">        coordinates (array-like, float)</span>
-<span class="sd">            The 3D coordinates of each particle.</span>
-<span class="sd">        velocities (array-like, float)</span>
-<span class="sd">            The 3D velocity of each stellar particle.</span>
-<span class="sd">        masses (array-like, float)</span>
-<span class="sd">            The mass of each particle in Msun.</span>
-<span class="sd">        redshift (array-like/float)</span>
-<span class="sd">            The redshift/s of the stellar particles.</span>
-<span class="sd">        softening_length (float)</span>
-<span class="sd">            The physical gravitational softening length.</span>
-<span class="sd">        nparticle : int</span>
-<span class="sd">            How many particles are there?</span>
+<span class="sd">    Args:</span>
+<span class="sd">        directory (string):</span>
+<span class="sd">            Data location of group and particle files.</span>
+<span class="sd">        snap_number (int):</span>
+<span class="sd">            Snapshot number.</span>
+<span class="sd">        stellar_mass_limit (float):</span>
+<span class="sd">            Stellar mass limit above which to load galaxies.</span>
+<span class="sd">            In units of solar mass.</span>
+<span class="sd">        verbose (bool):</span>
+<span class="sd">            Verbosity flag</span>
+<span class="sd">        dtm (float):</span>
+<span class="sd">            Dust-to-metals ratio to apply to all gas particles</span>
+<span class="sd">        physical (bool):</span>
+<span class="sd">            Should the coordinates be converted to physical?</span>
+<span class="sd">            Default: True</span>
+<span class="sd">        metals (bool):</span>
+<span class="sd">            Should we load individual stellar element abundances?</span>
+<span class="sd">            Default: True. This property may not be available for</span>
+<span class="sd">            all snapshots ( see</span>
+<span class="sd">            https://www.tng-project.org/data/docs/specifications/#sec1a ).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        galaxies (list):</span>
+<span class="sd">            List of `ParticleGalaxy` objects, each containing star and</span>
+<span class="sd">            gas particles</span>
+<span class="sd">        subhalo_mask (array, bool):</span>
+<span class="sd">            Boolean array of selected galaxies from the subhalo catalogue.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Define class level Quantity attributes</span>
-    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">velocities</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">masses</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">softening_lengths</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="c1"># Do some simple argument</span>
+    <span class="n">snap_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">snap_number</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">coordinates</span><span class="p">,</span>
-        <span class="n">velocities</span><span class="p">,</span>
-        <span class="n">masses</span><span class="p">,</span>
-        <span class="n">redshift</span><span class="p">,</span>
-        <span class="n">softening_length</span><span class="p">,</span>
-        <span class="n">nparticles</span><span class="p">,</span>
-        <span class="n">centre</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Intialise the Particles.</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading header information...&quot;</span><span class="p">)</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            coordinates (array-like, float)</span>
-<span class="sd">                The 3D positions of the particles.</span>
-<span class="sd">            velocities (array-like, float)</span>
-<span class="sd">                The 3D velocities of the particles.</span>
-<span class="sd">            masses (array-like, float)</span>
-<span class="sd">                The mass of each particle.</span>
-<span class="sd">            redshift (float)</span>
-<span class="sd">                The redshift/s of the particles.</span>
-<span class="sd">            softening_length (float)</span>
-<span class="sd">                The physical gravitational softening length.</span>
-<span class="sd">            nparticle (int)</span>
-<span class="sd">                How many particles are there?</span>
-<span class="sd">            centre (array, float)</span>
-<span class="sd">                Centre of the particle distribution.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Check arguments are valid</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadHeader</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">)</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
+    <span class="n">redshift</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;Redshift&#39;</span><span class="p">]</span>
+    <span class="n">Om0</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;Omega0&#39;</span><span class="p">]</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;HubbleParam&#39;</span><span class="p">]</span>
 
-        <span class="c1"># Set phase space coordinates</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="o">=</span> <span class="n">velocities</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading subhalo catalogue...&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Initialise the particle photometry dictionaries</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SubhaloMassType&#39;</span><span class="p">,</span> <span class="s1">&#39;SubhaloPos&#39;</span><span class="p">]</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadSubhalos</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">stellar_mass</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubhaloMassType&#39;</span><span class="p">][:,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">subhalo_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">stellar_mass</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">stellar_mass_limit</span>
+    <span class="n">subhalo_pos</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubhaloPos&#39;</span><span class="p">][</span><span class="n">subhalo_mask</span><span class="p">]</span>
 
-        <span class="c1"># Set unit information</span>
-
-        <span class="c1"># Set the softening length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">softening_lengths</span> <span class="o">=</span> <span class="n">softening_length</span>
-
-        <span class="c1"># Set the particle masses</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">masses</span> <span class="o">=</span> <span class="n">masses</span>
-
-        <span class="c1"># Set the redshift of the particles</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
-
-        <span class="c1"># How many particles are there?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span> <span class="o">=</span> <span class="n">nparticles</span>
-
-        <span class="c1"># Set the centre of the particle distribution</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">centre</span>
-
-    <span class="k">def</span> <span class="nf">_check_part_args</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">velocities</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">softening_length</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sanitizes the inputs ensuring all arguments agree and are compatible.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            InconsistentArguments</span>
-<span class="sd">                If any arguments are incompatible or not as expected an error</span>
-<span class="sd">                is thrown.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Ensure all quantities have units</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;coordinates must have unyt units associated to them.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">velocities</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;velocities must have unyt units associated to them.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">masses</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;masses must have unyt units associated to them.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">softening_length</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;softening_length must have unyt units associated to them.&quot;</span>
-            <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">rotate_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-            <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-            <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-            <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-            <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subhalo_mask</span><span class="p">)</span><span class="si">}</span><span class="s2"> galaxies &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;above the stellar mass cut (</span><span class="si">{</span><span class="n">stellar_mass_limit</span><span class="si">}</span><span class="s2"> M_solar)&quot;</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Particles.convert_to_physical_properties"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.convert_to_physical_properties">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_physical_properties</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
+    <span class="n">galaxies</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subhalo_mask</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading particle information...&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+        <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">subhalo_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">subhalo_pos</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">total</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">subhalo_mask</span><span class="p">)</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts comoving coordinates and velocities to physical coordinates</span>
-<span class="sd">        and velocties.</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
 
-<span class="sd">        Note that redshift must be provided to perform this conversion.</span>
+        <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+            <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
-<span class="sd">        Since smoothing lengths are not universal quantities their existence is</span>
-<span class="sd">        checked before trying to convert them.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-            <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-            <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-            <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-            <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-        <span class="p">)</span></div>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">*</span> <span class="n">kpc</span>
 
-<div class="viewcode-block" id="Particles.convert_to_comoving_properties"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.convert_to_comoving_properties">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_comoving_properties</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts comoving coordinates and velocities to physical coordinates</span>
-<span class="sd">        and velocties.</span>
+        <span class="n">star_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;GFM_StellarFormationTime&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Coordinates&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Masses&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;GFM_InitialMass&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;GFM_Metallicity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SubfindHsml&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">metals</span><span class="p">:</span>
+            <span class="n">star_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;GFM_Metals&#39;</span><span class="p">)</span>
 
-<span class="sd">        Note that redshift must be provided to perform this conversion.</span>
-
-<span class="sd">        Since smoothing lengths are not universal quantities their existence is</span>
-<span class="sd">        checked before trying to convert them.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-            <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-            <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-            <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-            <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-        <span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">centered_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the coordinates centred on the geometric mean.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">masses</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">loadSubhalo</span><span class="p">(</span>
+            <span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;stars&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">star_fields</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Particles.get_particle_photo_luminosities"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_particle_photo_luminosities">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
+        <span class="k">if</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
+            <span class="c1"># Mask for wind particles</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_StellarFormationTime&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.0</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            photo_luminosities (dict)</span>
-<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="c1"># filter particle arrays</span>
+            <span class="n">imasses</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_InitialMass&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">form_time</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_StellarFormationTime&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">coods</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">metallicities</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_Metallicity&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">masses</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">hsml</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubfindHsml&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span></div>
+            <span class="n">masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
+            <span class="n">imasses</span> <span class="o">=</span> <span class="p">(</span><span class="n">imasses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="Particles.get_particle_photo_fluxes"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_particle_photo_fluxes">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
+            <span class="k">if</span> <span class="n">metals</span><span class="p">:</span>
+                <span class="n">_metals</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_Metals&#39;</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
+                <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+                <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_metals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s_oxygen</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            filters (object)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
+            <span class="c1"># Convert comoving coordinates to physical kpc</span>
+            <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+                <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+                <span class="n">hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            (dict)</span>
-<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="c1"># convert formation times to ages</span>
+            <span class="n">cosmo</span> <span class="o">=</span> <span class="n">FlatLambdaCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">h</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">)</span>
+            <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">scale_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span></div></div>
+            <span class="k">if</span> <span class="n">hsml</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">hsml</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">hsml</span> <span class="o">*</span> <span class="n">kpc</span>
 
+            <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
+                <span class="n">initial_masses</span><span class="o">=</span><span class="n">imasses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+                <span class="n">ages</span><span class="o">=</span><span class="n">ages</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
+                <span class="n">metallicities</span><span class="o">=</span><span class="n">metallicities</span><span class="p">,</span>
+                <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">,</span>
+                <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">,</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="n">coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">current_masses</span><span class="o">=</span><span class="n">masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+                <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+            <span class="p">)</span>
 
-<div class="viewcode-block" id="CoordinateGenerator"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.CoordinateGenerator">[docs]</a><span class="k">class</span> <span class="nc">CoordinateGenerator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A collection of helper methods for generating random coordinate arrays from</span>
-<span class="sd">    various distribution functions.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="CoordinateGenerator.generate_3D_gaussian"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.CoordinateGenerator.generate_3D_gaussian">[docs]</a>    <span class="k">def</span> <span class="nf">generate_3D_gaussian</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A generator for coordinates from a 3D gaussian distribution.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            n (int)</span>
-<span class="sd">                The number of coordinates to sample.</span>
-<span class="sd">            mean (array-like, float)</span>
-<span class="sd">                The centre of the gaussian distribution. Must be a 3D array</span>
-<span class="sd">                containing the centre along each axis.</span>
-<span class="sd">            cov (array-like, float)</span>
-<span class="sd">                The covariance of the gaussian distribution.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            coords (array-like, float)</span>
-<span class="sd">                The sampled coordinates in an (n, 3) array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># If we haven&#39;t been passed a covariance make one</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">cov</span><span class="p">:</span>
-            <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="c1"># Get the coordinates</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">multivariate_normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">coords</span></div>
-
-    <span class="k">def</span> <span class="nf">generate_2D_Sersic</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-            <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-            <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-            <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-            <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
+        <span class="n">gas_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;StarFormationRate&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Coordinates&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Masses&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;GFM_Metallicity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;SubfindHsml&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">loadSubhalo</span><span class="p">(</span>
+            <span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="s1">&#39;gas&#39;</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">gas_fields</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">generate_3D_spline</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">kernel_func</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-            <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-            <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-            <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-            <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
 
-<div class="viewcode-block" id="CoordinateGenerator.calculate_centre_of_mass"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.CoordinateGenerator.calculate_centre_of_mass">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_centre_of_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the centre of mass of the collection</span>
-<span class="sd">        of particles.</span>
+            <span class="n">g_masses</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">]</span>
+            <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;StarFormationRate&#39;</span><span class="p">]</span>
+            <span class="n">g_coods</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span>
+            <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;SubfindHsml&#39;</span><span class="p">]</span>
+            <span class="n">g_metals</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;GFM_Metallicity&#39;</span><span class="p">]</span>
 
-<span class="sd">        Uses the `masses` and `coordinates` attributes,</span>
-<span class="sd">        and assigns the centre of mass to the `centre` attribute</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">total_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span>
-        <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+            <span class="n">g_masses</span> <span class="o">=</span> <span class="p">(</span><span class="n">g_masses</span> <span class="o">*</span> <span class="mf">1e10</span><span class="p">)</span> <span class="o">/</span> <span class="n">h</span>
+            <span class="n">star_forming</span> <span class="o">=</span> <span class="n">g_sfr</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coods</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">):</span>
-            <span class="n">com</span> <span class="o">+=</span> <span class="n">coods</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">masses</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># Convert comoving coordinates to physical kpc</span>
+            <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+                <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+                <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+                <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
-        <span class="n">com</span> <span class="o">/=</span> <span class="n">total_mass</span>
+            <span class="n">galaxies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="n">g_coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">masses</span><span class="o">=</span><span class="n">g_masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+                <span class="n">metallicities</span><span class="o">=</span><span class="n">g_metals</span><span class="p">,</span>
+                <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
+                <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">g_hsml</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
+            <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">com</span></div></div>
+    <span class="k">return</span> <span class="n">galaxies</span><span class="p">,</span> <span class="n">subhalo_mask</span></div>
 </pre></div>
         </article>
       </div>
