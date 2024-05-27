@@ -480,6 +480,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">import</span> <span class="nn">synthesizer.exceptions</span> <span class="k">as</span> <span class="nn">exceptions</span>
@@ -1864,14 +1865,25 @@
         <span class="c1"># And ensure transmission is in expected range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">clip_transmission</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Filter.apply_filter"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Filter.apply_filter"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.apply_filter">[docs]</a>    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">arr</span><span class="p">,</span>
+        <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Apply this filter&#39;s transmission curve to an arbitrary dimensioned</span>
+<span class="sd">        Apply the transmission curve to any array.</span>
+
+<span class="sd">        Applies this filter&#39;s transmission curve to an arbitrary dimensioned</span>
 <span class="sd">        array returning the sum of the array convolved with the filter</span>
 <span class="sd">        transmission curve along the wavelength axis (final axis).</span>
 
 <span class="sd">        If no wavelength or frequency array is provided then the filters rest</span>
 <span class="sd">        frame frequency is assumed.</span>
+
+<span class="sd">        To apply to llam or flam, wavelengths must be provided. To apply to</span>
+<span class="sd">        lnu or fnu frequencies must be provided.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            arr (array-like, float)</span>
@@ -1898,10 +1910,43 @@
 <span class="sd">                If the shape of the transmission and wavelength array differ</span>
 <span class="sd">                the convolution cannot be done.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialise the xs were about to set and use</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">original_xs</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># Warn the user that frequencies take precedence over wavelengths</span>
-        <span class="c1"># if both are provided</span>
-        <span class="k">if</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Get the right x array to integrate over</span>
+        <span class="k">if</span> <span class="n">lam</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">nu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If we haven&#39;t been handed anything we&#39;ll use the filter&#39;s</span>
+            <span class="c1"># frequencies</span>
+
+            <span class="c1"># Use the filters frequency array</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span>
+            <span class="n">original_xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_nu</span>
+
+        <span class="k">elif</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If we have lams we are intergrating over llam or flam</span>
+
+            <span class="c1"># Ensure the passed wavelengths have units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+                <span class="n">lam</span> <span class="o">*=</span> <span class="n">Angstrom</span>
+
+            <span class="c1"># Use the passed wavelength and original lam</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">original_xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span>
+
+        <span class="k">elif</span> <span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># If we&#39;ve been handed nu we are integrating over lnu or fnu</span>
+
+            <span class="c1"># Ensure the passed frequencies have units</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+                <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
+
+            <span class="c1"># Use the passed frequency and original frequency</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">original_xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_nu</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If both have been handed then frequencies take precedence</span>
             <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="p">(</span>
@@ -1910,61 +1955,24 @@
                         <span class="s2">&quot; for filter convolution.&quot;</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
+            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">original_xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_nu</span>
 
-        <span class="c1"># Get the correct x array to integrate w.r.t and work out if we need</span>
-        <span class="c1"># to shift the transmission curve.</span>
-        <span class="k">if</span> <span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Ensure the passed frequencies have units</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-                <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
+        <span class="c1"># Interpolate the transmission curve onto the provided frequencies</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">original_xs</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
 
-            <span class="c1"># Define the integration xs</span>
-            <span class="n">xs</span> <span class="o">=</span> <span class="n">nu</span>
-
-            <span class="c1"># Do we need to shift?</span>
-            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">nu</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-            <span class="c1"># To shift the transmission we need the corresponding wavelength</span>
-            <span class="c1"># with the units stripped off</span>
-            <span class="k">if</span> <span class="n">need_shift</span><span class="p">:</span>
-                <span class="n">lam</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-
-        <span class="k">elif</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Ensure the passed wavelengths have no units</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
-                <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">value</span>
-
-            <span class="c1"># Define the integration xs</span>
-            <span class="n">xs</span> <span class="o">=</span> <span class="n">lam</span>
-
-            <span class="c1"># Do we need to shift?</span>
-            <span class="n">need_shift</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Define the integration xs</span>
-            <span class="n">xs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span>
-
-            <span class="c1"># No shift needed</span>
-            <span class="n">need_shift</span> <span class="o">=</span> <span class="kc">False</span>
-
-        <span class="c1"># Do we need to shift?</span>
-        <span class="k">if</span> <span class="n">need_shift</span><span class="p">:</span>
-            <span class="c1"># Ok, shift the tranmission curve by interpolating onto the</span>
-            <span class="c1"># provided wavelengths</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-                <span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_original_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.0</span>
-            <span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># We can use the standard transmission array</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
-
-        <span class="c1"># Check dimensions are ok</span>
-        <span class="k">if</span> <span class="n">xs</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Final dimension of array did not match &quot;</span>
-                <span class="s2">&quot;x array shape (arr.shape[-1]=</span><span class="si">%d</span><span class="s2">, &quot;</span>
-                <span class="s2">&quot;xs.size=</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xs</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="c1"># Ensure the xs array and arr are a compatible shape</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;The shape of the transmission curve and the final axis of &quot;</span>
+                <span class="s2">&quot;the array to be convolved do not match. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(arr.shape=</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, transmission.shape=</span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">)&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Store this observed frame transmission</span>
@@ -1978,7 +1986,7 @@
         <span class="n">xs_in_band</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">in_band</span><span class="p">]</span>
         <span class="n">t_in_band</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">in_band</span><span class="p">]</span>
 
-        <span class="c1"># Multiply the IFU by the filter transmission curve</span>
+        <span class="c1"># Multiply the array by the filter transmission curve</span>
         <span class="n">transmission</span> <span class="o">=</span> <span class="n">arr_in_band</span> <span class="o">*</span> <span class="n">t_in_band</span>
 
         <span class="c1"># Sum over the final axis to &quot;collect&quot; transmission in this filer</span>
