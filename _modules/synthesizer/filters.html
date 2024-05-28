@@ -678,13 +678,12 @@
 
     <span class="k">def</span> <span class="nf">_load_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads a `FilterCollection` from a HDF5 file.</span>
+<span class="sd">        Load a `FilterCollection` from a HDF5 file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            path (str)</span>
 <span class="sd">                The file path from which to load the `FilterCollection`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Open the HDF5 file</span>
         <span class="n">hdf</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
@@ -708,73 +707,17 @@
 
         <span class="c1"># Loop over the groups and make the filters</span>
         <span class="k">for</span> <span class="n">filter_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">:</span>
-            <span class="c1"># Open the filter group</span>
-            <span class="n">f_grp</span> <span class="o">=</span> <span class="n">hdf</span><span class="p">[</span><span class="n">filter_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)]</span>
-
-            <span class="c1"># Get the filter type</span>
-            <span class="n">filter_type</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;filter_type&quot;</span><span class="p">]</span>
-
-            <span class="c1"># For SVO filters we don&#39;t want to send a request to the</span>
-            <span class="c1"># database so instead instatiate it as a generic filter and</span>
-            <span class="c1"># overwrite some attributes after the fact</span>
-            <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;SVO&quot;</span><span class="p">:</span>
-                <span class="n">filt</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span>
-                    <span class="n">filter_code</span><span class="p">,</span>
-                    <span class="n">transmission</span><span class="o">=</span><span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Transmission&quot;</span><span class="p">][:],</span>
-                    <span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
-                <span class="p">)</span>
-
-                <span class="c1"># Set the SVO specific attributes</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">=</span> <span class="n">filter_type</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">svo_url</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;svo_url&quot;</span><span class="p">]</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">observatory</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;observatory&quot;</span><span class="p">]</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">filter_</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;filter_&quot;</span><span class="p">]</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">original_lam</span> <span class="o">=</span> <span class="n">unyt_array</span><span class="p">(</span>
-                    <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Original_Wavelength&quot;</span><span class="p">][:],</span> <span class="n">lam_units</span>
-                <span class="p">)</span>
-                <span class="n">filt</span><span class="o">.</span><span class="n">original_t</span> <span class="o">=</span> <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Original_Transmission&quot;</span><span class="p">][:]</span>
-
-            <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;TopHat&quot;</span><span class="p">:</span>
-                <span class="c1"># For a top hat filter we can pass the related parameters</span>
-                <span class="c1"># and build the filter as normal</span>
-
-                <span class="c1"># Set up key word params, we have to do this to handle to</span>
-                <span class="c1"># two methods for creating top hat filters</span>
-                <span class="n">tophat_dict</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="n">key</span><span class="p">:</span> <span class="kc">None</span>
-                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
-                        <span class="s2">&quot;lam_min&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;lam_max&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;lam_eff&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;lam_fwhm&quot;</span><span class="p">,</span>
-                    <span class="p">]</span>
-                <span class="p">}</span>
-
-                <span class="c1"># Loop over f_grp keys and set those that exist</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="s2">&quot;lam&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-                        <span class="n">tophat_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">unyt_quantity</span><span class="p">(</span>
-                            <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-                            <span class="n">lam_units</span><span class="p">,</span>
-                        <span class="p">)</span>
-
-                <span class="c1"># Create the filter</span>
-                <span class="n">filt</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_code</span><span class="p">,</span> <span class="o">**</span><span class="n">tophat_dict</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># For a generic filter just set the transmission and</span>
-                <span class="c1"># wavelengths</span>
-                <span class="n">filt</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span>
-                    <span class="n">filter_code</span><span class="p">,</span>
-                    <span class="n">transmission</span><span class="o">=</span><span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Transmission&quot;</span><span class="p">][:],</span>
-                    <span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="c1"># Get the filter</span>
+            <span class="n">filt</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="n">filter_code</span><span class="p">,</span> <span class="n">hdf</span><span class="o">=</span><span class="n">hdf</span><span class="p">)</span>
 
             <span class="c1"># Store the created filter</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">filt</span>
 
         <span class="n">hdf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># We&#39;re done loading so lets merge the filters, if they need to be</span>
+        <span class="c1"># resampled they will be at the end of the __init__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_filter_lams</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_include_svo_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_codes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -785,7 +728,6 @@
 <span class="sd">                A list of SVO filter codes, used to retrieve filter data from</span>
 <span class="sd">                the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Loop over the given filter codes</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filter_codes</span><span class="p">:</span>
             <span class="c1"># Get filter from SVO</span>
@@ -811,7 +753,6 @@
 <span class="sd">                                      &quot;lam_max&quot;: &lt;maximum_nonzero_wavelength&gt;},</span>
 <span class="sd">                                      ...}.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Loop over the keys of the dictionary</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tophat_dict</span><span class="p">:</span>
             <span class="c1"># Get this filter&#39;s properties</span>
@@ -858,7 +799,6 @@
 <span class="sd">                    {&lt;filter_code1&gt; : {&quot;transmission&quot;: &lt;transmission_array&gt;}}.</span>
 <span class="sd">                For generic filters new_lam must be provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Loop over the keys of the dictionary</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">generic_dict</span><span class="p">:</span>
             <span class="c1"># Get this filter&#39;s properties</span>
@@ -881,7 +821,6 @@
 <span class="sd">                A list of SVO filter codes, used to retrieve filter data from</span>
 <span class="sd">                the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Loop over the given filter codes</span>
         <span class="k">for</span> <span class="n">_filter</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
             <span class="c1"># Store the filter and its code</span>
@@ -1073,7 +1012,7 @@
             <span class="n">max_lam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_merge_filter_lams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_gaps</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_merge_filter_lams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_gaps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Merge the wavelength arrays of multiple filters.</span>
 
@@ -1081,6 +1020,10 @@
 
 <span class="sd">        If a gap is found between filters it can be populated with the minimum</span>
 <span class="sd">        average wavelength resolution of all filters if fill_gaps is True.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fill_gaps (bool)</span>
+<span class="sd">                Are we filling gaps in the wavelength array? Defaults to False.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            np.ndarray</span>
@@ -1611,6 +1554,7 @@
         <span class="n">lam_eff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">lam_fwhm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">hdf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise a filter.</span>
@@ -1634,6 +1578,9 @@
 <span class="sd">                If a top hat filter: The FWHM of the filter curve.</span>
 <span class="sd">            new_lam (array-like, float)</span>
 <span class="sd">                The wavelength array for which the transmission is defined.</span>
+<span class="sd">            hdf (h5py.Group)</span>
+<span class="sd">                The HDF5 root group of a HDF5 file from which to load the</span>
+<span class="sd">                filter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Metadata of this filter</span>
@@ -1660,9 +1607,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">=</span> <span class="n">transmission</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_shifted_t</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># Are loading from a hdf5 group?</span>
+        <span class="k">if</span> <span class="n">hdf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_filter_from_hdf5</span><span class="p">(</span><span class="n">hdf</span><span class="p">)</span>
+
         <span class="c1"># Is this a generic filter? (Everything other than the label is defined</span>
         <span class="c1"># above.)</span>
-        <span class="k">if</span> <span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">transmission</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">=</span> <span class="s2">&quot;Generic&quot;</span>
 
         <span class="c1"># Is this a top hat filter?</span>
@@ -1774,6 +1725,78 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_filter_from_hdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hdf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a filter from an HDF5 group.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            hdf (h5py.Group)</span>
+<span class="sd">                The HDF5 root group containing the filter data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the wavelength units</span>
+        <span class="n">lam_units</span> <span class="o">=</span> <span class="n">hdf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Wavelength_units&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Get the filter group</span>
+        <span class="n">f_grp</span> <span class="o">=</span> <span class="n">hdf</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)]</span>
+
+        <span class="c1"># Get the filter type</span>
+        <span class="n">filter_type</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;filter_type&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Set wavelength array</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">unyt_array</span><span class="p">(</span><span class="n">hdf</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">][</span><span class="s2">&quot;Wavelengths&quot;</span><span class="p">][:],</span> <span class="n">lam_units</span><span class="p">)</span>
+
+        <span class="c1"># For SVO filters we don&#39;t want to send a request to the</span>
+        <span class="c1"># database so instead instatiate it as a generic filter and</span>
+        <span class="c1"># overwrite some attributes after the fact</span>
+        <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;SVO&quot;</span><span class="p">:</span>
+            <span class="c1"># Set the SVO specific attributes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">=</span> <span class="n">filter_type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">svo_url</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;svo_url&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">observatory</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;observatory&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;instrument&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_</span> <span class="o">=</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;filter_&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span> <span class="o">=</span> <span class="n">unyt_array</span><span class="p">(</span>
+                <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Original_Wavelength&quot;</span><span class="p">][:],</span> <span class="n">lam_units</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="o">=</span> <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Original_Transmission&quot;</span><span class="p">][:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Transmission&quot;</span><span class="p">][:]</span>
+
+        <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;TopHat&quot;</span><span class="p">:</span>
+            <span class="c1"># For a top hat filter we can pass the related parameters</span>
+            <span class="c1"># and build the filter as normal</span>
+
+            <span class="c1"># Set up key word params, we have to do this to handle to</span>
+            <span class="c1"># two methods for creating top hat filters</span>
+            <span class="n">tophat_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+                    <span class="s2">&quot;lam_min&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;lam_max&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;lam_eff&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;lam_fwhm&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+
+            <span class="c1"># Loop over f_grp keys and set those that exist</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s2">&quot;lam&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="n">tophat_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">unyt_quantity</span><span class="p">(</span>
+                        <span class="n">f_grp</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                        <span class="n">lam_units</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># Attach top hat properties</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tophat_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="c1"># Finally, construct the top hat filter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_top_hat_filter</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># For a generic filter just set the transmission and</span>
+            <span class="c1"># wavelengths</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">f_grp</span><span class="p">[</span><span class="s2">&quot;Transmission&quot;</span><span class="p">][:]</span>
 
 <div class="viewcode-block" id="Filter.clip_transmission"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.clip_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">clip_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
