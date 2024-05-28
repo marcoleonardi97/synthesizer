@@ -1706,6 +1706,75 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Alias for self.t.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
 
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a string representation of the filter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            string</span>
+<span class="sd">                A string representation of the filter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">details</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;Filter Code: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Observatory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">observatory</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Instrument: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">instrument</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Filter: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Filter Type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;TopHat&quot;</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;Lambda Min: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_min</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Lambda Max: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_max</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Lambda Eff: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_eff</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;Lambda FWHM: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_fwhm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_type</span> <span class="o">==</span> <span class="s2">&quot;SVO&quot;</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;SVO URL: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">svo_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Wavelength Array: shape = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Frequency Array: shape = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Original Wavelength Array: shape = &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_lam</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Original Frequency Array: shape = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_nu</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Transmission Curve: shape = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Original Transmission Curve: shape = &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;min = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">, max = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">original_t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Filter.clip_transmission"><a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.Filter.clip_transmission">[docs]</a>    <span class="k">def</span> <span class="nf">clip_transmission</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clips transmission curve between 0 and 1.</span>
