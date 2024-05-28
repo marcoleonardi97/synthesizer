@@ -477,6 +477,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">planck</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="EmissionBase"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.EmissionBase">[docs]</a><span class="k">class</span> <span class="nc">EmissionBase</span><span class="p">:</span>
@@ -848,25 +849,21 @@
         <span class="n">umax</span> <span class="o">=</span> <span class="mf">1e7</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">umin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="mf">2.0</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Gamma, Umin or alpha for DL07 model not provided, &quot;</span>
-                    <span class="s2">&quot;using default values&quot;</span>
-                <span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="s2">&quot;Computing required values using Magdis+2012 &quot;</span>
-                    <span class="s2">&quot;stacking results&quot;</span>
-                <span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Gamma, Umin or alpha for DL07 model not provided, &quot;</span>
+                <span class="s2">&quot;using default values&quot;</span>
+            <span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Computing required values using Magdis+2012 &quot;</span>
+                <span class="s2">&quot;stacking results&quot;</span>
+            <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">u_avg</span> <span class="o">=</span> <span class="n">u_mean_magdis12</span><span class="p">(</span>
                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mdust</span> <span class="o">/</span> <span class="n">Msun</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ldust</span> <span class="o">/</span> <span class="n">Lsun</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p0</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gamma not provided&quot;</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Choosing default gamma value as 5%&quot;</span><span class="p">)</span>
-
+                <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Gamma not provided, choosing default gamma value as 5%&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.05</span>
 
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
@@ -887,7 +884,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">umin_id</span> <span class="o">=</span> <span class="n">umin_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha_id</span> <span class="o">=</span> <span class="n">alpha_id</span></div>
 
-<div class="viewcode-block" id="IR_templates.get_spectra"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.IR_templates.get_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_lam</span><span class="p">,</span> <span class="n">dust_components</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="IR_templates.get_spectra"><a class="viewcode-back" href="../../../_autosummary/synthesizer.dust.emission.html#synthesizer.dust.emission.IR_templates.get_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_lam</span><span class="p">,</span> <span class="n">dust_components</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the lnu for the provided wavelength grid</span>
 
@@ -901,7 +898,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;DL07&quot;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using the Draine &amp; Li 2007 dust models&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using the Draine &amp; Li 2007 dust models&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dl07</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>

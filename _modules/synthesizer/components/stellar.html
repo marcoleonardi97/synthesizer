@@ -464,6 +464,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span><span class="p">,</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="StarsComponent"><a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent">[docs]</a><span class="k">class</span> <span class="nc">StarsComponent</span><span class="p">:</span>
@@ -895,15 +896,12 @@
 
         <span class="c1"># Check if grid has been run through a photoionisation code</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">grid</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="s2">&quot;The grid you are using has not been post-processed &quot;</span>
-                        <span class="s2">&quot;through a photoionisation code. This method will &quot;</span>
-                        <span class="s2">&quot;just return the incident stellar emission. Are &quot;</span>
-                        <span class="s2">&quot;you sure this is the method you want to use?&quot;</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The grid you are using has not been post-processed &quot;</span>
+                <span class="s2">&quot;through a photoionisation code. This method will &quot;</span>
+                <span class="s2">&quot;just return the incident stellar emission. Are &quot;</span>
+                <span class="s2">&quot;you sure this is the method you want to use?&quot;</span>
+            <span class="p">)</span>
 
             <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra_incident</span><span class="p">(</span>
                 <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
@@ -1380,13 +1378,11 @@
             <span class="c1">#   - total</span>
 
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="s2">&quot;Separate dust curve slopes for diffuse and &quot;</span>
-                        <span class="s2">&quot;birth cloud dust not given&quot;</span>
-                    <span class="p">)</span>
+                <span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;Separate dust curve slopes for diffuse and &quot;</span>
+                    <span class="s2">&quot;birth cloud dust not given. &quot;</span>
+                    <span class="s2">&quot;Defaulting to dust_curve.slope (-1 if unmodified)&quot;</span>
                 <span class="p">)</span>
-                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;Defaulting to dust_curve.slope (-1 if unmodified)&quot;</span><span class="p">))</span>
                 <span class="n">alpha</span> <span class="o">=</span> <span class="p">[</span><span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">slope</span><span class="p">]</span>
 
             <span class="c1"># Overwrite Nones with the dust_curve.slope value</span>
@@ -1454,11 +1450,9 @@
                 <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dust_emission_model</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span>
                     <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dust_emission_model</span><span class="p">,</span> <span class="s2">&quot;template&quot;</span><span class="p">)</span>
                 <span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="s2">&quot;Separate dust emission model for diffuse and &quot;</span>
-                            <span class="s2">&quot;birth cloud dust not given&quot;</span>
-                        <span class="p">)</span>
+                    <span class="n">warn</span><span class="p">(</span>
+                        <span class="s2">&quot;Separate dust emission model for diffuse and &quot;</span>
+                        <span class="s2">&quot;birth cloud dust not given&quot;</span>
                     <span class="p">)</span>
 
                     <span class="n">dust_emission_model</span> <span class="o">=</span> <span class="p">[</span>

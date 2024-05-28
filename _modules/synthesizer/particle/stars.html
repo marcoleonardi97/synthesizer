@@ -470,8 +470,6 @@
 <span class="sd">                        tau_v=tau_vs, coordinates=coordinates, ...)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
-
 <span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -487,6 +485,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.plt</span> <span class="kn">import</span> <span class="n">single_histxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="Stars"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars">[docs]</a><span class="k">class</span> <span class="nc">Stars</span><span class="p">(</span><span class="n">Particles</span><span class="p">,</span> <span class="n">StarsComponent</span><span class="p">):</span>
@@ -962,8 +961,7 @@
 
         <span class="c1"># Ensure and warn that the masking hasn&#39;t removed everything</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
 
@@ -973,8 +971,7 @@
 
             <span class="c1"># Ensure and warn that the masking hasn&#39;t removed everything</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">aperture_mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aperture mask has filtered out all particles&quot;</span><span class="p">)</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Aperture mask has filtered out all particles&quot;</span><span class="p">)</span>
 
                 <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1369,8 +1366,7 @@
 
         <span class="c1"># Ensure and warn that the masking hasn&#39;t removed everything</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nstars</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)))</span>
 
@@ -1608,9 +1604,9 @@
 
         <span class="c1"># Warn the user we are resampling a resampled population</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_resample</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Warning, galaxy stars already resampled. </span><span class="se">\</span>
-<span class="s2">                    To force resample, set force_resample=True. Returning...&quot;</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Galaxy stars already resampled. &quot;</span>
+                <span class="s2">&quot;To force resample, set force_resample=True. Returning...&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
