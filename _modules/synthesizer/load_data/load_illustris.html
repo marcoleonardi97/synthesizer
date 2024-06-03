@@ -451,7 +451,7 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.load_data.load_illustris</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatLambdaCDM</span>
+<span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck15</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
@@ -524,9 +524,8 @@
 
     <span class="c1"># Get header information</span>
     <span class="n">header</span> <span class="o">=</span> <span class="n">il</span><span class="o">.</span><span class="n">groupcat</span><span class="o">.</span><span class="n">loadHeader</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">snap_number</span><span class="p">)</span>
-    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span>
-    <span class="n">redshift</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;Redshift&quot;</span><span class="p">]</span>
-    <span class="n">Om0</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;Omega0&quot;</span><span class="p">]</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;Time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">redshift</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;Redshift&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;HubbleParam&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -610,7 +609,7 @@
                 <span class="n">hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
 
             <span class="c1"># convert formation times to ages</span>
-            <span class="n">cosmo</span> <span class="o">=</span> <span class="n">FlatLambdaCDM</span><span class="p">(</span><span class="n">H0</span><span class="o">=</span><span class="n">h</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Om0</span><span class="o">=</span><span class="n">Om0</span><span class="p">)</span>
+            <span class="n">cosmo</span> <span class="o">=</span> <span class="n">Planck15</span>
             <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">scale_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
