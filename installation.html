@@ -478,7 +478,7 @@
 </pre></div>
 </div>
 <p>If you want to install the code in <em>editable</em> mode, so any changes in the code base will be reflected in the installation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
 <p>Make sure you stay up to date with the latest versions through git:</p>
@@ -486,6 +486,24 @@
 <span class="n">git</span> <span class="n">pull</span> <span class="n">origin</span> <span class="n">main</span>
 </pre></div>
 </div>
+</section>
+<section id="installing-with-optional-flags">
+<h2>Installing with optional flags<a class="headerlink" href="#installing-with-optional-flags" title="Permalink to this heading">¶</a></h2>
+<p>DISCLAIMER: most users do not need to worry about this section. Synthesizer, by design, simplifies compilation so the user doesn’t need to think about it.</p>
+<p>Synthesizer uses C extensions for much of the heavy lifting done in the background to derive spectra. By default Synthesizer will use <code class="docutils literal notranslate"><span class="pre">-std=c99</span> <span class="pre">-Wall</span> <span class="pre">-O3</span> <span class="pre">-ffast-math</span> <span class="pre">-g</span></code> (on a unix-system) to optimise agressively. You can override this by modifying the compiler flags and linker arguments at the point of install, e.g.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">CFLAGS=...</span> <span class="pre">LDFLAGS=...</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span>
+<span class="pre">`</span></code></p>
+<p>Setting these environment variables will override the default flags. Note that Synthesizer will santise any requested flags to ensure they are compatible with the compiler. For example, to compile with debugging symbols and no optimisation, you could use</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">CFLAGS=&quot;-std=c99</span> <span class="pre">-Wall</span> <span class="pre">-g&quot;</span> <span class="pre">LDFLAGS=&quot;-g&quot;</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span>
+<span class="pre">`</span></code></p>
+<p>which would be recommended if you are developing the code, particularly the C extensions. In addition to disabling optimisation and turning on debugging symbols, you can also turn on debugging checks by adding <code class="docutils literal notranslate"><span class="pre">WITH_DEBUGGING_CHECKS=1</span></code>, e.g.</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">CFLAGS=&quot;-std=c99</span> <span class="pre">-Wall</span> <span class="pre">-g&quot;</span> <span class="pre">WITH_DEBUGGING_CHECKS=1</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span>
+<span class="pre">`</span></code></p>
+<p>This will add additional checks to the code to help catch bugs, but will slow down the code. This is recommended if you are developing the code, but not for normal use.</p>
+<p>The build process will generate a log file (<cite>build_synth.log</cite>) which details the compilation process and any choices that were made about the requested flags. If you encounter any issues, please check this log file for more information.</p>
 </section>
 <section id="downloading-sps-grids">
 <h2>Downloading SPS grids<a class="headerlink" href="#downloading-sps-grids" title="Permalink to this heading">¶</a></h2>
@@ -551,6 +569,7 @@
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#creating-a-python-environment">Creating a python environment</a></li>
 <li><a class="reference internal" href="#cloning-and-installing-the-code">Cloning and installing the code</a></li>
+<li><a class="reference internal" href="#installing-with-optional-flags">Installing with optional flags</a></li>
 <li><a class="reference internal" href="#downloading-sps-grids">Downloading SPS grids</a></li>
 </ul>
 </li>
