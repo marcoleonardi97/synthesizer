@@ -478,6 +478,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
 <span class="kn">from</span> <span class="nn">synthesizer.photometry</span> <span class="kn">import</span> <span class="n">PhotometryCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span><span class="p">,</span> <span class="n">rebin_1d</span><span class="p">,</span> <span class="n">wavelength_to_rgba</span>
@@ -540,6 +541,7 @@
 <span class="sd">            description (string)</span>
 <span class="sd">                An optional descriptive string defining the Sed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># Set the description</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
@@ -592,6 +594,8 @@
         <span class="c1"># Broadband photometry</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Creating Sed&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Sed.sum"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.sum">[docs]</a>    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1005,6 +1009,7 @@
 <span class="sd">            UnrecognisedOption</span>
 <span class="sd">                If method is an incompatible option an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># If the method is trapz we can do any number of dimensions</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
@@ -1060,6 +1065,9 @@
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">bolometric_luminosity</span>
+
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating bolometric luminosity&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span></div>
 
 <div class="viewcode-block" id="Sed.measure_window_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>

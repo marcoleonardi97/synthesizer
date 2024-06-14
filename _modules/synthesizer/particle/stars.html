@@ -471,6 +471,8 @@
 <span class="sd">                        tau_v=tau_vs, coordinates=coordinates, ...)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
+
 <span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -479,6 +481,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span><span class="p">,</span> <span class="n">LineCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">Para_Stars</span>
@@ -741,6 +744,7 @@
         <span class="n">spectra_type</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A method to prepare the arguments for SED computation with the C</span>
@@ -762,6 +766,9 @@
 <span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
 <span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
 <span class="sd">                Defaults to cic.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tuple</span>
@@ -812,6 +819,10 @@
         <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">part_props</span><span class="p">)</span>
 
+        <span class="c1"># If nthreads is -1 then use all available threads</span>
+        <span class="k">if</span> <span class="n">nthreads</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">nthreads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">grid_spectra</span><span class="p">,</span>
             <span class="n">grid_props</span><span class="p">,</span>
@@ -823,6 +834,7 @@
             <span class="n">npart</span><span class="p">,</span>
             <span class="n">nlam</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Stars.generate_lnu"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">generate_lnu</span><span class="p">(</span>
@@ -838,6 +850,7 @@
         <span class="n">parametric_young_stars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">parametric_sfh</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span>
         <span class="n">aperture</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the integrated rest frame spectra for a given grid key</span>
@@ -882,6 +895,12 @@
 <span class="sd">                Currently two are supported, `Constant` and</span>
 <span class="sd">                `TruncatedExponential`, selected using the keyword</span>
 <span class="sd">                arguments `constant` and `exponential`.</span>
+<span class="sd">            aperture (float)</span>
+<span class="sd">                If not None, specifies the radius of a spherical aperture</span>
+<span class="sd">                to apply to the particles.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
@@ -1002,6 +1021,7 @@
             <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="n">mask</span> <span class="o">&amp;</span> <span class="n">aperture_mask</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
@@ -1105,7 +1125,32 @@
         <span class="n">fesc</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
     <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the arguments for the C extension to compute lines.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The SPS grid object to extract spectra from.</span>
+<span class="sd">            line_id (str)</span>
+<span class="sd">                The id of the line to extract.</span>
+<span class="sd">            fesc (float/array-like, float)</span>
+<span class="sd">                Fraction of stellar emission that escapes unattenuated from</span>
+<span class="sd">                the birth cloud. Can either be a single value</span>
+<span class="sd">                or an value per star (defaults to 0.0).</span>
+<span class="sd">            mask (bool)</span>
+<span class="sd">                A mask to be applied to the stars. Spectra will only be</span>
+<span class="sd">                computed and returned for stars with True in the mask.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Make a dummy mask if none has been passed</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
@@ -1150,6 +1195,10 @@
         <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">part_props</span><span class="p">)</span>
 
+        <span class="c1"># If nthreads is -1 then use all available threads</span>
+        <span class="k">if</span> <span class="n">nthreads</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">nthreads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">grid_line</span><span class="p">,</span>
             <span class="n">grid_continuum</span><span class="p">,</span>
@@ -1161,9 +1210,12 @@
             <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
             <span class="n">npart</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Stars.generate_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Stars.generate_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate rest frame line luminosity and continuum from an SPS Grid.</span>
 
@@ -1188,6 +1240,9 @@
 <span class="sd">                The method to use for the interpolation. Options are:</span>
 <span class="sd">                &#39;cic&#39; - Cloud in cell</span>
 <span class="sd">                &#39;ngp&#39; - Nearest grid point</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Line</span>
@@ -1223,6 +1278,7 @@
                     <span class="n">fesc</span><span class="p">,</span>
                     <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                     <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -1252,6 +1308,7 @@
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">do_grid_check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the particle rest frame spectra for a given grid key spectra</span>
@@ -1288,10 +1345,15 @@
 <span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
 <span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
 <span class="sd">                Defaults to cic.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of integrated spectra in units of (erg / s / Hz).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># Ensure we have a total key in the grid. If not error.</span>
         <span class="k">if</span> <span class="n">spectra_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1380,10 +1442,14 @@
             <span class="n">spectra_type</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Preparing C args&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
         <span class="n">masked_spec</span> <span class="o">=</span> <span class="n">compute_particle_seds</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># If there&#39;s no mask we&#39;re done</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1392,6 +1458,9 @@
         <span class="c1"># If we have a mask we need to account for the zeroed spectra</span>
         <span class="n">spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">nstars</span><span class="p">,</span> <span class="n">masked_spec</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
         <span class="n">spec</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">masked_spec</span>
+
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Masking spectra and adding contribution&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">spec</span></div>
 
 <div class="viewcode-block" id="Stars.generate_particle_line"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.generate_particle_line">[docs]</a>    <span class="k">def</span> <span class="nf">generate_particle_line</span><span class="p">(</span>
@@ -1401,6 +1470,7 @@
         <span class="n">fesc</span><span class="p">,</span>
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate rest frame line luminosity and continuum from an SPS Grid.</span>
@@ -1427,6 +1497,9 @@
 <span class="sd">                The method to use for the interpolation. Options are:</span>
 <span class="sd">                &#39;cic&#39; - Cloud in cell</span>
 <span class="sd">                &#39;ngp&#39; - Nearest grid point</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Line</span>
@@ -1462,6 +1535,7 @@
                     <span class="n">fesc</span><span class="p">,</span>
                     <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                     <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -2425,6 +2499,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">grid</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Prepare the arguments for SFZH computation with the C functions.</span>
@@ -2467,6 +2542,10 @@
         <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">part_props</span><span class="p">)</span>
 
+        <span class="c1"># If nthreads = -1 we will use all available</span>
+        <span class="k">if</span> <span class="n">nthreads</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">nthreads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">grid_props</span><span class="p">,</span>
             <span class="n">part_props</span><span class="p">,</span>
@@ -2475,12 +2554,14 @@
             <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
             <span class="n">npart</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="Stars.get_sfzh"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_sfzh">[docs]</a>    <span class="k">def</span> <span class="nf">get_sfzh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">grid</span><span class="p">,</span>
         <span class="n">grid_assignment_method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the binned SFZH history of this collection of particles.</span>
@@ -2496,6 +2577,9 @@
 <span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
 <span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
 <span class="sd">                Defaults to cic.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the computation. If set to -1</span>
+<span class="sd">                all available threads will be used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numpy array of containing the SFZH.</span>
@@ -2507,6 +2591,7 @@
         <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_sfzh_args</span><span class="p">(</span>
             <span class="n">grid</span><span class="p">,</span>
             <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">grid_assignment_method</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the SFZH</span>
