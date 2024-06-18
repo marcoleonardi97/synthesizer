@@ -472,7 +472,7 @@
     <span class="n">Greybody</span><span class="p">,</span>
     <span class="n">IR_templates</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">Lsun</span><span class="p">,</span> <span class="n">Msun</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">Lsun</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">um</span>
 </pre></div>
 </div>
 </div>
@@ -560,12 +560,47 @@
 <img alt="../_images/misc_dust_emission_8_0.png" src="../_images/misc_dust_emission_8_0.png" />
 </div>
 </div>
+<p>Adding CMB heating to the intrinsic dust temperature of the galaxy, and comparing the IR spectra difference with and without CMB heating</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Casey12</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">model_cmb</span> <span class="o">=</span> <span class="n">Casey12</span><span class="p">(</span><span class="n">T</span> <span class="o">*</span> <span class="n">K</span><span class="p">,</span> <span class="mf">1.6</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">cmb_heating</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+    <span class="n">sed</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="n">sed_cmb</span> <span class="o">=</span> <span class="n">model_cmb</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="n">L_ir_ratio</span> <span class="o">=</span> <span class="n">sed_cmb</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span> <span class="o">*</span> <span class="n">um</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="n">sed</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span> <span class="o">*</span> <span class="n">um</span>
+    <span class="p">)</span>  <span class="c1"># same as model_cmb.cmb_factor</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+        <span class="n">T</span><span class="p">,</span> <span class="n">L_ir_ratio</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">model_cmb</span><span class="o">.</span><span class="n">temperature_z</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Input dust temperature&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;L$_{\rm IR}$ ratio&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/misc_dust_emission_10_0.png" src="../_images/misc_dust_emission_10_0.png" />
+</div>
+</div>
 </section>
 <section id="IR-Templates---Draine-&amp;-Li-2007-dust-models">
 <h3>IR Templates - Draine &amp; Li 2007 dust models<a class="headerlink" href="#IR-Templates---Draine-&-Li-2007-dust-models" title="Permalink to this heading">¶</a></h3>
-<p>Begin by reading in the DL07 grids, which have been created by downlaoding the ASCII DL07 files and running “from synthesizer.utils import process_dl07_to_hdf5” “process_dl07_to_hdf5()”</p>
+<p>Begin by reading in the DL07 grids, which have been created by downloading the ASCII DL07 files and running “from synthesizer.utils import process_dl07_to_hdf5” “process_dl07_to_hdf5()”</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
@@ -583,7 +618,7 @@
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[6], line 5</span>
+Cell <span class="ansi-green-fg">In[7], line 5</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> grid_name <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">MW3.1</span><span style="color: rgb(175,0,0)">&#34;</span>
 <span class="ansi-green-intense-fg ansi-bold">      4</span> grid_dir <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">../../../tests/test_grid/</span><span style="color: rgb(175,0,0)">&#34;</span>
 <span class="ansi-green-fg">----&gt; 5</span> grid <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Grid</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">grid_name</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">grid_dir</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">grid_dir</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_spectra</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">True</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">read_lines</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg ansi-bold" style="color: rgb(0,135,0)">False</span><span class="ansi-yellow-bg">)</span>
@@ -633,7 +668,7 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
@@ -647,7 +682,7 @@ File <span class="ansi-green-fg">h5py/h5f.pyx:102</span>, in <span class="ansi-c
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[7], line 1</span>
+Cell <span class="ansi-green-fg">In[8], line 1</span>
 <span class="ansi-green-fg">----&gt; 1</span> <span style="color: rgb(0,135,0)">print</span>(<span class="ansi-yellow-bg">grid</span><span style="color: rgb(98,98,98)">.</span>axes)
 
 <span class="ansi-red-fg">NameError</span>: name &#39;grid&#39; is not defined
@@ -655,7 +690,7 @@ Cell <span class="ansi-green-fg">In[7], line 1</span>
 </div>
 <p>Keeping dust luminosity same while varying dust mass</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">mdust</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">1e7</span><span class="p">,</span> <span class="mf">1e8</span><span class="p">,</span> <span class="mf">5e8</span><span class="p">,</span> <span class="mf">1e9</span><span class="p">,</span> <span class="mf">5e9</span><span class="p">]:</span>
@@ -684,7 +719,7 @@ Cell <span class="ansi-green-fg">In[7], line 1</span>
 <div class="highlight"><pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-fg">In[8], line 3</span>
+Cell <span class="ansi-green-fg">In[9], line 3</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> mdust <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> [<span style="color: rgb(98,98,98)">1e7</span>, <span style="color: rgb(98,98,98)">1e8</span>, <span style="color: rgb(98,98,98)">5e8</span>, <span style="color: rgb(98,98,98)">1e9</span>, <span style="color: rgb(98,98,98)">5e9</span>]:
 <span class="ansi-green-intense-fg ansi-bold">      2</span>     model <span style="color: rgb(98,98,98)">=</span> IR_templates(
 <span class="ansi-green-fg">----&gt; 3</span>         <span class="ansi-yellow-bg">grid</span>, mdust<span style="color: rgb(98,98,98)">=</span>mdust <span style="color: rgb(98,98,98)">*</span> Msun, ldust<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(98,98,98)">1e11</span> <span style="color: rgb(98,98,98)">*</span> Lsun, verbose<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">False</span>
@@ -698,6 +733,14 @@ Cell <span class="ansi-green-fg">In[8], line 3</span>
 
 <span class="ansi-red-fg">NameError</span>: name &#39;grid&#39; is not defined
 </pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>
