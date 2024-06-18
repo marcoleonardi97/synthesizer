@@ -580,6 +580,7 @@
         <span class="n">s_hydrogen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">softening_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">centre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metallicity_floor</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the Stars instance. The first 3 arguments are always</span>
@@ -630,6 +631,7 @@
             <span class="n">softening_length</span><span class="o">=</span><span class="n">softening_length</span><span class="p">,</span>
             <span class="n">nparticles</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">initial_masses</span><span class="p">),</span>
             <span class="n">centre</span><span class="o">=</span><span class="n">centre</span><span class="p">,</span>
+            <span class="n">metallicity_floor</span><span class="o">=</span><span class="n">metallicity_floor</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">)</span>
 
@@ -670,11 +672,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">s_oxygen</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s_hydrogen</span> <span class="o">=</span> <span class="n">s_hydrogen</span>
 
-        <span class="c1"># Compute useful logged quantities</span>
-        <span class="c1"># TODO: should be changed to a property to avoid data duplication</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
-
         <span class="c1"># Set up IMF properties (updated later)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">imf_hmass_slope</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># slope of the imf</span>
 
@@ -691,6 +688,34 @@
         <span class="c1"># Particle stars can calculate and attach a SFZH analogous to a</span>
         <span class="c1"># parametric galaxy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log10ages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return stellar particle ages in log (base 10)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            log10ages (array)</span>
+<span class="sd">                log10 stellar ages</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log10metallicities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return stellar particle ages in log (base 10).</span>
+<span class="sd">        Zero valued metallicities are set to `metallicity_floor`,</span>
+<span class="sd">        which is set on initialisation of this stars object. To</span>
+<span class="sd">        check it, run `stars.metallicity_floor`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            log10metallicities (array)</span>
+<span class="sd">                log10 stellar metallicities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span>
+        <span class="n">mets</span><span class="p">[</span><span class="n">mets</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_floor</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mets</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_star_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -781,12 +806,14 @@
 
         <span class="c1"># Set up the inputs to the C function.</span>
         <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+            <span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
@@ -1157,12 +1184,14 @@
 
         <span class="c1"># Set up the inputs to the C function.</span>
         <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10age</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">metallicity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10ages</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log10ages</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log10metallicities</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+            <span class="p">),</span>
         <span class="p">]</span>
         <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initial_masses</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
