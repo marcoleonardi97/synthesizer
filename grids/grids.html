@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Grids" href="grids_example.html" /><link rel="prev" title="Installation" href="../installation.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Running your own SPS grids" href="creating_grids.html" /><link rel="prev" title="Installation" href="../installation.html" />
 
     <!-- Generated with Sphinx 7.1.1 and Furo 2024.05.06 -->
         <title>Grids - Synthesizer</title>
@@ -207,7 +207,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
   
   <div class="sidebar-logo-container">
-    <img class="sidebar-logo" src="../_static/synth.png" alt="Logo"/>
+    <img class="sidebar-logo" src="../_static/synthesizer_logo.png" alt="Logo"/>
   </div>
   
   
@@ -220,11 +220,10 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Grids</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="grids_example.html">Grids</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grids_example.html#Passing-wavelength-limits">Passing wavelength limits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_grids.html">Running your own SPS grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="creating_grids.html#Running-your-grid-through-Cloudy">Running your grid through Cloudy</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../abundances.html">Abundances</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../galaxies/galaxies.html">Galaxy Objects</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Galaxy Objects</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../galaxies/galaxy_obj.html">Working with Galaxy objects</a></li>
 </ul>
@@ -259,6 +258,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../imaging/property_maps.html">Making maps</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../creating_grids/creating_grids.html">Creating Grids</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/cosmo/test_los_spectra.html">Line of sight example</a></li>
@@ -476,7 +476,7 @@
 <h2>Available Grids<a class="headerlink" href="#available-grids" title="Permalink to this heading">¶</a></h2>
 <p>A goal of <cite>synthesizer</cite> is to be <strong>flexible</strong>. With this in mind we have generated a variety of grids for different stellar population synthesis (SPS) models, initial mass functions (IMFs), and photoionisation modelling assumptions.</p>
 <section id="grid-naming">
-<h3>Grid naming<a class="headerlink" href="#grid-naming" title="Permalink to this heading">¶</a></h3>
+<span id="id1"></span><h3>Grid naming<a class="headerlink" href="#grid-naming" title="Permalink to this heading">¶</a></h3>
 <p>The naming of grids currently follows this specification:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">sps_model</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">sps_version</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">sps_variant</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">imf_type</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">mass_boundaries</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">slopes</span><span class="p">}</span><span class="n">_</span><span class="p">{</span><span class="n">photoionisation_code</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">photoionisation_code_version</span><span class="p">}</span><span class="o">-</span><span class="p">{</span><span class="n">photoionisation_parameters</span><span class="p">}</span>
 </pre></div>
@@ -736,17 +736,18 @@
 </li>
 </ul>
 </details></section>
-<section id="loading-and-using-grids">
-<h2>Loading and using Grids<a class="headerlink" href="#loading-and-using-grids" title="Permalink to this heading">¶</a></h2>
+<section id="how-to-create-your-own-grids">
+<h2>How to create your own grids<a class="headerlink" href="#how-to-create-your-own-grids" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="grids_example.html">Grids</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grids_example.html#Passing-a-wavelength-array">Passing a wavelength array</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grids_example.html#Passing-wavelength-limits">Passing wavelength limits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="creating_grids.html">Running your own SPS grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="creating_grids.html#Running-your-grid-through-Cloudy">Running your grid through Cloudy</a></li>
 </ul>
 </div>
+</section>
+<section id="loading-and-using-grids">
+<h2>Loading and using Grids<a class="headerlink" href="#loading-and-using-grids" title="Permalink to this heading">¶</a></h2>
+<p>On the next page we demonstrate how to load and explore a grid in <cite>synthesizer</cite>.</p>
 </section>
 </section>
 
@@ -755,12 +756,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="grids_example.html">
+          <a class="next-page" href="creating_grids.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Grids</div>
+                <div class="title">Running your own SPS grids</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -821,6 +822,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#grid-list">Grid list</a></li>
+<li><a class="reference internal" href="#how-to-create-your-own-grids">How to create your own grids</a></li>
 <li><a class="reference internal" href="#loading-and-using-grids">Loading and using Grids</a></li>
 </ul>
 </li>
