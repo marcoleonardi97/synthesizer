@@ -369,6 +369,7 @@
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="synthesizer.integrate.html">synthesizer.integrate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="synthesizer.line.html">synthesizer.line</a></li>
 <li class="toctree-l3"><a class="reference internal" href="synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
@@ -894,7 +895,7 @@ by the transmission defined from tau_v and the dust curve.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.calculate_ionising_photon_production_rate">
-<span class="sig-name descname"><span class="pre">calculate_ionising_photon_production_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ionisation_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(13.6,</span> <span class="pre">'eV')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.calculate_ionising_photon_production_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.calculate_ionising_photon_production_rate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">calculate_ionising_photon_production_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ionisation_energy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(13.6,</span> <span class="pre">'eV')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.calculate_ionising_photon_production_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.calculate_ionising_photon_production_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function to calculate the ionising photon production rate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -902,6 +903,8 @@ by the transmission defined from tau_v and the dust curve.</p>
 <li><p><strong>ionisation_energy</strong> (<em>unyt_array</em>) – The ionisation energy.</p></li>
 <li><p><strong>limit</strong> (<em>float/int</em>) – An upper bound on the number of subintervals
 used in the integration adaptive algorithm.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
 </ul>
 </dd>
 </dl>
@@ -945,7 +948,7 @@ have the same wavelength array.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.flux">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">flux</span></span><a class="headerlink" href="#synthesizer.sed.Sed.flux" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the spectra in terms fo flux</p>
+<dd><p>Get the spectra in terms fo flux.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><dl class="simple">
@@ -1008,7 +1011,10 @@ Useful when you want rest-frame quantities.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>lam</strong> (<em>float/array-like</em><em>, </em><em>float</em>) – The wavelength(s) of interest.</p></li>
-<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs for more
+information. Possible values are ‘linear’, ‘nearest’,
+‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, and
+‘next’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1029,7 +1035,10 @@ Useful when you want rest-frame quantities.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>wavelength</strong> (<em>float/array-like</em><em>, </em><em>float</em>) – The wavelength(s) of interest.</p></li>
-<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs.</p></li>
+<li><p><strong>kind</strong> (<em>str</em>) – Interpolation kind, see scipy.interp1d docs for more
+information. Possible values are ‘linear’, ‘nearest’,
+‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, and
+‘next’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1167,50 +1176,77 @@ resample to.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_balmer_break">
-<span class="sig-name descname"><span class="pre">measure_balmer_break</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_balmer_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_balmer_break" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure the Balmer break using two windows at (3400,3600) and
-(4150,4250)</p>
+<span class="sig-name descname"><span class="pre">measure_balmer_break</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_balmer_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_balmer_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the Balmer break.</p>
+<p>This will use two windows at (3400,3600) and (4150,4250).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><dl class="simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used. Options include ‘trapz’
+and ‘simps’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
 <dt>float</dt><dd><p>The Balmer break strength</p>
 </dd>
 </dl>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If <cite>integration_method</cite> is an incompatible option an error
+    is raised.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_beta">
-<span class="sig-name descname"><span class="pre">measure_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1250.0,</span> <span class="pre">3000.0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_beta" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure the UV continuum slope ($eta$) measured using the provided
-window. If the window has len(2) a full fit to the spectra is performed
-else the luminosity in two windows is calculated and used to determine
-the slope, similar to observations.</p>
+<span class="sig-name descname"><span class="pre">measure_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1250.0,</span> <span class="pre">3000.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_beta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the UV continuum slope (beta).</p>
+<p>If the provided window is len(2) a full fit to the spectra is performed
+otherwise the luminosity in two windows is calculated and used to
+determine the slope, similar to observations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in which to measure in terms of wavelength.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in which to measure in terms of wavelength.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used to calculate the window luminosity.
+Options include ‘trapz’ and ‘simps’.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
-<dt>float</dt><dd><p>The UV continuum slope ($eta$)</p>
+<dt>float</dt><dd><p>The UV continuum slope (beta)</p>
 </dd>
 </dl>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If <cite>integration_method</cite> is an incompatible option an error
+    is raised.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_bolometric_luminosity">
-<span class="sig-name descname"><span class="pre">measure_bolometric_luminosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_bolometric_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_bolometric_luminosity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the bolometric luminosity of the SED by simply integrating
-the SED.</p>
+<span class="sig-name descname"><span class="pre">measure_bolometric_luminosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_bolometric_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_bolometric_luminosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the bolometric luminosity of the SED.</p>
+<p>This will integrate the SED over the final axis (which is always the
+wavelength axis) for an arbitrary number of dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>method</strong> (<em>str</em>) – The method used to calculate the bolometric luminosity. Options
-include ‘trapz’ and ‘quad’.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used to calculate the bolometric
+luminosity. Options include ‘trapz’ and ‘simps’.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><dl class="simple">
@@ -1220,21 +1256,25 @@ include ‘trapz’ and ‘quad’.</p>
 </p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If method is an incompatible option an error is raised.</p>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.InconsistentArguments.html#synthesizer.exceptions.InconsistentArguments" title="synthesizer.exceptions.InconsistentArguments"><strong>InconsistentArguments</strong></a> – If <cite>integration_method</cite> is an incompatible option an error
+    is raised.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_break">
-<span class="sig-name descname"><span class="pre">measure_break</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_break" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure a spectral break (e.g. the Balmer break) or D4000 using two
-windows.</p>
+<span class="sig-name descname"><span class="pre">measure_break</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">red</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_break" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure a spectral break (e.g. the Balmer break) using two windows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>blue</strong> (<em>tuple</em><em>, </em><em>float</em>) – The wavelength limits of the blue window.</p></li>
 <li><p><strong>red</strong> (<em>tuple</em><em>, </em><em>float</em>) – The wavelength limits of the red window.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used. Options include ‘trapz’
+and ‘simps’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1243,6 +1283,10 @@ windows.</p>
 </dd>
 </dl>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If <cite>integration_method</cite> is an incompatible option an error
+    is raised.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1270,12 +1314,18 @@ windows.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_d4000">
-<span class="sig-name descname"><span class="pre">measure_d4000</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bruzual83'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_d4000"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_d4000" title="Permalink to this definition">¶</a></dt>
-<dd><p>Measure the D4000 index using either the Bruzual83 or Balogh
-definitions.</p>
+<span class="sig-name descname"><span class="pre">measure_d4000</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">definition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Bruzual83'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_d4000"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_d4000" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure the D4000 index.</p>
+<p>This can optionally use either the Bruzual83 or Balogh definitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>definition</strong> – The choice of definition: ‘Bruzual83’ or ‘Balogh’.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>definition</strong> – The choice of definition: ‘Bruzual83’ or ‘Balogh’.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used. Options include ‘trapz’
+and ‘simps’.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><blockquote>
@@ -1286,7 +1336,8 @@ definitions.</p>
 </div></blockquote>
 <dl class="simple">
 <dt>Raises:</dt><dd><dl class="simple">
-<dt>UnrecognisedOption</dt><dd><p>If definition is an incompatible option an error is raised.</p>
+<dt>UnrecognisedOption</dt><dd><p>If <cite>definition</cite> or <cite>integration_method</cite> is an
+incompatible option an error is raised.</p>
 </dd>
 </dl>
 </dd>
@@ -1320,14 +1371,16 @@ definitions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_window_lnu">
-<span class="sig-name descname"><span class="pre">measure_window_lnu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_window_lnu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_window_lnu" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">measure_window_lnu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_window_lnu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_window_lnu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure lnu in a spectral window.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in wavelength.</p></li>
-<li><p><strong>method</strong> (<em>str</em>) – The method to use for the integration. Options include
-‘average’, ‘trapz’, and ‘quad’.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method to use on the window. Options include
+‘average’, or for integration ‘trapz’, and ‘simps’.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1339,7 +1392,8 @@ definitions.</p>
 </div></blockquote>
 <dl class="simple">
 <dt>Raises:</dt><dd><dl class="simple">
-<dt>UnrecognisedOption</dt><dd><p>If method is an incompatible option an error is raised.</p>
+<dt>UnrecognisedOption</dt><dd><p>If <cite>integration_method</cite> is an incompatible option an error
+is raised.</p>
 </dd>
 </dl>
 </dd>
@@ -1351,14 +1405,16 @@ definitions.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.sed.Sed.measure_window_luminosity">
-<span class="sig-name descname"><span class="pre">measure_window_luminosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_window_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_window_luminosity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">measure_window_luminosity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'trapz'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/sed.html#Sed.measure_window_luminosity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.sed.Sed.measure_window_luminosity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Measure the luminosity in a spectral window.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>window</strong> (<em>tuple</em><em>, </em><em>float</em>) – The window in wavelength.</p></li>
-<li><p><strong>method</strong> (<em>str</em>) – The method used to calculate the bolometric luminosity. Options
-include ‘trapz’ and ‘quad’.</p></li>
+<li><p><strong>integration_method</strong> (<em>str</em>) – The integration method used to calculate the window
+luminosity. Options include ‘trapz’ and ‘simps’.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use for the integration. If -1 then
+all available threads are used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1369,7 +1425,8 @@ include ‘trapz’ and ‘quad’.</p></li>
 </p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If method is an incompatible option an error is raised.</p>
+<dd class="field-odd"><p><a class="reference internal" href="synthesizer.exceptions.UnrecognisedOption.html#synthesizer.exceptions.UnrecognisedOption" title="synthesizer.exceptions.UnrecognisedOption"><strong>UnrecognisedOption</strong></a> – If <cite>integration_method</cite> is an incompatible option
+    an error is raised.</p>
 </dd>
 </dl>
 </dd></dl>

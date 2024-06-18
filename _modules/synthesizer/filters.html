@@ -368,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.integrate.html">synthesizer.integrate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line.html">synthesizer.line</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
@@ -481,12 +482,12 @@
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">import</span> <span class="nn">synthesizer.exceptions</span> <span class="k">as</span> <span class="nn">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer._version</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">synthesizer.integrate</span> <span class="kn">import</span> <span class="n">integrate_last_axis</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
@@ -1966,6 +1967,8 @@
         <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">nu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply the transmission curve to any array.</span>
@@ -1994,6 +1997,12 @@
 <span class="sd">                provided.</span>
 <span class="sd">            verbose (bool)</span>
 <span class="sd">                Are we talking?</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the integration. If -1 then</span>
+<span class="sd">                all available threads are used. Defaults to 1.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The method to use in the integration. Can be either &quot;trapz&quot;</span>
+<span class="sd">                or &quot;simps&quot;. Defaults to &quot;trapz&quot;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
@@ -2004,6 +2013,9 @@
 <span class="sd">            ValueError</span>
 <span class="sd">                If the shape of the transmission and wavelength array differ</span>
 <span class="sd">                the convolution cannot be done.</span>
+<span class="sd">            InconsistentArguments</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Initialise the xs were about to set and use</span>
         <span class="n">xs</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2082,11 +2094,17 @@
         <span class="n">transmission</span> <span class="o">=</span> <span class="n">arr_in_band</span> <span class="o">*</span> <span class="n">t_in_band</span>
 
         <span class="c1"># Sum over the final axis to &quot;collect&quot; transmission in this filer</span>
-        <span class="n">sum_per_x</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
-            <span class="n">transmission</span> <span class="o">/</span> <span class="n">xs_in_band</span><span class="p">,</span> <span class="n">xs_in_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="n">sum_per_x</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span>
+            <span class="n">xs_in_band</span><span class="p">,</span>
+            <span class="n">transmission</span> <span class="o">/</span> <span class="n">xs_in_band</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">sum_den</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">trapezoid</span><span class="p">(</span>
-            <span class="n">t_in_band</span> <span class="o">/</span> <span class="n">xs_in_band</span><span class="p">,</span> <span class="n">xs_in_band</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="n">sum_den</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span>
+            <span class="n">xs_in_band</span><span class="p">,</span>
+            <span class="n">t_in_band</span> <span class="o">/</span> <span class="n">xs_in_band</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">sum_in_band</span> <span class="o">=</span> <span class="n">sum_per_x</span> <span class="o">/</span> <span class="n">sum_den</span>
 

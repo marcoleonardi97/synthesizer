@@ -370,6 +370,7 @@
 <li class="toctree-l4"><a class="reference internal" href="_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.integrate.html">synthesizer.integrate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.line.html">synthesizer.line</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
@@ -467,7 +468,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.igm</span> <span class="kn">import</span> <span class="n">Madau96</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span><span class="p">,</span> <span class="n">plot_spectra_as_rainbow</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">um</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">um</span>
 </pre></div>
 </div>
 </div>
@@ -671,28 +672,14 @@ log10(Bolometric luminosity/erg/s):36.84609875911521----------
 unyt_quantity(7.01614828e+44, &#39;erg/s&#39;)
 </pre></div></div>
 </div>
-<p>By default the above simply sums up the spectrum. However, we can also integrate the spectrum instead:</p>
+<p>By default any spectra integration will use a trapezoid method. It’s also possible to use the simpson rule.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;quad&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">(</span><span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;simps&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:574: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
-  If increasing the limit yields no improvement it is advised to analyze
-  the integrand in order to determine the difficulties.  If the position of a
-  local difficulty can be determined (singularity, discontinuity) one will
-  probably gain from splitting up the interval and calling the integrator
-  on the subranges.  Perhaps a special-purpose integrator should be used.
-  integrate.quad(
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -700,46 +687,12 @@ unyt_quantity(7.01614828e+44, &#39;erg/s&#39;)
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(6.94274582e+44, &#39;erg/s&#39;)
+unyt_quantity(6.99398441e+44, &#39;erg/s&#39;)
 </pre></div></div>
 </div>
-<p>Under-the-hood the above uses a function to get the luminosity at a particular frequency or wavelength:</p>
+<p>You can also get the luminosity or <code class="docutils literal notranslate"><span class="pre">lnu</span></code> in a particular window by passing the wavelengths defining the limits of the window.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">get_lnu_at_lam</span><span class="p">(</span><span class="mi">1500</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-unyt_quantity(1.66123409e+29, &#39;erg/(Hz*s)&#39;)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">get_lnu_at_nu</span><span class="p">(</span><span class="mf">1e14</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-unyt_quantity(1.55769072e+27, &#39;erg/(Hz*s)&#39;)
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">((</span><span class="mf">1400.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1600.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">))</span>
@@ -747,7 +700,7 @@ unyt_quantity(1.55769072e+27, &#39;erg/(Hz*s)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -755,8 +708,9 @@ unyt_quantity(1.55769072e+27, &#39;erg/(Hz*s)&#39;)
 unyt_quantity(4.0480619e+43, &#39;erg/s&#39;)
 </pre></div></div>
 </div>
+<p>Notice how units were provided with this window. These are required but also allow you to use an arbitrary unit system.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_luminosity</span><span class="p">((</span><span class="mf">0.14</span> <span class="o">*</span> <span class="n">um</span><span class="p">,</span> <span class="mf">0.16</span> <span class="o">*</span> <span class="n">um</span><span class="p">))</span>
@@ -764,7 +718,7 @@ unyt_quantity(4.0480619e+43, &#39;erg/s&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -773,7 +727,7 @@ unyt_quantity(4.0480619e+43, &#39;erg/s&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mf">1400.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1600.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">))</span>
@@ -781,7 +735,7 @@ unyt_quantity(4.0480619e+43, &#39;erg/s&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -789,18 +743,19 @@ unyt_quantity(4.0480619e+43, &#39;erg/s&#39;)
 unyt_quantity(1.51428832e+29, &#39;erg/(Hz*s)&#39;)
 </pre></div></div>
 </div>
+<p>Like the bolometric luminosity there are multiple integration methods that can be used for calculating the window. By default it will use the trapezoid method (<code class="docutils literal notranslate"><span class="pre">&quot;trapz&quot;</span></code>), but you can also take a simple average.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span>
-    <span class="p">(</span><span class="mf">1400.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1600.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span>
+    <span class="p">(</span><span class="mf">1400.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="mf">1600.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">),</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -808,40 +763,27 @@ unyt_quantity(1.51428832e+29, &#39;erg/(Hz*s)&#39;)
 unyt_quantity(1.5142835e+29, &#39;erg/(Hz*s)&#39;)
 </pre></div></div>
 </div>
+<p>Or again use Simpson’s method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;quad&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;simps&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:749: IntegrationWarning: The maximum number of subdivisions (50) has been achieved.
-  If increasing the limit yields no improvement it is advised to analyze
-  the integrand in order to determine the difficulties.  If the position of a
-  local difficulty can be determined (singularity, discontinuity) one will
-  probably gain from splitting up the interval and calling the integrator
-  on the subranges.  Perhaps a special-purpose integrator should be used.
-  integrate.quad(func, *lims)[0] / integrate.quad(inv, *lims)[0]
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(1.51222305e+29, &#39;erg/(Hz*s)&#39;)
+unyt_quantity(1.52094846e+29, &#39;erg/(Hz*s)&#39;)
 </pre></div></div>
 </div>
 <p>We can also measure a spectral break by providing two windows, e.g.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_break</span><span class="p">((</span><span class="mi">3400</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="p">(</span><span class="mi">4150</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span>
@@ -849,17 +791,17 @@ unyt_quantity(1.51222305e+29, &#39;erg/(Hz*s)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(0.85569664, &#39;(dimensionless)&#39;)
+np.float64(0.8556966386986625)
 </pre></div></div>
 </div>
 <p>There are also a few in-built break methods, e.g. <code class="docutils literal notranslate"><span class="pre">measure_Balmer_break()</span></code></p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_balmer_break</span><span class="p">()</span>
@@ -867,16 +809,16 @@ unyt_quantity(0.85569664, &#39;(dimensionless)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(0.85569664, &#39;(dimensionless)&#39;)
+np.float64(0.8556966386986625)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_d4000</span><span class="p">()</span>
@@ -884,17 +826,17 @@ unyt_quantity(0.85569664, &#39;(dimensionless)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_quantity(0.90143359, &#39;(dimensionless)&#39;)
+np.float64(0.9014335946523934)
 </pre></div></div>
 </div>
 <p>We can also measure absorption line indices:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_index</span><span class="p">(</span>
@@ -904,7 +846,7 @@ unyt_quantity(0.90143359, &#39;(dimensionless)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -914,7 +856,7 @@ unyt_quantity(5.80884398, &#39;Å&#39;)
 </div>
 <p>We can also measure the UV spectral slope <span class="math notranslate nohighlight">\(\beta\)</span>:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_beta</span><span class="p">()</span>
@@ -922,7 +864,7 @@ unyt_quantity(5.80884398, &#39;Å&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -932,7 +874,7 @@ np.float64(-2.9472901626578625)
 </div>
 <p>By default this uses a single window and fits the spectrum by a power-law. However, we can also specify two windows as below, in which case the luminosity in each window is calcualted and used to infer a slope:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">measure_beta</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mi">1250</span><span class="p">,</span> <span class="mi">1750</span><span class="p">,</span> <span class="mi">2250</span><span class="p">,</span> <span class="mi">2750</span><span class="p">))</span>
@@ -940,7 +882,7 @@ np.float64(-2.9472901626578625)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -950,7 +892,7 @@ np.float64(-2.9533621846623594)
 </div>
 <p>We can also measure ionising photon production rates for a particular ionisation energy:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed</span><span class="o">.</span><span class="n">calculate_ionising_photon_production_rate</span><span class="p">(</span>
@@ -959,31 +901,20 @@ np.float64(-2.9533621846623594)
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/home/runner/work/synthesizer/synthesizer/src/synthesizer/sed.py:1312: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
-  the requested tolerance from being achieved.  The error may be
-  underestimated.
-  return integrate.quad(
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-9.82136804455068e+54
+unyt_quantity(9.8212605e+54, &#39;1/s&#39;)
 </pre></div></div>
 </div>
 <section id="Observed-frame-SED">
 <h4>Observed frame SED<a class="headerlink" href="#Observed-frame-SED" title="Permalink to this heading">¶</a></h4>
 <p>To do this we need to provide a cosmology, using an <code class="docutils literal notranslate"><span class="pre">astropy.cosmology</span></code> object, a redshift <span class="math notranslate nohighlight">\(z\)</span>, and optionally an IGM absorption model.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
@@ -994,7 +925,7 @@ np.float64(-2.9533621846623594)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1003,7 +934,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">obslam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">fnu</span><span class="p">))</span>
@@ -1024,12 +955,12 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_48_1.png" src="_images/sed_48_1.png" />
+<img alt="_images/sed_49_1.png" src="_images/sed_49_1.png" />
 </div>
 </div>
 <p>We can also plot the observed frame spectra as rainbow.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_spectra_as_rainbow</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">use_fnu</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1041,7 +972,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_50_0.png" src="_images/sed_50_0.png" />
+<img alt="_images/sed_51_0.png" src="_images/sed_51_0.png" />
 </div>
 </div>
 </section>
@@ -1049,7 +980,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 <h4>Photometry<a class="headerlink" href="#Photometry" title="Permalink to this heading">¶</a></h4>
 <p>Once we have computed the observed frame SED there is a method on an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> object that allows us to calculate observed photometry (the same is of course true for rest frame photometry). However, first we need to instantiate a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> object.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">filter_codes</span> <span class="o">=</span> <span class="p">[</span>
@@ -1070,7 +1001,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Measure observed photometry</span>
@@ -1112,7 +1043,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 <p>The <code class="docutils literal notranslate"><span class="pre">Sed</span></code> object can actually hold an array of seds and the methods should all work fine.</p>
 <p>Let’s create an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> object with two seds:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]))</span>
@@ -1120,7 +1051,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">)</span>
@@ -1128,7 +1059,7 @@ unyt_array([0., 0., 0., ..., 0., 0., 0.], &#39;nJy&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1137,15 +1068,15 @@ unyt_array([1.51428832e+29, 3.02857663e+29], &#39;erg/(Hz*s)&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">((</span><span class="mi">1400</span><span class="p">,</span> <span class="mi">1600</span><span class="p">)</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1154,7 +1085,7 @@ unyt_array([1.51428350e+29, 3.02856699e+29], &#39;erg/(Hz*s)&#39;)
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_beta</span><span class="p">()</span>
@@ -1162,7 +1093,7 @@ unyt_array([1.51428350e+29, 3.02856699e+29], &#39;erg/(Hz*s)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1171,7 +1102,7 @@ array([-2.94729016, -2.94729016])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_beta</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mi">1250</span><span class="p">,</span> <span class="mi">1750</span><span class="p">,</span> <span class="mi">2250</span><span class="p">,</span> <span class="mi">2750</span><span class="p">))</span>
@@ -1179,7 +1110,7 @@ array([-2.94729016, -2.94729016])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1188,7 +1119,7 @@ array([-2.95336218, -2.95336218])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_balmer_break</span><span class="p">()</span>
@@ -1196,16 +1127,16 @@ array([-2.95336218, -2.95336218])
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-unyt_array([0.85569664, 0.85569664], &#39;(dimensionless)&#39;)
+array([0.85569664, 0.85569664])
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed2</span><span class="o">.</span><span class="n">measure_index</span><span class="p">(</span>
@@ -1215,7 +1146,7 @@ unyt_array([0.85569664, 0.85569664], &#39;(dimensionless)&#39;)
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1231,7 +1162,7 @@ unyt_array([5.80884398, 5.80884398], &#39;Å&#39;)
 <p><code class="docutils literal notranslate"><span class="pre">Sed</span></code>s can be combined either via concatenation to produce a single <code class="docutils literal notranslate"><span class="pre">Sed</span></code> holding multiple spectra from the combined <code class="docutils literal notranslate"><span class="pre">Sed</span></code>s, or by addition to add the spectra contained in two <code class="docutils literal notranslate"><span class="pre">Sed</span></code>s.</p>
 <p>To concatenate spectra we can use <code class="docutils literal notranslate"><span class="pre">Sed.concat()</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shapes before:&quot;</span><span class="p">,</span> <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">sed2</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -1251,7 +1182,7 @@ Combined shape: (3, 9244)
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">Sed.concat</span></code> can take an arbitrary number of <code class="docutils literal notranslate"><span class="pre">Sed</span></code> objects to combine.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed4</span> <span class="o">=</span> <span class="n">sed2</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sed</span><span class="p">,</span> <span class="n">sed2</span><span class="p">,</span> <span class="n">sed3</span><span class="p">)</span>
@@ -1269,7 +1200,7 @@ Combined shape: (8, 9244)
 </div>
 <p>If we want to add the spectra of 2 <code class="docutils literal notranslate"><span class="pre">Sed</span></code> objects we simply apply the <code class="docutils literal notranslate"><span class="pre">+</span></code> operator. However, unlike <code class="docutils literal notranslate"><span class="pre">concat</span></code>, this will only work for <code class="docutils literal notranslate"><span class="pre">Sed</span></code>s with identical shapes.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed5</span> <span class="o">=</span> <span class="n">sed</span> <span class="o">+</span> <span class="n">sed</span>
@@ -1289,12 +1220,12 @@ Combined shape: (8, 9244)
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_69_0.png" src="_images/sed_69_0.png" />
+<img alt="_images/sed_70_0.png" src="_images/sed_70_0.png" />
 </div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">Sed</span></code> includes a method to resample an sed, e.g. to lower-resolution or to match observations.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed6</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">get_resampled_sed</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -1327,11 +1258,11 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_71_1.png" src="_images/sed_71_1.png" />
+<img alt="_images/sed_72_1.png" src="_images/sed_72_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -1350,7 +1281,7 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 </div>
 <p>To apply attenuation to an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> you can use the <code class="docutils literal notranslate"><span class="pre">apply_attenuation</span></code> method and pass the optical depth. An instance of a dust curve can also be provided but this defaults to a power law with slope = 1 (<code class="docutils literal notranslate"><span class="pre">synthesizer.dust.attenuation.PowerLaw(slope=1)</span></code>).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed4_att</span> <span class="o">=</span> <span class="n">sed4</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span><span class="n">tau_v</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
@@ -1373,12 +1304,12 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_74_0.png" src="_images/sed_74_0.png" />
+<img alt="_images/sed_75_0.png" src="_images/sed_75_0.png" />
 </div>
 </div>
 <p>The only other argument <code class="docutils literal notranslate"><span class="pre">apply_attenuation</span></code> can take is a mask for applying attenuation to speicifc spectra in an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> with multiple spectra (like an <code class="docutils literal notranslate"><span class="pre">Sed</span></code> containing the spectra for multiple particles for instance.)</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sed7_att</span> <span class="o">=</span> <span class="n">sed4</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
@@ -1403,12 +1334,12 @@ Spectres: new_wavs contains values outside the range in spec_wavs, new_fluxes an
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/sed_76_0.png" src="_images/sed_76_0.png" />
+<img alt="_images/sed_77_0.png" src="_images/sed_77_0.png" />
 </div>
 </div>
 <p>If you have an attenuated SED, a natural quantity to calculate is the extinction of that spectra (<span class="math notranslate nohighlight">\(A\)</span>). This can be done either at the wavelengths of the <code class="docutils literal notranslate"><span class="pre">Sed</span></code>, an arbitrary wavelength/wavelength array, or at commonly used values (1500 and 5500 angstrom) using functions available in the <code class="docutils literal notranslate"><span class="pre">sed</span></code> module. Note that these functions return the extinction/attenuation in magnitudes. Below is a demonstration.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="p">(</span>

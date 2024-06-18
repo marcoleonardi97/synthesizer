@@ -368,6 +368,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.integrate.html">synthesizer.integrate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line.html">synthesizer.line</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
@@ -469,7 +470,6 @@
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
@@ -479,6 +479,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
 <span class="kn">from</span> <span class="nn">synthesizer.dust.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
+<span class="kn">from</span> <span class="nn">synthesizer.integrate</span> <span class="kn">import</span> <span class="n">integrate_last_axis</span>
 <span class="kn">from</span> <span class="nn">synthesizer.photometry</span> <span class="kn">import</span> <span class="n">PhotometryCollection</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span><span class="p">,</span> <span class="n">rebin_1d</span><span class="p">,</span> <span class="n">wavelength_to_rgba</span>
@@ -580,7 +581,7 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
 
-        <span class="c1"># Measure the bolometric luminosity</span>
+        <span class="c1"># Measure bolometric luminosity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
 
         <span class="c1"># Redshift of the SED</span>
@@ -844,7 +845,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">flux</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the spectra in terms fo flux</span>
+<span class="sd">        Get the spectra in terms fo flux.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            flux (unyt_array)</span>
@@ -907,28 +908,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_lnu_at_nu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A simple internal function for getting lnu at nu assuming the default</span>
-<span class="sd">        unit system.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            nu (float/array-like, float)</span>
-<span class="sd">                The frequency(s) of interest.</span>
-<span class="sd">            kind (str)</span>
-<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
-<span class="sd">            ind (int)</span>
-<span class="sd">                Row index of the spectra. Only applicable for muiti-dimensional</span>
-<span class="sd">                spectra.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            luminosity (float/array-like, float)</span>
-<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">nu</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:],</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">nu</span><span class="p">)</span>
-
 <div class="viewcode-block" id="Sed.get_lnu_at_nu"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_lnu_at_nu">[docs]</a>    <span class="k">def</span> <span class="nf">get_lnu_at_nu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return lnu with units at a provided frequency using 1d interpolation.</span>
@@ -937,39 +916,16 @@
 <span class="sd">            wavelength (float/array-like, float)</span>
 <span class="sd">                The wavelength(s) of interest.</span>
 <span class="sd">            kind (str)</span>
-<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs for more</span>
+<span class="sd">                information. Possible values are &#39;linear&#39;, &#39;nearest&#39;,</span>
+<span class="sd">                &#39;zero&#39;, &#39;slinear&#39;, &#39;quadratic&#39;, &#39;cubic&#39;, &#39;previous&#39;, and</span>
+<span class="sd">                &#39;next&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (unyt_array)</span>
 <span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">nu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-        <span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">_get_lnu_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return lnu without units at a provided wavelength using 1d</span>
-<span class="sd">        interpolation.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            lam (float/array-like, float)</span>
-<span class="sd">                The wavelength(s) of interest.</span>
-<span class="sd">            kind (str)</span>
-<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
-<span class="sd">            ind (int)</span>
-<span class="sd">                Row index of the spectra. Only applicable for muiti-dimensional</span>
-<span class="sd">                spectra.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            luminosity (float/array-like, float)</span>
-<span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ind</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">lam</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:],</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">lam</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">nu</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span></div>
 
 <div class="viewcode-block" id="Sed.get_lnu_at_lam"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_lnu_at_lam">[docs]</a>    <span class="k">def</span> <span class="nf">get_lnu_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -979,107 +935,79 @@
 <span class="sd">            lam (float/array-like, float)</span>
 <span class="sd">                The wavelength(s) of interest.</span>
 <span class="sd">            kind (str)</span>
-<span class="sd">                Interpolation kind, see scipy.interp1d docs.</span>
+<span class="sd">                Interpolation kind, see scipy.interp1d docs for more</span>
+<span class="sd">                information. Possible values are &#39;linear&#39;, &#39;nearest&#39;,</span>
+<span class="sd">                &#39;zero&#39;, &#39;slinear&#39;, &#39;quadratic&#39;, &#39;cubic&#39;, &#39;previous&#39;, and</span>
+<span class="sd">                &#39;next&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (unyt-array)</span>
 <span class="sd">                The luminosity (lnu) at the provided wavelength.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">lam</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span></div>
 
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="Sed.measure_bolometric_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_bolometric_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_bolometric_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.measure_bolometric_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_bolometric_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_bolometric_luminosity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the bolometric luminosity of the SED by simply integrating</span>
-<span class="sd">        the SED.</span>
+<span class="sd">        Calculate the bolometric luminosity of the SED.</span>
+
+<span class="sd">        This will integrate the SED over the final axis (which is always the</span>
+<span class="sd">        wavelength axis) for an arbitrary number of dimensions.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            method (str)</span>
-<span class="sd">                The method used to calculate the bolometric luminosity. Options</span>
-<span class="sd">                include &#39;trapz&#39; and &#39;quad&#39;.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used to calculate the bolometric</span>
+<span class="sd">                luminosity. Options include &#39;trapz&#39; and &#39;simps&#39;.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            bolometric_luminosity (float)</span>
 <span class="sd">                The bolometric luminosity.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            UnrecognisedOption</span>
-<span class="sd">                If method is an incompatible option an error is raised.</span>
+<span class="sd">            InconsistentArguments</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
-        <span class="c1"># If the method is trapz we can do any number of dimensions</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
-                <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
-            <span class="c1"># Handle multiple dimensions explicitly</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="c1"># Integrate using quad</span>
-                <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span>
-                        <span class="mf">1e12</span><span class="p">,</span>
-                        <span class="mf">1e16</span><span class="p">,</span>
-                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;cubic&quot;</span><span class="p">),</span>
-                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-                    <span class="o">*</span> <span class="n">Hz</span>
-                <span class="p">)</span>
-
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="c1"># Set up bolometric luminosity array</span>
-                <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
-                <span class="c1"># Loop over spectra</span>
-                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                    <span class="n">bolometric_luminosity</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span>
-                            <span class="mf">1e12</span><span class="p">,</span>
-                            <span class="mf">1e16</span><span class="p">,</span>
-                            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;cubic&quot;</span><span class="p">,</span> <span class="n">ind</span><span class="p">),</span>
-                        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-                        <span class="o">*</span> <span class="n">Hz</span>
-                    <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-                    <span class="s2">&quot;Measuring bolometric luminosities for Sed.lnu.ndim &gt; 2&quot;</span>
-                    <span class="s2">&quot; not yet implemented! Feel free to implement and raise &quot;</span>
-                    <span class="s2">&quot;a pull request. Guidance for contributing can be found &quot;</span>
-                    <span class="s2">&quot;at https://github.com/flaresimulations/&quot;</span>
-                    <span class="s2">&quot;synthesizer/blob/main/&quot;</span>
-                    <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
-                <span class="s2">&quot;Options are &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
-            <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">bolometric_luminosity</span>
-
+        <span class="c1"># Calculate the bolometric luminosity</span>
+        <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
+        <span class="c1"># frequency. It&#39;s faster to just multiply by -1 than to reverse the</span>
+        <span class="c1"># array.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="o">-</span><span class="n">integrate_last_axis</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating bolometric luminosity&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span></div>
 
-<div class="viewcode-block" id="Sed.measure_window_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.measure_window_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_luminosity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">window</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure the luminosity in a spectral window.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            window (tuple, float)</span>
 <span class="sd">                The window in wavelength.</span>
-<span class="sd">            method (str)</span>
-<span class="sd">                The method used to calculate the bolometric luminosity. Options</span>
-<span class="sd">                include &#39;trapz&#39; and &#39;quad&#39;.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used to calculate the window</span>
+<span class="sd">                luminosity. Options include &#39;trapz&#39; and &#39;simps&#39;.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (float)</span>
@@ -1087,45 +1015,47 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnrecognisedOption</span>
-<span class="sd">                If method is an incompatible option an error is raised.</span>
+<span class="sd">                If `integration_method` is an incompatible option</span>
+<span class="sd">                an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define the &quot;transmission&quot; for the window</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-        <span class="c1"># Integrate using the requested method</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
-            <span class="c1"># Convert wavelength limits to frequency limits and convert to</span>
-            <span class="c1"># base units.</span>
-            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">window</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-                <span class="o">*</span> <span class="n">Hz</span>
+        <span class="c1"># Integrate the window</span>
+        <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
+        <span class="c1"># frequency. It&#39;s faster to just multiply by -1 than to reverse the</span>
+        <span class="c1"># array.</span>
+        <span class="n">luminosity</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span>
+            <span class="n">integrate_last_axis</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+            <span class="o">*</span> <span class="n">Hz</span>
+        <span class="p">)</span>
 
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="c1"># Define a pseudo transmission function</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
-                <span class="s2">&quot;Options are &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
-            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">luminosity</span></div>
 
-        <span class="k">return</span> <span class="n">luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Sed.measure_window_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.measure_window_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_lnu">[docs]</a>    <span class="k">def</span> <span class="nf">measure_window_lnu</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">window</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure lnu in a spectral window.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            window (tuple, float)</span>
 <span class="sd">                The window in wavelength.</span>
-<span class="sd">            method (str)</span>
-<span class="sd">                The method to use for the integration. Options include</span>
-<span class="sd">                &#39;average&#39;, &#39;trapz&#39;, and &#39;quad&#39;.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method to use on the window. Options include</span>
+<span class="sd">                &#39;average&#39;, or for integration &#39;trapz&#39;, and &#39;simps&#39;.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            luminosity (float)</span>
@@ -1133,18 +1063,18 @@
 
 <span class="sd">         Raises:</span>
 <span class="sd">            UnrecognisedOption</span>
-<span class="sd">                If method is an incompatible option an error is raised.</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Define a pseudo transmission function</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
         <span class="c1"># Apply the correct method</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;average&quot;</span><span class="p">:</span>
-            <span class="c1"># Define a pseudo transmission function</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">integration_method</span> <span class="o">==</span> <span class="s2">&quot;average&quot;</span><span class="p">:</span>
             <span class="c1"># Apply to the correct axis of the spectra</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                         <span class="p">[</span>
                             <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
@@ -1155,102 +1085,118 @@
                 <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">Lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;trapz&quot;</span><span class="p">:</span>
-            <span class="c1"># Define a pseudo transmission function</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">transmission</span> <span class="o">=</span> <span class="n">transmission</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-
-            <span class="c1"># Reverse the frequencies</span>
-            <span class="n">nu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="c1"># Apply to the correct axis of the spectra</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spec_dims</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                        <span class="p">[</span>
-                            <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
-                                <span class="n">_lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span>
-                            <span class="p">)</span>
-                            <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span><span class="p">)</span>
-                            <span class="k">for</span> <span class="n">_lnu</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span>
-                        <span class="p">]</span>
-                    <span class="p">)</span>
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
-                <span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">lnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">Lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span>
-                    <span class="n">transmission</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">nu</span>
-                <span class="p">)</span>
-
-        <span class="c1"># note: not yet adapted for multiple SEDs</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;quad&quot;</span><span class="p">:</span>
-            <span class="c1"># define limits in base units</span>
-            <span class="n">lims</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">window</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-
-            <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_lnu_at_nu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span>
-
-            <span class="k">def</span> <span class="nf">inv</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-                <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x</span>
-
-            <span class="n">Lnu</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">inv</span><span class="p">,</span> <span class="o">*</span><span class="n">lims</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="p">)</span>
-
-            <span class="n">Lnu</span> <span class="o">=</span> <span class="n">Lnu</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+                <span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">*</span> <span class="n">transmission</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnrecognisedOption</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unrecognised integration method (</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">). &quot;</span>
-                <span class="s2">&quot;Options are &#39;average&#39;, &#39;trapz&#39; or &#39;quad&#39;&quot;</span>
+            <span class="c1"># Luminosity integral</span>
+            <span class="n">lum</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">transmission</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span></div>
+            <span class="c1"># Transmission integral</span>
+            <span class="n">tran</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
+                <span class="n">transmission</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
 
-<div class="viewcode-block" id="Sed.measure_break"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_break">[docs]</a>    <span class="k">def</span> <span class="nf">measure_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">):</span>
+            <span class="c1"># Compute lnu</span>
+            <span class="n">lnu</span> <span class="o">=</span> <span class="n">lum</span> <span class="o">/</span> <span class="n">tran</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+
+        <span class="k">return</span> <span class="n">lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sed.measure_break"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_break">[docs]</a>    <span class="k">def</span> <span class="nf">measure_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Measure a spectral break (e.g. the Balmer break) or D4000 using two</span>
-<span class="sd">        windows.</span>
+<span class="sd">        Measure a spectral break (e.g. the Balmer break) using two windows.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            blue (tuple, float)</span>
 <span class="sd">                The wavelength limits of the blue window.</span>
 <span class="sd">            red (tuple, float)</span>
 <span class="sd">                The wavelength limits of the red window.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used. Options include &#39;trapz&#39;</span>
+<span class="sd">                and &#39;simps&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            break</span>
 <span class="sd">                The ratio of the luminosity in the two windows.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">red</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Sed.measure_balmer_break"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_balmer_break">[docs]</a>    <span class="k">def</span> <span class="nf">measure_balmer_break</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span>
+                <span class="n">red</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+            <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span>
+                <span class="n">blue</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sed.measure_balmer_break"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_balmer_break">[docs]</a>    <span class="k">def</span> <span class="nf">measure_balmer_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Measure the Balmer break using two windows at (3400,3600) and</span>
-<span class="sd">        (4150,4250)</span>
+<span class="sd">        Measure the Balmer break.</span>
+
+<span class="sd">        This will use two windows at (3400,3600) and (4150,4250).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used. Options include &#39;trapz&#39;</span>
+<span class="sd">                and &#39;simps&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
 <span class="sd">                The Balmer break strength</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3400</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
         <span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4150</span><span class="p">,</span> <span class="mi">4250</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span>
+            <span class="n">blue</span><span class="p">,</span>
+            <span class="n">red</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Sed.measure_d4000"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_d4000">[docs]</a>    <span class="k">def</span> <span class="nf">measure_d4000</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definition</span><span class="o">=</span><span class="s2">&quot;Bruzual83&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.measure_d4000"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_d4000">[docs]</a>    <span class="k">def</span> <span class="nf">measure_d4000</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">definition</span><span class="o">=</span><span class="s2">&quot;Bruzual83&quot;</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Measure the D4000 index using either the Bruzual83 or Balogh</span>
-<span class="sd">        definitions.</span>
+<span class="sd">        Measure the D4000 index.</span>
+
+<span class="sd">        This can optionally use either the Bruzual83 or Balogh definitions.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            definition</span>
 <span class="sd">                The choice of definition: &#39;Bruzual83&#39; or &#39;Balogh&#39;.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used. Options include &#39;trapz&#39;</span>
+<span class="sd">                and &#39;simps&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
@@ -1258,9 +1204,9 @@
 
 <span class="sd">         Raises:</span>
 <span class="sd">            UnrecognisedOption</span>
-<span class="sd">                If definition is an incompatible option an error is raised.</span>
+<span class="sd">                If `definition` or `integration_method` is an</span>
+<span class="sd">                incompatible option an error is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Define the requested definition</span>
         <span class="k">if</span> <span class="n">definition</span> <span class="o">==</span> <span class="s2">&quot;Bruzual83&quot;</span><span class="p">:</span>
             <span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3750</span><span class="p">,</span> <span class="mi">3950</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span>
@@ -1275,24 +1221,42 @@
                 <span class="s2">&quot;Options are &#39;Bruzual83&#39; or &#39;Balogh&#39;&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_break</span><span class="p">(</span>
+            <span class="n">blue</span><span class="p">,</span>
+            <span class="n">red</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Sed.measure_beta"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_beta">[docs]</a>    <span class="k">def</span> <span class="nf">measure_beta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mf">1250.0</span><span class="p">,</span> <span class="mf">3000.0</span><span class="p">)):</span>
+<div class="viewcode-block" id="Sed.measure_beta"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_beta">[docs]</a>    <span class="k">def</span> <span class="nf">measure_beta</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mf">1250.0</span><span class="p">,</span> <span class="mf">3000.0</span><span class="p">),</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Measure the UV continuum slope ($\beta$) measured using the provided</span>
-<span class="sd">        window. If the window has len(2) a full fit to the spectra is performed</span>
-<span class="sd">        else the luminosity in two windows is calculated and used to determine</span>
-<span class="sd">        the slope, similar to observations.</span>
+<span class="sd">        Measure the UV continuum slope (beta).</span>
+
+<span class="sd">        If the provided window is len(2) a full fit to the spectra is performed</span>
+<span class="sd">        otherwise the luminosity in two windows is calculated and used to</span>
+<span class="sd">        determine the slope, similar to observations.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            window (tuple, float)</span>
 <span class="sd">                The window in which to measure in terms of wavelength.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">            integration_method (str)</span>
+<span class="sd">                The integration method used to calculate the window luminosity.</span>
+<span class="sd">                Options include &#39;trapz&#39; and &#39;simps&#39;.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float</span>
-<span class="sd">                The UV continuum slope ($\beta$)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">                The UV continuum slope (beta)</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            UnrecognisedOption</span>
+<span class="sd">                If `integration_method` is an incompatible option an error</span>
+<span class="sd">                is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If a single window is provided</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&gt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -1324,8 +1288,16 @@
             <span class="n">red</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
 
             <span class="c1"># Measure the red and blue windows</span>
-            <span class="n">lnu_blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">blue</span><span class="p">)</span>
-            <span class="n">lnu_red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span><span class="n">red</span><span class="p">)</span>
+            <span class="n">lnu_blue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span>
+                <span class="n">blue</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">lnu_red</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_window_lnu</span><span class="p">(</span>
+                <span class="n">red</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">integration_method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="c1"># Measure beta</span>
             <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span>
@@ -1732,9 +1704,7 @@
         <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">spectra</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Sed.calculate_ionising_photon_production_rate"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.calculate_ionising_photon_production_rate">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_ionising_photon_production_rate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span>
-        <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        A function to calculate the ionising photon production rate.</span>
@@ -1745,6 +1715,9 @@
 <span class="sd">            limit (float/int)</span>
 <span class="sd">                An upper bound on the number of subintervals</span>
 <span class="sd">                used in the integration adaptive algorithm.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the integration. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">            float</span>
@@ -1754,19 +1727,31 @@
         <span class="c1"># Convert lnu to llam</span>
         <span class="n">llam</span> <span class="o">=</span> <span class="n">lnu_to_llam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="p">)</span>
 
-        <span class="c1"># Caculate ionisation wavelength</span>
+        <span class="c1"># Calculate ionisation wavelength</span>
         <span class="n">ionisation_wavelength</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">c</span> <span class="o">/</span> <span class="n">ionisation_energy</span>
 
-        <span class="c1"># Defintion integration arrays</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">llam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">ionisation_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">&lt;</span> <span class="n">ionisation_wavelength</span>
 
-        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x_</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
-            <span class="mi">0</span><span class="p">,</span>
-            <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="c1"># Define integration arrays</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">llam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># Get value of luminosity at ionisation wavelength</span>
+        <span class="n">ionisation_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
+            <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Restrict arrays to ionisation regime</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ionisation_mask</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ionisation_mask</span><span class="p">]</span>
+
+        <span class="c1"># Add ionisation wavelength and luminosity values</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ionisation_y</span><span class="p">)</span>
+
+        <span class="n">ion_photon_prod_rate</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>
+
+        <span class="k">return</span> <span class="n">ion_photon_prod_rate</span></div>
 
 <div class="viewcode-block" id="Sed.plot_spectra"><a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.plot_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
