@@ -27,7 +27,7 @@ Example for generating a rest-frame physical scale image. This example will:
 - Calculate rest-frame luminosities for the UVJ bands
 - Make an image of the galaxy, including an RGB image.
 
-.. GENERATED FROM PYTHON SOURCE LINES 11-92
+.. GENERATED FROM PYTHON SOURCE LINES 11-96
 
 
 
@@ -45,8 +45,8 @@ Example for generating a rest-frame physical scale image. This example will:
     min = 3.31e+03 Angstrom
     max = 1.33e+04 Angstrom
     FilterCollection.lam.size = 75014
-    /home/runner/work/synthesizer/synthesizer/examples/parametric/plot_create_image.py:58: RuntimeWarning: Filter wavelength grid is not the same as the SED wavelength grid.
-      galaxy.stars.spectra["incident"].get_photo_luminosities(filters)
+    /home/runner/work/synthesizer/synthesizer/examples/parametric/plot_create_image.py:62: RuntimeWarning: Filter wavelength grid is not the same as the SED wavelength grid.
+      galaxy.stars.spectra["reprocessed"].get_photo_luminosities(filters)
     llllllllllllllll!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!llllllllllllllll
     llllll!!!!!!!!!!!!!!!!!!!!!!!!!!!!iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii!!!!!!!!!!!!!!!!!!!!!!!!!!!!llllll
     !!!!!!!!!!!!!!!!!!!!!!iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii!!!!!!!!!!!!!!!!!!!!!!
@@ -160,6 +160,7 @@ Example for generating a rest-frame physical scale image. This example will:
 
 
     import matplotlib.pyplot as plt
+    from synthesizer.emission_models import ReprocessedEmission
     from synthesizer.filters import UVJ
     from synthesizer.grid import Grid
     from synthesizer.imaging import ImageCollection
@@ -181,6 +182,9 @@ Example for generating a rest-frame physical scale image. This example will:
         grid_dir = "../../tests/test_grid/"
         grid = Grid(grid_name, grid_dir=grid_dir)
 
+        # Create the emission model
+        model = ReprocessedEmission(grid)
+
         # Define the SFZDist
         Z_p = {"metallicity": 0.01}
         metal_dist = ZDist.DeltaConstant(**Z_p)
@@ -199,13 +203,13 @@ Example for generating a rest-frame physical scale image. This example will:
         galaxy = Galaxy(sfzh)
 
         # Generate stellar spectra
-        galaxy.stars.get_spectra_incident(grid)
+        galaxy.stars.get_spectra(model)
 
         # Get a UVJ filter set
         filters = UVJ()
 
         # Get photometry
-        galaxy.stars.spectra["incident"].get_photo_luminosities(filters)
+        galaxy.stars.spectra["reprocessed"].get_photo_luminosities(filters)
 
         # Define geometry of the images
         resolution = 0.01 * kpc  # resolution in kpc
@@ -220,7 +224,7 @@ Example for generating a rest-frame physical scale image. This example will:
 
         # Get the photometric images
         img.get_imgs_smoothed(
-            photometry=galaxy.stars.spectra["incident"].photo_luminosities,
+            photometry=galaxy.stars.spectra["reprocessed"].photo_luminosities,
             density_grid=morph.get_density_grid(resolution, img.npix),
         )
 
@@ -233,7 +237,7 @@ Example for generating a rest-frame physical scale image. This example will:
         # We can also do the same with a helper function on the galaxy object
         img = galaxy.get_images_luminosity(
             resolution=resolution,
-            stellar_photometry="incident",
+            stellar_photometry="reprocessed",
             fov=fov,
         )
 
@@ -243,7 +247,7 @@ Example for generating a rest-frame physical scale image. This example will:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.584 seconds)
+   **Total running time of the script:** (0 minutes 2.372 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_create_image.py:

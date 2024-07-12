@@ -26,7 +26,7 @@ mass which is passed at instantiation. This example shows how a galaxy
 can later be scaled in terms of mass to achieve a particular brightness in
 a particular filter.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-171
+.. GENERATED FROM PYTHON SOURCE LINES 10-177
 
 
 
@@ -40,8 +40,8 @@ a particular filter.
 
  .. code-block:: none
 
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/igm.py:218: RuntimeWarning: overflow encountered in exp
-      t = np.exp(-tau)
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/emission_models/attenuation/igm.py:382: RuntimeWarning: overflow encountered in exp
+      transmission = np.exp(-tau)
     36307.8054770101 nJy
 
 
@@ -60,6 +60,8 @@ a particular filter.
     from matplotlib.lines import Line2D
     from synthesizer import galaxy
     from synthesizer.conversions import apparent_mag_to_fnu, fnu_to_lnu
+    from synthesizer.emission_models import PacmanEmission
+    from synthesizer.emission_models.attenuation import PowerLaw
     from synthesizer.filters import Filter
     from synthesizer.grid import Grid
     from synthesizer.parametric import SFH, Stars, ZDist
@@ -81,6 +83,15 @@ a particular filter.
     grid_dir = "../../tests/test_grid/"
     grid = Grid(grid_name, grid_dir=grid_dir)
 
+    # Define the emission model
+    model = PacmanEmission(
+        grid,
+        fesc=0.5,
+        fesc_ly_alpha=0.5,
+        tau_v=0.1,
+        dust_curve=PowerLaw(slope=-1),
+    )
+
     # Set up the SFH
     sfh = SFH.Constant(duration=100 * Myr)
 
@@ -101,12 +112,7 @@ a particular filter.
     gal = galaxy(stars=stars, redshift=redshift)
 
     # Generate spectra using pacman model (complex)
-    gal.stars.get_spectra_pacman(
-        grid,
-        fesc=0.5,
-        fesc_LyA=0.5,
-        tau_v=0.1,
-    )
+    gal.stars.get_spectra(model)
 
     # Get the observed spectra
     gal.get_observed_spectra(cosmo=cosmo)
@@ -218,7 +224,7 @@ a particular filter.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.734 seconds)
+   **Total running time of the script:** (0 minutes 0.594 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_scale_by_luminosity.py:

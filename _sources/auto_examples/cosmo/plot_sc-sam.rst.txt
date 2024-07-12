@@ -23,7 +23,7 @@ SC-SAM example
 
 Load SC-SAM example data into a list of galaxy objects.
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-106
+.. GENERATED FROM PYTHON SOURCE LINES 7-111
 
 
 
@@ -37,11 +37,11 @@ Load SC-SAM example data into a list of galaxy objects.
 
  .. code-block:: none
 
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:251: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:256: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:111: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:110: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
       self.load_gas(gas=gas)
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:118: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
     /opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: divide by zero encountered in log10
       out_arr = func(np.asarray(inp), out=out_func, **kwargs)
@@ -58,6 +58,8 @@ Load SC-SAM example data into a list of galaxy objects.
 
     import matplotlib.pyplot as plt
     import numpy as np
+    from synthesizer.emission_models import PacmanEmission
+    from synthesizer.emission_models.attenuation import PowerLaw
     from synthesizer.grid import Grid
     from synthesizer.load_data.load_scsam import load_SCSAM
 
@@ -66,6 +68,15 @@ Load SC-SAM example data into a list of galaxy objects.
         grid_name = "test_grid.hdf5"
         grid_dir = "../../tests/test_grid/"
         grid = Grid(grid_name, grid_dir=grid_dir)
+
+        # Define the emission model
+        model = PacmanEmission(
+            grid,
+            tau_v=0.33,
+            dust_curve=PowerLaw(slope=-1),
+            fesc=0.1,
+            fesc_ly_alpha=0.5,
+        )
 
         # Load example SC-SAM SF history (just contains 10 galaxies)
         test_data = "../../tests/data/sc-sam_sfhist.dat"
@@ -96,25 +107,19 @@ Load SC-SAM example data into a list of galaxy objects.
         for i in range(len(particle_galaxies)):
             # Get SEDs for the particle galaxy object
             particle_galaxy = particle_galaxies[i]
-            particle_galaxy.stars.get_spectra_incident(grid)
-            particle_galaxy.stars.get_spectra_reprocessed(grid, fesc=0.1)
-            particle_galaxy.stars.get_spectra_screen(grid, tau_v=0.33)
+            particle_galaxy.stars.get_spectra(model)
             particle_sed = particle_galaxy.stars.spectra[spectrum]
             particle_SEDs.append(particle_sed.lnu)
 
             # Get SEDs for the parametric NNI galaxy object
             parametric_NNI_galaxy = parametric_NNI_galaxies[i]
-            parametric_NNI_galaxy.stars.get_spectra_incident(grid)
-            parametric_NNI_galaxy.stars.get_spectra_reprocessed(grid, fesc=0.1)
-            parametric_NNI_galaxy.stars.get_spectra_screen(grid, tau_v=0.33)
+            parametric_NNI_galaxy.stars.get_spectra(model)
             parametric_sed = parametric_NNI_galaxy.stars.spectra[spectrum]
             parametric_NNI_SEDs.append(parametric_sed.lnu)
 
             # Get SEDs for the parametric RGI galaxy object
             parametric_RGI_galaxy = parametric_RGI_galaxies[i]
-            parametric_RGI_galaxy.stars.get_spectra_incident(grid)
-            parametric_RGI_galaxy.stars.get_spectra_reprocessed(grid, fesc=0.1)
-            parametric_RGI_galaxy.stars.get_spectra_screen(grid, tau_v=0.33)
+            parametric_RGI_galaxy.stars.get_spectra(model)
             parametric_sed = parametric_RGI_galaxy.stars.spectra[spectrum]
             parametric_RGI_SEDs.append(parametric_sed.lnu)
 
@@ -158,7 +163,7 @@ Load SC-SAM example data into a list of galaxy objects.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.088 seconds)
+   **Total running time of the script:** (0 minutes 0.847 seconds)
 
 
 .. _sphx_glr_download_auto_examples_cosmo_plot_sc-sam.py:

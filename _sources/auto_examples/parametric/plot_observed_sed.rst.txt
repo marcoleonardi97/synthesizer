@@ -28,7 +28,7 @@ including photometry. This example will:
 - calculate observed frame spectra (requires comsology and redshift)
 - calculate observed frame fluxes
 
-.. GENERATED FROM PYTHON SOURCE LINES 12-109
+.. GENERATED FROM PYTHON SOURCE LINES 12-115
 
 
 
@@ -62,9 +62,11 @@ including photometry. This example will:
 
 
     from astropy.cosmology import Planck18 as cosmo
+    from synthesizer.emission_models import PacmanEmission
+    from synthesizer.emission_models.attenuation import PowerLaw
+    from synthesizer.emission_models.attenuation.igm import Madau96
     from synthesizer.filters import FilterCollection
     from synthesizer.grid import Grid
-    from synthesizer.igm import Madau96
     from synthesizer.parametric import SFH, Stars, ZDist
     from synthesizer.parametric.galaxy import Galaxy
     from unyt import Myr
@@ -78,6 +80,15 @@ including photometry. This example will:
         grid_name = "test_grid"
         grid_dir = "../../tests/test_grid/"
         grid = Grid(grid_name, grid_dir=grid_dir)
+
+        # Define the emission model
+        model = PacmanEmission(
+            grid,
+            tau_v=0.1,
+            fesc=0.5,
+            fesc_ly_alpha=0.5,
+            dust_curve=PowerLaw(slope=-1),
+        )
 
         # define filters
         filter_codes = [
@@ -125,12 +136,7 @@ including photometry. This example will:
         galaxy = Galaxy(stars, redshift=z)
 
         # generate spectra using pacman model (complex)
-        sed = galaxy.stars.get_spectra_pacman(
-            grid,
-            fesc=0.5,
-            fesc_LyA=0.5,
-            tau_v=0.1,
-        )
+        sed = galaxy.stars.get_spectra(model)
 
         # now calculate the observed frame spectra
         sed.get_fnu(
@@ -161,7 +167,7 @@ including photometry. This example will:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.558 seconds)
+   **Total running time of the script:** (0 minutes 3.023 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_observed_sed.py:

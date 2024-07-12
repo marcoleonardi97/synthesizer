@@ -24,7 +24,7 @@ Compare Single star particle to instantaneous SFZH
 A sanity check example for a single star in both parametric and particle
 objects. These should give indistinguishable results.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-136
+.. GENERATED FROM PYTHON SOURCE LINES 8-138
 
 
 
@@ -74,6 +74,7 @@ objects. These should give indistinguishable results.
     import numpy as np
     from matplotlib.colors import Normalize
     from mpl_toolkits.axes_grid1 import make_axes_locatable
+    from synthesizer.emission_models import TransmittedEmission
     from synthesizer.grid import Grid
     from synthesizer.parametric import Stars as ParametricStars
     from synthesizer.particle import Stars as ParticleStars
@@ -82,6 +83,9 @@ objects. These should give indistinguishable results.
     grid_name = "test_grid"
     grid_dir = "../../tests/test_grid/"
     grid = Grid(grid_name, grid_dir=grid_dir)
+
+    # Define the emission model
+    model = TransmittedEmission(grid)
 
     # Define the parametric stars
     stars = ParametricStars(
@@ -96,7 +100,7 @@ objects. These should give indistinguishable results.
     stars.plot_sfzh()
 
     # Compute the parametric sed
-    sed = stars.get_spectra_transmitted(grid)
+    sed = stars.get_spectra(model)
 
     # Create the particle stars object
     part_stars = ParticleStars(
@@ -182,9 +186,7 @@ objects. These should give indistinguishable results.
 
     plt.show()
 
-    part_sed = part_stars.get_spectra_transmitted(
-        grid, grid_assignment_method="cic"
-    )
+    part_sed = part_stars.get_spectra(model, grid_assignment_method="cic")
     plt.figure(2)
     plt.plot(np.log10(sed.lam), np.log10(sed.lnu), label="parametric")
     plt.plot(
@@ -201,7 +203,7 @@ objects. These should give indistinguishable results.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.492 seconds)
+   **Total running time of the script:** (0 minutes 0.484 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_single_star_test.py:

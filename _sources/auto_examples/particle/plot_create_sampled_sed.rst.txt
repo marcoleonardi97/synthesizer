@@ -25,7 +25,7 @@ this example generates a sample of star particles from a 2D SFZH.
 In this case it is generated from a parametric star formation history
 with constant star formation.
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-74
+.. GENERATED FROM PYTHON SOURCE LINES 9-78
 
 
 
@@ -39,18 +39,44 @@ with constant star formation.
 
  .. code-block:: none
 
-    ----------
-    SUMMARY OF BINNED SFZH
-    median age: 50.12 Myr
-    mean age: 50.01 Myr
-    mean metallicity: 0.0100
-    ----------
-
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:251: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    +-------------------------------------------------------------------------------------------------------+
+    |                                                 STARS                                                 |
+    +--------------------------+----------------------------------------------------------------------------+
+    | Attribute                | Value                                                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    | sf_hist_func             | <synthesizer.parametric.sf_hist.Constant object at 0x7f0381c17fa0>         |
+    +--------------------------+----------------------------------------------------------------------------+
+    | metal_dist_func          | <synthesizer.parametric.metal_dist.DeltaConstant object at 0x7f0381c17f70> |
+    +--------------------------+----------------------------------------------------------------------------+
+    | initial_mass             | 1.00e+00 Msun                                                              |
+    +--------------------------+----------------------------------------------------------------------------+
+    | metallicity_grid_type    | 'log10Z'                                                                   |
+    +--------------------------+----------------------------------------------------------------------------+
+    | log10ages_lims           | [6.0,  10.399999999999984, ]                                               |
+    +--------------------------+----------------------------------------------------------------------------+
+    | metallicities_lims       | [1e-05,  0.025118864315095104, ]                                           |
+    +--------------------------+----------------------------------------------------------------------------+
+    | log10metallicities_lims  | [-5.0,  -1.600000000000012, ]                                              |
+    +--------------------------+----------------------------------------------------------------------------+
+    | ages (45,)               | 1.00e+06 yr -> 2.51e+10 yr (Mean: 2.71e+09 yr)                             |
+    +--------------------------+----------------------------------------------------------------------------+
+    | metallicities (35,)      | 1.00e-05 -> 2.51e-02 (Mean: 3.49e-03)                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    | log10ages (45,)          | 6.00e+00 -> 1.04e+01 (Mean: 8.20e+00)                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    | log10metallicities (35,) | -5.00e+00 -> -1.60e+00 (Mean: -3.30e+00)                                   |
+    +--------------------------+----------------------------------------------------------------------------+
+    | sf_hist (45,)            | 0.00e+00 -> 1.85e-01 (Mean: 2.22e-02)                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    | metal_dist (35,)         | 0.00e+00 -> 1.00e+00 (Mean: 2.86e-02)                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    | sfzh (45, 35)            | 0.00e+00 -> 1.85e-01 (Mean: 6.35e-04)                                      |
+    +--------------------------+----------------------------------------------------------------------------+
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:256: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:111: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:110: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
       self.load_gas(gas=gas)
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:118: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
     /opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: divide by zero encountered in log10
       out_arr = func(np.asarray(inp), out=out_func, **kwargs)
@@ -67,6 +93,7 @@ with constant star formation.
 
     import matplotlib.pyplot as plt
     import numpy as np
+    from synthesizer.emission_models import IncidentEmission
     from synthesizer.grid import Grid
     from synthesizer.parametric import SFH, ZDist
     from synthesizer.parametric import Stars as ParametricStars
@@ -78,6 +105,9 @@ with constant star formation.
     grid_name = "test_grid"
     grid_dir = "../../tests/test_grid/"
     grid = Grid(grid_name, grid_dir=grid_dir)
+
+    # Define the emission model
+    model = IncidentEmission(grid)
 
     # define the grid (normally this would be defined by an SPS grid)
     log10ages = np.arange(6.0, 10.5, 0.1)
@@ -109,7 +139,7 @@ with constant star formation.
     """ this generates stellar and intrinsic spectra
     galaxy.generate_intrinsic_spectra(grid, fesc=0.0)
     calculate only integrated SEDs """
-    galaxy.stars.get_spectra_incident(grid)
+    galaxy.stars.get_spectra(model)
 
     # --- generate dust screen
     # galaxy.get_screen(0.5) # tau_v
@@ -133,7 +163,7 @@ with constant star formation.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.222 seconds)
+   **Total running time of the script:** (0 minutes 0.220 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_create_sampled_sed.py:

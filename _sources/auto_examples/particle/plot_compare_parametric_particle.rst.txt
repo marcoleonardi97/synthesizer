@@ -24,7 +24,7 @@ Compare parametric and particle SEDs
 This example compares a sampled and binned (parametric) SED for different
 numbers of particles
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-83
+.. GENERATED FROM PYTHON SOURCE LINES 8-87
 
 
 
@@ -40,11 +40,11 @@ numbers of particles
 
     /opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: divide by zero encountered in log10
       out_arr = func(np.asarray(inp), out=out_func, **kwargs)
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:251: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:256: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:111: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:110: RuntimeWarning: In `load_gas`: one of either `masses` or `metallicities` is not provided, setting `gas` object to `None`
       self.load_gas(gas=gas)
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:118: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Current mass of stars not provided, setting stellar_mass_weighted_age to `None`
       self.calculate_integrated_stellar_properties()
 
 
@@ -59,6 +59,7 @@ numbers of particles
 
     import matplotlib.pyplot as plt
     import numpy as np
+    from synthesizer.emission_models import IncidentEmission
     from synthesizer.grid import Grid
     from synthesizer.parametric import SFH, ZDist
     from synthesizer.parametric import Stars as ParametricStars
@@ -71,6 +72,9 @@ numbers of particles
     grid_name = "test_grid"
     grid_dir = "../../tests/test_grid/"
     grid = Grid(grid_name, grid_dir=grid_dir)
+
+    # Define the incident emission
+    model = IncidentEmission(grid)
 
     # Define the SFH and metallicity distribution
     Z_p = {"metallicity": 0.01}
@@ -89,7 +93,7 @@ numbers of particles
 
     # Compute the parametric sed
     parametric_galaxy = ParametricGalaxy(sfzh)
-    parametric_galaxy.stars.get_spectra_incident(grid)
+    parametric_galaxy.stars.get_spectra(model)
     sed = parametric_galaxy.stars.spectra["incident"]
     plt.plot(
         np.log10(sed.lam),
@@ -116,8 +120,8 @@ numbers of particles
         particle_galaxy = ParticleGalaxy(stars=stars)
 
         # Calculate the stars SEDs using nearest grid point
-        ngp_sed = particle_galaxy.stars.get_spectra_incident(
-            grid, grid_assignment_method="ngp"
+        ngp_sed = particle_galaxy.stars.get_spectra(
+            model, grid_assignment_method="ngp"
         )
 
         plt.plot(
@@ -135,7 +139,7 @@ numbers of particles
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.267 seconds)
+   **Total running time of the script:** (0 minutes 0.261 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_compare_parametric_particle.py:

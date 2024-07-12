@@ -26,7 +26,7 @@ It includes the following steps:
 - Builds a parametric galaxy using make_sfzh.
 - Retrieves delta_lambda for the galaxy using the grid.
 
-.. GENERATED FROM PYTHON SOURCE LINES 10-85
+.. GENERATED FROM PYTHON SOURCE LINES 10-89
 
 
 
@@ -54,6 +54,7 @@ It includes the following steps:
 
     import matplotlib.pyplot as plt
     import numpy as np
+    from synthesizer.emission_models import IncidentEmission
     from synthesizer.grid import Grid
     from synthesizer.parametric import SFH, Stars, ZDist
     from synthesizer.parametric.galaxy import Galaxy
@@ -64,6 +65,9 @@ It includes the following steps:
         grid_name = "test_grid"
         grid_dir = "../../tests/test_grid/"
         grid = Grid(grid_name, grid_dir=grid_dir)
+
+        # Define the emission model
+        model = IncidentEmission(grid)
 
         # define the parameters of the star formation and metal enrichment
         # histories
@@ -95,7 +99,7 @@ It includes the following steps:
         galaxy = Galaxy(stars, redshift=z)
 
         # Delta lambda model for pure stellar spectra
-        galaxy.stars.get_spectra_incident(grid)
+        galaxy.stars.get_spectra(model)
         lam, delta_lam = Grid.get_delta_lambda(grid)
         print("Mean delta: ", np.mean(delta_lam))
 
@@ -130,7 +134,7 @@ It includes the following steps:
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.231 seconds)
+   **Total running time of the script:** (0 minutes 0.233 seconds)
 
 
 .. _sphx_glr_download_auto_examples_parametric_plot_delta_lambda.py:
