@@ -556,6 +556,13 @@
 <span class="sd">            The physical gravitational softening length.</span>
 <span class="sd">        nparticle : int</span>
 <span class="sd">            How many particles are there?</span>
+<span class="sd">        centre (array, float)</span>
+<span class="sd">            Centre of the particle distribution.</span>
+<span class="sd">        metallicity_floor (float)</span>
+<span class="sd">            The metallicity floor when using log properties (only matters for</span>
+<span class="sd">            baryons). This is used to avoid log(0) errors</span>
+<span class="sd">        radii (array-like, float)</span>
+<span class="sd">            The radii of the particles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define class level Quantity attributes</span>
@@ -564,6 +571,7 @@
     <span class="n">masses</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">softening_lengths</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">centre</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">radii</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -631,6 +639,10 @@
         <span class="c1"># Set the centre of the particle distribution</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">centre</span>
 
+        <span class="c1"># Set the radius to None, this will be populated when needed and</span>
+        <span class="c1"># can then be subsequently accessed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="c1"># Set the metallicity floor when using log properties (only matters for</span>
         <span class="c1"># baryons)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_floor</span> <span class="o">=</span> <span class="n">metallicity_floor</span>
@@ -639,14 +651,13 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">velocities</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">softening_length</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sanitizes the inputs ensuring all arguments agree and are compatible.</span>
+<span class="sd">        Sanitize the inputs ensuring all arguments agree and are compatible.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            InconsistentArguments</span>
 <span class="sd">                If any arguments are incompatible or not as expected an error</span>
 <span class="sd">                is thrown.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># Ensure all quantities have units</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -665,20 +676,24 @@
                 <span class="s2">&quot;softening_length must have unyt units associated to them.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">rotate_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Particles.rotate_particles"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.rotate_particles">[docs]</a>    <span class="k">def</span> <span class="nf">rotate_particles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rotate the particle distribution.</span>
+
+<span class="sd">        Not yet implemented.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
             <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
             <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
             <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
             <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Particles.convert_to_physical_properties"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.convert_to_physical_properties">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_physical_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts comoving coordinates and velocities to physical coordinates</span>
-<span class="sd">        and velocties.</span>
+<span class="sd">        Convert comoving coordinates and velocities to physical.</span>
 
 <span class="sd">        Note that redshift must be provided to perform this conversion.</span>
 
@@ -696,8 +711,7 @@
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Converts comoving coordinates and velocities to physical coordinates</span>
-<span class="sd">        and velocties.</span>
+<span class="sd">        Convert physical coordinates and velocities to comoving.</span>
 
 <span class="sd">        Note that redshift must be provided to perform this conversion.</span>
 
@@ -714,9 +728,11 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">centered_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the coordinates centred on the geometric mean.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">masses</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t centre coordinates without a centre.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
 
 <div class="viewcode-block" id="Particles.get_particle_photo_luminosities"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_particle_photo_luminosities">[docs]</a>    <span class="k">def</span> <span class="nf">get_particle_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -837,8 +853,8 @@
         <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="s2">&quot;Particles&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Particles.calculate_centre_of_mass"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.calculate_centre_of_mass">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_centre_of_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the centre of mass of the collection</span>
-<span class="sd">        of particles.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the centre of mass of the collection of particles.</span>
 
 <span class="sd">        Uses the `masses` and `coordinates` attributes,</span>
 <span class="sd">        and assigns the centre of mass to the `centre` attribute</span>
@@ -851,7 +867,204 @@
 
         <span class="n">com</span> <span class="o">/=</span> <span class="n">total_mass</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">com</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">com</span></div>
+
+<div class="viewcode-block" id="Particles.get_radii"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_radii">[docs]</a>    <span class="k">def</span> <span class="nf">get_radii</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radii of the particles.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radii (array-like, float)</span>
+<span class="sd">                The radii of the particles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Raise an error if the centre is not set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t calculate radii without a centre.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Calculate the radii</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centered_coordinates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">frac</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radius of a particle distribution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            weights (array-like, float)</span>
+<span class="sd">                The weights to use to weight the particles.</span>
+<span class="sd">            frac (float)</span>
+<span class="sd">                The fraction of the total weight for the radius.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the radii if not already set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_radii</span><span class="p">()</span>
+
+        <span class="c1"># Strip units off the weights if they have them</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">):</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># Sort the weights and radii by radius</span>
+        <span class="n">sinds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[</span><span class="n">sinds</span><span class="p">]</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radii</span><span class="p">[</span><span class="n">sinds</span><span class="p">]</span>
+
+        <span class="c1"># Get the total of the weights</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="c1"># Get the cumulative array for the weights</span>
+        <span class="n">cum_weight</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+        <span class="c1"># Interpolate to get an accurate radius</span>
+        <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="n">total</span><span class="p">,</span> <span class="n">cum_weight</span><span class="p">,</span> <span class="n">radii</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">radius</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span><span class="o">.</span><span class="n">units</span>
+
+<div class="viewcode-block" id="Particles.get_attr_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_attr_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_attr_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_attr</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radius of a particle distribution.</span>
+
+<span class="sd">        By default this will return the &quot;half attr radius.&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            weight_attr (str)</span>
+<span class="sd">                The attribute to use to weight the particles.</span>
+<span class="sd">            frac (float)</span>
+<span class="sd">                The fraction of the total attribute for the radius.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the weight attribute</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weight_attr</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># Ensure we found the attribute</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">weight_attr</span><span class="si">}</span><span class="s2"> not found in particle object.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_radius</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">frac</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Particles.get_luminosity_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_luminosity_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_luminosity_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radius of a particle distribution based on luminoisty.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The type of spectra to use to compute radius.</span>
+<span class="sd">            filter_code (str)</span>
+<span class="sd">                The filter code to compute the radius for.</span>
+<span class="sd">            frac (float)</span>
+<span class="sd">                The fraction of the total light for the radius.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check we have that spectra type, if so unpack it</span>
+        <span class="k">if</span> <span class="n">spectra_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spectra_type</span><span class="si">}</span><span class="s2"> not found in particle photometry. &quot;</span>
+                <span class="s2">&quot;Call get_particle_photo_luminosities first.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">phot_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+
+        <span class="c1"># Check we have the filter code</span>
+        <span class="k">if</span> <span class="n">filter_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">phot_collection</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filter_code</span><span class="si">}</span><span class="s2"> not found in particle photometry. &quot;</span>
+                <span class="s2">&quot;Call get_particle_photo_luminosities first.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">light</span> <span class="o">=</span> <span class="n">phot_collection</span><span class="p">[</span><span class="n">filter_code</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_radius</span><span class="p">(</span><span class="n">light</span><span class="p">,</span> <span class="n">frac</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Particles.get_flux_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_flux_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_flux_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the radius of a particle distribution based on flux.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The type of spectra to use to compute radius.</span>
+<span class="sd">            filter_code (str)</span>
+<span class="sd">                The filter code to compute the radius for.</span>
+<span class="sd">            frac (float)</span>
+<span class="sd">                The fraction of the total light for the radius.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check we have that spectra type, if so unpack it</span>
+        <span class="k">if</span> <span class="n">spectra_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">spectra_type</span><span class="si">}</span><span class="s2"> not found in particle photometry. &quot;</span>
+                <span class="s2">&quot;Call get_particle_photo_fluxes first.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">phot_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span><span class="p">[</span><span class="n">spectra_type</span><span class="p">]</span>
+
+        <span class="c1"># Check we have the filter code</span>
+        <span class="k">if</span> <span class="n">filter_code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">phot_collection</span><span class="o">.</span><span class="n">filter_codes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filter_code</span><span class="si">}</span><span class="s2"> not found in particle photometry. &quot;</span>
+                <span class="s2">&quot;Call get_particle_photo_fluxes first.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">light</span> <span class="o">=</span> <span class="n">phot_collection</span><span class="p">[</span><span class="n">filter_code</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_radius</span><span class="p">(</span><span class="n">light</span><span class="p">,</span> <span class="n">frac</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Particles.get_half_mass_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_half_mass_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_half_mass_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the half mass radius of the particle distribution.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The half mass radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Hanlde</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_attr_radius</span><span class="p">(</span><span class="s2">&quot;masses&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Particles.get_half_luminosity_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_half_luminosity_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_half_luminosity_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the half luminosity radius of the particle distribution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The type of spectra to use to compute radius.</span>
+<span class="sd">            filter_code (str)</span>
+<span class="sd">                The filter code to compute the radius for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The half luminosity radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_luminosity_radius</span><span class="p">(</span><span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Particles.get_half_flux_radius"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_half_flux_radius">[docs]</a>    <span class="k">def</span> <span class="nf">get_half_flux_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the half flux radius of the particle distribution.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            spectra_type (str)</span>
+<span class="sd">                The type of spectra to use to compute radius.</span>
+<span class="sd">            filter_code (str)</span>
+<span class="sd">                The filter code to compute the radius for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            radius (float)</span>
+<span class="sd">                The half flux radius of the particle distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_flux_radius</span><span class="p">(</span><span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="CoordinateGenerator"><a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.CoordinateGenerator">[docs]</a><span class="k">class</span> <span class="nc">CoordinateGenerator</span><span class="p">:</span>
@@ -935,7 +1148,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=435c853b"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ca458949"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
