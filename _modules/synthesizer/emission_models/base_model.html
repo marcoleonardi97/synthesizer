@@ -253,6 +253,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../emission_models/dust_emission.html">Dust emission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../emission_models/modify_models.html">Modifying a model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../emission_models/custom_models.html">Creating your own EmissionModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../emission_models/custom_models.html#Saving-or-not-saving-the-emission">Saving or not saving the emission</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../emission_models/combined_models.html">Combined Emission Models</a></li>
 </ul>
 </li>
@@ -652,6 +653,7 @@
         <span class="n">fixed_parameters</span><span class="o">=</span><span class="p">{},</span>
         <span class="n">scale_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">post_processing</span><span class="o">=</span><span class="p">(),</span>
+        <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -729,6 +731,11 @@
 <span class="sd">                containing the spectra/lines, the emitters, and the emission</span>
 <span class="sd">                model, and return the same dict with the post processing</span>
 <span class="sd">                applied.</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                A flag for whether the emission produced by this model should</span>
+<span class="sd">                be &quot;saved&quot;, i.e. attached to the emitter. If False, the</span>
+<span class="sd">                emission will be discarded after it has been used. Default is</span>
+<span class="sd">                True.</span>
 <span class="sd">            **kwargs:</span>
 <span class="sd">                Any additional keyword arguments to store. These can be used</span>
 <span class="sd">                to store additional information needed by the model.</span>
@@ -825,6 +832,9 @@
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;related_models must be a set, list, tuple, or EmissionModel.&quot;</span>
             <span class="p">)</span>
+
+        <span class="c1"># Are we saving this emission?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_save</span> <span class="o">=</span> <span class="n">save</span>
 
         <span class="c1"># We&#39;re done with setup, so unpack the model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span>
@@ -1036,6 +1046,9 @@
 
             <span class="c1"># Get this models summary</span>
             <span class="n">parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_summary</span><span class="p">())</span>
+
+            <span class="c1"># Report if the resulting emission will be saved</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Save emission: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">_save</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="c1"># Print any fixed parameters if there are any</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fixed_parameters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1616,6 +1629,31 @@
         <span class="c1"># Unpack the model now we&#39;re done</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span></div>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the flag for whether to save the emission.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_save&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EmissionModel.set_save"><a class="viewcode-back" href="../../../_autosummary/synthesizer.emission_models.base_model.html#synthesizer.emission_models.base_model.EmissionModel.set_save">[docs]</a>    <span class="k">def</span> <span class="nf">set_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="p">,</span> <span class="n">set_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the flag for whether to save the emission.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save (bool):</span>
+<span class="sd">                Whether to save the emission.</span>
+<span class="sd">            set_all (bool):</span>
+<span class="sd">                Whether to set the save flag on all models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set the save flag</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">set_all</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save</span> <span class="o">=</span> <span class="n">save</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+
+        <span class="c1"># Unpack the model now we&#39;re done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span></div>
+
 <div class="viewcode-block" id="EmissionModel.add_mask"><a class="viewcode-back" href="../../../_autosummary/synthesizer.emission_models.base_model.html#synthesizer.emission_models.base_model.EmissionModel.add_mask">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">set_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a mask.</span>
@@ -2103,6 +2141,10 @@
         <span class="c1"># Keep track of which components are included</span>
         <span class="n">components</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
+        <span class="c1"># We need a flag for the for whether any models are discarded so we</span>
+        <span class="c1"># know whether to include it in the legend</span>
+        <span class="n">some_discarded</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="c1"># Plot the tree using Matplotlib</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
 
@@ -2115,6 +2157,13 @@
                 <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;royalblue&quot;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;forestgreen&quot;</span>
+
+            <span class="c1"># If the model isn&#39;t saved apply some transparency</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.6</span>
+                <span class="n">some_discarded</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">text</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
                 <span class="n">x</span><span class="p">,</span>
                 <span class="o">-</span><span class="n">y</span><span class="p">,</span>  <span class="c1"># Invert y-axis for bottom-to-top</span>
@@ -2129,6 +2178,7 @@
                     <span class="k">else</span> <span class="s2">&quot;square,pad=0.3&quot;</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Used a dashed outline for masked nodes</span>
@@ -2233,6 +2283,32 @@
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Masked&quot;</span><span class="p">,</span>
                     <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Include a transparent legend element for non-saved nodes if needed</span>
+        <span class="k">if</span> <span class="n">some_discarded</span><span class="p">:</span>
+            <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">mpatches</span><span class="o">.</span><span class="n">FancyBboxPatch</span><span class="p">(</span>
+                    <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+                    <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                    <span class="n">height</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Saved&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">mpatches</span><span class="o">.</span><span class="n">FancyBboxPatch</span><span class="p">(</span>
+                    <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+                    <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                    <span class="n">height</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Discarded&quot;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
                     <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -2577,6 +2653,13 @@
         <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_processing</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
+        <span class="c1"># Loop over all models and delete those spectra if we aren&#39;t saving</span>
+        <span class="c1"># them (we have to this after post processing incase the deleted</span>
+        <span class="c1"># spectra are needed during post processing)</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">save</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">spectra</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="n">spectra</span>
 
     <span class="k">def</span> <span class="nf">_get_lines</span><span class="p">(</span>
@@ -2787,6 +2870,13 @@
         <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_processing</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
+        <span class="c1"># Loop over all models and delete those lines if we aren&#39;t saving</span>
+        <span class="c1"># them (we have to this after post processing incase the deleted</span>
+        <span class="c1"># lines are needed during post processing)</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">save</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">lines</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="n">lines</span></div>
 
 
@@ -2882,7 +2972,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=29ab7c82"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=435c853b"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=4e2eecee"></script>
