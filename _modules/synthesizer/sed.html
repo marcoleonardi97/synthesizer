@@ -638,7 +638,6 @@
         <span class="c1"># lam.</span>
         <span class="k">if</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
@@ -652,8 +651,8 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
 
-        <span class="c1"># Measure bolometric luminosity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+        <span class="c1"># Prepare for bolometric luminosity calculation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Redshift of the SED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1037,6 +1036,10 @@
 <span class="sd">                is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
+
+        <span class="c1"># Don&#39;t duplicate the calculation if we already have it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
 
         <span class="c1"># Calculate the bolometric luminosity</span>
         <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
@@ -2486,7 +2489,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=a883c3b4"></script>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=29ab7c82"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/scripts/furo.js?v=4e2eecee"></script>
