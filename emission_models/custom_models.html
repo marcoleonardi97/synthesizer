@@ -514,9 +514,10 @@
 <p>To create your own <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> all you need to do is define each indiviudal emission type and relate them. This operation will define a tree-like structure, where each model links to at least one other model.</p>
 <p>In the sections below we will detail how to define each different type of emission operation, but there are a few arguments needed by an <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> regardless of the operation:</p>
 <ul class="simple">
-<li><p>A <strong>label</strong> which identifies the model. These must be unique within a single emission model “tree”.</p></li>
-<li><p>An emitter to act on. This is given by passing a string to the emitter argument. Currently the possible emitters are: <code class="docutils literal notranslate"><span class="pre">&quot;stellar&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;blackhole&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;galaxy&quot;</span></code>.</p></li>
+<li><p>A <strong>label</strong> which identifies the model. This is given by passing a string to the <code class="docutils literal notranslate"><span class="pre">label</span></code> argument. These must be unique within a single emission model “tree”.</p></li>
+<li><p>An <strong>emitter</strong> to act on. This is given by passing a string to the <code class="docutils literal notranslate"><span class="pre">emitter</span></code> argument. Currently the possible emitters are: <code class="docutils literal notranslate"><span class="pre">&quot;stellar&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;blackhole&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;galaxy&quot;</span></code>.</p></li>
 </ul>
+<p>Before demonstrating anythign we first need to import the classes we’ll need and set up a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> (described <a class="reference internal" href="../grids/grids.html"><span class="doc">here</span></a>).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -534,15 +535,87 @@
 </pre></div>
 </div>
 </div>
-<section id="Defining-an-extraction">
-<h2>Defining an extraction<a class="headerlink" href="#Defining-an-extraction" title="Permalink to this heading">¶</a></h2>
-<p>To define an extraction we simply need to pass a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> to extract from and a key to extract (with the option of providing an escape fraction).</p>
-<div class="nbinput docutils container">
+<section id="Emitters">
+<h2>Emitters<a class="headerlink" href="#Emitters" title="Permalink to this heading">¶</a></h2>
+<p>The emitter on a model defines:</p>
+<ul class="simple">
+<li><p>Where any model independant attributes should be extracted from (e.g. ages and metallicites needed for stellar extractions).</p></li>
+<li><p>Where the resulting spectra/lines will be stored once generated.</p></li>
+<li><p>Where any model attributes set to attribute strings should be extracted from (e.g. optical depths when <code class="docutils literal notranslate"><span class="pre">tau_v=&quot;tau_v&quot;</span></code>).</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;stellar&quot;</span></code> will cause the model to use a <code class="docutils literal notranslate"><span class="pre">Stars</span></code> object, <code class="docutils literal notranslate"><span class="pre">&quot;blackhole&quot;</span></code> will cause the model to use a <code class="docutils literal notranslate"><span class="pre">BlackHole/s</span></code> object, while <code class="docutils literal notranslate"><span class="pre">&quot;galaxy&quot;</span></code> will cause the model to use a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> object. This mechanism is all performed behind the scenes, you should never have to interact directly with any of this beyond setting the emitter string on a model.</p>
+<p>As well as the base <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> classes there are 3 specialised model classes: <code class="docutils literal notranslate"><span class="pre">StellarEmissionModel</span></code>, <code class="docutils literal notranslate"><span class="pre">BlackHoleEmissionModel</span></code>, and <code class="docutils literal notranslate"><span class="pre">GalaxyEmissionModel</span></code>. These specialised classes are identical to the base <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> class but automatically set the <code class="docutils literal notranslate"><span class="pre">emitter</span></code> argument to <code class="docutils literal notranslate"><span class="pre">&quot;stellar&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;blackhole&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;galaxy&quot;</span></code> respectively.</p>
+<p>We’ll cover the specifics of different operations below, but this means the following fake models:</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transmitted</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
-    <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span>
+    <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">nlr</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;nlr&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;blackhole&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">transmitted</span><span class="p">,</span> <span class="n">nlr</span><span class="p">),</span>
+    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>are equivalent to:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BlackHoleEmissionModel</span><span class="p">,</span>
+    <span class="n">GalaxyEmissionModel</span><span class="p">,</span>
+    <span class="n">StellarEmissionModel</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">transmitted</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">nlr</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;nlr&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">GalaxyEmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">transmitted</span><span class="p">,</span> <span class="n">nlr</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>In the rest of this notebook we’ll use these specialised classes rather than the base <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code>.</p>
+</section>
+<section id="Defining-an-extraction">
+<h2>Defining an extraction<a class="headerlink" href="#Defining-an-extraction" title="Permalink to this heading">¶</a></h2>
+<p>To define an extraction we simply need to pass a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> to extract from and a key to extract (with the option of providing an escape fraction).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">transmitted</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">transmitted</span><span class="p">)</span>
 </pre></div>
@@ -555,7 +628,7 @@
 <div class="highlight"><pre>
 |==== EmissionModel: transmitted ====|
 |------------------------------------|
-|  TRANSMITTED (galaxy)              |
+|  TRANSMITTED (stellar)             |
 |------------------------------------|
 |Extraction model:                   |
 |  Grid: test_grid                   |
@@ -570,11 +643,11 @@
 <h2>Defining a combination<a class="headerlink" href="#Defining-a-combination" title="Permalink to this heading">¶</a></h2>
 <p>To define a combination we simply pass the models we want combined to the <code class="docutils literal notranslate"><span class="pre">combine</span></code> keyword (along with a label).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define models to combine</span>
-<span class="n">linecont</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">linecont</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;linecont&quot;</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
     <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">,</span>
@@ -583,7 +656,7 @@
     <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
     <span class="n">fesc</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">nebular_cont</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">nebular_cont</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
     <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;nebular_continuum&quot;</span><span class="p">,</span>
@@ -593,7 +666,7 @@
 <span class="p">)</span>
 
 <span class="c1"># Define the combined model</span>
-<span class="n">nebular</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">linecont</span><span class="p">,</span> <span class="n">nebular_cont</span><span class="p">))</span>
+<span class="n">nebular</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">linecont</span><span class="p">,</span> <span class="n">nebular_cont</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">nebular</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -605,7 +678,7 @@
 <div class="highlight"><pre>
 |================ EmissionModel: nebular ===============|
 |-------------------------------------------------------|
-|  LINECONT (galaxy)                                    |
+|  LINECONT (stellar)                                   |
 |-------------------------------------------------------|
 |Extraction model:                                      |
 |  Grid: test_grid                                      |
@@ -615,7 +688,7 @@
 |  Masks:                                               |
 |    - log10ages &lt; 7 dimensionless                      |
 |-------------------------------------------------------|
-|  NEBULAR_CONTINUUM (galaxy)                           |
+|  NEBULAR_CONTINUUM (stellar)                          |
 |-------------------------------------------------------|
 |Extraction model:                                      |
 |  Grid: test_grid                                      |
@@ -625,7 +698,7 @@
 |  Masks:                                               |
 |    - log10ages &lt; 7 dimensionless                      |
 |-------------------------------------------------------|
-|  NEBULAR (galaxy)                                     |
+|  NEBULAR (stellar)                                    |
 |-------------------------------------------------------|
 |Combination model:                                     |
 |  Combine models: linecont, nebular_continuum          |
@@ -637,12 +710,12 @@
 <section id="Defining-an-attenuation">
 <h2>Defining an attenuation<a class="headerlink" href="#Defining-an-attenuation" title="Permalink to this heading">¶</a></h2>
 <p>To define an attenuated emission model we need a dust curve, the model to apply the dust to, and an optical depth (once again along with a label).</p>
-<p>Any property can also have strings passed instead of numbers. When a string is passed the spectra generator method will look for an attribute on an emitter using this string. This is only applicable for certain properties, e.g. <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> and <code class="docutils literal notranslate"><span class="pre">fesc</span></code>.</p>
+<p>Some properties can also have strings passed instead of numbers. When a string is passed the spectra generator method will look for an attribute on an emitter using this string. This is only applicable for certain properties, e.g. <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> and <code class="docutils literal notranslate"><span class="pre">fesc</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attenuated</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attenuated</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;attenuated&quot;</span><span class="p">,</span>
     <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
     <span class="n">apply_dust_to</span><span class="o">=</span><span class="n">nebular</span><span class="p">,</span>
@@ -659,7 +732,7 @@
 <div class="highlight"><pre>
 |====================================== EmissionModel: attenuated =======================================|
 |--------------------------------------------------------------------------------------------------------|
-|  LINECONT (galaxy)                                                                                     |
+|  LINECONT (stellar)                                                                                    |
 |--------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                       |
 |  Grid: test_grid                                                                                       |
@@ -669,7 +742,7 @@
 |  Masks:                                                                                                |
 |    - log10ages &lt; 7 dimensionless                                                                       |
 |--------------------------------------------------------------------------------------------------------|
-|  NEBULAR_CONTINUUM (galaxy)                                                                            |
+|  NEBULAR_CONTINUUM (stellar)                                                                           |
 |--------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                       |
 |  Grid: test_grid                                                                                       |
@@ -679,18 +752,76 @@
 |  Masks:                                                                                                |
 |    - log10ages &lt; 7 dimensionless                                                                       |
 |--------------------------------------------------------------------------------------------------------|
-|  NEBULAR (galaxy)                                                                                      |
+|  NEBULAR (stellar)                                                                                     |
 |--------------------------------------------------------------------------------------------------------|
 |Combination model:                                                                                      |
 |  Combine models: linecont, nebular_continuum                                                           |
 |  Save emission: True                                                                                   |
 |--------------------------------------------------------------------------------------------------------|
-|  ATTENUATED (galaxy)                                                                                   |
+|  ATTENUATED (stellar)                                                                                  |
 |--------------------------------------------------------------------------------------------------------|
 |Dust attenuation model:                                                                                 |
-|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7fcec9d3b280&gt;          |
+|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7f7cddce2ce0&gt;          |
 |  Apply dust to: nebular                                                                                |
 |  Optical depth (tau_v): [&#39;tau_v&#39;]                                                                      |
+|  Save emission: True                                                                                   |
+|========================================================================================================|
+</pre></div></div>
+</div>
+<p>The optical depth specifically (<code class="docutils literal notranslate"><span class="pre">tau_v</span></code>) can also take a tuple containing either strings or floats which will be combined into a single attenuation curve when used.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">attenuated</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
+    <span class="s2">&quot;attenuated&quot;</span><span class="p">,</span>
+    <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">apply_dust_to</span><span class="o">=</span><span class="n">nebular</span><span class="p">,</span>
+    <span class="n">tau_v</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;tau_v&quot;</span><span class="p">,</span> <span class="mf">0.33</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">attenuated</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+|====================================== EmissionModel: attenuated =======================================|
+|--------------------------------------------------------------------------------------------------------|
+|  LINECONT (stellar)                                                                                    |
+|--------------------------------------------------------------------------------------------------------|
+|Extraction model:                                                                                       |
+|  Grid: test_grid                                                                                       |
+|  Extract key: linecont                                                                                 |
+|  Escape fraction: 0.7                                                                                  |
+|  Save emission: True                                                                                   |
+|  Masks:                                                                                                |
+|    - log10ages &lt; 7 dimensionless                                                                       |
+|--------------------------------------------------------------------------------------------------------|
+|  NEBULAR_CONTINUUM (stellar)                                                                           |
+|--------------------------------------------------------------------------------------------------------|
+|Extraction model:                                                                                       |
+|  Grid: test_grid                                                                                       |
+|  Extract key: nebular_continuum                                                                        |
+|  Escape fraction: None                                                                                 |
+|  Save emission: True                                                                                   |
+|  Masks:                                                                                                |
+|    - log10ages &lt; 7 dimensionless                                                                       |
+|--------------------------------------------------------------------------------------------------------|
+|  NEBULAR (stellar)                                                                                     |
+|--------------------------------------------------------------------------------------------------------|
+|Combination model:                                                                                      |
+|  Combine models: linecont, nebular_continuum                                                           |
+|  Save emission: True                                                                                   |
+|--------------------------------------------------------------------------------------------------------|
+|  ATTENUATED (stellar)                                                                                  |
+|--------------------------------------------------------------------------------------------------------|
+|Dust attenuation model:                                                                                 |
+|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7f7d18dacbb0&gt;          |
+|  Apply dust to: nebular                                                                                |
+|  Optical depth (tau_v): (&#39;tau_v&#39;, 0.33)                                                                |
 |  Save emission: True                                                                                   |
 |========================================================================================================|
 </pre></div></div>
@@ -700,12 +831,12 @@
 <h2>Defining a generation<a class="headerlink" href="#Defining-a-generation" title="Permalink to this heading">¶</a></h2>
 <p>To define a generation model we only need to provide the generator class (i.e. a <code class="docutils literal notranslate"><span class="pre">Blackbody</span></code>).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.emission_models.dust.emission</span> <span class="kn">import</span> <span class="n">Blackbody</span>
 
-<span class="n">bb_emission</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">bb_emission</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;blackbody_emission&quot;</span><span class="p">,</span>
     <span class="n">generator</span><span class="o">=</span><span class="n">Blackbody</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">),</span>
 <span class="p">)</span>
@@ -720,20 +851,20 @@
 <div class="highlight"><pre>
 |========================================= EmissionModel: blackbody_emission =========================================|
 |---------------------------------------------------------------------------------------------------------------------|
-|  BLACKBODY_EMISSION (galaxy)                                                                                        |
+|  BLACKBODY_EMISSION (stellar)                                                                                       |
 |---------------------------------------------------------------------------------------------------------------------|
 |Generation model:                                                                                                    |
-|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7fcf04e7b100&gt;          |
+|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7f7cddce1b40&gt;          |
 |  Save emission: True                                                                                                |
 |=====================================================================================================================|
 </pre></div></div>
 </div>
 <p>If we want to scale the generated emission by another emission model we can pass that as the <code class="docutils literal notranslate"><span class="pre">lum_intrinsic_model</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_bb_emission</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scaled_bb_emission</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;blackbody_emission&quot;</span><span class="p">,</span>
     <span class="n">generator</span><span class="o">=</span><span class="n">Blackbody</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">),</span>
     <span class="n">lum_intrinsic_model</span><span class="o">=</span><span class="n">transmitted</span><span class="p">,</span>
@@ -749,7 +880,7 @@
 <div class="highlight"><pre>
 |========================================= EmissionModel: blackbody_emission =========================================|
 |---------------------------------------------------------------------------------------------------------------------|
-|  TRANSMITTED (galaxy)                                                                                               |
+|  TRANSMITTED (stellar)                                                                                              |
 |---------------------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                                    |
 |  Grid: test_grid                                                                                                    |
@@ -757,10 +888,10 @@
 |  Escape fraction: 0.3                                                                                               |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
-|  BLACKBODY_EMISSION (galaxy)                                                                                        |
+|  BLACKBODY_EMISSION (stellar)                                                                                       |
 |---------------------------------------------------------------------------------------------------------------------|
 |Generation model:                                                                                                    |
-|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7fcec9d390c0&gt;          |
+|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7f7cddce1c30&gt;          |
 |  Scale by: transmitted                                                                                              |
 |  Save emission: True                                                                                                |
 |=====================================================================================================================|
@@ -768,10 +899,10 @@
 </div>
 <p>For the special case of energy balance dust emission you can pass both the intrinsic and attenuated models to scale by the emission reprocessed by dust.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dust_emission</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dust_emission</span> <span class="o">=</span> <span class="n">GalaxyEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;blackbody_emission&quot;</span><span class="p">,</span>
     <span class="n">generator</span><span class="o">=</span><span class="n">Blackbody</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">),</span>
     <span class="n">lum_intrinsic_model</span><span class="o">=</span><span class="n">transmitted</span><span class="p">,</span>
@@ -788,7 +919,7 @@
 <div class="highlight"><pre>
 |========================================= EmissionModel: blackbody_emission =========================================|
 |---------------------------------------------------------------------------------------------------------------------|
-|  LINECONT (galaxy)                                                                                                  |
+|  LINECONT (stellar)                                                                                                 |
 |---------------------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                                    |
 |  Grid: test_grid                                                                                                    |
@@ -798,7 +929,7 @@
 |  Masks:                                                                                                             |
 |    - log10ages &lt; 7 dimensionless                                                                                    |
 |---------------------------------------------------------------------------------------------------------------------|
-|  NEBULAR_CONTINUUM (galaxy)                                                                                         |
+|  NEBULAR_CONTINUUM (stellar)                                                                                        |
 |---------------------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                                    |
 |  Grid: test_grid                                                                                                    |
@@ -808,7 +939,7 @@
 |  Masks:                                                                                                             |
 |    - log10ages &lt; 7 dimensionless                                                                                    |
 |---------------------------------------------------------------------------------------------------------------------|
-|  TRANSMITTED (galaxy)                                                                                               |
+|  TRANSMITTED (stellar)                                                                                              |
 |---------------------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                                    |
 |  Grid: test_grid                                                                                                    |
@@ -816,24 +947,24 @@
 |  Escape fraction: 0.3                                                                                               |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
-|  NEBULAR (galaxy)                                                                                                   |
+|  NEBULAR (stellar)                                                                                                  |
 |---------------------------------------------------------------------------------------------------------------------|
 |Combination model:                                                                                                   |
 |  Combine models: linecont, nebular_continuum                                                                        |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
-|  ATTENUATED (galaxy)                                                                                                |
+|  ATTENUATED (stellar)                                                                                               |
 |---------------------------------------------------------------------------------------------------------------------|
 |Dust attenuation model:                                                                                              |
-|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7fcec9d3b280&gt;                       |
+|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7f7d18dacbb0&gt;                       |
 |  Apply dust to: nebular                                                                                             |
-|  Optical depth (tau_v): [&#39;tau_v&#39;]                                                                                   |
+|  Optical depth (tau_v): (&#39;tau_v&#39;, 0.33)                                                                             |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
 |  BLACKBODY_EMISSION (galaxy)                                                                                        |
 |---------------------------------------------------------------------------------------------------------------------|
 |Generation model:                                                                                                    |
-|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7fcec9d38970&gt;          |
+|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7f7d18dacd90&gt;          |
 |  Dust luminosity: transmitted - attenuated                                                                          |
 |  Save emission: True                                                                                                |
 |=====================================================================================================================|
@@ -844,10 +975,10 @@
 <h2>Including a mask<a class="headerlink" href="#Including-a-mask" title="Permalink to this heading">¶</a></h2>
 <p>A mask can be included in any step by passing <code class="docutils literal notranslate"><span class="pre">mask_attr</span></code>, <code class="docutils literal notranslate"><span class="pre">mask_thresh</span></code>, and <code class="docutils literal notranslate"><span class="pre">mask_op</span></code>.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">masked_transmitted</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">masked_transmitted</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;masked_transmitted&quot;</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
     <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
@@ -861,7 +992,7 @@
 </div>
 <p>We can also define multiple masks on a single step. To add more masks, use the <code class="docutils literal notranslate"><span class="pre">add_mask</span></code> method, as demonstrated on the <a class="reference internal" href="premade_models/premade_models.html"><span class="doc">premade models</span></a>. These will be combined with a boolean <code class="docutils literal notranslate"><span class="pre">and</span></code> operation at the point of spectra generation.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">masked_transmitted</span><span class="o">.</span><span class="n">add_mask</span><span class="p">(</span><span class="s2">&quot;metallicities&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">dimensionless</span><span class="p">)</span>
@@ -877,7 +1008,7 @@
 <div class="highlight"><pre>
 |======== EmissionModel: masked_transmitted ========|
 |---------------------------------------------------|
-|  MASKED_TRANSMITTED (galaxy)                      |
+|  MASKED_TRANSMITTED (stellar)                     |
 |---------------------------------------------------|
 |Extraction model:                                  |
 |  Grid: test_grid                                  |
@@ -896,11 +1027,11 @@
 <h2>Including related models<a class="headerlink" href="#Including-related-models" title="Permalink to this heading">¶</a></h2>
 <p>In many instances you’ll have a primary emissions spectra that you wish to calculate, plus some extra emission models that get produced along the way, but do not feature in the main “tree”. To include these models, and ensure their spectra is generated by calls to <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> or <code class="docutils literal notranslate"><span class="pre">get_lines</span></code> methods, you can pass them to the <code class="docutils literal notranslate"><span class="pre">related_models</span></code> argument at instantiation.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the combined model</span>
-<span class="n">nebular</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">nebular</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;nebular&quot;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">linecont</span><span class="p">,</span> <span class="n">nebular_cont</span><span class="p">),</span> <span class="n">related_models</span><span class="o">=</span><span class="p">(</span><span class="n">transmitted</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">nebular</span><span class="p">)</span>
@@ -914,7 +1045,7 @@
 <div class="highlight"><pre>
 |================ EmissionModel: nebular ===============|
 |-------------------------------------------------------|
-|  LINECONT (galaxy)                                    |
+|  LINECONT (stellar)                                   |
 |-------------------------------------------------------|
 |Extraction model:                                      |
 |  Grid: test_grid                                      |
@@ -924,7 +1055,7 @@
 |  Masks:                                               |
 |    - log10ages &lt; 7 dimensionless                      |
 |-------------------------------------------------------|
-|  NEBULAR_CONTINUUM (galaxy)                           |
+|  NEBULAR_CONTINUUM (stellar)                          |
 |-------------------------------------------------------|
 |Extraction model:                                      |
 |  Grid: test_grid                                      |
@@ -934,7 +1065,7 @@
 |  Masks:                                               |
 |    - log10ages &lt; 7 dimensionless                      |
 |-------------------------------------------------------|
-|  TRANSMITTED (galaxy)                                 |
+|  TRANSMITTED (stellar)                                |
 |-------------------------------------------------------|
 |Extraction model:                                      |
 |  Grid: test_grid                                      |
@@ -942,7 +1073,7 @@
 |  Escape fraction: 0.3                                 |
 |  Save emission: True                                  |
 |-------------------------------------------------------|
-|  NEBULAR (galaxy)                                     |
+|  NEBULAR (stellar)                                    |
 |-------------------------------------------------------|
 |Combination model:                                     |
 |  Combine models: linecont, nebular_continuum          |
@@ -956,13 +1087,13 @@
 <p>When an emission model is used in a <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method, any parameters the model does not define will be extracted from the emitter. If you would like to set any of these to fixed values you can pass a dictionary of parameters to a model at instantiation.</p>
 <p>For demonstration purposes, below we create an AGN NLR emission model with fixed NLR parameters. This can also be done with a setter after instantiation (see the model modification <a class="reference internal" href="modify_models.html"><span class="doc">docs</span></a>).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the NLR and BLR grids</span>
 <span class="n">nlr_grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="s2">&quot;test_grid_agn-nlr&quot;</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="s2">&quot;../../../tests/test_grid&quot;</span><span class="p">)</span>
 
-<span class="n">nlr</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">nlr</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;nlr&quot;</span><span class="p">,</span>
     <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
     <span class="n">grid</span><span class="o">=</span><span class="n">nlr_grid</span><span class="p">,</span>
@@ -985,7 +1116,7 @@
 <div class="highlight"><pre>
 |================= EmissionModel: nlr =================|
 |------------------------------------------------------|
-|  NLR (galaxy)                                        |
+|  NLR (blackhole)                                     |
 |------------------------------------------------------|
 |Extraction model:                                     |
 |  Grid: test_grid_agn-nlr                             |
@@ -1014,7 +1145,7 @@
 <p>When <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> is called, and all spectra have been generated, any post processing functions will be called with these arguments (in the order listed above).</p>
 <p>Below we define a <strong>fake</strong> function to perform some arbitrary mass scaling of the spectra.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">scale_by_mass</span><span class="p">(</span><span class="n">emission</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
@@ -1040,7 +1171,7 @@
     <span class="k">return</span> <span class="n">emission</span>
 
 
-<span class="n">nebular</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<span class="n">nebular</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">linecont</span><span class="p">,</span> <span class="n">nebular_cont</span><span class="p">),</span>
     <span class="n">related_models</span><span class="o">=</span><span class="p">(</span><span class="n">transmitted</span><span class="p">),</span>
@@ -1055,10 +1186,10 @@
 <h1>Saving or not saving the emission<a class="headerlink" href="#Saving-or-not-saving-the-emission" title="Permalink to this heading">¶</a></h1>
 <p>By default all emissions produced by a model will be attached to an emitter after generation. If you would like to instead discard a spectra (but still have it generated for making other spectra) you can pass <code class="docutils literal notranslate"><span class="pre">save=False</span></code> to the emission model at instantiation.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">throw_away</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">throw_away</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
     <span class="s2">&quot;throw_away&quot;</span><span class="p">,</span>
     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">linecont</span><span class="p">,</span> <span class="n">nebular_cont</span><span class="p">),</span>
     <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1068,9 +1199,10 @@
 </div>
 <section id="Putting-it-all-together">
 <h2>Putting it all together<a class="headerlink" href="#Putting-it-all-together" title="Permalink to this heading">¶</a></h2>
-<p>In the example below we demonstrate how to construct a complex model. We reconstruct the <code class="docutils literal notranslate"><span class="pre">TotalEmission</span></code> model with the <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2000ApJ...539..718C/abstract">Charlot&amp;Fall+2000</a> – like attenuation operation explicitly.</p>
+<p>In the example below we demonstrate how to construct a complex model piece by piece. This will construct the <code class="docutils literal notranslate"><span class="pre">TotalEmission</span></code> model with the <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2000ApJ...539..718C/abstract">Charlot&amp;Fall+2000</a> like attenuation operation explicitly.</p>
+<p>Here we’ll use the base <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> class to explictly show the setting of the <code class="docutils literal notranslate"><span class="pre">emitter</span></code> argument. Notice how we associate the dust emission and total emission on the galaxy rather than the stellar component.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the extractions</span>
@@ -1152,12 +1284,12 @@
     <span class="n">generator</span><span class="o">=</span><span class="n">Blackbody</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">),</span>
     <span class="n">lum_intrinsic_model</span><span class="o">=</span><span class="n">reprocessed</span><span class="p">,</span>
     <span class="n">lum_attenuated_model</span><span class="o">=</span><span class="n">emergent</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">],</span>
-    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># And bring everything together into the total emission</span>
 <span class="n">total</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
-    <span class="s2">&quot;total&quot;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">emergent</span><span class="p">,</span> <span class="n">dust_emission</span><span class="p">),</span> <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span>
+    <span class="s2">&quot;total&quot;</span><span class="p">,</span> <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">emergent</span><span class="p">,</span> <span class="n">dust_emission</span><span class="p">),</span> <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span>
 <span class="p">)</span>
 
 <span class="n">total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">()</span>
@@ -1169,7 +1301,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/emission_models_custom_models_27_0.png" src="../_images/emission_models_custom_models_27_0.png" />
+<img alt="../_images/emission_models_custom_models_34_0.png" src="../_images/emission_models_custom_models_34_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1179,22 +1311,22 @@
 <div class="highlight"><pre>
 |================================================ EmissionModel: total ===============================================|
 |---------------------------------------------------------------------------------------------------------------------|
-|  LINECONT (stellar)                                                                                                 |
-|---------------------------------------------------------------------------------------------------------------------|
-|Extraction model:                                                                                                    |
-|  Grid: test_grid                                                                                                    |
-|  Extract key: linecont                                                                                              |
-|  Escape fraction: 0.7                                                                                               |
-|  Save emission: False                                                                                               |
-|  Masks:                                                                                                             |
-|    - log10ages &lt; 7 dimensionless                                                                                    |
-|---------------------------------------------------------------------------------------------------------------------|
 |  NEBULAR_CONTINUUM (stellar)                                                                                        |
 |---------------------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                                    |
 |  Grid: test_grid                                                                                                    |
 |  Extract key: nebular_continuum                                                                                     |
 |  Escape fraction: None                                                                                              |
+|  Save emission: False                                                                                               |
+|  Masks:                                                                                                             |
+|    - log10ages &lt; 7 dimensionless                                                                                    |
+|---------------------------------------------------------------------------------------------------------------------|
+|  LINECONT (stellar)                                                                                                 |
+|---------------------------------------------------------------------------------------------------------------------|
+|Extraction model:                                                                                                    |
+|  Grid: test_grid                                                                                                    |
+|  Extract key: linecont                                                                                              |
+|  Escape fraction: 0.7                                                                                               |
 |  Save emission: False                                                                                               |
 |  Masks:                                                                                                             |
 |    - log10ages &lt; 7 dimensionless                                                                                    |
@@ -1227,16 +1359,6 @@
 |  Combine models: nebular, transmitted                                                                               |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
-|  YOUNG_ATTENUATED (stellar)                                                                                         |
-|---------------------------------------------------------------------------------------------------------------------|
-|Dust attenuation model:                                                                                              |
-|  Dust curve: &lt;class &#39;synthesizer.emission_models.attenuation.dust.PowerLaw&#39;&gt;                                        |
-|  Apply dust to: reprocessed                                                                                         |
-|  Optical depth (tau_v): (&#39;tau_v&#39;, 0.67)                                                                             |
-|  Save emission: False                                                                                               |
-|  Masks:                                                                                                             |
-|    - log10ages &lt; 7 dimensionless                                                                                    |
-|---------------------------------------------------------------------------------------------------------------------|
 |  OLD_ATTENUATED (stellar)                                                                                           |
 |---------------------------------------------------------------------------------------------------------------------|
 |Dust attenuation model:                                                                                              |
@@ -1247,17 +1369,20 @@
 |  Masks:                                                                                                             |
 |    - log10ages &gt;= 7 dimensionless                                                                                   |
 |---------------------------------------------------------------------------------------------------------------------|
+|  YOUNG_ATTENUATED (stellar)                                                                                         |
+|---------------------------------------------------------------------------------------------------------------------|
+|Dust attenuation model:                                                                                              |
+|  Dust curve: &lt;class &#39;synthesizer.emission_models.attenuation.dust.PowerLaw&#39;&gt;                                        |
+|  Apply dust to: reprocessed                                                                                         |
+|  Optical depth (tau_v): (&#39;tau_v&#39;, 0.67)                                                                             |
+|  Save emission: False                                                                                               |
+|  Masks:                                                                                                             |
+|    - log10ages &lt; 7 dimensionless                                                                                    |
+|---------------------------------------------------------------------------------------------------------------------|
 |  ATTENUATED (stellar)                                                                                               |
 |---------------------------------------------------------------------------------------------------------------------|
 |Combination model:                                                                                                   |
 |  Combine models: young_attenuated, old_attenuated                                                                   |
-|  Save emission: True                                                                                                |
-|---------------------------------------------------------------------------------------------------------------------|
-|  DUST_EMISSION (stellar)                                                                                            |
-|---------------------------------------------------------------------------------------------------------------------|
-|Generation model:                                                                                                    |
-|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7fcec9d7a470&gt;          |
-|  Dust luminosity: reprocessed - attenuated                                                                          |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
 |  EMERGENT (stellar)                                                                                                 |
@@ -1266,7 +1391,14 @@
 |  Combine models: attenuated, escaped                                                                                |
 |  Save emission: True                                                                                                |
 |---------------------------------------------------------------------------------------------------------------------|
-|  TOTAL (stellar)                                                                                                    |
+|  DUST_EMISSION (galaxy)                                                                                             |
+|---------------------------------------------------------------------------------------------------------------------|
+|Generation model:                                                                                                    |
+|  Emission generation model: &lt;synthesizer.emission_models.dust.emission.Blackbody object at 0x7f7cddd4beb0&gt;          |
+|  Dust luminosity: reprocessed - attenuated                                                                          |
+|  Save emission: True                                                                                                |
+|---------------------------------------------------------------------------------------------------------------------|
+|  TOTAL (galaxy)                                                                                                     |
 |---------------------------------------------------------------------------------------------------------------------|
 |Combination model:                                                                                                   |
 |  Combine models: emergent, dust_emission                                                                            |
@@ -1333,6 +1465,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Creating your own EmissionModel</a><ul>
+<li><a class="reference internal" href="#Emitters">Emitters</a></li>
 <li><a class="reference internal" href="#Defining-an-extraction">Defining an extraction</a></li>
 <li><a class="reference internal" href="#Defining-a-combination">Defining a combination</a></li>
 <li><a class="reference internal" href="#Defining-an-attenuation">Defining an attenuation</a></li>
@@ -1356,7 +1489,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=328c5404"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ce3a7739"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -2315,7 +2315,9 @@
 
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
-    <span class="k">def</span> <span class="nf">_apply_overrides</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_apply_overrides</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">covering_fraction</span><span class="p">,</span> <span class="n">mask</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply overrides to an emission model copy.</span>
 
@@ -2362,6 +2364,18 @@
 <span class="sd">                          {&lt;label&gt;: str(&lt;attribute&gt;)}</span>
 <span class="sd">                      to use an attribute of the component as the escape</span>
 <span class="sd">                      fraction.</span>
+<span class="sd">            covering_fraction (dict):</span>
+<span class="sd">                An overide to the emission model covering fraction. Either:</span>
+<span class="sd">                    - None, indicating the covering fraction defined on the</span>
+<span class="sd">                      emission model should be used.</span>
+<span class="sd">                    - A float to use as the covering fraction for all models.</span>
+<span class="sd">                    - A dictionary of the form:</span>
+<span class="sd">                          {&lt;label&gt;: float(&lt;covering_fraction&gt;)}</span>
+<span class="sd">                      to use a specific covering fraction with a particular</span>
+<span class="sd">                      model or</span>
+<span class="sd">                          {&lt;label&gt;: str(&lt;attribute&gt;)}</span>
+<span class="sd">                      to use an attribute of the component as the covering</span>
+<span class="sd">                      fraction.</span>
 <span class="sd">            mask (dict):</span>
 <span class="sd">                An overide to the emission model mask. Either:</span>
 <span class="sd">                    - None, indicating the mask defined on the emission model</span>
@@ -2372,18 +2386,43 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If we have dust curves to apply, apply them</span>
         <span class="k">if</span> <span class="n">dust_curves</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">dust_curve</span> <span class="ow">in</span> <span class="n">dust_curves</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_dust_curve</span> <span class="o">=</span> <span class="n">dust_curve</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dust_curves</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">dust_curve</span> <span class="ow">in</span> <span class="n">dust_curves</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_dust_curve</span> <span class="o">=</span> <span class="n">dust_curve</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_dust_curve</span> <span class="o">=</span> <span class="n">dust_curves</span>
 
         <span class="c1"># If we have optical depths to apply, apply them</span>
         <span class="k">if</span> <span class="n">tau_v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tau_v</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_tau_v</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">tau_v</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_tau_v</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="s2">&quot;str&quot;</span><span class="p">))</span>
+                        <span class="k">else</span> <span class="n">value</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_tau_v</span> <span class="o">=</span> <span class="p">(</span><span class="n">tau_v</span><span class="p">,)</span>
 
         <span class="c1"># If we have escape fractions to apply, apply them</span>
         <span class="k">if</span> <span class="n">fesc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fesc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fesc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fesc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">=</span> <span class="n">fesc</span>
+
+        <span class="c1"># If we have covering fractions to apply, apply them</span>
+        <span class="k">if</span> <span class="n">covering_fraction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">covering_fraction</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">covering_fraction</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_covering_fraction</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">_covering_fraction</span> <span class="o">=</span> <span class="n">covering_fraction</span>
 
         <span class="c1"># If we have masks to apply, apply them</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2505,7 +2544,9 @@
                 <span class="p">)</span>
 
         <span class="c1"># Apply any overides we have</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_overrides</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_overrides</span><span class="p">(</span>
+            <span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">covering_fraction</span><span class="p">,</span> <span class="n">mask</span>
+        <span class="p">)</span>
 
         <span class="c1"># Make a spectra dictionary if we haven&#39;t got one yet</span>
         <span class="k">if</span> <span class="n">spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2666,6 +2707,7 @@
         <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">covering_fraction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">lines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2720,6 +2762,18 @@
 <span class="sd">                            {&lt;label&gt;: str(&lt;attribute&gt;)}</span>
 <span class="sd">                      to use an attribute of the component as the escape</span>
 <span class="sd">                      fraction.</span>
+<span class="sd">            covering_fraction (dict):</span>
+<span class="sd">                An overide to the emission model covering fraction. Either:</span>
+<span class="sd">                    - None, indicating the covering fraction defined on the</span>
+<span class="sd">                      emission model should be used.</span>
+<span class="sd">                    - A float to use as the covering fraction for all models.</span>
+<span class="sd">                    - A dictionary of the form:</span>
+<span class="sd">                            {&lt;label&gt;: float(&lt;covering_fraction&gt;)}</span>
+<span class="sd">                      to use a specific covering fraction with a particular</span>
+<span class="sd">                      model or</span>
+<span class="sd">                            {&lt;label&gt;: str(&lt;attribute&gt;)}</span>
+<span class="sd">                      to use an attribute of the component as the covering</span>
+<span class="sd">                      fraction.</span>
 <span class="sd">            mask (dict):</span>
 <span class="sd">                An overide to the emission model mask. Either:</span>
 <span class="sd">                    - None, indicating the mask defined on the emission model</span>
@@ -2753,7 +2807,9 @@
         <span class="n">emission_model</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># Apply any overides we have</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_overrides</span><span class="p">(</span><span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_apply_overrides</span><span class="p">(</span>
+            <span class="n">emission_model</span><span class="p">,</span> <span class="n">dust_curves</span><span class="p">,</span> <span class="n">tau_v</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="n">covering_fraction</span><span class="p">,</span> <span class="n">mask</span>
+        <span class="p">)</span>
 
         <span class="c1"># If we haven&#39;t got a lines dictionary yet we&#39;ll make one</span>
         <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2939,11 +2995,10 @@
         <span class="n">EmissionModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_emitter</span> <span class="o">=</span> <span class="s2">&quot;galaxy&quot;</span>
 
-        <span class="c1"># Ensure we are only combining</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_combining</span><span class="p">:</span>
+        <span class="c1"># Ensure we aren&#39;t extracting, this cannot be done for a galaxy.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_extracting</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;A GalaxyEmissionModel must be either combining or dust &quot;</span>
-                <span class="s2">&quot;attenuating.&quot;</span>
+                <span class="s2">&quot;A GalaxyEmissionModel cannot be an extraction model.&quot;</span>
             <span class="p">)</span></div>
 </pre></div>
         </article>
@@ -2977,7 +3032,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=328c5404"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce3a7739"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
