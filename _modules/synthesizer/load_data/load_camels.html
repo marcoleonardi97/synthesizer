@@ -506,11 +506,14 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.load_data.load_camels</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck15</span><span class="p">,</span> <span class="n">Planck18</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">UnmetDependency</span>
 <span class="kn">from</span> <span class="nn">synthesizer.load_data.utils</span> <span class="kn">import</span> <span class="n">get_len</span>
 
 <span class="kn">from</span> <span class="nn">..particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
@@ -623,8 +626,8 @@
 <div class="viewcode-block" id="load_CAMELS_IllustrisTNG"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_camels.html#synthesizer.load_data.load_camels.load_CAMELS_IllustrisTNG">[docs]</a><span class="k">def</span> <span class="nf">load_CAMELS_IllustrisTNG</span><span class="p">(</span>
     <span class="n">_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snap_033.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -637,9 +640,9 @@
 <span class="sd">            data location</span>
 <span class="sd">        snap_name (string):</span>
 <span class="sd">            snapshot filename</span>
-<span class="sd">        fof_name (string):</span>
+<span class="sd">        group_name (string):</span>
 <span class="sd">            subfind / FOF filename</span>
-<span class="sd">        fof_dir (string):</span>
+<span class="sd">        group_dir (string):</span>
 <span class="sd">            optional argument specifying lcoation of fof file</span>
 <span class="sd">            if different to snapshot</span>
 <span class="sd">        verbose (bool):</span>
@@ -673,9 +676,9 @@
         <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/Coordinates&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (physical)</span>
         <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;PartType0/SubfindHsml&quot;</span><span class="p">][:]</span>
 
-    <span class="k">if</span> <span class="n">fof_dir</span><span class="p">:</span>
-        <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">group_dir</span><span class="p">:</span>
+        <span class="n">_dir</span> <span class="o">=</span> <span class="n">group_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
 
@@ -756,8 +759,8 @@
 <div class="viewcode-block" id="load_CAMELS_Astrid"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_camels.html#synthesizer.load_data.load_camels.load_CAMELS_Astrid">[docs]</a><span class="k">def</span> <span class="nf">load_CAMELS_Astrid</span><span class="p">(</span>
     <span class="n">_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snap_090.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_090.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_090.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
@@ -769,9 +772,9 @@
 <span class="sd">            data location</span>
 <span class="sd">        snap_name (string):</span>
 <span class="sd">            snapshot filename</span>
-<span class="sd">        fof_name (string):</span>
+<span class="sd">        group_name (string):</span>
 <span class="sd">            subfind / FOF filename</span>
-<span class="sd">        fof_dir (string):</span>
+<span class="sd">        group_dir (string):</span>
 <span class="sd">            optional argument specifying lcoation of fof file</span>
 <span class="sd">            if different to snapshot</span>
 <span class="sd">        dtm (float):</span>
@@ -818,9 +821,9 @@
     <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
 
-    <span class="k">if</span> <span class="n">fof_dir</span><span class="p">:</span>
-        <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">group_dir</span><span class="p">:</span>
+        <span class="n">_dir</span> <span class="o">=</span> <span class="n">group_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
 
@@ -854,8 +857,8 @@
 <div class="viewcode-block" id="load_CAMELS_Simba"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_camels.html#synthesizer.load_data.load_camels.load_CAMELS_Simba">[docs]</a><span class="k">def</span> <span class="nf">load_CAMELS_Simba</span><span class="p">(</span>
     <span class="n">_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snap_033.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
-    <span class="n">fof_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;fof_subhalo_tab_033.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">):</span>
@@ -867,9 +870,9 @@
 <span class="sd">            data location</span>
 <span class="sd">        snap_name (string):</span>
 <span class="sd">            snapshot filename</span>
-<span class="sd">        fof_name (string):</span>
+<span class="sd">        group_name (string):</span>
 <span class="sd">            subfind / FOF filename</span>
-<span class="sd">        fof_dir (string):</span>
+<span class="sd">        group_dir (string):</span>
 <span class="sd">            optional argument specifying lcoation of fof file</span>
 <span class="sd">            if different to snapshot</span>
 <span class="sd">        dtm (float):</span>
@@ -915,9 +918,9 @@
     <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
 
-    <span class="k">if</span> <span class="n">fof_dir</span><span class="p">:</span>
-        <span class="n">_dir</span> <span class="o">=</span> <span class="n">fof_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
-    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">fof_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">group_dir</span><span class="p">:</span>
+        <span class="n">_dir</span> <span class="o">=</span> <span class="n">group_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="n">lens</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloLenType&quot;</span><span class="p">][:]</span>
         <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
 
@@ -946,6 +949,261 @@
         <span class="n">dtm</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
         <span class="n">centre</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
     <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_CAMELS_SwiftEAGLE_subfind"><a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.load_camels.html#synthesizer.load_data.load_camels.load_CAMELS_SwiftEAGLE_subfind">[docs]</a><span class="k">def</span> <span class="nf">load_CAMELS_SwiftEAGLE_subfind</span><span class="p">(</span>
+    <span class="n">_dir</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">,</span>
+    <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;snapshot_033.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;groups_033.hdf5&quot;</span><span class="p">,</span>
+    <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cosmo</span><span class="o">=</span><span class="n">Planck15</span><span class="p">,</span>
+    <span class="n">min_star_part</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">num_threads</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load CAMELS-Swift-EAGLE galaxies</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dir (string):</span>
+<span class="sd">            data location</span>
+<span class="sd">        snap_name (string):</span>
+<span class="sd">            snapshot filename</span>
+<span class="sd">        group_name (string):</span>
+<span class="sd">            subfind / FOF filename</span>
+<span class="sd">        group_dir (string):</span>
+<span class="sd">            optional argument specifying location of fof file</span>
+<span class="sd">            if different to snapshot</span>
+<span class="sd">        verbose (bool):</span>
+<span class="sd">            verbosity flag</span>
+<span class="sd">        dtm (float):</span>
+<span class="sd">            dust-to-metals ratio to apply to all gas particles</span>
+<span class="sd">        physical (bool):</span>
+<span class="sd">            Should the coordinates be converted to physical?</span>
+<span class="sd">        cosmo (astropy cosmology):</span>
+<span class="sd">            cosmology object to use for age calculation</span>
+<span class="sd">        min_star_part (int):</span>
+<span class="sd">            minimum number of star particles required to load galaxy</span>
+<span class="sd">        num_threads (int)</span>
+<span class="sd">            number of threads to use for multiprocessing.</span>
+<span class="sd">            Default is -1, i.e. use all available cores.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        galaxies (object):</span>
+<span class="sd">            `ParticleGalaxy` object containing star and gas particle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">schwimmbad</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnmetDependency</span><span class="p">(</span>
+            <span class="s2">&quot;Loading Swift-EAGLE CAMELS data requires the `schwimmbad`&quot;</span>
+            <span class="s2">&quot;package. You currently do not have schwimmbad installed. &quot;</span>
+            <span class="s2">&quot;Install it via `pip install schwimmbad`&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_threads</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">schwimmbad</span><span class="o">.</span><span class="n">SerialPool</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">num_threads</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">schwimmbad</span><span class="o">.</span><span class="n">MultiPool</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="n">schwimmbad</span><span class="o">.</span><span class="n">MultiPool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">num_threads</span><span class="p">)</span>
+
+    <span class="c1"># Check if snapshot and subfind files in same directory</span>
+    <span class="k">if</span> <span class="n">group_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">group_dir</span> <span class="o">=</span> <span class="n">_dir</span>
+
+    <span class="c1"># Load cosmology information</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">snap_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Cosmology&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Scale-factor&quot;</span><span class="p">]</span>
+        <span class="n">redshift</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Cosmology&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;Redshift&quot;</span><span class="p">]</span>
+
+    <span class="c1"># get subfind particle info (lens and IDs) for subsetting snapshot info</span>
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">group_dir</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">group_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">lentype</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;Subhalo/SubhaloLenType&#39;</span><span class="p">][:]</span>
+        <span class="n">grp_lentype</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;Group/GroupLenType&#39;</span><span class="p">][:]</span>
+        <span class="n">grpn</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;Subhalo/SubhaloGrNr&#39;</span><span class="p">][:]</span>
+        <span class="n">grp_firstsub</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;Group/GroupFirstSub&#39;</span><span class="p">][:]</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;IDs/ID&#39;</span><span class="p">][:]</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">snap_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="c1"># Load star particle information</span>
+        <span class="n">star_ids</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/ParticleIDs&#39;</span><span class="p">][:]</span>
+        <span class="n">form_time</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/BirthScaleFactors&#39;</span><span class="p">][:]</span>
+        <span class="n">coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/Coordinates&#39;</span><span class="p">][:]</span>
+        <span class="n">masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/Masses&#39;</span><span class="p">][:]</span>
+        <span class="n">imasses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/InitialMasses&#39;</span><span class="p">][:]</span>
+        <span class="n">_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/SmoothedElementMassFractions&#39;</span><span class="p">][:]</span>
+        <span class="n">metallicity</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/SmoothedMetalMassFractions&#39;</span><span class="p">][:]</span>
+        <span class="n">hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType4/SmoothingLengths&#39;</span><span class="p">][:]</span>
+
+        <span class="c1"># Load gas particle information</span>
+        <span class="n">gas_ids</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/ParticleIDs&#39;</span><span class="p">][:]</span>
+        <span class="n">g_sfr</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/StarFormationRates&#39;</span><span class="p">][:]</span>
+        <span class="n">g_masses</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/Masses&#39;</span><span class="p">][:]</span>
+        <span class="n">g_metals</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/SmoothedMetalMassFractions&#39;</span><span class="p">][:]</span>
+        <span class="n">g_coods</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/Coordinates&#39;</span><span class="p">][:]</span>
+        <span class="n">g_hsml</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;PartType0/SmoothingLengths&#39;</span><span class="p">][:]</span>
+
+    <span class="n">masses</span> <span class="o">=</span> <span class="n">masses</span> <span class="o">*</span> <span class="mf">1e10</span>
+    <span class="n">imasses</span> <span class="o">=</span> <span class="n">imasses</span> <span class="o">*</span> <span class="mf">1e10</span>
+    <span class="n">g_masses</span> <span class="o">=</span> <span class="n">g_masses</span> <span class="o">*</span> <span class="mf">1e10</span>
+
+    <span class="c1"># Convert comoving coordinates to physical kpc</span>
+    <span class="k">if</span> <span class="n">physical</span><span class="p">:</span>
+        <span class="n">coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_coods</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">g_hsml</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+        <span class="n">pos</span> <span class="o">*=</span> <span class="n">scale_factor</span>
+
+    <span class="c1"># Get subhalos with minimum number of star particles</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lentype</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_star_part</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">swifteagle_particle_assignment</span><span class="p">(</span>
+        <span class="n">idx</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="p">,</span>
+        <span class="n">grpn</span><span class="p">,</span>
+        <span class="n">grp_lentype</span><span class="p">,</span>
+        <span class="n">grp_firstsub</span><span class="p">,</span>
+        <span class="n">lentype</span><span class="p">,</span>
+        <span class="n">ids</span><span class="p">,</span>
+        <span class="n">star_ids</span><span class="p">,</span>
+        <span class="n">gas_ids</span><span class="p">,</span>
+        <span class="n">form_time</span><span class="p">,</span>
+        <span class="n">coods</span><span class="p">,</span>
+        <span class="n">masses</span><span class="p">,</span>
+        <span class="n">imasses</span><span class="p">,</span>
+        <span class="n">metallicity</span><span class="p">,</span>
+        <span class="n">hsml</span><span class="p">,</span>
+        <span class="n">g_sfr</span><span class="p">,</span>
+        <span class="n">g_masses</span><span class="p">,</span>
+        <span class="n">g_metals</span><span class="p">,</span>
+        <span class="n">g_coods</span><span class="p">,</span>
+        <span class="n">g_hsml</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">gal</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
+        <span class="n">gal</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
+
+        <span class="c1"># Find star particles in this subhalo</span>
+        <span class="n">ptype</span> <span class="o">=</span> <span class="mi">4</span>
+
+        <span class="c1"># First find group number for this subhalo</span>
+        <span class="n">_grpn</span> <span class="o">=</span> <span class="n">grpn</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="c1"># Find particle index for preceding groups</span>
+        <span class="n">grp_lowi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grp_lentype</span><span class="p">[:</span><span class="n">_grpn</span><span class="p">])</span>
+
+        <span class="c1"># Find particle index for preceding subhalos in same group</span>
+        <span class="n">sh_lowi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lentype</span><span class="p">[</span><span class="n">grp_firstsub</span><span class="p">[</span><span class="n">_grpn</span><span class="p">]:</span><span class="n">idx</span><span class="p">])</span>
+
+        <span class="c1"># Find particle index upto this subhalo</span>
+        <span class="n">lowi</span> <span class="o">=</span> <span class="n">grp_lowi</span> <span class="o">+</span> <span class="n">sh_lowi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lentype</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="n">ptype</span><span class="p">])</span>
+
+        <span class="c1"># Find upper index for this subhalo particle type</span>
+        <span class="n">uppi</span> <span class="o">=</span> <span class="n">lowi</span> <span class="o">+</span> <span class="n">lentype</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">ptype</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># Filter particle IDs for this subhalo</span>
+        <span class="n">part_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">star_ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="n">lowi</span><span class="p">:</span><span class="n">uppi</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Filter particle arrays for this subhalo</span>
+        <span class="n">sh_form_time</span> <span class="o">=</span> <span class="n">form_time</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_coods</span> <span class="o">=</span> <span class="n">coods</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_masses</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_imasses</span> <span class="o">=</span> <span class="n">imasses</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_metallicity</span> <span class="o">=</span> <span class="n">metallicity</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_hsml</span> <span class="o">=</span> <span class="n">hsml</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+
+        <span class="c1"># Get individual element abundances</span>
+        <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[</span><span class="n">part_ids</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_metals</span><span class="p">[</span><span class="n">part_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># convert formation times to ages</span>
+        <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">sh_form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
+
+        <span class="c1"># Check for smoothing lengths</span>
+        <span class="k">if</span> <span class="n">sh_hsml</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span> <span class="o">*</span> <span class="n">kpc</span>
+
+        <span class="n">gal</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
+            <span class="n">initial_masses</span><span class="o">=</span><span class="n">sh_imasses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">ages</span><span class="o">=</span><span class="n">ages</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
+            <span class="n">metallicities</span><span class="o">=</span><span class="n">sh_metallicity</span><span class="p">,</span>
+            <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">,</span>
+            <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">current_masses</span><span class="o">=</span><span class="n">sh_masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+            <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">smoothing_lengths</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check there are gas particles in this subhalo</span>
+        <span class="k">if</span> <span class="n">lentype</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c1"># Find gas particles in this subhalo</span>
+            <span class="n">ptype</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Find particle index upto this subhalo</span>
+            <span class="n">lowi</span> <span class="o">=</span> <span class="n">grp_lowi</span> <span class="o">+</span> <span class="n">sh_lowi</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">lentype</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="n">ptype</span><span class="p">])</span>
+
+            <span class="c1"># Find upper index for this subhalo particle type</span>
+            <span class="n">uppi</span> <span class="o">=</span> <span class="n">lowi</span> <span class="o">+</span> <span class="n">lentype</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="n">ptype</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c1"># Filter particle IDs for this subhalo</span>
+            <span class="n">part_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">gas_ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="n">lowi</span><span class="p">:</span><span class="n">uppi</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">sh_g_sfr</span> <span class="o">=</span> <span class="n">g_sfr</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+            <span class="n">sh_g_masses</span> <span class="o">=</span> <span class="n">g_masses</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+            <span class="n">sh_g_metals</span> <span class="o">=</span> <span class="n">g_metals</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+            <span class="n">sh_g_coods</span> <span class="o">=</span> <span class="n">g_coods</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+            <span class="n">sh_g_hsml</span> <span class="o">=</span> <span class="n">g_hsml</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+
+            <span class="n">star_forming</span> <span class="o">=</span> <span class="n">sh_g_sfr</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+
+            <span class="n">gal</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_g_coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">masses</span><span class="o">=</span><span class="n">sh_g_masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
+                <span class="n">metallicities</span><span class="o">=</span><span class="n">sh_g_metals</span><span class="p">,</span>
+                <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
+                <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">sh_g_hsml</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">gal</span>
+
+    <span class="n">_f</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+        <span class="n">swifteagle_particle_assignment</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
+        <span class="n">grpn</span><span class="o">=</span><span class="n">grpn</span><span class="p">,</span>
+        <span class="n">grp_lentype</span><span class="o">=</span><span class="n">grp_lentype</span><span class="p">,</span>
+        <span class="n">grp_firstsub</span><span class="o">=</span><span class="n">grp_firstsub</span><span class="p">,</span>
+        <span class="n">lentype</span><span class="o">=</span><span class="n">lentype</span><span class="p">,</span>
+        <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span>
+        <span class="n">star_ids</span><span class="o">=</span><span class="n">star_ids</span><span class="p">,</span>
+        <span class="n">gas_ids</span><span class="o">=</span><span class="n">gas_ids</span><span class="p">,</span>
+        <span class="n">form_time</span><span class="o">=</span><span class="n">form_time</span><span class="p">,</span>
+        <span class="n">coods</span><span class="o">=</span><span class="n">coods</span><span class="p">,</span>
+        <span class="n">masses</span><span class="o">=</span><span class="n">masses</span><span class="p">,</span>
+        <span class="n">imasses</span><span class="o">=</span><span class="n">imasses</span><span class="p">,</span>
+        <span class="n">metallicity</span><span class="o">=</span><span class="n">metallicity</span><span class="p">,</span>
+        <span class="n">hsml</span><span class="o">=</span><span class="n">hsml</span><span class="p">,</span>
+        <span class="n">g_sfr</span><span class="o">=</span><span class="n">g_sfr</span><span class="p">,</span>
+        <span class="n">g_masses</span><span class="o">=</span><span class="n">g_masses</span><span class="p">,</span>
+        <span class="n">g_metals</span><span class="o">=</span><span class="n">g_metals</span><span class="p">,</span>
+        <span class="n">g_coods</span><span class="o">=</span><span class="n">g_coods</span><span class="p">,</span>
+        <span class="n">g_hsml</span><span class="o">=</span><span class="n">g_hsml</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">galaxies</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_f</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">galaxies</span><span class="p">)):</span>
+        <span class="n">galaxies</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span>
+
+    <span class="k">return</span> <span class="n">galaxies</span><span class="p">,</span> <span class="n">mask</span></div>
 </pre></div>
         </article>
       </div>
@@ -978,7 +1236,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=36be61cc"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ef78f7fa"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
