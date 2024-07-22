@@ -511,8 +511,8 @@
         <article role="main" id="furo-main-content">
           <section id="Galaxy-Spectra">
 <h1>Galaxy Spectra<a class="headerlink" href="#Galaxy-Spectra" title="Permalink to this heading">¶</a></h1>
-<p>Unlike component spectra, galaxy level spectra are by definition integrated. These spectra can only be combinations of component spectra. To see how to define emission models for galaxy level spectra see the <a class="reference internal" href="../emission_models/combined_models.html"><span class="doc">combined emission</span></a> docs. Here we will demonstrate the usage of a combined model to generate spectra for a galaxy.</p>
-<div class="nbinput docutils container">
+<p>Unlike component spectra, galaxy level spectra are by definition integrated. These spectra can only be combinations of component spectra. To see how to define emission models for galaxy level spectra see the <a class="reference internal" href="../emission_models/combined_models.html"><span class="doc">combined emission</span></a> docs. Here we will demonstrate the usage of a combined model to generate spectra for a galaxy. First we define that combined model.</p>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -602,8 +602,15 @@
     <span class="n">related_models</span><span class="o">=</span><span class="p">(</span><span class="n">gal_intrinsic</span><span class="p">,),</span>
     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="c1"># Discard some spectra</span>
+</pre></div>
+</div>
+</div>
+<p>This emission model is going to produce a lot of spectra. In reality we probably don’t want to carry around all these spectra on a galaxy or its components. Instead we can select exactly which spectra we want to save. This can either be done by setting the save flag to <code class="docutils literal notranslate"><span class="pre">False</span></code> on selected models like below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Discard some spectra</span>
 <span class="n">gal_total</span><span class="p">[</span><span class="s2">&quot;young_linecont&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">gal_total</span><span class="p">[</span><span class="s2">&quot;young_nebular_continuum&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">gal_total</span><span class="p">[</span><span class="s2">&quot;old_linecont&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -620,11 +627,39 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_galaxy_1_0.png" src="../_images/spectra_galaxy_1_0.png" />
+<img alt="../_images/spectra_galaxy_3_0.png" src="../_images/spectra_galaxy_3_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 1000x600 with 1 Axes&gt;, &lt;Axes: &gt;)
+</pre></div></div>
+</div>
+<p>But if we only want a handful of spectra saved this is pretty cumbersome. We can instead state exactly which spectra we want saved using the <code class="docutils literal notranslate"><span class="pre">save_spectra</span></code> method which takes an arbitrary number of emission model labels as arguments.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gal_total</span><span class="o">.</span><span class="n">save_spectra</span><span class="p">(</span>
+    <span class="s2">&quot;total&quot;</span><span class="p">,</span> <span class="s2">&quot;dust_emission&quot;</span><span class="p">,</span> <span class="s2">&quot;total_attenuated&quot;</span><span class="p">,</span> <span class="s2">&quot;total_intrinsic&quot;</span>
+<span class="p">)</span>
+<span class="n">gal_total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/spectra_galaxy_5_0.png" src="../_images/spectra_galaxy_5_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -634,7 +669,7 @@
 </div>
 <p>First lets make a galaxy containing both stars and black holes. We’ll use a particle galaxy with particle <code class="docutils literal notranslate"><span class="pre">Stars</span></code> and <code class="docutils literal notranslate"><span class="pre">BlackHoles</span></code>, but getting spectra is the same for both particle and parametric galaxies.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define the metallicity history</span>
@@ -695,7 +730,7 @@
 </div>
 <p>Similarly to component spectra, to generate galaxy level spectra we call the <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method on a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code>, with the <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code>. There is no need to call the component methods; the <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> level method will handle generating the component spectra automatically.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">gal_total</span><span class="p">)</span>
@@ -714,7 +749,7 @@
 <p>Now we can plot the spectra we’ve generated using the <code class="docutils literal notranslate"><span class="pre">plot_spectra</span></code> method. Unlike the component versions of this method, we need to also flag which type of spectra we’d like to plot from the galaxy.</p>
 <p>We can plot only stellar spectra, only black hole spectra or the combined spectra. Below we show the combined.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span>
@@ -731,11 +766,11 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_galaxy_7_0.png" src="../_images/spectra_galaxy_7_0.png" />
+<img alt="../_images/spectra_galaxy_11_0.png" src="../_images/spectra_galaxy_11_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -748,7 +783,7 @@
 <h2>Getting observed spectra<a class="headerlink" href="#Getting-observed-spectra" title="Permalink to this heading">¶</a></h2>
 <p>If we want to get the observed spectra for all spectra on a galaxy we can use the <code class="docutils literal notranslate"><span class="pre">get_observed_spectra</span></code> method. This uses the <code class="docutils literal notranslate"><span class="pre">redshift</span></code> attribute on the galaxy object by default.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
@@ -759,7 +794,7 @@
 </div>
 <p>Which we can also plot with the <code class="docutils literal notranslate"><span class="pre">plot_observed_spectra</span></code> method (here only showing the combined spectra, which is the default).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">plot_observed_spectra</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
@@ -770,11 +805,11 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_galaxy_11_0.png" src="../_images/spectra_galaxy_11_0.png" />
+<img alt="../_images/spectra_galaxy_15_0.png" src="../_images/spectra_galaxy_15_0.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -860,7 +895,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=0e0dc60c"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=d22f660a"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

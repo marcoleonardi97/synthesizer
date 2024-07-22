@@ -1641,6 +1641,21 @@
         <span class="c1"># Unpack the model now we&#39;re done</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="EmissionModel.save_spectra"><a class="viewcode-back" href="../../../_autosummary/synthesizer.emission_models.base_model.html#synthesizer.emission_models.base_model.EmissionModel.save_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">save_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the save flag to True for the given spectra.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args (str):</span>
+<span class="sd">                The spectra to save.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First set all models to not save</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">set_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Now set the given spectra to save</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span><span class="o">.</span><span class="n">set_save</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="EmissionModel.add_mask"><a class="viewcode-back" href="../../../_autosummary/synthesizer.emission_models.base_model.html#synthesizer.emission_models.base_model.EmissionModel.add_mask">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">set_all</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a mask.</span>
@@ -2552,6 +2567,15 @@
         <span class="k">if</span> <span class="n">spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># We need to make sure the root is being saved, otherwise this is a bit</span>
+        <span class="c1"># nonsensical.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_related</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2"> is not being saved. There&#39;s no point in &quot;</span>
+                <span class="s2">&quot;generating at the root if they are not saved. Maybe you &quot;</span>
+                <span class="s2">&quot;want to use a child model you are saving instead?&quot;</span>
+            <span class="p">)</span>
+
         <span class="c1"># Perform all extractions</span>
         <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_spectra</span><span class="p">(</span>
             <span class="n">emission_model</span><span class="p">,</span>
@@ -2815,6 +2839,15 @@
         <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
+        <span class="c1"># We need to make sure the root is being saved, otherwise this is a bit</span>
+        <span class="c1"># nonsensical.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_related</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s2"> is not being saved. There&#39;s no point in &quot;</span>
+                <span class="s2">&quot;generating at the root if they are not saved. Maybe you &quot;</span>
+                <span class="s2">&quot;want to use a child model you are saving instead?&quot;</span>
+            <span class="p">)</span>
+
         <span class="c1"># Perform all extractions</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_lines</span><span class="p">(</span>
             <span class="n">line_ids</span><span class="p">,</span>
@@ -3032,7 +3065,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=0e0dc60c"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=d22f660a"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
