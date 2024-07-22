@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=613ab9ff" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -529,7 +529,13 @@
 
 <div class="viewcode-block" id="flux_to_luminosity"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.flux_to_luminosity">[docs]</a><span class="k">def</span> <span class="nf">flux_to_luminosity</span><span class="p">(</span><span class="n">flux</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts flux to luminosity in erg / s.</span>
+<span class="sd">    Convert flux to luminosity.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">            L = F * 4 * pi * D_L**2 / (1 + z)</span>
+
+<span class="sd">    The result will be in units of erg / s.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        flux (unyt_quantity/unyt_array)</span>
@@ -548,7 +554,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">flux</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;Flux must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -567,8 +572,13 @@
 
 <div class="viewcode-block" id="fnu_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_lnu</span><span class="p">(</span><span class="n">fnu</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts spectral flux density to spectral luminosity density</span>
-<span class="sd">    in erg / s / Hz.</span>
+<span class="sd">    Convert spectral flux density to spectral luminosity density.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">            L_nu = F_nu * 4 * pi * D_L**2 / (1 + z)</span>
+
+<span class="sd">    The result will be in units of erg / s / Hz.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        fnu (unyt_quantity/unyt_array)</span>
@@ -587,7 +597,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;fnu must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -606,7 +615,11 @@
 
 <div class="viewcode-block" id="fnu_to_apparent_mag"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_apparent_mag">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_apparent_mag</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts flux to apparent AB magnitude.</span>
+<span class="sd">    Convert flux to apparent AB magnitude.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                m = -2.5 * log10(fnu / (10**9 * nJy)) + 8.9</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        flux (unyt_quantity/unyt_array)</span>
@@ -620,7 +633,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;fnu must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -630,7 +642,13 @@
 
 <div class="viewcode-block" id="apparent_mag_to_fnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.apparent_mag_to_fnu">[docs]</a><span class="k">def</span> <span class="nf">apparent_mag_to_fnu</span><span class="p">(</span><span class="n">app_mag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts apparent AB magnitude to flux.</span>
+<span class="sd">    Convert apparent AB magnitude to flux.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                F_nu = 10**9 * 10**(-0.4 * (m - 8.9)) * nJy</span>
+
+<span class="sd">    The result will be in units of nJy.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        app_mag (float)</span>
@@ -642,14 +660,18 @@
 <span class="sd">            The flux.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.4</span> <span class="o">*</span> <span class="p">(</span><span class="n">app_mag</span> <span class="o">-</span> <span class="mf">8.9</span><span class="p">))</span> <span class="o">*</span> <span class="n">nJy</span></div>
 
 
 <div class="viewcode-block" id="llam_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.llam_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">llam_to_lnu</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">llam</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts spectral luminosity density in terms of wavelength (llam) to</span>
-<span class="sd">    spectral luminosity density in terms of frequency (lnu).</span>
+<span class="sd">    Convert spectral luminosity density per wavelength to per frequency.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                L_nu = L_lam * lam**2 / c</span>
+
+<span class="sd">    The result will be in units of erg / s / Hz.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (unyt_quantity/unyt_array)</span>
@@ -665,7 +687,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">llam</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;llam must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -677,8 +698,13 @@
 
 <div class="viewcode-block" id="lnu_to_llam"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.lnu_to_llam">[docs]</a><span class="k">def</span> <span class="nf">lnu_to_llam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts spectral luminoisty density in terms of frequency (lnu)</span>
-<span class="sd">    to luminoisty in terms of wavelength (llam).</span>
+<span class="sd">    Convert spectral luminoisty density per frequency to per wavelength.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                    L_lam = L_nu * c / lam**2</span>
+
+<span class="sd">    The result will be in units of erg / s / A.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (unyt_quantity/unyt_array)</span>
@@ -695,7 +721,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lnu must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -707,8 +732,13 @@
 
 <div class="viewcode-block" id="flam_to_fnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.flam_to_fnu">[docs]</a><span class="k">def</span> <span class="nf">flam_to_fnu</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">flam</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts spectral flux in terms of wavelength (f_lam) to spectral flux</span>
-<span class="sd">    in terms of frequency (f_nu).</span>
+<span class="sd">    Convert spectral flux density per wavelength to per frequency.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                    F_nu = F_lam * lam**2 / c</span>
+
+<span class="sd">    The result will be in units of nJy.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (unyt_quantity/unyt_array)</span>
@@ -724,7 +754,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">flam</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;flam must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -736,8 +765,13 @@
 
 <div class="viewcode-block" id="fnu_to_flam"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_flam">[docs]</a><span class="k">def</span> <span class="nf">fnu_to_flam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">fnu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Converts spectral flux density in terms of frequency (f_nu)</span>
-<span class="sd">    to flux in terms of wavelength (flam).</span>
+<span class="sd">    Convert spectral flux density per frequency to per wavelength.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                    F_lam = F_nu * c / lam**2</span>
+
+<span class="sd">    The result will be in units of erg / s / A.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        lam (unyt_quantity/unyt_array)</span>
@@ -754,7 +788,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Ensure we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;fnu must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -765,7 +798,14 @@
 
 
 <div class="viewcode-block" id="absolute_mag_to_lnu"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.absolute_mag_to_lnu">[docs]</a><span class="k">def</span> <span class="nf">absolute_mag_to_lnu</span><span class="p">(</span><span class="n">ab_mag</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert absolute magnitude (M) to luminosity.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert absolute magnitude (M) to luminosity.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                    L_nu = 10**(-0.4 * (M + 48.6)) * dist_mod</span>
+
+<span class="sd">    The result will be in units of erg / s / Hz.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        ab_mag (float)</span>
@@ -775,7 +815,6 @@
 <span class="sd">        unyt_quantity/unyt_array</span>
 <span class="sd">            The luminosity in erg / s / Hz.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Define the distance modulus at 10 pcs</span>
     <span class="n">dist_mod</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pc</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">**</span> <span class="mi">2</span>
 
@@ -783,7 +822,12 @@
 
 
 <div class="viewcode-block" id="lnu_to_absolute_mag"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.lnu_to_absolute_mag">[docs]</a><span class="k">def</span> <span class="nf">lnu_to_absolute_mag</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert spectral luminosity density to absolute magnitude (M).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert spectral luminosity density to absolute magnitude (M).</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">                    M = -2.5 * log10(L_nu / dist_mod / (erg / s / Hz)) - 48.6</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        unyt_quantity/unyt_array</span>
@@ -797,7 +841,6 @@
 <span class="sd">        IncorrectUnits</span>
 <span class="sd">            If units are missing an error is raised.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Enusre we have units</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lnu must be given with unyt units.&quot;</span><span class="p">)</span>
@@ -813,7 +856,7 @@
 
 <div class="viewcode-block" id="vacuum_to_air"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.vacuum_to_air">[docs]</a><span class="k">def</span> <span class="nf">vacuum_to_air</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function for converting a vacuum wavelength into an air wavelength.</span>
+<span class="sd">    Convert a vacuum wavelength into an air wavelength.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        wavelength (float or unyt_array)</span>
@@ -823,8 +866,7 @@
 <span class="sd">        wavelength (unyt_array)</span>
 <span class="sd">            A wavelength in vacuum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># if wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
+    <span class="c1"># If wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">wavelength</span> <span class="o">*=</span> <span class="n">Angstrom</span>
 
@@ -841,7 +883,7 @@
 
 <div class="viewcode-block" id="air_to_vacuum"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.air_to_vacuum">[docs]</a><span class="k">def</span> <span class="nf">air_to_vacuum</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function for converting an air wavelength into a vacuum wavelength.</span>
+<span class="sd">    Convert an air wavelength into a vacuum wavelength.</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">        wavelength (float or unyt_array)</span>
@@ -851,8 +893,7 @@
 <span class="sd">        wavelength (unyt_array)</span>
 <span class="sd">            A wavelength in vacuum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># if wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
+    <span class="c1"># If wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">wavelength</span> <span class="o">*=</span> <span class="n">Angstrom</span>
 
@@ -872,7 +913,7 @@
 
 <div class="viewcode-block" id="standard_to_vacuum"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.standard_to_vacuum">[docs]</a><span class="k">def</span> <span class="nf">standard_to_vacuum</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function for converting a standard wavelength into a vacuum wavelength.</span>
+<span class="sd">    Convert a standard wavelength into a vacuum wavelength.</span>
 
 <span class="sd">    Standard wavelengths are defined in vacuum at &lt;2000A and air at &gt;= 2000A.</span>
 
@@ -884,23 +925,22 @@
 <span class="sd">        wavelength (unyt_array)</span>
 <span class="sd">            A wavelength in vacuum.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># if wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
+    <span class="c1"># If wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">wavelength</span> <span class="o">*=</span> <span class="n">Angstrom</span>
 
-    <span class="c1"># if wavelength is &lt; 2000A simply return since no change required.</span>
+    <span class="c1"># If wavelength is &lt; 2000A simply return since no change required.</span>
     <span class="k">if</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mf">2000.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavelength</span>
 
-    <span class="c1"># otherwise conver to vacuum</span>
+    <span class="c1"># Otherwise, convert to vacuum</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">air_to_vacuum</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="vacuum_to_standard"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.vacuum_to_standard">[docs]</a><span class="k">def</span> <span class="nf">vacuum_to_standard</span><span class="p">(</span><span class="n">wavelength</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A function for converting a vacuum wavelength into a standard wavelength.</span>
+<span class="sd">    Convert a vacuum wavelength into a standard wavelength.</span>
 
 <span class="sd">    Standard wavelengths are defined in vacuum at &lt;2000A and air at &gt;= 2000A.</span>
 
@@ -912,18 +952,74 @@
 <span class="sd">        wavelength (unyt_array)</span>
 <span class="sd">            A standard wavelength.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># if wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
+    <span class="c1"># If wavelength is not a unyt_array conver to one assume unit is Anstrom.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
         <span class="n">wavelength</span> <span class="o">*=</span> <span class="n">Angstrom</span>
 
-    <span class="c1"># if wavelength is &lt; 2000A simply return since no change required.</span>
+    <span class="c1"># If wavelength is &lt; 2000A simply return since no change required.</span>
     <span class="k">if</span> <span class="n">wavelength</span> <span class="o">&lt;=</span> <span class="mf">2000.0</span> <span class="o">*</span> <span class="n">Angstrom</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wavelength</span>
 
-    <span class="c1"># otherwise conver to vacuum</span>
+    <span class="c1"># Otherwise, convert to vacuum</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">vacuum_to_air</span><span class="p">(</span><span class="n">wavelength</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="attenuation_to_optical_depth"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.attenuation_to_optical_depth">[docs]</a><span class="k">def</span> <span class="nf">attenuation_to_optical_depth</span><span class="p">(</span><span class="n">attenuation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert attenuation to optical depth.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        attenuation (float):</span>
+<span class="sd">            The attenuation to convert.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        float</span>
+<span class="sd">            The converted optical depth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">attenuation</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="optical_depth_to_attenuation"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.optical_depth_to_attenuation">[docs]</a><span class="k">def</span> <span class="nf">optical_depth_to_attenuation</span><span class="p">(</span><span class="n">optical_depth</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert optical depth to attenuation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        optical depth (float):</span>
+<span class="sd">            The optical depth to convert.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        float</span>
+<span class="sd">            The converted attenuation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">optical_depth</span></div>
+
+
+<div class="viewcode-block" id="tau_lam_to_tau_v"><a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.tau_lam_to_tau_v">[docs]</a><span class="k">def</span> <span class="nf">tau_lam_to_tau_v</span><span class="p">(</span><span class="n">dust_curve</span><span class="p">,</span> <span class="n">tau_lam</span><span class="p">,</span> <span class="n">lam</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert optical depth in any given band to v-band optical depth.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dust_curve (AttenuationBase):</span>
+<span class="sd">            The attenutation law to use.</span>
+<span class="sd">        tau_lam (float):</span>
+<span class="sd">            The optical depth to convert.</span>
+<span class="sd">        lam (unyt_quantity):</span>
+<span class="sd">            The wavelength at which tau_lam was calculated.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        float</span>
+<span class="sd">            The converted optical depth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Convert to angstrom</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;angstrom&quot;</span><span class="p">)</span>
+
+    <span class="n">tau_norm</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tau_lam</span> <span class="o">/</span> <span class="n">tau_norm</span></div>
 </pre></div>
         </article>
       </div>
@@ -956,7 +1052,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=ce3a7739"></script>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=2f96d105"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
     <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
