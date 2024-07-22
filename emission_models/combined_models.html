@@ -642,11 +642,11 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gal_attenuated</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total_attenuated&quot;</span><span class="p">,</span>
-    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">att_uni_model</span><span class="p">,</span> <span class="n">pc_model</span><span class="p">[</span><span class="s2">&quot;attenuated&quot;</span><span class="p">]),</span>
+    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">att_uni_model</span><span class="p">,</span> <span class="n">pc_model</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">]),</span>
     <span class="n">related_models</span><span class="o">=</span><span class="p">(</span><span class="n">gal_intrinsic</span><span class="p">,),</span>
     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">gal_attenuated</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">gal_attenuated</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -663,21 +663,22 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-(&lt;Figure size 1000x600 with 1 Axes&gt;, &lt;Axes: &gt;)
+(&lt;Figure size 1200x600 with 1 Axes&gt;, &lt;Axes: &gt;)
 </pre></div></div>
 </div>
-<p>And finally a total emission which includes the dust emission (with the two previous models as related models).</p>
+<p>We can then create a dust emission model for the whole galaxy based on the combined attenuated and intrinsic emission.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
-    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">dust_uni_model</span><span class="p">,</span> <span class="n">pc_model</span><span class="p">),</span>
-    <span class="n">related_models</span><span class="o">=</span><span class="p">(</span><span class="n">gal_intrinsic</span><span class="p">,</span> <span class="n">gal_attenuated</span><span class="p">),</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dust_emission</span> <span class="o">=</span> <span class="n">DustEmission</span><span class="p">(</span>
+    <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">Greybody</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">),</span>
+    <span class="n">dust_lum_intrinsic</span><span class="o">=</span><span class="n">gal_intrinsic</span><span class="p">,</span>
+    <span class="n">dust_lum_attenuated</span><span class="o">=</span><span class="n">gal_attenuated</span><span class="p">,</span>
     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;dust_emission&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">dust_emission</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -695,6 +696,36 @@
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 (&lt;Figure size 1500x800 with 1 Axes&gt;, &lt;Axes: &gt;)
+</pre></div></div>
+</div>
+<p>And finally we can combine the emissions into the total emission of the galaxy.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">dust_emission</span><span class="p">,</span> <span class="n">gal_attenuated</span><span class="p">),</span>
+    <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/emission_models_combined_models_9_0.png" src="../_images/emission_models_combined_models_9_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 1200x800 with 1 Axes&gt;, &lt;Axes: &gt;)
 </pre></div></div>
 </div>
 </section>
@@ -748,7 +779,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=2f96d105"></script>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=36be61cc"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
