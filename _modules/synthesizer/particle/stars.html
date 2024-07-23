@@ -945,6 +945,8 @@
 <span class="sd">            old (bool/float)</span>
 <span class="sd">                If not None, specifies age in Myr at which to filter</span>
 <span class="sd">                for old star particles.</span>
+<span class="sd">            mask (array)</span>
+<span class="sd">                Boolean array of star particles to include</span>
 <span class="sd">            verbose (bool)</span>
 <span class="sd">                Flag for verbose output.</span>
 <span class="sd">            do_grid_check (bool)</span>
@@ -1073,16 +1075,26 @@
             <span class="c1"># Get mask for particles we&#39;re going to replace with parametric</span>
             <span class="n">pmask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">parametric_young_stars</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-            <span class="c1"># Update the young/old mask to ignore those we&#39;re replacing</span>
-            <span class="n">mask</span><span class="p">[</span><span class="n">pmask</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Check we have particles to replace</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Update the young/old mask to ignore those we&#39;re replacing</span>
+                <span class="n">mask</span><span class="p">[</span><span class="n">pmask</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="n">lnu_parametric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametric_young_stars</span><span class="p">(</span>
-                <span class="n">pmask</span><span class="o">=</span><span class="n">pmask</span> <span class="o">&amp;</span> <span class="n">aperture_mask</span><span class="p">,</span>
-                <span class="n">age</span><span class="o">=</span><span class="n">parametric_young_stars</span><span class="p">,</span>
-                <span class="n">parametric_sfh</span><span class="o">=</span><span class="n">parametric_sfh</span><span class="p">,</span>
-                <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
-                <span class="n">spectra_name</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="n">lnu_parametric</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametric_young_stars</span><span class="p">(</span>
+                    <span class="n">pmask</span><span class="o">=</span><span class="n">pmask</span> <span class="o">&amp;</span> <span class="n">aperture_mask</span><span class="p">,</span>
+                    <span class="n">age</span><span class="o">=</span><span class="n">parametric_young_stars</span><span class="p">,</span>
+                    <span class="n">parametric_sfh</span><span class="o">=</span><span class="n">parametric_sfh</span><span class="p">,</span>
+                    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+                    <span class="n">spectra_name</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Create a dummy empty array</span>
+                <span class="n">lnu_parametric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;All particles replaced with parametric forms&quot;</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">lnu_parametric</span>
 
         <span class="kn">from</span> <span class="nn">..extensions.integrated_spectra</span> <span class="kn">import</span> <span class="n">compute_integrated_sed</span>
 
@@ -1185,8 +1197,9 @@
                 <span class="n">initial_mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span><span class="p">[</span><span class="n">_pmask</span><span class="p">],</span>
             <span class="p">)</span>
 
-        <span class="c1"># Combine the individual parametric forms for each particle</span>
-        <span class="n">stars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">stars</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">stars</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stars</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Combine the individual parametric forms for each particle</span>
+            <span class="n">stars</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">stars</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">stars</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="c1"># Get the spectra for this parametric form</span>
         <span class="k">return</span> <span class="n">stars</span><span class="o">.</span><span class="n">generate_lnu</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">spectra_name</span><span class="o">=</span><span class="n">spectra_name</span><span class="p">)</span>
@@ -2295,7 +2308,7 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=d22f660a"></script>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6ae9b562"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
