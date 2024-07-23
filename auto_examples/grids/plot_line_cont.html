@@ -1,0 +1,884 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plot spectra example" href="plot_spectra.html" /><link rel="prev" title="Plot ionising luminosity" href="plot_log10Q.html" />
+
+    <!-- Generated with Sphinx 7.4.7 and Furo 2024.07.18 -->
+        <title>Plot the line continuum for a given grid point - Synthesizer</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=613ab9ff" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Synthesizer</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../_static/synthesizer_logo.png" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started/downloading_grids.html">Downloading Grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../getting_started/overview.html">Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../grids/grids.html">Grids</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Grids</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../grids/grids_example.html"><code class="docutils literal notranslate"><span class="pre">Grid</span></code> example</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../components/stars.html">Stars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../components/gas.html">Gas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../components/blackholes.html">Blackholes</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../sed/sed.html">Sed</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of Sed</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../sed/sed_example.html">The Sed object</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../emission_models/emission_models.html">Emission models</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of Emission models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/model_usage.html">Emission model basics</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../emission_models/premade_models/premade_models.html">Premade Models</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of Premade Models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../emission_models/premade_models/stellar_models.html">Stellar Emission Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../emission_models/premade_models/agn_models.html">AGN Emission Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../emission_models/premade_models/common_models.html">Common Models</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/dust_emission.html">Dust emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/modify_models.html">Modifying a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/custom_models.html">Creating your own EmissionModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/custom_models.html#Saving-or-not-saving-the-emission">Saving or not saving the emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../emission_models/combined_models.html">Combined Emission Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../attenuation/attenuation.html">Attenuation</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of Attenuation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../attenuation/dust_attenuation.html">Dust Attenuation Curves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../attenuation/igm.html">Intergalactic Medium Absortion</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../spectra/spectra.html">Generating spectra</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of Generating spectra</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../spectra/stars.html">Stellar Spectra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../spectra/blackholes.html">Black Hole Spectra</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../spectra/galaxy.html">Galaxy Spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../lines/lines.html">Emission Lines</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of Emission Lines</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../lines/grid_lines.html">Lines from <code class="docutils literal notranslate"><span class="pre">Grid</span></code> objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../lines/galaxy_lines.html">Lines from <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code> objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../filters/filters.html">Filters</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of Filters</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../filters/filters_example.html">Filters example</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../photometry/photometry.html">Photometry</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of Photometry</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../photometry/photometry_example.html">Generating Photometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../photometry/galaxy_phot.html">Generating photometry from a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../imaging/imaging.html">Imaging</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of Imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/particle_imaging.html">Images From Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/parametric_imaging.html">Images From Parametric Galaxies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/particle_data_cube.html">Spectral Data Cubes from Galaxy Particle distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/parametric_data_cube.html">Spectral Data Cubes from a Parametric Galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../imaging/property_maps.html">Property maps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../parallelism/openmp.html">Parallelism</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../advanced/advanced.html">Advanced</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of Advanced</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/config_options.html">Configuration Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/units.html">Units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/abundances.html">Abundances</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../advanced/creating_grids.html">Creating Grids</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notebook_examples/cookbook.html">Cookbook</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of Cookbook</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notebook_examples/generate_active_galaxy.html">Generate active galaxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notebook_examples/generate_composite_galaxy.html">Generate composite galaxy</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cosmo/plot_test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cosmo/plot_test_aperture_mask.html">Aperture Mask Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cosmo/plot_sc-sam.html">SC-SAM example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cosmo/plot_parametric_young_stars.html">Parametric Young Stars Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cosmo/plot_cosmo_example.html">Camels example</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../general/index.html">General examples</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of General examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../general/plot_igm.html">IGM transmission example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/plot_dustcurves.html">Dust curves example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/plot_filters.html">Filters example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/plot_quiescent_colours.html">Plot quiescent UVJ diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../general/plot_photometry.html">Photometry example</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Grid examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of Grid examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_log10Q.html">Plot ionising luminosity</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot the line continuum for a given grid point</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_spectra.html">Plot spectra example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_lines.html">Get lines example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_spectra_by_age.html">Plot spectra by age</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../imaging/index.html">Imaging examples</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of Imaging examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../imaging/plot_image_addition.html">Image addition example</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../parametric/index.html">Parametric galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle navigation of Parametric galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_delta_lambda.html">Plot delta_lambda for a grid.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_create_image.html">Create image example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_generate_lines.html">Generating Lines from a Parametric Galaxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_observed_sed.html">Generate parametric observed SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_scale_by_luminosity.html">An example showing how to scale a galaxy’s mass by luminosity/flux.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_sed.html">Generate parametric galaxy SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../parametric/plot_equivalent_width.html">Plot equivalent width for UV indices</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../particle/index.html">Particle galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle navigation of Particle galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_create_sampled_sed.html">Create sampled SED</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_compare_parametric_particle.html">Compare parametric and particle SEDs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../API.html">API Reference</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.html">synthesizer</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle navigation of synthesizer</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.html">synthesizer.abundances</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle navigation of synthesizer.abundances</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.abundance_patterns.html">synthesizer.abundances.abundance_patterns</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.abundance_scalings.html">synthesizer.abundances.abundance_scalings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.depletion_models.html">synthesizer.abundances.depletion_models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.elements.html">synthesizer.abundances.elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.download_data.html">synthesizer.download_data</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.html">synthesizer.emission_models</a><input class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><div class="visually-hidden">Toggle navigation of synthesizer.emission_models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.agn.html">synthesizer.emission_models.agn</a><input class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" role="switch" type="checkbox"/><label for="toctree-checkbox-28"><div class="visually-hidden">Toggle navigation of synthesizer.emission_models.agn</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.agn.models.html">synthesizer.emission_models.agn.models</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.agn.unified_agn.html">synthesizer.emission_models.agn.unified_agn</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.attenuation.html">synthesizer.emission_models.attenuation</a><input class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" role="switch" type="checkbox"/><label for="toctree-checkbox-29"><div class="visually-hidden">Toggle navigation of synthesizer.emission_models.attenuation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.attenuation.dust.html">synthesizer.emission_models.attenuation.dust</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.attenuation.igm.html">synthesizer.emission_models.attenuation.igm</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.base_model.html">synthesizer.emission_models.base_model</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.dust.html">synthesizer.emission_models.dust</a><input class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" role="switch" type="checkbox"/><label for="toctree-checkbox-30"><div class="visually-hidden">Toggle navigation of synthesizer.emission_models.dust</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.dust.emission.html">synthesizer.emission_models.dust.emission</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.models.html">synthesizer.emission_models.models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.operations.html">synthesizer.emission_models.operations</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.stellar.html">synthesizer.emission_models.stellar</a><input class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" role="switch" type="checkbox"/><label for="toctree-checkbox-31"><div class="visually-hidden">Toggle navigation of synthesizer.emission_models.stellar</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.stellar.models.html">synthesizer.emission_models.stellar.models</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.emission_models.stellar.pacman_model.html">synthesizer.emission_models.stellar.pacman_model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.html">synthesizer.exceptions</a><input class="toctree-checkbox" id="toctree-checkbox-32" name="toctree-checkbox-32" role="switch" type="checkbox"/><label for="toctree-checkbox-32"><div class="visually-hidden">Toggle navigation of synthesizer.exceptions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.GridError.html">synthesizer.exceptions.GridError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentAddition.html">synthesizer.exceptions.InconsistentAddition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentArguments.html">synthesizer.exceptions.InconsistentArguments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentCoordinates.html">synthesizer.exceptions.InconsistentCoordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentParameter.html">synthesizer.exceptions.InconsistentParameter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.InconsistentWavelengths.html">synthesizer.exceptions.InconsistentWavelengths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.IncorrectUnits.html">synthesizer.exceptions.IncorrectUnits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingArgument.html">synthesizer.exceptions.MissingArgument</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingAttribute.html">synthesizer.exceptions.MissingAttribute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingImage.html">synthesizer.exceptions.MissingImage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingSpectraType.html">synthesizer.exceptions.MissingSpectraType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.MissingUnits.html">synthesizer.exceptions.MissingUnits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOFilterNotFound.html">synthesizer.exceptions.SVOFilterNotFound</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.SVOInaccessible.html">synthesizer.exceptions.SVOInaccessible</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnimplementedFunctionality.html">synthesizer.exceptions.UnimplementedFunctionality</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnknownImageType.html">synthesizer.exceptions.UnknownImageType</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnmetDependency.html">synthesizer.exceptions.UnmetDependency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.UnrecognisedOption.html">synthesizer.exceptions.UnrecognisedOption</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.exceptions.WavelengthOutOfRange.html">synthesizer.exceptions.WavelengthOutOfRange</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.filters.html">synthesizer.filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.galaxy.html">synthesizer.galaxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.grid.html">synthesizer.grid</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" role="switch" type="checkbox"/><label for="toctree-checkbox-33"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" role="switch" type="checkbox"/><label for="toctree-checkbox-34"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.image.html">synthesizer.imaging.image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.image_collection.html">synthesizer.imaging.image_collection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.spectral_cube.html">synthesizer.imaging.spectral_cube</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.kernel_functions.html">synthesizer.kernel_functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line.html">synthesizer.line</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.line_ratios.html">synthesizer.line_ratios</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.html">synthesizer.load_data</a><input class="toctree-checkbox" id="toctree-checkbox-35" name="toctree-checkbox-35" role="switch" type="checkbox"/><label for="toctree-checkbox-35"><div class="visually-hidden">Toggle navigation of synthesizer.load_data</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.load_camels.html">synthesizer.load_data.load_camels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.load_flares.html">synthesizer.load_data.load_flares</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.load_scsam.html">synthesizer.load_data.load_scsam</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.load_simba.html">synthesizer.load_data.load_simba</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.load_data.utils.html">synthesizer.load_data.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.html">synthesizer.parametric</a><input class="toctree-checkbox" id="toctree-checkbox-36" name="toctree-checkbox-36" role="switch" type="checkbox"/><label for="toctree-checkbox-36"><div class="visually-hidden">Toggle navigation of synthesizer.parametric</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.blackholes.html">synthesizer.parametric.blackholes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.galaxy.html">synthesizer.parametric.galaxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.metal_dist.html">synthesizer.parametric.metal_dist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.morphology.html">synthesizer.parametric.morphology</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.sf_hist.html">synthesizer.parametric.sf_hist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.parametric.stars.html">synthesizer.parametric.stars</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.particle.html">synthesizer.particle</a><input class="toctree-checkbox" id="toctree-checkbox-37" name="toctree-checkbox-37" role="switch" type="checkbox"/><label for="toctree-checkbox-37"><div class="visually-hidden">Toggle navigation of synthesizer.particle</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.particle.blackholes.html">synthesizer.particle.blackholes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.particle.galaxy.html">synthesizer.particle.galaxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.particle.gas.html">synthesizer.particle.gas</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.particle.particles.html">synthesizer.particle.particles</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.particle.stars.html">synthesizer.particle.stars</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.photoionisation.html">synthesizer.photoionisation</a><input class="toctree-checkbox" id="toctree-checkbox-38" name="toctree-checkbox-38" role="switch" type="checkbox"/><label for="toctree-checkbox-38"><div class="visually-hidden">Toggle navigation of synthesizer.photoionisation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.photoionisation.cloudy17.html">synthesizer.photoionisation.cloudy17</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.photoionisation.cloudy23.html">synthesizer.photoionisation.cloudy23</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.photoionisation.photoionisation.html">synthesizer.photoionisation.photoionisation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.photometry.html">synthesizer.photometry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.sed.html">synthesizer.sed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.units.html">synthesizer.units</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.utils.html">synthesizer.utils</a><input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" role="switch" type="checkbox"/><label for="toctree-checkbox-39"><div class="visually-hidden">Toggle navigation of synthesizer.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.art.html">synthesizer.utils.art</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.ascii_table.html">synthesizer.utils.ascii_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.integrate.html">synthesizer.utils.integrate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.plt.html">synthesizer.utils.plt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.stats.html">synthesizer.utils.stats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.util_funcs.html">synthesizer.utils.util_funcs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.warnings.html">synthesizer.warnings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-grids-plot-line-cont-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="plot-the-line-continuum-for-a-given-grid-point">
+<span id="sphx-glr-auto-examples-grids-plot-line-cont-py"></span><h1>Plot the line continuum for a given grid point<a class="headerlink" href="#plot-the-line-continuum-for-a-given-grid-point" title="Link to this heading">¶</a></h1>
+<p>Demonstrate how to create spectra using a collection of line luminosities
+instead of the default approach. Mostly for testing purposes.</p>
+<img src="../../_images/sphx_glr_plot_line_cont_001.png" srcset="../../_images/sphx_glr_plot_line_cont_001.png" alt="plot line cont" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: divide by zero encountered in log10
+  out_arr = func(np.asarray(inp), out=out_func, **kwargs)
+[&#39;Al 2 1670.79A&#39;, &#39;Ar 3 7135.79A&#39;, &#39;Ar 3 7751.11A&#39;, &#39;Ar 4 2853.66A&#39;, &#39;C 1 1657.91A&#39;, &#39;C 1 1992.01A&#39;, &#39;C 1 2582.90A&#39;, &#39;C 2 1334.53A&#39;, &#39;C 2 1335.66A&#39;, &#39;C 2 1335.71A&#39;, &#39;C 2 2325.40A&#39;, &#39;C 2 2326.93A&#39;, &#39;C 3 1906.68A&#39;, &#39;C 3 1908.73A&#39;, &#39;C 4 1548.19A&#39;, &#39;C 4 1550.77A&#39;, &#39;Ca 2 7291.47A&#39;, &#39;Ca 2 7323.89A&#39;, &#39;Cl 2 8578.70A&#39;, &#39;Fe 2 1.25668m&#39;, &#39;Fe 2 1.27877m&#39;, &#39;Fe 2 1.29427m&#39;, &#39;Fe 2 1.32055m&#39;, &#39;Fe 2 1.32777m&#39;, &#39;Fe 2 1.37181m&#39;, &#39;Fe 2 1.53348m&#39;, &#39;Fe 2 1.59948m&#39;, &#39;Fe 2 1.64355m&#39;, &#39;Fe 2 1.66377m&#39;, &#39;Fe 2 1.67688m&#39;, &#39;Fe 2 1.71113m&#39;, &#39;Fe 2 1.74494m&#39;, &#39;Fe 2 1.79711m&#39;, &#39;Fe 2 1.80002m&#39;, &#39;Fe 2 1.80940m&#39;, &#39;Fe 2 1.89541m&#39;, &#39;Fe 2 1.95361m&#39;, &#39;Fe 2 2395.63A&#39;, &#39;Fe 2 2399.24A&#39;, &#39;Fe 2 2406.66A&#39;, &#39;Fe 2 2410.52A&#39;, &#39;Fe 2 2598.37A&#39;, &#39;Fe 2 2607.09A&#39;, &#39;Fe 2 2611.87A&#39;, &#39;Fe 2 2613.82A&#39;, &#39;Fe 2 2625.67A&#39;, &#39;Fe 2 2628.29A&#39;, &#39;Fe 2 2631.05A&#39;, &#39;Fe 2 2631.32A&#39;, &#39;Fe 2 4243.97A&#39;, &#39;Fe 2 4276.84A&#39;, &#39;Fe 2 4287.39A&#39;, &#39;Fe 2 4319.62A&#39;, &#39;Fe 2 4346.86A&#39;, &#39;Fe 2 4352.79A&#39;, &#39;Fe 2 4358.37A&#39;, &#39;Fe 2 4359.33A&#39;, &#39;Fe 2 4413.78A&#39;, &#39;Fe 2 4416.27A&#39;, &#39;Fe 2 4452.10A&#39;, &#39;Fe 2 4474.90A&#39;, &#39;Fe 2 4814.54A&#39;, &#39;Fe 2 4874.50A&#39;, &#39;Fe 2 4889.62A&#39;, &#39;Fe 2 4905.35A&#39;, &#39;Fe 2 4923.92A&#39;, &#39;Fe 2 4947.39A&#39;, &#39;Fe 2 4973.40A&#39;, &#39;Fe 2 5005.52A&#39;, &#39;Fe 2 5018.44A&#39;, &#39;Fe 2 5020.25A&#39;, &#39;Fe 2 5049.30A&#39;, &#39;Fe 2 5072.41A&#39;, &#39;Fe 2 5111.64A&#39;, &#39;Fe 2 5158.01A&#39;, &#39;Fe 2 5158.79A&#39;, &#39;Fe 2 5169.03A&#39;, &#39;Fe 2 5184.80A&#39;, &#39;Fe 2 5261.63A&#39;, &#39;Fe 2 5273.36A&#39;, &#39;Fe 2 5284.10A&#39;, &#39;Fe 2 5333.66A&#39;, &#39;Fe 2 5376.47A&#39;, &#39;Fe 2 5412.67A&#39;, &#39;Fe 2 5433.15A&#39;, &#39;Fe 2 5527.36A&#39;, &#39;Fe 2 6516.08A&#39;, &#39;Fe 2 7155.17A&#39;, &#39;Fe 2 7172.00A&#39;, &#39;Fe 2 7388.17A&#39;, &#39;Fe 2 7452.56A&#39;, &#39;Fe 2 8616.95A&#39;, &#39;Fe 2 8891.93A&#39;, &#39;Fe 2 9051.95A&#39;, &#39;Fe 2 9226.63A&#39;, &#39;Fe 2 9267.56A&#39;, &#39;Fe 2 9399.04A&#39;, &#39;Fe 2 9470.94A&#39;, &#39;Fe 3 4658.05A&#39;, &#39;Fe 3 4985.87A&#39;, &#39;Fe 3 5270.40A&#39;, &#39;Fe 4 2829.36A&#39;, &#39;Fe 4 2835.74A&#39;, &#39;Fe 4 3094.96A&#39;, &#39;Fe 5 3891.28A&#39;, &#39;Fe 6 3662.50A&#39;, &#39;Fe 6 5176.04A&#39;, &#39;Fe 7 3586.32A&#39;, &#39;Fe 7 3758.92A&#39;, &#39;Fe 7 5720.71A&#39;, &#39;Fe 7 6086.97A&#39;, &#39;H 1 1.00494m&#39;, &#39;H 1 1.09381m&#39;, &#39;H 1 1.28181m&#39;, &#39;H 1 1.87510m&#39;, &#39;H 1 1215.67A&#39;, &#39;H 1 2.16553m&#39;, &#39;H 1 3734.37A&#39;, &#39;H 1 3750.15A&#39;, &#39;H 1 3770.63A&#39;, &#39;H 1 3797.90A&#39;, &#39;H 1 3835.38A&#39;, &#39;H 1 3889.05A&#39;, &#39;H 1 3970.07A&#39;, &#39;H 1 4101.73A&#39;, &#39;H 1 4340.46A&#39;, &#39;H 1 4861.32A&#39;, &#39;H 1 6562.80A&#39;, &#39;H 1 9229.02A&#39;, &#39;H 1 9545.97A&#39;, &#39;He 1 1.08291m&#39;, &#39;He 1 1.08303m&#39;, &#39;He 1 3187.74A&#39;, &#39;He 1 3888.64A&#39;, &#39;He 1 5875.61A&#39;, &#39;He 1 5875.64A&#39;, &#39;He 1 6678.15A&#39;, &#39;He 2 1025.27A&#39;, &#39;He 2 1084.94A&#39;, &#39;He 2 1215.13A&#39;, &#39;He 2 1640.41A&#39;, &#39;He 2 4685.68A&#39;, &#39;Mg 2 2795.53A&#39;, &#39;Mg 2 2802.71A&#39;, &#39;Mg 5 2782.76A&#39;, &#39;Mg 6 1806.00A&#39;, &#39;Mg 7 2628.89A&#39;, &#39;N 2 6548.05A&#39;, &#39;N 2 6583.45A&#39;, &#39;N 3 1749.67A&#39;, &#39;N 4 1486.50A&#39;, &#39;N 5 1238.82A&#39;, &#39;N 5 1242.80A&#39;, &#39;Ne 3 3868.76A&#39;, &#39;Ne 3 3967.47A&#39;, &#39;Ne 4 1601.45A&#39;, &#39;Ne 5 3345.82A&#39;, &#39;Ne 5 3425.88A&#39;, &#39;Ni 2 1.19102m&#39;, &#39;Ni 2 1.93877m&#39;, &#39;Ni 2 6666.80A&#39;, &#39;Ni 2 7377.83A&#39;, &#39;Ni 2 7411.61A&#39;, &#39;O 1 1.12863m&#39;, &#39;O 1 1.12864m&#39;, &#39;O 1 1.12869m&#39;, &#39;O 1 1.12870m&#39;, &#39;O 1 1.12873m&#39;, &#39;O 1 1302.17A&#39;, &#39;O 1 1304.86A&#39;, &#39;O 1 1306.03A&#39;, &#39;O 1 1641.31A&#39;, &#39;O 1 6300.30A&#39;, &#39;O 1 6363.78A&#39;, &#39;O 1 8446.25A&#39;, &#39;O 1 8446.36A&#39;, &#39;O 1 8446.76A&#39;, &#39;O 2 3726.03A&#39;, &#39;O 2 3728.81A&#39;, &#39;O 3 1660.81A&#39;, &#39;O 3 1666.15A&#39;, &#39;O 3 2320.95A&#39;, &#39;O 3 4363.21A&#39;, &#39;O 3 4958.91A&#39;, &#39;O 3 5006.84A&#39;, &#39;O 4 1399.78A&#39;, &#39;O 4 1401.16A&#39;, &#39;O 4 1404.81A&#39;, &#39;O 4 1407.38A&#39;, &#39;O 5 1218.34A&#39;, &#39;O 6 1031.91A&#39;, &#39;O 6 1037.61A&#39;, &#39;S 2 1.02867m&#39;, &#39;S 2 1.03205m&#39;, &#39;S 2 1.03364m&#39;, &#39;S 2 4068.60A&#39;, &#39;S 2 4076.35A&#39;, &#39;S 2 6716.44A&#39;, &#39;S 2 6730.82A&#39;, &#39;S 3 9068.62A&#39;, &#39;S 3 9530.62A&#39;, &#39;Si 2 1179.59A&#39;, &#39;Si 2 1260.42A&#39;, &#39;Si 2 1264.74A&#39;, &#39;Si 2 1265.00A&#39;, &#39;Si 2 1526.71A&#39;, &#39;Si 2 1533.43A&#39;, &#39;Si 3 1206.50A&#39;, &#39;Si 3 1882.71A&#39;, &#39;Si 3 1892.03A&#39;, &#39;Si 4 1393.75A&#39;, &#39;Si 4 1402.77A&#39;, &#39;Si 6 1.96247m&#39;, &#39;Si 7 2.48071m&#39;, &#39;Si 7 2146.64A&#39;]
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/grid.py:706: FutureWarning: Line objects should be created with a string id, not a list or tuple. This will be removed in a future version.
+  Line(
+He 2 1025.27A 5187383838167570.0 erg
+O 6 1031.91A 0.0 erg
+O 6 1037.61A 0.0 erg
+He 2 1084.94A 9723715504085136.0 erg
+Si 2 1179.59A 1.4108154510499115e+19 erg
+Si 3 1206.50A 2.073538193961097e+19 erg
+He 2 1215.13A 3.111093816383812e+16 erg
+H 1 1215.67A 1.392282683365367e+22 erg
+O 5 1218.34A 169548465.4520282 erg
+N 5 1238.82A 624062804322858.5 erg
+N 5 1242.80A 356467033772204.56 erg
+Si 2 1260.42A 6.517626249225478e+18 erg
+Si 2 1264.74A 9.892171901463702e+18 erg
+Si 2 1265.00A 1.262972765191959e+19 erg
+O 1 1302.17A 2.938883551884211e+18 erg
+O 1 1304.86A 2.0871741790882464e+19 erg
+O 1 1306.03A 7.093977273780589e+18 erg
+C 2 1334.53A 1.1866891066281277e+19 erg
+C 2 1335.66A 1.0306203113715968e+19 erg
+C 2 1335.71A 1.4639347398146288e+19 erg
+Si 4 1393.75A 1.3481087162792575e+19 erg
+O 4 1399.78A 31101186657803.15 erg
+O 4 1401.16A 24685610443749.348 erg
+Si 4 1402.77A 1.5828812455529964e+19 erg
+O 4 1404.81A 16690190913142.691 erg
+O 4 1407.38A 30548480526103.77 erg
+N 4 1486.50A 8.605399660760286e+16 erg
+Si 2 1526.71A 3.172422263009973e+18 erg
+Si 2 1533.43A 1.0339666793739264e+19 erg
+C 4 1548.19A 1.0449074468557154e+19 erg
+C 4 1550.77A 2.5341368240565547e+19 erg
+Ne 4 1601.45A 1696406477982.463 erg
+He 2 1640.41A 3.6135717634479917e+17 erg
+O 1 1641.31A 824761224901443.5 erg
+C 1 1657.91A 1.209699157247224e+17 erg
+O 3 1660.81A 1.240658837510782e+19 erg
+O 3 1666.15A 3.651550282175651e+19 erg
+Al 2 1670.79A 0.0 erg
+N 3 1749.67A 6.219182423404684e+18 erg
+Mg 6 1806.00A 0.0 erg
+Si 3 1882.71A 4.818295191564509e+19 erg
+Si 3 1892.03A 3.4626527908829594e+19 erg
+C 3 1906.68A 2.3688186272120544e+20 erg
+C 3 1908.73A 1.6113643854237886e+20 erg
+C 1 1992.01A 1571122330203.3855 erg
+Si 7 2146.64A 0.0 erg
+O 3 2320.95A 2.2172852587799904e+19 erg
+C 2 2325.40A 1.3685466600008447e+20 erg
+C 2 2326.93A 7.851579939615421e+19 erg
+Fe 2 2395.63A 3.894235609512206e+18 erg
+Fe 2 2399.24A 1.777278879122512e+17 erg
+Fe 2 2406.66A 1.884711124852712e+17 erg
+Fe 2 2410.52A 1.912470113719942e+17 erg
+C 1 2582.90A 7465528536500.324 erg
+Fe 2 2598.37A 3.464575823800818e+17 erg
+Fe 2 2607.09A 2.714054093965942e+17 erg
+Fe 2 2611.87A 3.2910635596181366e+18 erg
+Fe 2 2613.82A 1.526463271256725e+17 erg
+Fe 2 2625.67A 6.666341086692654e+18 erg
+Fe 2 2628.29A 1.3802550523456978e+17 erg
+Mg 7 2628.89A 0.0 erg
+Fe 2 2631.05A 2.3931267102286288e+17 erg
+Fe 2 2631.32A 1.992207562790535e+18 erg
+Mg 5 2782.76A 0.0 erg
+Mg 2 2795.53A 4.489265831464402e+20 erg
+Mg 2 2802.71A 2.3824524972105646e+20 erg
+Fe 4 2829.36A 7.750354744704633e+18 erg
+Fe 4 2835.74A 1.4290060730575014e+19 erg
+Ar 4 2853.66A 2.2762428015253936e+17 erg
+Fe 4 3094.96A 3.443816732820936e+18 erg
+He 1 3187.74A 1.4781972647744507e+20 erg
+Ne 5 3345.82A 0.0 erg
+Ne 5 3425.88A 0.0 erg
+Fe 7 3586.32A 0.0 erg
+Fe 6 3662.50A 312112430.66673404 erg
+O 2 3726.03A 5.484321400868736e+21 erg
+O 2 3728.81A 4.617243917060647e+21 erg
+H 1 3734.37A 1.812378378897449e+20 erg
+H 1 3750.15A 2.175302756508154e+20 erg
+Fe 7 3758.92A 0.0 erg
+H 1 3770.63A 2.7648935746113123e+20 erg
+H 1 3797.90A 2.7570715274055156e+20 erg
+H 1 3835.38A 3.796881190472091e+20 erg
+Ne 3 3868.76A 1.99751312505286e+21 erg
+He 1 3888.64A 4.135472335248691e+20 erg
+H 1 3889.05A 5.766644916950392e+20 erg
+Fe 5 3891.28A 11600544276147.86 erg
+Ne 3 3967.47A 6.228856076488914e+20 erg
+H 1 3970.07A 8.563705313988684e+20 erg
+S 2 4068.60A 8.552890565352923e+19 erg
+S 2 4076.35A 2.7273258751224685e+19 erg
+H 1 4101.73A 1.4140528685973784e+21 erg
+Fe 2 4243.97A 1.8203456116006044e+18 erg
+Fe 2 4276.84A 5.280249605196545e+17 erg
+Fe 2 4287.39A 1.7094670626601738e+18 erg
+Fe 2 4319.62A 1.6718184653783722e+17 erg
+H 1 4340.46A 2.7306609055066253e+21 erg
+Fe 2 4346.86A 4.412665893327465e+17 erg
+Fe 2 4352.79A 2.5972220140513357e+17 erg
+Fe 2 4358.37A 8.125157522053466e+16 erg
+Fe 2 4359.33A 1.2880523705820244e+18 erg
+O 3 4363.21A 1.7696595401151545e+20 erg
+Fe 2 4413.78A 9.215517701508296e+17 erg
+Fe 2 4416.27A 2.594516751995567e+17 erg
+Fe 2 4452.10A 5.98222548009457e+17 erg
+Fe 2 4474.90A 2.927189469675347e+17 erg
+Fe 3 4658.05A 3.4659881237709038e+19 erg
+He 2 4685.68A 4.368911413317777e+16 erg
+Fe 2 4814.54A 5.169292565770391e+17 erg
+H 1 4861.32A 6.516501575100608e+21 erg
+Fe 2 4874.50A 2.1856561549634502e+17 erg
+Fe 2 4889.62A 3.526753723729129e+17 erg
+Fe 2 4905.35A 2.5804265379671853e+17 erg
+Fe 2 4923.92A 3389798421341863.5 erg
+Fe 2 4947.39A 6.067450687580365e+17 erg
+O 3 4958.91A 1.2063813615723011e+22 erg
+Fe 2 4973.40A 1.7717533347956598e+17 erg
+Fe 3 4985.87A 4.556303279905936e+18 erg
+Fe 2 5005.52A 3.5107892641645466e+17 erg
+O 3 5006.84A 3.6378634046353736e+22 erg
+Fe 2 5018.44A 4980753659703200.0 erg
+Fe 2 5020.25A 1.0176005705110216e+17 erg
+Fe 2 5049.30A 4.165387055327544e+17 erg
+Fe 2 5072.41A 9.904311623886353e+17 erg
+Fe 2 5111.64A 5.7080707609349306e+17 erg
+Fe 2 5158.01A 1.6645557489857216e+17 erg
+Fe 2 5158.79A 4.996147370774307e+18 erg
+Fe 2 5169.03A 1.1341146560222387e+17 erg
+Fe 6 5176.04A 2831301721.688391 erg
+Fe 2 5184.80A 1.4217125489895029e+17 erg
+Fe 2 5261.63A 1.9873640035646464e+18 erg
+Fe 3 5270.40A 2.128912245268688e+19 erg
+Fe 2 5273.36A 1.1727340365442796e+18 erg
+Fe 2 5284.10A 1553214215566512.2 erg
+Fe 2 5333.66A 1.0088406511033612e+18 erg
+Fe 2 5376.47A 4.5700956547935405e+17 erg
+Fe 2 5412.67A 9.223711694925008e+16 erg
+Fe 2 5433.15A 3.7129383137901165e+17 erg
+Fe 2 5527.36A 6.868792941599926e+17 erg
+Fe 7 5720.71A 0.0 erg
+He 1 5875.61A 5.304894258118195e+20 erg
+He 1 5875.64A 3.183003577610985e+20 erg
+Fe 7 6086.97A 0.0 erg
+O 1 6300.30A 3.092521080339101e+20 erg
+O 1 6363.78A 9.987886300172337e+19 erg
+Fe 2 6516.08A 224867472582266.66 erg
+N 2 6548.05A 7.907920314843534e+20 erg
+H 1 6562.80A 2.5618681397754374e+22 erg
+N 2 6583.45A 2.3425689513315006e+21 erg
+Ni 2 6666.80A 1.779409525347276e+17 erg
+He 1 6678.15A 2.967568653909578e+20 erg
+S 2 6716.44A 9.165336016449013e+20 erg
+S 2 6730.82A 1.0884534603192406e+21 erg
+Ar 3 7135.79A 7.064707327226914e+20 erg
+Fe 2 7155.17A 6.493627568637593e+18 erg
+Fe 2 7172.00A 1.1994849695539814e+18 erg
+Ca 2 7291.47A 5.3396508689928704e+17 erg
+Ca 2 7323.89A 3.6367874818693504e+17 erg
+Ni 2 7377.83A 4.4766047912606525e+18 erg
+Fe 2 7388.17A 9.397740628643658e+17 erg
+Ni 2 7411.61A 3.3071083228142925e+17 erg
+Fe 2 7452.56A 2.1892045091832166e+18 erg
+Ar 3 7751.11A 1.8362978631725692e+20 erg
+O 1 8446.25A 1.5148762935175698e+18 erg
+O 1 8446.36A 3.625305829529035e+18 erg
+O 1 8446.76A 3.1501803439282714e+18 erg
+Cl 2 8578.70A 4.146754480387142e+19 erg
+Fe 2 8616.95A 3.565600666578127e+18 erg
+Fe 2 8891.93A 1.7239733289962284e+18 erg
+Fe 2 9051.95A 5.415474394268338e+18 erg
+S 3 9068.62A 2.95291405382741e+21 erg
+Fe 2 9226.63A 2.0448186181670098e+18 erg
+H 1 9229.02A 3.416114130582795e+20 erg
+Fe 2 9267.56A 8.262671776623117e+17 erg
+Fe 2 9399.04A 2.1298193237061873e+18 erg
+Fe 2 9470.94A 8.555406288651217e+17 erg
+S 3 9530.62A 7.830520560024e+21 erg
+H 1 9545.97A 5.17477905522157e+20 erg
+H 1 1.00494m 8.092597174184566e+20 erg
+S 2 1.02867m 5.627660529764509e+19 erg
+S 2 1.03205m 7.686494181014302e+19 erg
+S 2 1.03364m 5.555792759312155e+19 erg
+He 1 1.08291m 4.785377303443386e+20 erg
+He 1 1.08303m 3.3334132617574545e+21 erg
+H 1 1.09381m 1.4236895669978826e+21 erg
+O 1 1.12863m 5.917970029036251e+17 erg
+O 1 1.12864m 6.733505547582941e+17 erg
+O 1 1.12869m 2.0234902660584074e+17 erg
+O 1 1.12870m 1.9744979558253117e+17 erg
+O 1 1.12873m 8.979217543870252e+17 erg
+Ni 2 1.19102m 1.653397850947728e+18 erg
+Fe 2 1.25668m 4.844816862432433e+18 erg
+Fe 2 1.27877m 2.0670482659368624e+17 erg
+H 1 1.28181m 3.008606651068984e+21 erg
+Fe 2 1.29427m 4.3332223173938394e+17 erg
+Fe 2 1.32055m 1.6294009521830781e+18 erg
+Fe 2 1.32777m 2.9250014609624154e+17 erg
+Fe 2 1.37181m 9.696379937421018e+17 erg
+Fe 2 1.53348m 1.2150962454286017e+19 erg
+Fe 2 1.59948m 4.957066991247767e+18 erg
+Fe 2 1.64355m 9.723660405474792e+19 erg
+Fe 2 1.66377m 2.642894594566299e+18 erg
+Fe 2 1.67688m 5.012289126016644e+18 erg
+Fe 2 1.71113m 1.1181094262553487e+18 erg
+Fe 2 1.74494m 1.3234211109513487e+18 erg
+Fe 2 1.79711m 2.614328182294963e+18 erg
+Fe 2 1.80002m 5.21367865615159e+18 erg
+Fe 2 1.80940m 2.696716650539762e+19 erg
+H 1 1.87510m 8.874093651351503e+21 erg
+Fe 2 1.89541m 1.0091952267475898e+18 erg
+Ni 2 1.93877m 2.4688422797536594e+18 erg
+Fe 2 1.95361m 3.584279863226494e+18 erg
+Si 6 1.96247m 0.0 erg
+H 1 2.16553m 8.79984796573087e+20 erg
+Si 7 2.48071m 0.0 erg
+3.637874078716444e+22 erg/(Hz*s)
+9.481615926611713e+23 erg/(Hz*s)
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
+<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span>
+
+<span class="c1"># define grid</span>
+<span class="n">grid_name</span> <span class="o">=</span> <span class="s2">&quot;test_grid&quot;</span>
+<span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;../../tests/test_grid/&quot;</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># define grid point</span>
+<span class="n">grid_point</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_grid_point</span><span class="p">((</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">))</span>
+
+<span class="c1"># get an Sed</span>
+<span class="n">sed</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">grid_point</span><span class="p">,</span> <span class="n">spectra_id</span><span class="o">=</span><span class="s2">&quot;linecont&quot;</span><span class="p">)</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">18.0</span><span class="p">,</span> <span class="mi">23</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\lambda/\AA)$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(L_{\nu}/erg\ s^{-1}\ Hz^{-1} M_{\odot}^{-1})$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">available_lines</span><span class="p">)</span>
+
+
+<span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span>
+
+<span class="n">lc</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span><span class="n">grid_point</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lc</span><span class="p">:</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">line</span><span class="o">.</span><span class="n">wavelength</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+    <span class="n">dl</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="n">line</span><span class="o">.</span><span class="n">wavelength</span>
+    <span class="n">llnu</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">*</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="n">dl</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">llnu</span><span class="p">)</span>
+    <span class="n">lnu</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">+=</span> <span class="n">llnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/s/Hz&quot;</span><span class="p">)</span>
+
+<span class="n">linecont</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">linecont</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="c1"># plt.plot(np.log10(linecont.lam), np.log10(linecont.lnu), alpha=0.5, c=&#39;b&#39;)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">linecont</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">linecont</span><span class="o">.</span><span class="n">lnu</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">18.0</span><span class="p">,</span> <span class="mi">23</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\lambda/\AA)$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(L_{\nu}/erg\ s^{-1}\ Hz^{-1} M_{\odot}^{-1})$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="c1"># plt.plot(np.log10(linecont.lam), np.log10(linecont.lnu), alpha=0.5, c=&#39;b&#39;)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">linecont</span><span class="o">.</span><span class="n">lam</span><span class="p">),</span> <span class="n">linecont</span><span class="o">.</span><span class="n">lnu</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3e23</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm log_</span><span class="si">{10}</span><span class="s2">(\lambda/\AA)$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\rm L_{\nu}/erg\ s^{-1}\ Hz^{-1} M_{\odot}^{-1}$&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.427 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-grids-plot-line-cont-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/0a88df54271ff24e1e3d9391b8503a0f/plot_line_cont.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_line_cont.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/fb69b592f8b23d69521355d383847041/plot_line_cont.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_line_cont.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/77b8d9c9d6d056ad7a1720f5a54b0992/plot_line_cont.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_line_cont.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="plot_spectra.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Plot spectra example</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="plot_log10Q.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Plot ionising luminosity</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, Chris Lovell, Will Roper, Aswin Vijayan, Stephen Wilkins
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=9120aaa1"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
