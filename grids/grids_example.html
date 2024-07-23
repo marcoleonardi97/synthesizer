@@ -942,7 +942,6 @@
 (51, 13, 691)
 </pre></div></div>
 </div>
-<p>You can also pass a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> to isolate the grid to the filter curves you care about. For more details see the the <a class="reference internal" href="../filters/filters.html"><span class="doc">filter docs</span></a>.</p>
 <section id="Plot-a-single-grid-point">
 <h3>Plot a single grid point<a class="headerlink" href="#Plot-a-single-grid-point" title="Link to this heading">¶</a></h3>
 <p>We can plot the spectra at the location of a single point in our grid. First, we choose some age and metallicity</p>
@@ -1005,7 +1004,7 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_15_1.png" src="../_images/grids_grids_example_15_1.png" />
+<img alt="../_images/grids_grids_example_14_1.png" src="../_images/grids_grids_example_14_1.png" />
 </div>
 </div>
 </section>
@@ -1025,7 +1024,7 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_17_0.png" src="../_images/grids_grids_example_17_0.png" />
+<img alt="../_images/grids_grids_example_16_0.png" src="../_images/grids_grids_example_16_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -1040,7 +1039,7 @@ Text(0, 0.5, &#39;$\\rm log_{10}(L_{\\nu}/erg\\ s^{-1}\\ Hz^{-1} M_{\\odot}^{-1}
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/grids_grids_example_18_0.png" src="../_images/grids_grids_example_18_0.png" />
+<img alt="../_images/grids_grids_example_17_0.png" src="../_images/grids_grids_example_17_0.png" />
 </div>
 </div>
 </section>
@@ -1100,47 +1099,6 @@ array([[0.99095578, 1.00851607, 1.00394175, 0.99979438, 0.94348793],
        [1.04712358, 1.03816692, 1.02788439, 1.0014771 , 0.9827252 ],
        [1.12597668, 1.08081315, 1.05479005, 1.02042145, 1.01481675],
        [1.09623435, 1.06834097, 1.05297887, 1.04633496, 1.03886266]])
-</pre></div></div>
-</div>
-</section>
-<section id="Unifying-a-Grid-with-a-FilterCollection">
-<h3>Unifying a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> with a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code><a class="headerlink" href="#Unifying-a-Grid-with-a-FilterCollection" title="Link to this heading">¶</a></h3>
-<p>It’s important when working with a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> and any <code class="docutils literal notranslate"><span class="pre">Filter</span></code> objects (see the filter <a class="reference internal" href="../filters/filters.html"><span class="doc">docs</span></a>) to have a single wavelength array shared between the two to ensure filter transmission curves are applied correctly. Additionally, when using a fixed set of filters, limiting a <code class="docutils literal notranslate"><span class="pre">Grid</span></code>’s spectral range to that of the filters in question can drastically reduce the memory footprint of a calculation by avoiding carrying around wavelength elements that are not required.</p>
-<p>To enable this a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> provides the <code class="docutils literal notranslate"><span class="pre">unify_with_filters</span></code> method. This method will take a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code> as an argument and interpolate the <code class="docutils literal notranslate"><span class="pre">Grid</span></code> spectra onto the filters’ wavelength array. You can also initialise a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> by passing the filter collection via the <code class="docutils literal notranslate"><span class="pre">filters</span></code> keyword argument at instantiation.</p>
-<p>We demonstrate this below using a set of <code class="docutils literal notranslate"><span class="pre">UVJ</span></code> filters.</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">UVJ</span>
-
-<span class="c1"># Get the filter collection</span>
-<span class="n">fc</span> <span class="o">=</span> <span class="n">UVJ</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shape before:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-<span class="c1"># Unify the grid with this filter collection</span>
-<span class="n">grid</span><span class="o">.</span><span class="n">unify_with_filters</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shape after:&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-<span class="c1"># Or you can get the grid interpolated onto the filter wavelength</span>
-<span class="c1"># at the point of initialisation</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="n">fc</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Calculated wavelength array:
-min = 3.31e+03 Angstrom
-max = 1.33e+04 Angstrom
-FilterCollection.lam.size = 75014
-Shape before: (51, 13, 10000)
-Shape after: (51, 13, 2010)
 </pre></div></div>
 </div>
 </section>
@@ -1209,7 +1167,6 @@ Shape after: (51, 13, 2010)
 <li><a class="reference internal" href="#Plot-ionising-luminosities">Plot ionising luminosities</a></li>
 <li><a class="reference internal" href="#Resampling-Grids">Resampling Grids</a></li>
 <li><a class="reference internal" href="#Converting-a-Grid-into-an-Sed">Converting a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> into an <code class="docutils literal notranslate"><span class="pre">Sed</span></code></a></li>
-<li><a class="reference internal" href="#Unifying-a-Grid-with-a-FilterCollection">Unifying a <code class="docutils literal notranslate"><span class="pre">Grid</span></code> with a <code class="docutils literal notranslate"><span class="pre">FilterCollection</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1223,7 +1180,7 @@ Shape after: (51, 13, 2010)
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9120aaa1"></script>
+</div><script src="../_static/documentation_options.js?v=3a39829c"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -615,7 +615,6 @@
         <span class="n">read_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">read_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">lam_lims</span><span class="o">=</span><span class="p">(),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -639,14 +638,10 @@
 <span class="sd">            new_lam (array-like, float)</span>
 <span class="sd">                An optional user defined wavelength array the spectra will be</span>
 <span class="sd">                interpolated onto, see Grid.interp_spectra.</span>
-<span class="sd">            filters (FilterCollection)</span>
-<span class="sd">                An optional FilterCollection object to unify the grids</span>
-<span class="sd">                wavelength grid with. If provided, this will override new_lam</span>
-<span class="sd">                whether passed or not.</span>
 <span class="sd">            lam_lims (tuple, float)</span>
 <span class="sd">                A tuple of the lower and upper wavelength limits to truncate</span>
-<span class="sd">                the grid to (i.e. (lower_lam, upper_lam)). If new_lam or</span>
-<span class="sd">                filters are provided these limits will be ignored.</span>
+<span class="sd">                the grid to (i.e. (lower_lam, upper_lam)). If new_lam is</span>
+<span class="sd">                provided these limits will be ignored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get the grid file path data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -692,10 +687,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">available_lines</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="c1"># Prepare the wavelength axis (if new_lam, lam_lims and filters are</span>
+        <span class="c1"># Prepare the wavelength axis (if new_lam and lam_lims are</span>
         <span class="c1"># all None, this will do nothing, leaving the grid&#39;s wavelength array</span>
         <span class="c1"># as it is in the HDF5 file)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_lam_axis</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">lam_lims</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_lam_axis</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">lam_lims</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parse_grid_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_dir</span><span class="p">,</span> <span class="n">grid_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the grid path and set the grid directory and filename.&quot;&quot;&quot;</span>
@@ -869,23 +864,19 @@
     <span class="k">def</span> <span class="nf">_prepare_lam_axis</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">new_lam</span><span class="p">,</span>
-        <span class="n">filters</span><span class="p">,</span>
         <span class="n">lam_lims</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Modify the grid wavelength axis to adhere to user defined wavelengths.</span>
 
-<span class="sd">        This method will do nothing if the user has not provided new_lam,</span>
-<span class="sd">        filters, or lam_lims.</span>
+<span class="sd">        This method will do nothing if the user has not provided new_lam</span>
+<span class="sd">        or lam_lims.</span>
 
 <span class="sd">        If the user has passed any of these the wavelength array will be</span>
 <span class="sd">        limited and/or interpolated to match the user&#39;s input.</span>
 
 <span class="sd">        - If new_lam is provided, the spectra will be interpolated onto this</span>
 <span class="sd">          array.</span>
-<span class="sd">        - If filters are provided, the spectra will be limited wavelengths</span>
-<span class="sd">          with non-zero transmission and the filters will be interpolated</span>
-<span class="sd">          onto the grid&#39;s wavelength array in this non-zero range.</span>
 <span class="sd">        - If lam_lims are provided, the grid will be truncated to these</span>
 <span class="sd">          limits.</span>
 
@@ -893,24 +884,21 @@
 <span class="sd">            new_lam (array-like, float)</span>
 <span class="sd">                An optional user defined wavelength array the spectra will be</span>
 <span class="sd">                interpolated onto.</span>
-<span class="sd">            filters (FilterCollection)</span>
-<span class="sd">                An optional FilterCollection object to unify the grids</span>
-<span class="sd">                wavelength grid with.</span>
 <span class="sd">            lam_lims (tuple, float)</span>
 <span class="sd">                A tuple of the lower and upper wavelength limits to truncate</span>
 <span class="sd">                the grid to (i.e. (lower_lam, upper_lam)).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># If we have both new_lam (or filters) and wavelength limits</span>
+        <span class="c1"># If we have both new_lam and wavelength limits</span>
         <span class="c1"># the limits become meaningless tell the user so.</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;Passing new_lam or filters and lam_lims is contradictory, &quot;</span>
+                <span class="s2">&quot;Passing new_lam and lam_lims is contradictory, &quot;</span>
                 <span class="s2">&quot;lam_lims will be ignored.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Has a new wavelength grid been passed to interpolate</span>
         <span class="c1"># the spectra onto?</span>
-        <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">filters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Double check we aren&#39;t being asked to do something impossible.</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -921,28 +909,8 @@
             <span class="c1"># Interpolate the spectra grid</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">interp_spectra</span><span class="p">(</span><span class="n">new_lam</span><span class="p">)</span>
 
-        <span class="c1"># Are we unifying with a filter collection?</span>
-        <span class="k">if</span> <span class="n">filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Double check we aren&#39;t being asked to do something impossible.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                    <span class="s2">&quot;Can&#39;t interpolate spectra onto a FilterCollection &quot;</span>
-                    <span class="s2">&quot;wavelength array if no spectra have been read in! &quot;</span>
-                    <span class="s2">&quot;Set read_spectra=True.&quot;</span>
-                <span class="p">)</span>
-
-            <span class="c1"># Warn the user the new_lam will be ignored</span>
-            <span class="k">if</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span>
-                    <span class="s2">&quot;If a FilterCollection is defined alongside new_lam &quot;</span>
-                    <span class="s2">&quot;then FilterCollection.lam takes precedence and new_lam &quot;</span>
-                    <span class="s2">&quot;is ignored&quot;</span>
-                <span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">unify_with_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
-
         <span class="c1"># If we have been given wavelength limtis truncate the grid</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">filters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lam_lims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">new_lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">truncate_grid_lam</span><span class="p">(</span><span class="o">*</span><span class="n">lam_lims</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -1482,36 +1450,6 @@
             <span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="Grid.unify_with_filters">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.unify_with_filters">[docs]</a>
-    <span class="k">def</span> <span class="nf">unify_with_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Unify the grid with a FilterCollection object.</span>
-
-<span class="sd">        This will:</span>
-<span class="sd">        - Find the Grid wavelengths at which transmission is non-zero.</span>
-<span class="sd">        - Limit the spectra and wavelengths to where transmision is non-zero.</span>
-<span class="sd">        - Interpolate the filters onto the Grid&#39;s new wavelength array.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (synthesizer.filter.FilterCollection)</span>
-<span class="sd">                The FilterCollection object to unify with this grid.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the minimum and maximum wavelengths with non-zero transmission</span>
-        <span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">get_non_zero_lam_lims</span><span class="p">()</span>
-
-        <span class="c1"># Ensure we have at least 1 element with 0 transmission to solve</span>
-        <span class="c1"># any issues at the boundaries</span>
-        <span class="n">min_lam</span> <span class="o">-=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">angstrom</span>
-        <span class="n">max_lam</span> <span class="o">+=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">angstrom</span>
-
-        <span class="c1"># Truncate the grid to these wavelength limits</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">truncate_grid_lam</span><span class="p">(</span><span class="n">min_lam</span><span class="p">,</span> <span class="n">max_lam</span><span class="p">)</span>
-
-        <span class="c1"># Interpolate the filters onto this new wavelength range</span>
-        <span class="n">filters</span><span class="o">.</span><span class="n">resample_filters</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="Grid.animate_grid">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.grid.html#synthesizer.grid.Grid.animate_grid">[docs]</a>
     <span class="k">def</span> <span class="nf">animate_grid</span><span class="p">(</span>
@@ -1741,7 +1679,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=9120aaa1"></script>
+</div><script src="../../_static/documentation_options.js?v=3a39829c"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
