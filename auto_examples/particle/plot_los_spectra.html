@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plot line of sight diagnostics" href="plot_get_los_attenutation.html" /><link rel="prev" title="Compare Single star particle to instantaneous SFZH" href="plot_single_star_test.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plot line of sight optical depth calculations" href="plot_get_los_attenutation.html" /><link rel="prev" title="Compare Single star particle to instantaneous SFZH" href="plot_single_star_test.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.07.18 -->
         <title>Plot line of sight diagnostics - Synthesizer</title>
@@ -218,6 +218,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -336,7 +337,7 @@
 <li class="toctree-l3"><a class="reference internal" href="plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -516,8 +517,10 @@ to download the full example code.</p>
 <span id="sphx-glr-auto-examples-particle-plot-los-spectra-py"></span><h1>Plot line of sight diagnostics<a class="headerlink" href="#plot-line-of-sight-diagnostics" title="Link to this heading">¶</a></h1>
 <p>This example shows how to compute line of sight dust surface densities,
 and plots some diagnostics.</p>
-<img src="../../_images/sphx_glr_plot_los_spectra_001.png" srcset="../../_images/sphx_glr_plot_los_spectra_001.png" alt="plot los spectra" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:116: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
+<img src="../../_images/sphx_glr_plot_los_spectra_001.png" srcset="../../_images/sphx_glr_plot_los_spectra_001.png" alt="plot los spectra" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
   self.calculate_integrated_gas_properties()
+/home/runner/work/synthesizer/synthesizer/examples/particle/plot_los_spectra.py:134: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
+  galaxy.calculate_los_tau_v(
 
 (&lt;Figure size 350x500 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{\\AA}]$&#39;, ylabel=&#39;$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$&#39;&gt;)
 </pre></div>
@@ -529,6 +532,7 @@ and plots some diagnostics.</p>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="n">TotalEmission</span>
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
@@ -543,6 +547,22 @@ and plots some diagnostics.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DeJavu Serif&quot;</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Times New Roman&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">calculate_smoothing_lengths</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">num_neighbors</span><span class="o">=</span><span class="mi">56</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the SPH smoothing lengths for a set of coordinates.&quot;&quot;&quot;</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+    <span class="n">distances</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">num_neighbors</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># The k-th nearest neighbor distance (k = num_neighbors)</span>
+    <span class="n">kth_distances</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[:,</span> <span class="n">num_neighbors</span><span class="p">]</span>
+
+    <span class="c1"># Set the smoothing length to the k-th nearest neighbor</span>
+    <span class="c1"># distance divided by 2.0</span>
+    <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">kth_distances</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+    <span class="k">return</span> <span class="n">smoothing_lengths</span>
+
 
 <span class="c1"># Set the seed</span>
 <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
@@ -591,14 +611,8 @@ and plots some diagnostics.</p>
 <span class="c1"># Generate some random coordinates</span>
 <span class="n">coords</span> <span class="o">=</span> <span class="n">CoordinateGenerator</span><span class="o">.</span><span class="n">generate_3D_gaussian</span><span class="p">(</span><span class="n">nstars</span><span class="p">)</span>
 
-<span class="c1"># Calculate the smoothing lengths from radii</span>
-<span class="n">cent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="p">)</span>
-<span class="n">rs</span><span class="p">[</span><span class="n">rs</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>  <span class="c1"># Set a lower bound on the &quot;smoothing length&quot;</span>
+<span class="c1"># Calculate smoothing lengths</span>
+<span class="n">smls</span> <span class="o">=</span> <span class="n">calculate_smoothing_lengths</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
 
 <span class="c1"># Sample the SFZH, producing a Stars object</span>
 <span class="c1"># we will also pass some keyword arguments for attributes</span>
@@ -610,7 +624,7 @@ and plots some diagnostics.</p>
     <span class="n">nstars</span><span class="p">,</span>
     <span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
     <span class="n">current_masses</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">nstars</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mf">8.7</span> <span class="o">/</span> <span class="n">nstars</span><span class="p">),</span>
-    <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">rs</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">smls</span><span class="p">,</span>
     <span class="n">redshift</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -619,20 +633,14 @@ and plots some diagnostics.</p>
 <span class="c1"># Generate some random coordinates</span>
 <span class="n">coords</span> <span class="o">=</span> <span class="n">CoordinateGenerator</span><span class="o">.</span><span class="n">generate_3D_gaussian</span><span class="p">(</span><span class="n">ngas</span><span class="p">)</span>
 
-<span class="c1"># Calculate the smoothing lengths from radii</span>
-<span class="n">cent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-    <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="o">+</span> <span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">cent</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="p">)</span>
-<span class="n">rs</span><span class="p">[</span><span class="n">rs</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.6</span>  <span class="c1"># Set a lower bound on the &quot;smoothing length&quot;</span>
+<span class="c1"># Calculate the smoothing lengths</span>
+<span class="n">smls</span> <span class="o">=</span> <span class="n">calculate_smoothing_lengths</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
 
 <span class="n">gas</span> <span class="o">=</span> <span class="n">Gas</span><span class="p">(</span>
     <span class="n">masses</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mf">6.5</span><span class="p">,</span> <span class="n">ngas</span><span class="p">),</span>
     <span class="n">metallicities</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">ngas</span><span class="p">),</span>
     <span class="n">coordinates</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
-    <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">rs</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">smls</span><span class="p">,</span>
     <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -645,7 +653,11 @@ and plots some diagnostics.</p>
 <span class="n">kernel_data</span> <span class="o">=</span> <span class="n">sph_kernel</span><span class="o">.</span><span class="n">get_kernel</span><span class="p">()</span>
 
 <span class="c1"># Calculate the tau_vs</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">calculate_los_tau_v</span><span class="p">(</span><span class="n">kappa</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span> <span class="n">force_loop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">calculate_los_tau_v</span><span class="p">(</span>
+    <span class="n">kappa</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
+    <span class="n">force_loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="c1"># Get the spectra (this will automatically use the tau_vs we just calculated</span>
 <span class="c1"># since the emission model has tau_v=&quot;tau_v&quot;)</span>
@@ -658,7 +670,7 @@ and plots some diagnostics.</p>
 <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.158 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.167 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-particle-plot-los-spectra-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/55829db956316681b8770a19f9f1c158/plot_los_spectra.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_los_spectra.ipynb</span></code></a></p>
@@ -683,7 +695,7 @@ and plots some diagnostics.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Plot line of sight diagnostics</div>
+                <div class="title">Plot line of sight optical depth calculations</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -722,7 +734,7 @@ and plots some diagnostics.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

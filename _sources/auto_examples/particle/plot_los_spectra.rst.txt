@@ -24,7 +24,7 @@ Plot line of sight diagnostics
 This example shows how to compute line of sight dust surface densities,
 and plots some diagnostics.
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-140
+.. GENERATED FROM PYTHON SOURCE LINES 8-149
 
 
 
@@ -38,8 +38,10 @@ and plots some diagnostics.
 
  .. code-block:: none
 
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:116: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
       self.calculate_integrated_gas_properties()
+    /home/runner/work/synthesizer/synthesizer/examples/particle/plot_los_spectra.py:134: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
+      galaxy.calculate_los_tau_v(
 
     (<Figure size 350x500 with 1 Axes>, <Axes: xlabel='$\\lambda/[\\mathrm{\\AA}]$', ylabel='$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$'>)
 
@@ -56,6 +58,7 @@ and plots some diagnostics.
 
     import matplotlib.pyplot as plt
     import numpy as np
+    from scipy.spatial import cKDTree
     from synthesizer.emission_models import TotalEmission
     from synthesizer.emission_models.attenuation import PowerLaw
     from synthesizer.grid import Grid
@@ -70,6 +73,22 @@ and plots some diagnostics.
 
     plt.rcParams["font.family"] = "DeJavu Serif"
     plt.rcParams["font.serif"] = ["Times New Roman"]
+
+
+    def calculate_smoothing_lengths(positions, num_neighbors=56):
+        """Calculate the SPH smoothing lengths for a set of coordinates."""
+        tree = cKDTree(positions)
+        distances, _ = tree.query(positions, k=num_neighbors + 1)
+
+        # The k-th nearest neighbor distance (k = num_neighbors)
+        kth_distances = distances[:, num_neighbors]
+
+        # Set the smoothing length to the k-th nearest neighbor
+        # distance divided by 2.0
+        smoothing_lengths = kth_distances / 2.0
+
+        return smoothing_lengths
+
 
     # Set the seed
     np.random.seed(42)
@@ -118,14 +137,8 @@ and plots some diagnostics.
     # Generate some random coordinates
     coords = CoordinateGenerator.generate_3D_gaussian(nstars)
 
-    # Calculate the smoothing lengths from radii
-    cent = np.mean(coords, axis=0)
-    rs = np.sqrt(
-        (coords[:, 0] - cent[0]) ** 2
-        + (coords[:, 1] - cent[1]) ** 2
-        + (coords[:, 2] - cent[2]) ** 2
-    )
-    rs[rs < 0.2] = 0.6  # Set a lower bound on the "smoothing length"
+    # Calculate smoothing lengths
+    smls = calculate_smoothing_lengths(coords)
 
     # Sample the SFZH, producing a Stars object
     # we will also pass some keyword arguments for attributes
@@ -137,7 +150,7 @@ and plots some diagnostics.
         nstars,
         coordinates=coords,
         current_masses=np.full(nstars, 10**8.7 / nstars),
-        smoothing_lengths=rs / 2,
+        smoothing_lengths=smls,
         redshift=1,
     )
 
@@ -146,20 +159,14 @@ and plots some diagnostics.
     # Generate some random coordinates
     coords = CoordinateGenerator.generate_3D_gaussian(ngas)
 
-    # Calculate the smoothing lengths from radii
-    cent = np.mean(coords, axis=0)
-    rs = np.sqrt(
-        (coords[:, 0] - cent[0]) ** 2
-        + (coords[:, 1] - cent[1]) ** 2
-        + (coords[:, 2] - cent[2]) ** 2
-    )
-    rs[rs < 0.2] = 0.6  # Set a lower bound on the "smoothing length"
+    # Calculate the smoothing lengths
+    smls = calculate_smoothing_lengths(coords)
 
     gas = Gas(
         masses=np.random.uniform(10**6, 10**6.5, ngas),
         metallicities=np.random.uniform(0.01, 0.05, ngas),
         coordinates=coords,
-        smoothing_lengths=rs / 4,
+        smoothing_lengths=smls,
         dust_to_metal_ratio=0.2,
     )
 
@@ -172,7 +179,11 @@ and plots some diagnostics.
     kernel_data = sph_kernel.get_kernel()
 
     # Calculate the tau_vs
-    galaxy.calculate_los_tau_v(kappa=0.07, kernel=kernel_data, force_loop=True)
+    galaxy.calculate_los_tau_v(
+        kappa=0.07,
+        kernel=kernel_data,
+        force_loop=False,
+    )
 
     # Get the spectra (this will automatically use the tau_vs we just calculated
     # since the emission model has tau_v="tau_v")
@@ -187,7 +198,7 @@ and plots some diagnostics.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.158 seconds)
+   **Total running time of the script:** (0 minutes 1.167 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_los_spectra.py:

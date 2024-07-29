@@ -217,6 +217,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -335,7 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -548,7 +549,9 @@
 <span class="sd">            Centre of the particle distribution.</span>
 <span class="sd">        metallicity_floor (float)</span>
 <span class="sd">            The metallicity floor when using log properties (only matters for</span>
-<span class="sd">            baryons). This is used to avoid log(0) errors</span>
+<span class="sd">            baryons). This is used to avoid log(0) errors.</span>
+<span class="sd">        tau_v (float)</span>
+<span class="sd">            The V band optical depth.</span>
 <span class="sd">        radii (array-like, float)</span>
 <span class="sd">            The radii of the particles.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -571,6 +574,8 @@
         <span class="n">nparticles</span><span class="p">,</span>
         <span class="n">centre</span><span class="p">,</span>
         <span class="n">metallicity_floor</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
+        <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Particles&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Intialise the Particles.</span>
@@ -593,9 +598,11 @@
 <span class="sd">            metallicity_floor (float)</span>
 <span class="sd">                The metallicity floor when using log properties (only matters</span>
 <span class="sd">                for baryons). This is used to avoid log(0) errors.</span>
+<span class="sd">            tau_v (float)</span>
+<span class="sd">                The V band optical depth.</span>
+<span class="sd">            name (str)</span>
+<span class="sd">                The name of the particle type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Check arguments are valid</span>
-
         <span class="c1"># Set phase space coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="o">=</span> <span class="n">velocities</span>
@@ -634,6 +641,12 @@
         <span class="c1"># Set the metallicity floor when using log properties (only matters for</span>
         <span class="c1"># baryons)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_floor</span> <span class="o">=</span> <span class="n">metallicity_floor</span>
+
+        <span class="c1"># Set the V band optical depths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau_v</span> <span class="o">=</span> <span class="n">tau_v</span>
+
+        <span class="c1"># Attach the name of the particle type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">_check_part_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">velocities</span><span class="p">,</span> <span class="n">masses</span><span class="p">,</span> <span class="n">softening_length</span>
@@ -1097,6 +1110,174 @@
 <span class="sd">                The half flux radius of the particle distribution.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_flux_radius</span><span class="p">(</span><span class="n">spectra_type</span><span class="p">,</span> <span class="n">filter_code</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_prepare_los_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other_parts</span><span class="p">,</span>
+        <span class="n">attr</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">,</span>
+        <span class="n">force_loop</span><span class="p">,</span>
+        <span class="n">min_count</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prepare the arguments for line of sight column density computation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_parts (Particles)</span>
+<span class="sd">                The other particles to compute the column density with.</span>
+<span class="sd">            attr (str)</span>
+<span class="sd">                The attribute to compute the column density of.</span>
+<span class="sd">            kernel (array_like, float)</span>
+<span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
+<span class="sd">            mask (bool)</span>
+<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
+<span class="sd">                be computed and returned for stars with True in the mask.</span>
+<span class="sd">            threshold (float)</span>
+<span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
+<span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
+<span class="sd">            force_loop (bool)</span>
+<span class="sd">                Whether to force the use of a simple loop rather than the tree.</span>
+<span class="sd">            min_count (int)</span>
+<span class="sd">                The minimum number of particles allowed in a leaf cell when</span>
+<span class="sd">                using the tree. This can be used for tuning the tree</span>
+<span class="sd">                performance.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the calculation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure we actually have the properties needed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> object is missing coordinates!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">other_parts</span><span class="o">.</span><span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other_parts</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> object is missing coordinates!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">other_parts</span><span class="o">.</span><span class="n">smoothing_lengths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other_parts</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> object is missing smoothing lengths!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">other_parts</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other_parts</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> object is missing </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2">!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Set up the kernel inputs to the C function.</span>
+        <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">kdim</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="c1"># Get particle counts</span>
+        <span class="n">npart_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span>
+        <span class="n">npart_j</span> <span class="o">=</span> <span class="n">other_parts</span><span class="o">.</span><span class="n">nparticles</span>
+
+        <span class="c1"># Set up the inputs from this particle instance.</span>
+        <span class="n">pos_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set up the inputs from the other particle instance.</span>
+        <span class="n">pos_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="n">other_parts</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
+        <span class="n">smls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="n">other_parts</span><span class="o">.</span><span class="n">_smoothing_lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
+        <span class="n">surf_den_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">other_parts</span><span class="p">,</span> <span class="n">attr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">pos_i</span><span class="p">,</span>
+            <span class="n">pos_j</span><span class="p">,</span>
+            <span class="n">smls</span><span class="p">,</span>
+            <span class="n">surf_den_vals</span><span class="p">,</span>
+            <span class="n">npart_i</span><span class="p">,</span>
+            <span class="n">npart_j</span><span class="p">,</span>
+            <span class="n">kdim</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">force_loop</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Particles.get_los_column_density">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_los_column_density">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_los_column_density</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other_parts</span><span class="p">,</span>
+        <span class="n">density_attr</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">force_loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_count</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the column density of an attribute.</span>
+
+<span class="sd">        This will calculate the column density of an attribute on another</span>
+<span class="sd">        Particles child instance at the positions of the particles in this</span>
+<span class="sd">        Particles instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other_parts (Particles)</span>
+<span class="sd">                The other particles to calculate the column density with.</span>
+<span class="sd">            density_attr (str)</span>
+<span class="sd">                The attribute to use to calculate the column density.</span>
+<span class="sd">            kernel (array-like, float)</span>
+<span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
+<span class="sd">            mask (array-like, bool)</span>
+<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
+<span class="sd">                be computed and returned for stars with True in the mask.</span>
+<span class="sd">            threshold (float)</span>
+<span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
+<span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
+<span class="sd">            force_loop (bool)</span>
+<span class="sd">                Whether to force the use of a simple loop rather than the tree.</span>
+<span class="sd">            min_count (int)</span>
+<span class="sd">                The minimum number of particles allowed in a leaf cell when</span>
+<span class="sd">                using the tree. This can be used for tuning the tree</span>
+<span class="sd">                performance.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the calculation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            column_density (float)</span>
+<span class="sd">                The column density of the particles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">synthesizer.extensions.column_density</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">compute_column_density</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># If we don&#39;t have a mask make a fake one for consistency</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="c1"># Compute the column density</span>
+        <span class="k">return</span> <span class="n">compute_column_density</span><span class="p">(</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepare_los_args</span><span class="p">(</span>
+                <span class="n">other_parts</span><span class="p">,</span>
+                <span class="n">density_attr</span><span class="p">,</span>
+                <span class="n">kernel</span><span class="p">,</span>
+                <span class="n">mask</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="p">,</span>
+                <span class="n">force_loop</span><span class="p">,</span>
+                <span class="n">min_count</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
 </div>
 
 
@@ -1188,7 +1369,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../../../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

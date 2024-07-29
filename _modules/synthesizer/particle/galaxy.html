@@ -217,6 +217,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -335,7 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -529,10 +530,11 @@
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.base_galaxy</span> <span class="kn">import</span> <span class="n">BaseGalaxy</span>
+<span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
 <span class="kn">from</span> <span class="nn">synthesizer.imaging</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageCollection</span><span class="p">,</span> <span class="n">SpectralCube</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">ParametricStars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Gas</span><span class="p">,</span> <span class="n">Stars</span>
-<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="Galaxy">
@@ -894,105 +896,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metallicities</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_prepare_los_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">force_loop</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A method to prepare the arguments for line of sight metal surface</span>
-<span class="sd">        density computation with the C function.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            kernel (array_like, float)</span>
-<span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
-<span class="sd">                order such that a k element array can be indexed for the value</span>
-<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
-<span class="sd">                an arbitrary kernel.</span>
-<span class="sd">            mask (bool)</span>
-<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
-<span class="sd">                be computed and returned for stars with True in the mask.</span>
-<span class="sd">            threshold (float)</span>
-<span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
-<span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># If we have no gas, throw an error</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;No Gas object has been provided! We can&#39;t calculate line of &quot;</span>
-                <span class="s2">&quot;sight dust attenuation without a Gas object containing the &quot;</span>
-                <span class="s2">&quot;dust!&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Ensure we actually have the properties needed</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Star object is missing coordinates!&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">coordinates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Gas object is missing coordinates!&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">smoothing_lengths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Gas object is missing smoothing lengths!&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Gas object is missing metallicities!&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">masses</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Gas object is missing masses!&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Gas object is missing DTMs (dust_to_metal_ratio)!&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Set up the kernel inputs to the C function.</span>
-        <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">kdim</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">.</span><span class="n">size</span>
-
-        <span class="c1"># Set up the stellar inputs to the C function.</span>
-        <span class="n">star_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-        <span class="p">)</span>
-        <span class="n">nstar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># Set up the gas inputs to the C function.</span>
-        <span class="n">gas_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">gas_sml</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_smoothing_lengths</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-        <span class="p">)</span>
-        <span class="n">gas_met</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">metallicities</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-        <span class="p">)</span>
-        <span class="n">gas_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">_masses</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-            <span class="n">gas_dtm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">gas_mass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">),</span>
-                <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">gas_dtm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="o">.</span><span class="n">dust_to_metal_ratio</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
-            <span class="p">)</span>
-        <span class="n">ngas</span> <span class="o">=</span> <span class="n">gas_mass</span><span class="o">.</span><span class="n">size</span>
-
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">kernel</span><span class="p">,</span>
-            <span class="n">star_pos</span><span class="p">,</span>
-            <span class="n">gas_pos</span><span class="p">,</span>
-            <span class="n">gas_sml</span><span class="p">,</span>
-            <span class="n">gas_met</span><span class="p">,</span>
-            <span class="n">gas_mass</span><span class="p">,</span>
-            <span class="n">gas_dtm</span><span class="p">,</span>
-            <span class="n">nstar</span><span class="p">,</span>
-            <span class="n">ngas</span><span class="p">,</span>
-            <span class="n">kdim</span><span class="p">,</span>
-            <span class="n">threshold</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">gas_sml</span><span class="p">),</span>
-            <span class="n">force_loop</span><span class="p">,</span>
-        <span class="p">)</span>
-
 <div class="viewcode-block" id="Galaxy.integrate_particle_spectra">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.integrate_particle_spectra">[docs]</a>
     <span class="k">def</span> <span class="nf">integrate_particle_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1011,26 +914,32 @@
             <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Galaxy.calculate_los_tau_v">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.calculate_los_tau_v">[docs]</a>
-    <span class="k">def</span> <span class="nf">calculate_los_tau_v</span><span class="p">(</span>
+<div class="viewcode-block" id="Galaxy.get_stellar_los_tau_v">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_stellar_los_tau_v">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_stellar_los_tau_v</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">kappa</span><span class="p">,</span>
         <span class="n">kernel</span><span class="p">,</span>
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">force_loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_count</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate tau_v for each star particle based on the distribution of</span>
-<span class="sd">        stellar and gas particles.</span>
+<span class="sd">        Calculate the LOS optical depth for each star particle.</span>
+
+<span class="sd">        This will calculate the optical depth for each star particle based on</span>
+<span class="sd">        the gas particle distribution. The stars are considered to interact</span>
+<span class="sd">        with a gas particle if gas_z &gt; star_z and the star postion is within</span>
+<span class="sd">        the SPH kernel of the gas particle.</span>
 
 <span class="sd">        Note: the resulting tau_vs will be associated to the stars object at</span>
 <span class="sd">        self.stars.tau_v.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kappa (float)</span>
-<span class="sd">                ...</span>
+<span class="sd">                The dust opacity in units of Msun / pc**2.</span>
 <span class="sd">            kernel (array_like/float)</span>
 <span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
 <span class="sd">                order such that a k element array can be indexed for the value</span>
@@ -1046,19 +955,42 @@
 <span class="sd">                By default (False) the C function will only loop over nearby</span>
 <span class="sd">                gas particles to search for contributions to the LOS surface</span>
 <span class="sd">                density. This forces the loop over *all* gas particles.</span>
+<span class="sd">            min_count (int)</span>
+<span class="sd">                The minimum number of particles in a leaf cell of the tree</span>
+<span class="sd">                used to search for gas particles. Can be used to tune the</span>
+<span class="sd">                performance of the tree search in extreme cases. If there are</span>
+<span class="sd">                fewer particles in a leaf cell than this value, the search</span>
+<span class="sd">                will be performed with a brute force loop.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the tree search. Default is 1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
-        <span class="kn">from</span> <span class="nn">..extensions.los</span> <span class="kn">import</span> <span class="n">compute_dust_surface_dens</span>
-
-        <span class="c1"># If we don&#39;t have a mask make a fake one for consistency</span>
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
-
-        <span class="c1"># Prepare the arguments</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_los_args</span><span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">force_loop</span><span class="p">)</span>
+        <span class="c1"># Ensure we have stars and gas</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No Stars object has been provided! We can&#39;t calculate line &quot;</span>
+                <span class="s2">&quot;of sight dust attenuation without a Stars object containing &quot;</span>
+                <span class="s2">&quot;the stellar particles!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No Gas object has been provided! We can&#39;t calculate line of &quot;</span>
+                <span class="s2">&quot;sight dust attenuation without a Gas object containing the &quot;</span>
+                <span class="s2">&quot;dust!&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Compute the dust surface densities</span>
-        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="n">compute_dust_surface_dens</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>  <span class="c1"># Msun / Mpc**2</span>
+        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_los_column_density</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="p">,</span>
+            <span class="s2">&quot;dust_masses&quot;</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">force_loop</span><span class="o">=</span><span class="n">force_loop</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="o">=</span><span class="n">min_count</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># Msun / Mpc**2</span>
 
         <span class="n">los_dustsds</span> <span class="o">/=</span> <span class="p">(</span><span class="mf">1e6</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Msun / pc**2</span>
 
@@ -1070,8 +1002,195 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">nparticles</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">tau_v</span>
 
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating stellar LOS tau_v&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">tau_v</span></div>
 
+
+<div class="viewcode-block" id="Galaxy.get_black_hole_los_tau_v">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.get_black_hole_los_tau_v">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_black_hole_los_tau_v</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">kappa</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">force_loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_count</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the LOS optical depth for each black hole particle.</span>
+
+<span class="sd">        This will calculate the optical depth for each black hole particle</span>
+<span class="sd">        based on the gas particle distribution. The black holes are considered</span>
+<span class="sd">        to interact with a gas particle if gas_z &gt; black_hole_z and the black</span>
+<span class="sd">        hole postion is within the SPH kernel of the gas particle.</span>
+
+<span class="sd">        Note: the resulting tau_vs will be associated to the black_holes object</span>
+<span class="sd">        at self.black_holes.tau_v.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kappa (float)</span>
+<span class="sd">                The dust opacity in units of Msun / pc**2.</span>
+<span class="sd">            kernel (array_like/float)</span>
+<span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
+<span class="sd">            mask (bool)</span>
+<span class="sd">                A mask to be applied to the black holes. Surface densities will</span>
+<span class="sd">                only be computed and returned for black holes with True in the</span>
+<span class="sd">                mask.</span>
+<span class="sd">            threshold (float)</span>
+<span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
+<span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
+<span class="sd">            force_loop (bool)</span>
+<span class="sd">                By default (False) the C function will only loop over nearby</span>
+<span class="sd">                gas particles to search for contributions to the LOS surface</span>
+<span class="sd">                density. This forces the loop over *all* gas particles.</span>
+<span class="sd">            min_count (int)</span>
+<span class="sd">                The minimum number of particles in a leaf cell of the tree</span>
+<span class="sd">                used to search for gas particles. Can be used to tune the</span>
+<span class="sd">                performance of the tree search in extreme cases. If there are</span>
+<span class="sd">                fewer particles in a leaf cell than this value, the search</span>
+<span class="sd">                will be performed with a brute force loop.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the tree search. Default is 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
+
+        <span class="c1"># Ensure we have black holes and gas</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No BlackHoles object has been provided! We can&#39;t calculate &quot;</span>
+                <span class="s2">&quot;line of sight dust attenuation without a BlackHoles object &quot;</span>
+                <span class="s2">&quot;containing the black hole particles!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No Gas object has been provided! We can&#39;t calculate line of &quot;</span>
+                <span class="s2">&quot;sight dust attenuation without a Gas object containing the &quot;</span>
+                <span class="s2">&quot;dust!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Compute the dust surface densities</span>
+        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_los_column_density</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="p">,</span>
+            <span class="s2">&quot;dust_masses&quot;</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">force_loop</span><span class="o">=</span><span class="n">force_loop</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="o">=</span><span class="n">min_count</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">los_dustsds</span> <span class="o">/=</span> <span class="p">(</span><span class="mf">1e6</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Msun / pc**2</span>
+
+        <span class="c1"># Finalise the calculation</span>
+        <span class="n">tau_v</span> <span class="o">=</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">los_dustsds</span>
+
+        <span class="c1"># Store the result in self.black_holes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">tau_v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">tau_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">nbh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">tau_v</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">tau_v</span>
+
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating black hole LOS tau_v&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tau_v</span></div>
+
+
+    <span class="nd">@deprecated</span>
+    <span class="k">def</span> <span class="nf">calculate_los_tau_v</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">kappa</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">force_loop</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_count</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the LOS optical depth for each star particle.</span>
+
+<span class="sd">        This will calculate the optical depth for each star particle based on</span>
+<span class="sd">        the gas particle distribution. The stars are considered to interact</span>
+<span class="sd">        with a gas particle if gas_z &gt; star_z and the star postion is within</span>
+<span class="sd">        the SPH kernel of the gas particle.</span>
+
+<span class="sd">        Note: the resulting tau_vs will be associated to the stars object at</span>
+<span class="sd">        self.stars.tau_v.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            kappa (float)</span>
+<span class="sd">                The dust opacity in units of Msun / pc**2.</span>
+<span class="sd">            kernel (array_like/float)</span>
+<span class="sd">                A 1D description of the SPH kernel. Values must be in ascending</span>
+<span class="sd">                order such that a k element array can be indexed for the value</span>
+<span class="sd">                of impact parameter q via kernel[int(k*q)]. Note, this can be</span>
+<span class="sd">                an arbitrary kernel.</span>
+<span class="sd">            mask (bool)</span>
+<span class="sd">                A mask to be applied to the stars. Surface densities will only</span>
+<span class="sd">                be computed and returned for stars with True in the mask.</span>
+<span class="sd">            threshold (float)</span>
+<span class="sd">                The threshold above which the SPH kernel is 0. This is normally</span>
+<span class="sd">                at a value of the impact parameter of q = r / h = 1.</span>
+<span class="sd">            force_loop (bool)</span>
+<span class="sd">                By default (False) the C function will only loop over nearby</span>
+<span class="sd">                gas particles to search for contributions to the LOS surface</span>
+<span class="sd">                density. This forces the loop over *all* gas particles.</span>
+<span class="sd">            min_count (int)</span>
+<span class="sd">                The minimum number of particles in a leaf cell of the tree</span>
+<span class="sd">                used to search for gas particles. Can be used to tune the</span>
+<span class="sd">                performance of the tree search in extreme cases. If there are</span>
+<span class="sd">                fewer particles in a leaf cell than this value, the search</span>
+<span class="sd">                will be performed with a brute force loop.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the tree search. Default is 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
+
+        <span class="c1"># Ensure we have stars and gas</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No Stars object has been provided! We can&#39;t calculate line &quot;</span>
+                <span class="s2">&quot;of sight dust attenuation without a Stars object containing &quot;</span>
+                <span class="s2">&quot;the stellar particles!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;No Gas object has been provided! We can&#39;t calculate line of &quot;</span>
+                <span class="s2">&quot;sight dust attenuation without a Gas object containing the &quot;</span>
+                <span class="s2">&quot;dust!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Compute the dust surface densities</span>
+        <span class="n">los_dustsds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_los_column_density</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gas</span><span class="p">,</span>
+            <span class="s2">&quot;dust_masses&quot;</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">force_loop</span><span class="o">=</span><span class="n">force_loop</span><span class="p">,</span>
+            <span class="n">min_count</span><span class="o">=</span><span class="n">min_count</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># Msun / Mpc**2</span>
+
+        <span class="n">los_dustsds</span> <span class="o">/=</span> <span class="p">(</span><span class="mf">1e6</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>  <span class="c1"># Msun / pc**2</span>
+
+        <span class="c1"># Finalise the calculation</span>
+        <span class="n">tau_v</span> <span class="o">=</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">los_dustsds</span>
+
+        <span class="c1"># Store the result in self.stars</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">nparticles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">tau_v</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">tau_v</span>
+
+        <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating LOS tau_v&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tau_v</span>
 
 <div class="viewcode-block" id="Galaxy.screen_dust_gamma_parameter">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.galaxy.html#synthesizer.particle.galaxy.Galaxy.screen_dust_gamma_parameter">[docs]</a>
@@ -2216,7 +2335,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../../../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

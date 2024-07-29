@@ -218,6 +218,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -336,7 +337,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -565,34 +566,6 @@ of the black hole. The default is solar metallcity.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.calculate_los_tau_v">
-<span class="sig-name descname"><span class="pre">calculate_los_tau_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.calculate_los_tau_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.calculate_los_tau_v" title="Link to this definition">¶</a></dt>
-<dd><p>Calculate tau_v for each star particle based on the distribution of
-stellar and gas particles.</p>
-<p>Note: the resulting tau_vs will be associated to the stars object at
-self.stars.tau_v.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>kappa</strong> (<em>float</em>) – <p>…</p>
-</p></li>
-<li><p><strong>kernel</strong> (<em>array_like/float</em>) – A 1D description of the SPH kernel. Values must be in ascending
-order such that a k element array can be indexed for the value
-of impact parameter q via kernel[int(k*q)]. Note, this can be
-an arbitrary kernel.</p></li>
-<li><p><strong>mask</strong> (<em>bool</em>) – A mask to be applied to the stars. Surface densities will only
-be computed and returned for stars with True in the mask.</p></li>
-<li><p><strong>threshold</strong> (<em>float</em>) – The threshold above which the SPH kernel is 0. This is normally
-at a value of the impact parameter of q = r / h = 1.</p></li>
-<li><p><strong>force_loop</strong> (<em>bool</em>) – By default (False) the C function will only loop over nearby
-gas particles to search for contributions to the LOS surface
-density. This forces the loop over <em>all</em> gas particles.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.dust_to_metal_vijayan19">
 <span class="sig-name descname"><span class="pre">dust_to_metal_vijayan19</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stellar_mass_weighted_age</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ism_metallicity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.dust_to_metal_vijayan19"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.dust_to_metal_vijayan19" title="Link to this definition">¶</a></dt>
 <dd><p>Fitting function for the dust-to-metals ratio based on
@@ -606,6 +579,43 @@ ism_metallicity (float)
 Mass weighted gas-phase metallicity. Defaults to None,
 and uses value provided on this galaxy object
 (dimensionless)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_black_hole_los_tau_v">
+<span class="sig-name descname"><span class="pre">get_black_hole_los_tau_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_black_hole_los_tau_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_black_hole_los_tau_v" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the LOS optical depth for each black hole particle.</p>
+<p>This will calculate the optical depth for each black hole particle
+based on the gas particle distribution. The black holes are considered
+to interact with a gas particle if gas_z &gt; black_hole_z and the black
+hole postion is within the SPH kernel of the gas particle.</p>
+<p>Note: the resulting tau_vs will be associated to the black_holes object
+at self.black_holes.tau_v.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kappa</strong> (<em>float</em>) – The dust opacity in units of Msun / pc**2.</p></li>
+<li><p><strong>kernel</strong> (<em>array_like/float</em>) – A 1D description of the SPH kernel. Values must be in ascending
+order such that a k element array can be indexed for the value
+of impact parameter q via kernel[int(k*q)]. Note, this can be
+an arbitrary kernel.</p></li>
+<li><p><strong>mask</strong> (<em>bool</em>) – A mask to be applied to the black holes. Surface densities will
+only be computed and returned for black holes with True in the
+mask.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – The threshold above which the SPH kernel is 0. This is normally
+at a value of the impact parameter of q = r / h = 1.</p></li>
+<li><p><strong>force_loop</strong> (<em>bool</em>) – By default (False) the C function will only loop over nearby
+gas particles to search for contributions to the LOS surface
+density. This forces the loop over <em>all</em> gas particles.</p></li>
+<li><p><strong>min_count</strong> (<em>int</em>) – The minimum number of particles in a leaf cell of the tree
+used to search for gas particles. Can be used to tune the
+performance of the tree search in extreme cases. If there are
+fewer particles in a leaf cell than this value, the search
+will be performed with a brute force loop.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use in the tree search. Default is 1.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -958,6 +968,42 @@ module. Only used for smoothed images.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.get_stellar_los_tau_v">
+<span class="sig-name descname"><span class="pre">get_stellar_los_tau_v</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.get_stellar_los_tau_v"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.get_stellar_los_tau_v" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the LOS optical depth for each star particle.</p>
+<p>This will calculate the optical depth for each star particle based on
+the gas particle distribution. The stars are considered to interact
+with a gas particle if gas_z &gt; star_z and the star postion is within
+the SPH kernel of the gas particle.</p>
+<p>Note: the resulting tau_vs will be associated to the stars object at
+self.stars.tau_v.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kappa</strong> (<em>float</em>) – The dust opacity in units of Msun / pc**2.</p></li>
+<li><p><strong>kernel</strong> (<em>array_like/float</em>) – A 1D description of the SPH kernel. Values must be in ascending
+order such that a k element array can be indexed for the value
+of impact parameter q via kernel[int(k*q)]. Note, this can be
+an arbitrary kernel.</p></li>
+<li><p><strong>mask</strong> (<em>bool</em>) – A mask to be applied to the stars. Surface densities will only
+be computed and returned for stars with True in the mask.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – The threshold above which the SPH kernel is 0. This is normally
+at a value of the impact parameter of q = r / h = 1.</p></li>
+<li><p><strong>force_loop</strong> (<em>bool</em>) – By default (False) the C function will only loop over nearby
+gas particles to search for contributions to the LOS surface
+density. This forces the loop over <em>all</em> gas particles.</p></li>
+<li><p><strong>min_count</strong> (<em>int</em>) – The minimum number of particles in a leaf cell of the tree
+used to search for gas particles. Can be used to tune the
+performance of the tree search in extreme cases. If there are
+fewer particles in a leaf cell than this value, the search
+will be performed with a brute force loop.</p></li>
+<li><p><strong>nthreads</strong> (<em>int</em>) – The number of threads to use in the tree search. Default is 1.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.galaxy.Galaxy.integrate_particle_spectra">
 <span class="sig-name descname"><span class="pre">integrate_particle_spectra</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/galaxy.html#Galaxy.integrate_particle_spectra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.galaxy.Galaxy.integrate_particle_spectra" title="Link to this definition">¶</a></dt>
 <dd><p>Integrate all particle spectra on any attached components.</p>
@@ -1111,8 +1157,8 @@ defaults to value attached to this galaxy object.</p></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_black_hole_metallicity"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_black_hole_metallicity()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_integrated_gas_properties"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_integrated_gas_properties()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_integrated_stellar_properties"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_integrated_stellar_properties()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.calculate_los_tau_v"><code class="docutils literal notranslate"><span class="pre">Galaxy.calculate_los_tau_v()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.dust_to_metal_vijayan19"><code class="docutils literal notranslate"><span class="pre">Galaxy.dust_to_metal_vijayan19()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_black_hole_los_tau_v"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_black_hole_los_tau_v()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_data_cube"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_data_cube()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_images_flux"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_images_flux()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_images_luminosity"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_images_luminosity()</span></code></a></li>
@@ -1125,6 +1171,7 @@ defaults to value attached to this galaxy object.</p></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_mass()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metal_mass"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_metal_mass()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_map_stellar_metallicity"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_map_stellar_metallicity()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.get_stellar_los_tau_v"><code class="docutils literal notranslate"><span class="pre">Galaxy.get_stellar_los_tau_v()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.integrate_particle_spectra"><code class="docutils literal notranslate"><span class="pre">Galaxy.integrate_particle_spectra()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.load_gas"><code class="docutils literal notranslate"><span class="pre">Galaxy.load_gas()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.galaxy.Galaxy.load_stars"><code class="docutils literal notranslate"><span class="pre">Galaxy.load_stars()</span></code></a></li>
@@ -1142,7 +1189,7 @@ defaults to value attached to this galaxy object.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

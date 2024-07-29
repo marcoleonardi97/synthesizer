@@ -217,6 +217,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -335,7 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -836,6 +837,164 @@
             <span class="n">nthreads</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_prepare_line_args</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">line_id</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">,</span>
+        <span class="n">grid_assignment_method</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate the arguments for the C extension to compute lines.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (Grid)</span>
+<span class="sd">                The AGN grid object to extract lines from.</span>
+<span class="sd">            line_id (str)</span>
+<span class="sd">                The id of the line to extract.</span>
+<span class="sd">            fesc (float/array-like, float)</span>
+<span class="sd">                Fraction of stellar emission that escapes unattenuated from</span>
+<span class="sd">                the birth cloud. Can either be a single value</span>
+<span class="sd">                or an value per star (defaults to 0.0).</span>
+<span class="sd">            mask (bool)</span>
+<span class="sd">                A mask to be applied to the stars. Spectra will only be</span>
+<span class="sd">                computed and returned for stars with True in the mask.</span>
+<span class="sd">            grid_assignment_method (string)</span>
+<span class="sd">                The type of method used to assign particles to a SPS grid</span>
+<span class="sd">                point. Allowed methods are cic (cloud in cell) or nearest</span>
+<span class="sd">                grid point (ngp) or there uppercase equivalents (CIC, NGP).</span>
+<span class="sd">                Defaults to cic.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Which line region is this for?</span>
+        <span class="k">if</span> <span class="s2">&quot;nlr&quot;</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">grid_name</span><span class="p">:</span>
+            <span class="n">line_region</span> <span class="o">=</span> <span class="s2">&quot;nlr&quot;</span>
+        <span class="k">elif</span> <span class="s2">&quot;blr&quot;</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">grid_name</span><span class="p">:</span>
+            <span class="n">line_region</span> <span class="o">=</span> <span class="s2">&quot;blr&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Grid used for blackholes does not appear to be for&quot;</span>
+                <span class="s2">&quot; a line region (nlr or blr).&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Handle the case where mask is None</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="c1"># Set up the inputs to the C function.</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">axis</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">axes</span>
+        <span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">grid</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+            <span class="c1"># Parameters that need to be provided from the black hole</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># We might be trying to get a Quanitity, in which case we need</span>
+            <span class="c1"># a leading _</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># We might be missing a line region suffix, if prop is</span>
+            <span class="c1"># None we need to try again with the suffix</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">line_region</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># We could also be tripped up by plurals (TODO: stop this from</span>
+            <span class="c1"># happening!)</span>
+            <span class="k">elif</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;mass&quot;</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;masses&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;accretion_rate&quot;</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;accretion_rates&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;metallicity&quot;</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;metallicities&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># If we still have None here then our blackhole component doesn&#39;t</span>
+            <span class="c1"># have the required parameter</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not find </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">line_region</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;on </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+        <span class="c1"># Calculate npart from the mask</span>
+        <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+        <span class="c1"># Remove units from any unyt_arrays</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">prop</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="k">else</span> <span class="n">prop</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Ensure any parameters inherited from the emission model have</span>
+        <span class="c1"># as many values as particles</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">props</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                <span class="n">props</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">props</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nbh</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+
+        <span class="c1"># Apply the mask to each property and make contiguous</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">prop</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span>
+        <span class="p">]</span>
+
+        <span class="c1"># For black holes mass is a grid parameter but we still need to</span>
+        <span class="c1"># multiply by mass in the extensions so just multiply by 1</span>
+        <span class="n">part_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">npart</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># Make sure we set the number of particles to the size of the mask</span>
+        <span class="n">npart</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
+
+        <span class="c1"># Get the line grid and continuum</span>
+        <span class="n">grid_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">][</span><span class="s2">&quot;luminosity&quot;</span><span class="p">],</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">grid_continuum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">][</span><span class="s2">&quot;continuum&quot;</span><span class="p">],</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get the grid dimensions after slicing what we need</span>
+        <span class="n">grid_dims</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid_props</span><span class="p">):</span>
+            <span class="n">grid_dims</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="c1"># If fesc isn&#39;t an array make it one</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fesc</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="n">fesc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">npart</span><span class="p">,</span> <span class="n">fesc</span><span class="p">))</span>
+
+        <span class="c1"># Convert inputs to tuples</span>
+        <span class="n">grid_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">grid_props</span><span class="p">)</span>
+        <span class="n">part_props</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+
+        <span class="c1"># If nthreads is -1 then use all available threads</span>
+        <span class="k">if</span> <span class="n">nthreads</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">nthreads</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">grid_line</span><span class="p">,</span>
+            <span class="n">grid_continuum</span><span class="p">,</span>
+            <span class="n">grid_props</span><span class="p">,</span>
+            <span class="n">part_props</span><span class="p">,</span>
+            <span class="n">part_mass</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="p">,</span>
+            <span class="n">grid_dims</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">grid_props</span><span class="p">),</span>
+            <span class="n">npart</span><span class="p">,</span>
+            <span class="n">grid_assignment_method</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a string representation of the particle object.</span>
@@ -881,7 +1040,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../../../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

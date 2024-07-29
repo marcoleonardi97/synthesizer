@@ -217,6 +217,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../galaxy/galaxy.html">Galaxy</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Galaxy</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../galaxy/particle_parametric.html">Particle vs Parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../galaxy/line_of_sight.html">Line of Sight Calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../components/components.html">Components</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -335,7 +336,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_compare_grid_assignment.html">Compare SPS grid assignment methods</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
 </ul>
 </li>
 </ul>
@@ -512,11 +513,13 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">s</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="BlackholesComponent">
@@ -851,6 +854,118 @@
 
         <span class="c1"># Get the integrated spectra in grid units (erg / s / Hz)</span>
         <span class="k">return</span> <span class="n">compute_integrated_sed</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BlackholesComponent.generate_line">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.generate_line">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">grid</span><span class="p">,</span>
+        <span class="n">line_id</span><span class="p">,</span>
+        <span class="n">fesc</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;cic&quot;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate rest frame line luminosity and continuum from an AGN Grid.</span>
+
+<span class="sd">        This is a flexible base method which extracts the rest frame line</span>
+<span class="sd">        luminosity of this stellar population from the AGN grid based on the</span>
+<span class="sd">        passed arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            grid (Grid):</span>
+<span class="sd">                A Grid object.</span>
+<span class="sd">            line_id (list/str):</span>
+<span class="sd">                A list of line_ids or a str denoting a single line.</span>
+<span class="sd">                Doublets can be specified as a nested list or using a</span>
+<span class="sd">                comma (e.g. &#39;OIII4363,OIII4959&#39;).</span>
+<span class="sd">            fesc (float/array-like, float)</span>
+<span class="sd">                Fraction of AGN emission that escapes unattenuated from</span>
+<span class="sd">                the birth cloud. Can either be a single value</span>
+<span class="sd">                or an value per star (defaults to 0.0).</span>
+<span class="sd">            mask (array)</span>
+<span class="sd">                A mask to apply to the particles (only applicable to particle)</span>
+<span class="sd">            method (str)</span>
+<span class="sd">                The method to use for the interpolation. Options are:</span>
+<span class="sd">                &#39;cic&#39; - Cloud in cell</span>
+<span class="sd">                &#39;ngp&#39; - Nearest grid point</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use in the C extension. If -1 then</span>
+<span class="sd">                all available threads are used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Line</span>
+<span class="sd">                An instance of Line contain this lines wavelenth, luminosity,</span>
+<span class="sd">                and continuum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">synthesizer.extensions.integrated_line</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">compute_integrated_line</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Ensure line_id is a string</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;line_id must be a string&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Ensure and warn that the masking hasn&#39;t removed everything</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Age mask has filtered out all particles&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">Line</span><span class="p">(</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">Line</span><span class="p">(</span>
+                        <span class="n">line_id</span><span class="o">=</span><span class="n">line_id_</span><span class="p">,</span>
+                        <span class="n">wavelength</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span>
+                        <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span>
+                        <span class="n">luminosity</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                        <span class="n">continuum</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Set up a list to hold each individual Line</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Loop over the ids in this container</span>
+        <span class="k">for</span> <span class="n">line_id_</span> <span class="ow">in</span> <span class="n">line_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="c1"># Strip off any whitespace (can be left by split)</span>
+            <span class="n">line_id_</span> <span class="o">=</span> <span class="n">line_id_</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="c1"># Get this line&#39;s wavelength</span>
+            <span class="c1"># TODO: The units here should be extracted from the grid but aren&#39;t</span>
+            <span class="c1"># yet stored.</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span>
+
+            <span class="c1"># Get the luminosity and continuum</span>
+            <span class="n">lum</span><span class="p">,</span> <span class="n">cont</span> <span class="o">=</span> <span class="n">compute_integrated_line</span><span class="p">(</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepare_line_args</span><span class="p">(</span>
+                    <span class="n">grid</span><span class="p">,</span>
+                    <span class="n">line_id_</span><span class="p">,</span>
+                    <span class="n">fesc</span><span class="p">,</span>
+                    <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                    <span class="n">grid_assignment_method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Append this lines values to the containers</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Line</span><span class="p">(</span>
+                    <span class="n">line_id</span><span class="o">=</span><span class="n">line_id_</span><span class="p">,</span>
+                    <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+                    <span class="n">luminosity</span><span class="o">=</span><span class="n">lum</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                    <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Don&#39;t init another line if there was only 1 in the first place</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="o">*</span><span class="n">lines</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1342,7 +1457,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=df227169"></script>
+</div><script src="../../../_static/documentation_options.js?v=f945a0ba"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
