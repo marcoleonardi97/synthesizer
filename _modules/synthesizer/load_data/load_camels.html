@@ -294,6 +294,7 @@
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../auto_examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/cosmo/index.html">Cosmological simulation examples</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of Cosmological simulation examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_test_los_spectra.html">Line of sight example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_test_age_lookup.html">Age lookup test</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_test_aperture_mask.html">Aperture Mask Example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_sc-sam.html">SC-SAM example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/cosmo/plot_parametric_young_stars.html">Parametric Young Stars Example</a></li>
@@ -514,7 +515,7 @@
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">UnmetDependency</span>
-<span class="kn">from</span> <span class="nn">synthesizer.load_data.utils</span> <span class="kn">import</span> <span class="n">get_len</span>
+<span class="kn">from</span> <span class="nn">synthesizer.load_data.utils</span> <span class="kn">import</span> <span class="n">age_lookup_table</span><span class="p">,</span> <span class="n">get_len</span><span class="p">,</span> <span class="n">lookup_age</span>
 
 <span class="kn">from</span> <span class="nn">..particle.galaxy</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 
@@ -633,6 +634,9 @@
     <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup_resolution</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-IllustrisTNG galaxies</span>
@@ -653,6 +657,10 @@
 <span class="sd">            dust-to-metals ratio to apply to all gas particles</span>
 <span class="sd">        physical (bool):</span>
 <span class="sd">            Should the coordinates be converted to physical?</span>
+<span class="sd">        age_lookup (bool):</span>
+<span class="sd">            Create a lookup table for ages</span>
+<span class="sd">        age_lookup_resolution (int):</span>
+<span class="sd">            Resolution of the age lookup</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        galaxies (object):</span>
@@ -734,8 +742,23 @@
     <span class="c1"># convert formation times to ages</span>
     <span class="n">cosmo</span> <span class="o">=</span> <span class="n">Planck15</span>
     <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
-    <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
+
+    <span class="c1"># Are we creating a lookup table for ages?</span>
+    <span class="k">if</span> <span class="n">age_lookup</span><span class="p">:</span>
+        <span class="c1"># Create the lookup grid</span>
+        <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span> <span class="o">=</span> <span class="n">age_lookup_table</span><span class="p">(</span>
+            <span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">age_lookup_resolution</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Look up the ages for the particles</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">lookup_age</span><span class="p">(</span><span class="n">form_time</span><span class="p">,</span> <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calculate ages of these explicitly using astropy</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate ages at snapshot redshift</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;yr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">return</span> <span class="n">_load_CAMELS</span><span class="p">(</span>
         <span class="n">lens</span><span class="o">=</span><span class="n">lens</span><span class="p">,</span>
@@ -768,6 +791,9 @@
     <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup_resolution</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-Astrid galaxies</span>
@@ -784,6 +810,12 @@
 <span class="sd">            if different to snapshot</span>
 <span class="sd">        dtm (float):</span>
 <span class="sd">            dust to metals ratio for all gas particles</span>
+<span class="sd">        physical (bool):</span>
+<span class="sd">            Should properties be converted to physical?</span>
+<span class="sd">        age_lookup (bool):</span>
+<span class="sd">            Create a lookup table for ages</span>
+<span class="sd">        age_lookup_resolution (int):</span>
+<span class="sd">            Resolution of the age lookup</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        galaxies (object):</span>
@@ -823,8 +855,23 @@
     <span class="c1"># convert formation times to ages</span>
     <span class="n">cosmo</span> <span class="o">=</span> <span class="n">Planck18</span>
     <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
-    <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
+
+    <span class="c1"># Are we creating a lookup table for ages?</span>
+    <span class="k">if</span> <span class="n">age_lookup</span><span class="p">:</span>
+        <span class="c1"># Create the lookup grid</span>
+        <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span> <span class="o">=</span> <span class="n">age_lookup_table</span><span class="p">(</span>
+            <span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">age_lookup_resolution</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Look up the ages for the particles</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">lookup_age</span><span class="p">(</span><span class="n">form_time</span><span class="p">,</span> <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calculate ages of these explicitly using astropy</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate ages at snapshot redshift</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;yr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">if</span> <span class="n">group_dir</span><span class="p">:</span>
         <span class="n">_dir</span> <span class="o">=</span> <span class="n">group_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
@@ -869,6 +916,9 @@
     <span class="n">group_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dtm</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup_resolution</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-SIMBA galaxies</span>
@@ -885,6 +935,12 @@
 <span class="sd">            if different to snapshot</span>
 <span class="sd">        dtm (float):</span>
 <span class="sd">            dust to metals ratio for all gas particles</span>
+<span class="sd">        physical (bool):</span>
+<span class="sd">            Should properties be converted to physical?</span>
+<span class="sd">        age_lookup (bool):</span>
+<span class="sd">            Create a lookup table for ages</span>
+<span class="sd">        age_lookup_resolution (int):</span>
+<span class="sd">            Resolution of the age lookup</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        galaxies (object):</span>
@@ -922,9 +978,24 @@
 
     <span class="c1"># convert formation times to ages</span>
     <span class="n">cosmo</span> <span class="o">=</span> <span class="n">Planck15</span>
-    <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">scale_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
+    <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+
+    <span class="c1"># Are we creating a lookup table for ages?</span>
+    <span class="k">if</span> <span class="n">age_lookup</span><span class="p">:</span>
+        <span class="c1"># Create the lookup grid</span>
+        <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span> <span class="o">=</span> <span class="n">age_lookup_table</span><span class="p">(</span>
+            <span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">age_lookup_resolution</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Look up the ages for the particles</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">lookup_age</span><span class="p">(</span><span class="n">form_time</span><span class="p">,</span> <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calculate ages of these explicitly using astropy</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate ages at snapshot redshift</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;yr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">if</span> <span class="n">group_dir</span><span class="p">:</span>
         <span class="n">_dir</span> <span class="o">=</span> <span class="n">group_dir</span>  <span class="c1"># replace if symlinks for fof files are broken</span>
@@ -972,6 +1043,9 @@
     <span class="n">cosmo</span><span class="o">=</span><span class="n">Planck15</span><span class="p">,</span>
     <span class="n">min_star_part</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">num_threads</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">age_lookup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">age_lookup_resolution</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load CAMELS-Swift-EAGLE galaxies</span>
@@ -999,6 +1073,10 @@
 <span class="sd">        num_threads (int)</span>
 <span class="sd">            number of threads to use for multiprocessing.</span>
 <span class="sd">            Default is -1, i.e. use all available cores.</span>
+<span class="sd">        age_lookup (bool):</span>
+<span class="sd">            Create a lookup table for ages</span>
+<span class="sd">        age_lookup_resolution (int):</span>
+<span class="sd">            Resolution of the age lookup</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        galaxies (object):</span>
@@ -1073,6 +1151,27 @@
     <span class="c1"># Get subhalos with minimum number of star particles</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lentype</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_star_part</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
+    <span class="c1"># convert formation times to ages</span>
+    <span class="n">cosmo</span> <span class="o">=</span> <span class="n">Planck18</span>
+    <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
+
+    <span class="c1"># Are we creating a lookup table for ages?</span>
+    <span class="k">if</span> <span class="n">age_lookup</span><span class="p">:</span>
+        <span class="c1"># Create the lookup grid</span>
+        <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span> <span class="o">=</span> <span class="n">age_lookup_table</span><span class="p">(</span>
+            <span class="n">cosmo</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">age_lookup_resolution</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Look up the ages for the particles</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">lookup_age</span><span class="p">(</span><span class="n">form_time</span><span class="p">,</span> <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calculate ages of these explicitly using astropy</span>
+        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Calculate ages at snapshot redshift</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">&#39;yr&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
     <span class="k">def</span> <span class="nf">swifteagle_particle_assignment</span><span class="p">(</span>
         <span class="n">idx</span><span class="p">,</span>
         <span class="n">redshift</span><span class="p">,</span>
@@ -1083,7 +1182,7 @@
         <span class="n">ids</span><span class="p">,</span>
         <span class="n">star_ids</span><span class="p">,</span>
         <span class="n">gas_ids</span><span class="p">,</span>
-        <span class="n">form_time</span><span class="p">,</span>
+        <span class="n">ages</span><span class="p">,</span>
         <span class="n">coods</span><span class="p">,</span>
         <span class="n">masses</span><span class="p">,</span>
         <span class="n">imasses</span><span class="p">,</span>
@@ -1120,7 +1219,7 @@
         <span class="n">part_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">star_ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="n">lowi</span><span class="p">:</span><span class="n">uppi</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="c1"># Filter particle arrays for this subhalo</span>
-        <span class="n">sh_form_time</span> <span class="o">=</span> <span class="n">form_time</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
+        <span class="n">sh_ages</span> <span class="o">=</span> <span class="n">ages</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
         <span class="n">sh_coods</span> <span class="o">=</span> <span class="n">coods</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
         <span class="n">sh_masses</span> <span class="o">=</span> <span class="n">masses</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
         <span class="n">sh_imasses</span> <span class="o">=</span> <span class="n">imasses</span><span class="p">[</span><span class="n">part_ids</span><span class="p">]</span>
@@ -1131,11 +1230,6 @@
         <span class="n">s_oxygen</span> <span class="o">=</span> <span class="n">_metals</span><span class="p">[</span><span class="n">part_ids</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
         <span class="n">s_hydrogen</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_metals</span><span class="p">[</span><span class="n">part_ids</span><span class="p">,</span> <span class="mi">1</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="c1"># convert formation times to ages</span>
-        <span class="n">universe_age</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span>
-        <span class="n">_ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">sh_form_time</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">ages</span> <span class="o">=</span> <span class="p">(</span><span class="n">universe_age</span> <span class="o">-</span> <span class="n">_ages</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mf">1e9</span>  <span class="c1"># yr</span>
-
         <span class="c1"># Check for smoothing lengths</span>
         <span class="k">if</span> <span class="n">sh_hsml</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span>
@@ -1144,7 +1238,7 @@
 
         <span class="n">gal</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
             <span class="n">initial_masses</span><span class="o">=</span><span class="n">sh_imasses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
-            <span class="n">ages</span><span class="o">=</span><span class="n">ages</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
+            <span class="n">ages</span><span class="o">=</span><span class="n">sh_ages</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span>
             <span class="n">metallicities</span><span class="o">=</span><span class="n">sh_metallicity</span><span class="p">,</span>
             <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">,</span>
             <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">,</span>
@@ -1196,7 +1290,7 @@
         <span class="n">ids</span><span class="o">=</span><span class="n">ids</span><span class="p">,</span>
         <span class="n">star_ids</span><span class="o">=</span><span class="n">star_ids</span><span class="p">,</span>
         <span class="n">gas_ids</span><span class="o">=</span><span class="n">gas_ids</span><span class="p">,</span>
-        <span class="n">form_time</span><span class="o">=</span><span class="n">form_time</span><span class="p">,</span>
+        <span class="n">ages</span><span class="o">=</span><span class="n">ages</span><span class="p">,</span>
         <span class="n">coods</span><span class="o">=</span><span class="n">coods</span><span class="p">,</span>
         <span class="n">masses</span><span class="o">=</span><span class="n">masses</span><span class="p">,</span>
         <span class="n">imasses</span><span class="o">=</span><span class="n">imasses</span><span class="p">,</span>
@@ -1249,7 +1343,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=9bcc35c7"></script>
+</div><script src="../../../_static/documentation_options.js?v=850a55ee"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
