@@ -1127,7 +1127,6 @@
     <span class="n">continuum</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">luminosity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">flux</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">equivalent_width</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1198,12 +1197,18 @@
         <span class="c1"># Calculate the vacuum wavelength.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vacuum_wavelength</span> <span class="o">=</span> <span class="n">standard_to_vacuum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">)</span>
 
-        <span class="c1"># Continuum at line wavelength</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">continuum_lam</span> <span class="o">=</span> <span class="n">lnu_to_llam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">equivalent_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum_lam</span>
-
         <span class="c1"># Element</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">element</span> <span class="o">=</span> <span class="p">[</span><span class="n">li</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">li</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">continuum_llam</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the continuum in units of Llam (erg/s/AA).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">lnu_to_llam</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">equivalent_width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the equivalent width.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum_llam</span>
 
     <span class="k">def</span> <span class="nf">_make_line_from_values</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span>
@@ -1507,7 +1512,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=850a55ee"></script>
+</div><script src="../../_static/documentation_options.js?v=209ad7d0"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
