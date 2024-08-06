@@ -512,7 +512,7 @@
 <span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">FlatLambdaCDM</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Mpc</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.exceptions</span> <span class="kn">import</span> <span class="n">UnmetDependency</span>
 <span class="kn">from</span> <span class="nn">synthesizer.load_data.utils</span> <span class="kn">import</span> <span class="n">age_lookup_table</span><span class="p">,</span> <span class="n">get_len</span><span class="p">,</span> <span class="n">lookup_age</span>
@@ -1117,7 +1117,7 @@
         <span class="n">grpn</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloGrNr&quot;</span><span class="p">][:]</span>
         <span class="n">grp_firstsub</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Group/GroupFirstSub&quot;</span><span class="p">][:]</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;IDs/ID&quot;</span><span class="p">][:]</span>
-        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span>  <span class="c1"># kpc (comoving)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s2">&quot;Subhalo/SubhaloPos&quot;</span><span class="p">][:]</span> <span class="o">/</span> <span class="n">h</span>  <span class="c1"># kpc (comoving)</span>
 
     <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">snap_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
         <span class="c1"># Load star particle information</span>
@@ -1177,6 +1177,7 @@
     <span class="k">def</span> <span class="nf">swifteagle_particle_assignment</span><span class="p">(</span>
         <span class="n">idx</span><span class="p">,</span>
         <span class="n">redshift</span><span class="p">,</span>
+        <span class="n">pos</span><span class="p">,</span>
         <span class="n">grpn</span><span class="p">,</span>
         <span class="n">grp_lentype</span><span class="p">,</span>
         <span class="n">grp_firstsub</span><span class="p">,</span>
@@ -1198,6 +1199,8 @@
     <span class="p">):</span>
         <span class="n">gal</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">()</span>
         <span class="n">gal</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="n">redshift</span>
+        <span class="n">gal</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span>
+        <span class="n">gal</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">idx</span>
 
         <span class="c1"># Find star particles in this subhalo</span>
         <span class="n">ptype</span> <span class="o">=</span> <span class="mi">4</span>
@@ -1236,7 +1239,7 @@
         <span class="k">if</span> <span class="n">sh_hsml</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span> <span class="o">*</span> <span class="n">kpc</span>
+            <span class="n">smoothing_lengths</span> <span class="o">=</span> <span class="n">sh_hsml</span> <span class="o">*</span> <span class="n">Mpc</span>
 
         <span class="n">gal</span><span class="o">.</span><span class="n">load_stars</span><span class="p">(</span>
             <span class="n">initial_masses</span><span class="o">=</span><span class="n">sh_imasses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
@@ -1244,7 +1247,7 @@
             <span class="n">metallicities</span><span class="o">=</span><span class="n">sh_metallicity</span><span class="p">,</span>
             <span class="n">s_oxygen</span><span class="o">=</span><span class="n">s_oxygen</span><span class="p">,</span>
             <span class="n">s_hydrogen</span><span class="o">=</span><span class="n">s_hydrogen</span><span class="p">,</span>
-            <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_coods</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
             <span class="n">current_masses</span><span class="o">=</span><span class="n">sh_masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
             <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">smoothing_lengths</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1272,11 +1275,11 @@
             <span class="n">star_forming</span> <span class="o">=</span> <span class="n">sh_g_sfr</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
 
             <span class="n">gal</span><span class="o">.</span><span class="n">load_gas</span><span class="p">(</span>
-                <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_g_coods</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="n">sh_g_coods</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
                 <span class="n">masses</span><span class="o">=</span><span class="n">sh_g_masses</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
                 <span class="n">metallicities</span><span class="o">=</span><span class="n">sh_g_metals</span><span class="p">,</span>
                 <span class="n">star_forming</span><span class="o">=</span><span class="n">star_forming</span><span class="p">,</span>
-                <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">sh_g_hsml</span> <span class="o">*</span> <span class="n">kpc</span><span class="p">,</span>
+                <span class="n">smoothing_lengths</span><span class="o">=</span><span class="n">sh_g_hsml</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
                 <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="n">dtm</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -1285,6 +1288,7 @@
     <span class="n">_f</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
         <span class="n">swifteagle_particle_assignment</span><span class="p">,</span>
         <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">,</span>
+        <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
         <span class="n">grpn</span><span class="o">=</span><span class="n">grpn</span><span class="p">,</span>
         <span class="n">grp_lentype</span><span class="o">=</span><span class="n">grp_lentype</span><span class="p">,</span>
         <span class="n">grp_firstsub</span><span class="o">=</span><span class="n">grp_firstsub</span><span class="p">,</span>
@@ -1308,10 +1312,7 @@
     <span class="n">galaxies</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_f</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
     <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">galaxies</span><span class="p">)):</span>
-        <span class="n">galaxies</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">centre</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">kpc</span>
-
-    <span class="k">return</span> <span class="n">galaxies</span><span class="p">,</span> <span class="n">mask</span></div>
+    <span class="k">return</span> <span class="n">galaxies</span></div>
 
 </pre></div>
         </article>
@@ -1345,7 +1346,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=8d19e197"></script>
+</div><script src="../../../_static/documentation_options.js?v=8a6106d5"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

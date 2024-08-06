@@ -745,6 +745,23 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log10metallicities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return particle metallicities in log (base 10).</span>
+
+<span class="sd">        Zero valued metallicities are set to `metallicity_floor`,</span>
+<span class="sd">        which is set on initialisation of this particle object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            log10metallicities (array)</span>
+<span class="sd">                log10 particle metallicities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span>
+        <span class="n">mets</span><span class="p">[</span><span class="n">mets</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_floor</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mets</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Particles.get_particle_photo_luminosities">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.particles.html#synthesizer.particle.particles.Particles.get_particle_photo_luminosities">[docs]</a>
     <span class="k">def</span> <span class="nf">get_particle_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -914,6 +931,26 @@
         <span class="c1"># Calculate the radii</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centered_coordinates</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span> <span class="nf">_aperture_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aperture_radius</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mask for particles within spherical aperture.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            aperture_radius (float)</span>
+<span class="sd">                Radius of spherical aperture in kpc</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Centre of particles must be set to use aperture mask.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Get the radii if not already set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_radii</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">radii</span> <span class="o">&lt;</span> <span class="n">aperture_radius</span>
 
     <span class="k">def</span> <span class="nf">_get_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">frac</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1370,7 +1407,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=8d19e197"></script>
+</div><script src="../../../_static/documentation_options.js?v=8a6106d5"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

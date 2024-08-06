@@ -533,7 +533,7 @@
 <span class="kn">import</span> <span class="nn">cmasher</span> <span class="k">as</span> <span class="nn">cmr</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">s</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
@@ -755,24 +755,6 @@
 <span class="sd">                log10 stellar ages</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">log10metallicities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return stellar particle ages in log (base 10).</span>
-
-<span class="sd">        Zero valued metallicities are set to `metallicity_floor`,</span>
-<span class="sd">        which is set on initialisation of this stars object. To</span>
-<span class="sd">        check it, run `stars.metallicity_floor`.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            log10metallicities (array)</span>
-<span class="sd">                log10 stellar metallicities.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span>
-        <span class="n">mets</span><span class="p">[</span><span class="n">mets</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metallicity_floor</span>
-
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">mets</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_star_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1065,8 +1047,8 @@
             <span class="n">aperture_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aperture_mask</span><span class="p">(</span><span class="n">aperture_radius</span><span class="o">=</span><span class="n">aperture</span><span class="p">)</span>
 
             <span class="c1"># Ensure and warn that the masking hasn&#39;t removed everything</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">aperture_mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Aperture mask has filtered out all particles&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">aperture_mask</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Aperture and age masks have filtered out all particles&quot;</span><span class="p">)</span>
 
                 <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1077,7 +1059,7 @@
             <span class="n">pmask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_masks</span><span class="p">(</span><span class="n">parametric_young_stars</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
             <span class="c1"># Check we have particles to replace</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pmask</span> <span class="o">&amp;</span> <span class="n">aperture_mask</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Update the young/old mask to ignore those we&#39;re replacing</span>
                 <span class="n">mask</span><span class="p">[</span><span class="n">pmask</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1092,7 +1074,7 @@
                 <span class="c1"># Create a dummy empty array</span>
                 <span class="n">lnu_parametric</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">))</span>
 
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span> <span class="o">&amp;</span> <span class="n">aperture_mask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;All particles replaced with parametric forms&quot;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">lnu_parametric</span>
 
@@ -1116,24 +1098,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">lnu_particle</span></div>
 
-
-    <span class="k">def</span> <span class="nf">_aperture_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aperture_radius</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Mask for particles within spherical aperture.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            aperture_radius (float)</span>
-<span class="sd">                Radius of spherical aperture in kpc</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">centre</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">kpc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">distance</span> <span class="o">&lt;</span> <span class="n">aperture_radius</span>
 
     <span class="k">def</span> <span class="nf">_parametric_young_stars</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2386,7 +2350,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=8d19e197"></script>
+</div><script src="../../../_static/documentation_options.js?v=8a6106d5"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
