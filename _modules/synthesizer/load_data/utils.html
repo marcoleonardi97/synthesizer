@@ -542,13 +542,19 @@
 
 <div class="viewcode-block" id="age_lookup_table">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.utils.html#synthesizer.load_data.utils.age_lookup_table">[docs]</a>
-<span class="k">def</span> <span class="nf">age_lookup_table</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">delta_a</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">low_lim</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">age_lookup_table</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">delta_a</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">low_lim</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create a look-up table for age as a function of scale factor</span>
+<span class="sd">    Create a look-up table for age as a function of scale factor.</span>
+
+<span class="sd">    Defaults to start at the lower resolution limit (`delta_a`),</span>
+<span class="sd">    and proceeds in steps of `delta-a` until the scale factor given</span>
+<span class="sd">    by the input `redshift` minus the `low_lim`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cosmo (astropy.cosmology)</span>
 <span class="sd">            astropy cosmology object</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            redshift of the snapshot</span>
 <span class="sd">        delta_a (int)</span>
 <span class="sd">            scale factor resolution to approximate</span>
 <span class="sd">        low_lim (float)</span>
@@ -559,11 +565,24 @@
 <span class="sd">        age (array)</span>
 <span class="sd">            array of ages (Gyr)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">low_lim</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta_a</span>
+
+    <span class="c1"># Find the scale factor for the input snapshot</span>
+    <span class="n">root_scale_factor</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">)</span>
+
+    <span class="c1"># Find the (integer) resolution of the grid</span>
+    <span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">root_scale_factor</span> <span class="o">-</span> <span class="n">low_lim</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta_a</span>
     <span class="n">resolution</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
 
-    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low_lim</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="c1"># Create the (linear) scale factor array</span>
+    <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+        <span class="n">delta_a</span><span class="p">,</span>
+        <span class="n">root_scale_factor</span> <span class="o">-</span> <span class="n">low_lim</span><span class="p">,</span>
+        <span class="n">resolution</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Find the ages at these scale factors</span>
     <span class="n">ages</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">age</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">scale_factor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">ages</span></div>
 
 
@@ -572,7 +591,7 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.load_data.utils.html#synthesizer.load_data.utils.lookup_age">[docs]</a>
 <span class="k">def</span> <span class="nf">lookup_age</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">scale_factors</span><span class="p">,</span> <span class="n">ages</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Look up the age of a galaxy given its scale factor</span>
+<span class="sd">    Look up the age given a scale factor</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        scale_factor (array.float)</span>
@@ -620,7 +639,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=8a6106d5"></script>
+</div><script src="../../../_static/documentation_options.js?v=caefb03b"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
