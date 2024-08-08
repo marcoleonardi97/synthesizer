@@ -1021,7 +1021,7 @@
 
 <div class="viewcode-block" id="Stars.generate_line">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.stars.html#synthesizer.parametric.stars.Stars.generate_line">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line_type</span><span class="p">,</span> <span class="n">fesc</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate rest frame line luminosity and continuum from an SPS Grid.</span>
 
@@ -1035,6 +1035,8 @@
 <span class="sd">            line_id (str):</span>
 <span class="sd">                A str denoting a line. Doublets can be specified using a</span>
 <span class="sd">                comma (e.g. &#39;OIII4363,OIII4959&#39;).</span>
+<span class="sd">            line_type (str):</span>
+<span class="sd">                The type of line to extract. This must match a key in the Grid.</span>
 <span class="sd">            fesc (float):</span>
 <span class="sd">                The Lyman continuum escaped fraction, the fraction of</span>
 <span class="sd">                ionising photons that entirely escaped.</span>
@@ -1056,21 +1058,20 @@
             <span class="c1"># Strip off any whitespace (can be left by split)</span>
             <span class="n">line_id_</span> <span class="o">=</span> <span class="n">line_id_</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="c1"># Get the line from the grid</span>
-            <span class="n">grid_line</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">]</span>
-
             <span class="c1"># Get this line&#39;s wavelength</span>
             <span class="c1"># TODO: The units here should be extracted from the grid but aren&#39;t</span>
             <span class="c1"># yet stored.</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">line_id_</span><span class="p">][</span><span class="s2">&quot;wavelength&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">line_lams</span><span class="p">[</span><span class="n">line_id_</span><span class="p">]</span> <span class="o">*</span> <span class="n">angstrom</span>
 
             <span class="c1"># Line luminosity erg/s</span>
             <span class="n">lum</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                <span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;luminosity&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">line_lums</span><span class="p">[</span><span class="n">line_type</span><span class="p">][</span><span class="n">line_id_</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="p">)</span>
 
             <span class="c1"># Continuum at line wavelength, erg/s/Hz</span>
-            <span class="n">cont</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grid_line</span><span class="p">[</span><span class="s2">&quot;continuum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">cont</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">fesc</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">line_conts</span><span class="p">[</span><span class="n">line_type</span><span class="p">][</span><span class="n">line_id_</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="c1"># Append this lines values to the containers</span>
             <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -1412,7 +1413,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=caefb03b"></script>
+</div><script src="../../../_static/documentation_options.js?v=c4ebfef6"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

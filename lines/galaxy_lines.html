@@ -591,7 +591,7 @@ available diagrams: []
   out_arr = func(np.asarray(inp), out=out_func, **kwargs)
 </pre></div></div>
 </div>
-<p>In the case of a particle based galaxy you can either get the integrated line emission (<code class="docutils literal notranslate"><span class="pre">get_lines</span></code>) or per–particle line emission (<code class="docutils literal notranslate"><span class="pre">get_particle_lines</span></code>).</p>
+<p>In the case of a particle based galaxy you can either get the integrated line emission (<code class="docutils literal notranslate"><span class="pre">get_lines</span></code>) or per-particle line emission (<code class="docutils literal notranslate"><span class="pre">get_particle_lines</span></code>).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -613,8 +613,8 @@ available diagrams: []
     <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
     <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">),</span>
     <span class="n">dust_emission</span><span class="o">=</span><span class="n">Blackbody</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="mi">50</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">),</span>
-    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Get the spectra and lines</span>
@@ -629,6 +629,20 @@ available diagrams: []
 <span class="nb">print</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">[</span><span class="s2">&quot;emergent&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+----------
+LINE COLLECTION
+number of lines: 3
+lines: [&#39;H 1 4861.32A&#39; &#39;O 3 4958.91A&#39; &#39;O 3 5006.84A&#39;]
+available ratios: [&#39;R3&#39;]
+available diagrams: []
+----------
+</pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -653,14 +667,139 @@ lines: [&#39;H 1 4861.32A&#39; &#39;O 3 4958.91A&#39; &#39;O 3 5006.84A&#39;]
 available ratios: [&#39;R3&#39;]
 available diagrams: []
 ----------
-----------
-LINE COLLECTION
-number of lines: 3
-lines: [&#39;H 1 4861.32A&#39; &#39;O 3 4958.91A&#39; &#39;O 3 5006.84A&#39;]
-available ratios: [&#39;R3&#39;]
-available diagrams: []
-----------
 </pre></div></div>
+</div>
+<p>The line luminosities themselves are extracted and stored in the <code class="docutils literal notranslate"><span class="pre">&quot;nebular&quot;</span></code> key of the lines dictionaries. Below we plot the line luminosities and continuum luminosities to compare the different emissions.</p>
+<p>Note that we have skipped any lines with little or no contribution.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axisbelow</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Get the colours</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+    <span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+    <span class="c1"># Don&#39;t plot dust emission since it&#39;s effectively 0</span>
+    <span class="c1"># for these lines</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;dust_emission&quot;</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">line_ids</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span>
+            <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span>
+            <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">continuum</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Wavelength (Angstrom)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Continuum (erg/s/Hz)&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create the legend</span>
+<span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+    <span class="c1"># Don&#39;t plot dust emission since it&#39;s effectively 0</span>
+    <span class="c1"># for these lines</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;dust_emission&quot;</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="n">legend_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+    <span class="n">handles</span><span class="o">=</span><span class="n">legend_handles</span><span class="p">,</span>
+    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper center&quot;</span><span class="p">,</span>
+    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span>
+    <span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_axisbelow</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Get the colours</span>
+<span class="n">colors</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">):</span>
+    <span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">line_ids</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span>
+            <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span><span class="p">,</span>
+            <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">luminosity</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Wavelength (Angstrom)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Luminosity (erg/s)&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create the legend</span>
+<span class="n">legend_handles</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+    <span class="c1"># Skip all spectra types where lines are 0</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">line_ids</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stars</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">luminosity</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="n">legend_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+    <span class="n">handles</span><span class="o">=</span><span class="n">legend_handles</span><span class="p">,</span>
+    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper center&quot;</span><span class="p">,</span>
+    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">),</span>
+    <span class="n">ncol</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/lines_galaxy_lines_5_0.png" src="../_images/lines_galaxy_lines_5_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/lines_galaxy_lines_5_1.png" src="../_images/lines_galaxy_lines_5_1.png" />
+</div>
 </div>
 </section>
 
@@ -713,7 +852,7 @@ available diagrams: []
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=caefb03b"></script>
+</div><script src="../_static/documentation_options.js?v=c4ebfef6"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

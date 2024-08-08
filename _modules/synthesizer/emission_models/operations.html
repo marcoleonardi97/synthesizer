@@ -516,10 +516,8 @@
 <span class="sd">These classes should not be used directly.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
@@ -722,6 +720,7 @@
                 <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator_func</span><span class="p">(</span>
                     <span class="n">grid</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
                     <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
+                    <span class="n">line_type</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">extract</span><span class="p">,</span>
                     <span class="n">fesc</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">this_model</span><span class="o">.</span><span class="n">fesc</span><span class="p">)</span>
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this_model</span><span class="o">.</span><span class="n">fesc</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
                     <span class="k">else</span> <span class="n">this_model</span><span class="o">.</span><span class="n">fesc</span><span class="p">,</span>
@@ -900,15 +899,15 @@
                 <span class="n">line_id</span>
             <span class="p">]</span><span class="o">.</span><span class="n">wavelength</span>
 
-            <span class="c1"># Get the luminosity at this wavelength</span>
-            <span class="n">luminosity</span> <span class="o">=</span> <span class="n">spectra</span><span class="o">.</span><span class="n">get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
+            <span class="c1"># Get the continuum at this wavelength</span>
+            <span class="n">cont</span> <span class="o">=</span> <span class="n">spectra</span><span class="o">.</span><span class="n">get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
             <span class="c1"># Create the line (luminoisty = continuum)</span>
             <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
                 <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
                 <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
-                <span class="n">luminosity</span><span class="o">=</span><span class="n">luminosity</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">,</span>
-                <span class="n">continuum</span><span class="o">=</span><span class="n">luminosity</span><span class="p">,</span>
+                <span class="n">luminosity</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">lines</span>
@@ -1169,18 +1168,25 @@
 
         <span class="c1"># Loop over lines copying over the first set of lines</span>
         <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
-            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
-                <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="c1"># Initialise the combined luminosity and continuum for the line</span>
+            <span class="n">lum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">cont</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Get the wavelength of the line</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span>
 
             <span class="c1"># Combine the lines</span>
-            <span class="k">for</span> <span class="n">combine_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-                <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span>
-                    <span class="n">combine_model</span><span class="o">.</span><span class="n">label</span>
-                <span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span>
-                <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span>
-                    <span class="n">combine_model</span><span class="o">.</span><span class="n">label</span>
-                <span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_continuum</span>
+            <span class="k">for</span> <span class="n">combine_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">:</span>
+                <span class="n">lum</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span>
+                <span class="n">cont</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_continuum</span>
+
+            <span class="c1"># Add the line to the dictionary</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
+                <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
+                <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
+                <span class="n">luminosity</span><span class="o">=</span><span class="n">lum</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">lines</span>
 
@@ -1230,7 +1236,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=caefb03b"></script>
+</div><script src="../../../_static/documentation_options.js?v=c4ebfef6"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
