@@ -322,6 +322,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/parametric/index.html">Parametric galaxy examples</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle navigation of Parametric galaxy examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_compare_sfhs.html">Compare different parametric star formation history models</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_delta_lambda.html">Plot delta_lambda for a grid.</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_create_image.html">Create image example</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/parametric/plot_generate_lines.html">Generating Lines from a Parametric Galaxy</a></li>
@@ -526,19 +527,22 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils.stats</span> <span class="kn">import</span> <span class="n">weighted_mean</span><span class="p">,</span> <span class="n">weighted_median</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="c1"># Define a list of the available parametrisations</span>
 <span class="n">parametrisations</span> <span class="o">=</span> <span class="p">(</span>
     <span class="s2">&quot;Constant&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Exponential&quot;</span> <span class="s2">&quot;TruncatedExponential&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;LogNormal&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ExponentiallyyDeclining&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;DelayedExponentiallyDeclining&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Gaussian&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Exponential&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TruncatedExponential&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DecliningExponential&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DelayedExponential&quot;</span> <span class="s2">&quot;LogNormal&quot;</span><span class="p">,</span>
     <span class="s2">&quot;DoublePowerLaw&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -611,7 +615,7 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.Common.calculate_sfh">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_sfh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calcualte the age of a given star formation history.</span>
+<span class="sd">        Calculate the age of a given star formation history.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            t_range (tuple, float)</span>
@@ -635,11 +639,34 @@
         <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">sfh</span></div>
 
 
+<div class="viewcode-block" id="Common.plot_sfh">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.Common.plot_sfh">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_sfh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a quick plot of the star formation history.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t_range (tuple, float)</span>
+<span class="sd">                The age limits over which to calculate the SFH.</span>
+<span class="sd">            dt (float)</span>
+<span class="sd">                The interval between age bins.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">t</span><span class="p">,</span> <span class="n">sfr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_sfh</span><span class="p">(</span><span class="n">t_range</span><span class="o">=</span><span class="n">t_range</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">sfr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="Common.calculate_median_age">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.Common.calculate_median_age">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_median_age</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calcualte the median age of a given star formation history.</span>
+<span class="sd">        Calculate the median age of a given star formation history.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            t_range (tuple, float)</span>
@@ -728,28 +755,46 @@
 <span class="sd">    A constant star formation history.</span>
 
 <span class="sd">    The SFR is defined such that:</span>
-<span class="sd">        sfr = 1; t&lt;=duration</span>
-<span class="sd">        sfr = 0; t&gt;duration</span>
+<span class="sd">        sfr = 1; min_age&lt;t&lt;=max_age</span>
+<span class="sd">        sfr = 0; t&gt;max_age, t&lt;min_age</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        duration (float)</span>
-<span class="sd">            The duration of the period of constant star formation.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            max_age (unyt_quantity)</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">                If min_age = 0 then this is the duration of star formation.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
 <span class="sd">            duration (unyt_quantity)</span>
-<span class="sd">                The duration of the period of constant star formation.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The use of duration is deprecated in favour of max_age&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">max_age</span> <span class="o">=</span> <span class="n">duration</span>
+
         <span class="c1"># Initialise the parent</span>
-        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Constant&quot;</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Constant&quot;</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span>
+        <span class="p">)</span>
 
         <span class="c1"># Set the model parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -761,8 +806,70 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Set the SFR based on the duration.</span>
-        <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
             <span class="k">return</span> <span class="mf">1.0</span>
+        <span class="k">return</span> <span class="mf">0.0</span></div>
+
+
+
+<div class="viewcode-block" id="Gaussian">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.Gaussian">[docs]</a>
+<span class="k">class</span> <span class="nc">Gaussian</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Gaussian star formation history.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        peak_age (unyt_quantity)</span>
+<span class="sd">            The age at which the star formation peaks, i.e. the age at which</span>
+<span class="sd">            the gaussian is centred.</span>
+<span class="sd">        sigma (unyt_quantity)</span>
+<span class="sd">            The standard deviation of the gaussian function.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak_age</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mf">1e11</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_age (unyt_quantity)</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">                If min_age = 0 then this is the duration of star formation.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Initialise the parent</span>
+        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Gaussian&quot;</span><span class="p">,</span>
+            <span class="n">peak_age</span><span class="o">=</span><span class="n">peak_age</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+            <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span>
+            <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Set the model parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span> <span class="o">=</span> <span class="n">peak_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the amount SFR weight in a single age bin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            age (float)</span>
+<span class="sd">                The age (in years) at which to evaluate the SFR.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Set the SFR based on the duration.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">age</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span>
         <span class="k">return</span> <span class="mf">0.0</span></div>
 
 
@@ -771,27 +878,53 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.Exponential">[docs]</a>
 <span class="k">class</span> <span class="nc">Exponential</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An exponential star formation history.</span>
+<span class="sd">    A exponential star formation history that can be truncated.</span>
+
+<span class="sd">    Note: synthesizer uses age (not t) as its parameter such that:</span>
+<span class="sd">        t = max_age - age</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        tau (float)</span>
+<span class="sd">        tau (unyt_quantity)</span>
 <span class="sd">            The &quot;stretch&quot; parameter of the exponential.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            tau (unyt_quantity)</span>
-<span class="sd">                The &quot;stretch&quot; parameter of the exponential.</span>
+<span class="sd">                The &quot;stretch&quot; parameter of the exponential. Here a positive</span>
+<span class="sd">                tau produces a declining exponential, i.e. the star formation</span>
+<span class="sd">                rate decreases with time, but decreases with age. A negative</span>
+<span class="sd">                tau indicates an increasing star formation history.</span>
+<span class="sd">            max_age (unyt_quantity)</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Raise exception if tau is zero</span>
+        <span class="k">if</span> <span class="n">tau</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;tau must be non-zero!&quot;</span><span class="p">)</span>
+
         <span class="c1"># Initialise the parent</span>
-        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Exponential&quot;</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">)</span>
+        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Exponential&quot;</span><span class="p">,</span>
+            <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
+            <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span><span class="p">,</span>
+            <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Set the model parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -801,13 +934,22 @@
 <span class="sd">            age (float)</span>
 <span class="sd">                The age (in years) at which to evaluate the SFR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span></div>
+
+        <span class="c1"># define time coordinate</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="n">age</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+            <span class="c1"># equivalent to:</span>
+            <span class="c1"># return np.exp(age / self.tau)</span>
+
+        <span class="k">return</span> <span class="mf">0.0</span></div>
 
 
 
 <div class="viewcode-block" id="TruncatedExponential">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.TruncatedExponential">[docs]</a>
-<span class="k">class</span> <span class="nc">TruncatedExponential</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TruncatedExponential</span><span class="p">(</span><span class="n">Exponential</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A truncated exponential star formation history.</span>
 
@@ -815,33 +957,92 @@
 <span class="sd">        tau (unyt_quantity)</span>
 <span class="sd">            The &quot;stretch&quot; parameter of the exponential.</span>
 <span class="sd">        max_age (unyt_quantity)</span>
-<span class="sd">            The age at which the exponential is truncated. Above this age</span>
-<span class="sd">            the SFR is 0.</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            tau (unyt_quantity)</span>
-<span class="sd">                The &quot;stretch&quot; parameter of the exponential.</span>
+<span class="sd">                The &quot;stretch&quot; parameter of the exponential. Here a positive</span>
+<span class="sd">                tau produces a declining exponential, i.e. the star formation</span>
+<span class="sd">                rate decreases with time, but decreases with age. A negative</span>
+<span class="sd">                tau indicates an increasing star formation history.</span>
 <span class="sd">            max_age (unyt_quantity)</span>
-<span class="sd">                The age at which the exponential is truncated. Above this age</span>
-<span class="sd">                the SFR is 0.</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Exponential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="DecliningExponential">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.DecliningExponential">[docs]</a>
+<span class="k">class</span> <span class="nc">DecliningExponential</span><span class="p">(</span><span class="n">Exponential</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tau</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;For a declining exponential tau must be positive!&quot;</span>
+            <span class="p">)</span>
+        <span class="n">Exponential</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="DelayedExponential">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.DelayedExponential">[docs]</a>
+<span class="k">class</span> <span class="nc">DelayedExponential</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A delayed exponential star formation history that can be truncated.</span>
+<span class="sd">    The &quot;delayed&quot; element results in a more gradual increase at earlier</span>
+<span class="sd">    times.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        tau (unyt_quantity)</span>
+<span class="sd">            The &quot;stretch&quot; parameter of the exponential.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mf">0.0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tau (unyt_quantity)</span>
+<span class="sd">                The &quot;stretch&quot; parameter of the exponential. Here a positive</span>
+<span class="sd">                tau produces a declining exponential, i.e. the star formation</span>
+<span class="sd">                rate decreases with time, but decreases with age. A negative</span>
+<span class="sd">                tau indicates an increasing star formation history.</span>
+<span class="sd">            max_age (unyt_quantity)</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Raise exception if tau is zero</span>
+        <span class="k">if</span> <span class="n">tau</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span><span class="s2">&quot;tau must be non-zero!&quot;</span><span class="p">)</span>
 
         <span class="c1"># Initialise the parent</span>
         <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TruncatedExponential&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DelayedExponential&quot;</span><span class="p">,</span>
             <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
             <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span><span class="p">,</span>
+            <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Set the model parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -851,8 +1052,12 @@
 <span class="sd">            age (float)</span>
 <span class="sd">                The age (in years) at which to evaluate the SFR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+
+        <span class="c1"># define time coordinate</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="n">age</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
         <span class="k">return</span> <span class="mf">0.0</span></div>
 
 
@@ -868,11 +1073,15 @@
 <span class="sd">            The dimensionless &quot;width&quot; of the log normal distribution.</span>
 <span class="sd">        peak_age (float)</span>
 <span class="sd">            The peak of the log normal distribution.</span>
-<span class="sd">        max_age (float)</span>
-<span class="sd">            The maximum age of the log normal distribution.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The maximum age of the log normal distribution. In addition to</span>
+<span class="sd">            truncating the star formation history this is used to define</span>
+<span class="sd">            the peak.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">peak_age</span><span class="p">,</span> <span class="n">max_age</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">peak_age</span><span class="p">,</span> <span class="n">max_age</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
 
@@ -882,7 +1091,11 @@
 <span class="sd">            peak_age (unyt_quantity)</span>
 <span class="sd">                The peak of the log normal distribution.</span>
 <span class="sd">            max_age (unyt_quantity)</span>
-<span class="sd">                The maximum age of the log normal distribution.</span>
+<span class="sd">                The maximum age of the log normal distribution. In addition to</span>
+<span class="sd">                truncating the star formation history this is used to define</span>
+<span class="sd">                the peak.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Initialise the parent</span>
@@ -892,12 +1105,14 @@
             <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
             <span class="n">peak_age</span><span class="o">=</span><span class="n">peak_age</span><span class="p">,</span>
             <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span><span class="p">,</span>
+            <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Set the model parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span> <span class="o">=</span> <span class="n">peak_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
         <span class="c1"># Calculate the relative ages and peak for the calculation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tpeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span>
@@ -911,121 +1126,13 @@
 <span class="sd">            age (float)</span>
 <span class="sd">                The age (in years) at which to evaluate the SFR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
             <span class="n">norm</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span>
             <span class="n">exponent</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="o">**</span><span class="mi">2</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">exponent</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="mf">0.0</span></div>
-
-
-
-<div class="viewcode-block" id="ExponentiallyDeclining">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.ExponentiallyDeclining">[docs]</a>
-<span class="k">class</span> <span class="nc">ExponentiallyDeclining</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An exponentially declining star formation history</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        tau (float)</span>
-<span class="sd">            The &quot;stretch&quot; parameter of the exponential.</span>
-<span class="sd">        initial_age (unyt_quantity)</span>
-<span class="sd">            The &quot;start age&quot; of the exponential, i.e. the age where</span>
-<span class="sd">            star formation is maximal.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_age</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            tau (unyt_quantity)</span>
-<span class="sd">                The &quot;stretch&quot; parameter of the exponential.</span>
-<span class="sd">            initial_age (unyt_quantity)</span>
-<span class="sd">                The &quot;start age&quot; of the exponential, i.e. the age where</span>
-<span class="sd">                star formation is maximal.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Initialise the parent</span>
-        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ExponentiallyDeclining&quot;</span><span class="p">,</span>
-            <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
-            <span class="n">initial_age</span><span class="o">=</span><span class="n">initial_age</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Set the model parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">=</span> <span class="n">initial_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-
-    <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the amount SFR weight in a single age bin.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            age (float)</span>
-<span class="sd">                The age (in years) at which to evaluate the SFR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mf">0.0</span></div>
-
-
-
-<div class="viewcode-block" id="DelayedExponentiallyDeclining">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.parametric.sf_hist.html#synthesizer.parametric.sf_hist.DelayedExponentiallyDeclining">[docs]</a>
-<span class="k">class</span> <span class="nc">DelayedExponentiallyDeclining</span><span class="p">(</span><span class="n">Common</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A delayed exponentially declining star formation history.</span>
-
-<span class="sd">    This is effectively the same as ExponentiallyDeclining with an overloaded</span>
-<span class="sd">    _sfr method.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        tau (float)</span>
-<span class="sd">            The &quot;stretch&quot; parameter of the exponential.</span>
-<span class="sd">        initial_age (unyt_quantity)</span>
-<span class="sd">            The &quot;start age&quot; of the exponential, i.e. the age where</span>
-<span class="sd">            star formation is maximal.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_age</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            tau (unyt_quantity)</span>
-<span class="sd">                The &quot;stretch&quot; parameter of the exponential.</span>
-<span class="sd">            initial_age (unyt_quantity)</span>
-<span class="sd">                The &quot;start age&quot; of the exponential, i.e. the age where</span>
-<span class="sd">                star formation is maximal.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Initialise the parent</span>
-        <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DelayedExponentiallyDeclining&quot;</span><span class="p">,</span>
-            <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
-            <span class="n">initial_age</span><span class="o">=</span><span class="n">initial_age</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Set the model parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">=</span> <span class="n">initial_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-
-    <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the amount SFR weight in a single age bin.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            age (float)</span>
-<span class="sd">                The age (in years) at which to evaluate the SFR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span><span class="p">:</span>
-            <span class="n">norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span>
-            <span class="k">return</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_age</span> <span class="o">-</span> <span class="n">age</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
         <span class="k">return</span> <span class="mf">0.0</span></div>
 
 
@@ -1037,40 +1144,54 @@
 <span class="sd">    A double power law star formation history.</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        tau (float)</span>
-<span class="sd">            The normalisation of age before raising to the powers.</span>
+<span class="sd">        peak_age (unyt_quantity)</span>
+<span class="sd">            The age at which the star formation history peaks.</span>
 <span class="sd">        alpha (float)</span>
 <span class="sd">            The first power.</span>
 <span class="sd">        beta (float)</span>
 <span class="sd">            The second power.</span>
+<span class="sd">        max_age (unyt_quantity)</span>
+<span class="sd">            The age above which the star formation history is truncated.</span>
+<span class="sd">        min_age (unyt_quantity)</span>
+<span class="sd">            The age below which the star formation history is truncated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">peak_age</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">min_age</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">yr</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mf">1e11</span> <span class="o">*</span> <span class="n">yr</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the parent and this parametrisation of the SFH.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            tau (unyt_quantity)</span>
-<span class="sd">                The normalisation of age before raising to the powers.</span>
+<span class="sd">            peak_age (unyt_quantity)</span>
+<span class="sd">                The age at which the star formation history peaks.</span>
 <span class="sd">            alpha (float)</span>
 <span class="sd">                The first power.</span>
 <span class="sd">            beta (float)</span>
 <span class="sd">                The second power.</span>
+<span class="sd">            max_age (unyt_quantity)</span>
+<span class="sd">                The age above which the star formation history is truncated.</span>
+<span class="sd">            min_age (unyt_quantity)</span>
+<span class="sd">                The age below which the star formation history is truncated.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Initialise the parent</span>
         <span class="n">Common</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DoublePowerLaw&quot;</span><span class="p">,</span>
-            <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span>
+            <span class="n">peak_age</span><span class="o">=</span><span class="n">peak_age</span><span class="p">,</span>
             <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
             <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">max_age</span><span class="o">=</span><span class="n">max_age</span><span class="p">,</span>
+            <span class="n">min_age</span><span class="o">=</span><span class="n">min_age</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Set the model parameters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">tau</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span> <span class="o">=</span> <span class="n">peak_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">max_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span> <span class="o">=</span> <span class="n">min_age</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;yr&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
     <span class="k">def</span> <span class="nf">_sfr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1080,9 +1201,13 @@
 <span class="sd">            age (float)</span>
 <span class="sd">                The age (in years) at which to evaluate the SFR.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">term1</span> <span class="o">=</span> <span class="p">(</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
-        <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span></div>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_age</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_age</span><span class="p">):</span>
+            <span class="n">term1</span> <span class="o">=</span> <span class="p">(</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
+            <span class="n">term2</span> <span class="o">=</span> <span class="p">(</span><span class="n">age</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">peak_age</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">term1</span> <span class="o">+</span> <span class="n">term2</span><span class="p">)</span> <span class="o">**</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="k">return</span> <span class="mf">0.0</span></div>
 
 </pre></div>
         </article>
@@ -1116,7 +1241,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=0c979d61"></script>
+</div><script src="../../../_static/documentation_options.js?v=6045831a"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
