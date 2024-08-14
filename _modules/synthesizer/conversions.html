@@ -318,6 +318,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../auto_examples/imaging/index.html">Imaging examples</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of Imaging examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../auto_examples/imaging/plot_aperture_sum.html">Get sum of image inside an aperture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../auto_examples/imaging/plot_image_addition.html">Image addition example</a></li>
 </ul>
 </li>
@@ -413,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.grid.html">synthesizer.grid</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" role="switch" type="checkbox"/><label for="toctree-checkbox-33"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" role="switch" type="checkbox"/><label for="toctree-checkbox-34"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.circular_aperture.html">synthesizer.imaging.extensions.circular_aperture</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
@@ -523,7 +525,19 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">nJy</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">unyt_array</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Angstrom</span><span class="p">,</span>
+    <span class="n">Hz</span><span class="p">,</span>
+    <span class="n">arcsecond</span><span class="p">,</span>
+    <span class="n">c</span><span class="p">,</span>
+    <span class="n">cm</span><span class="p">,</span>
+    <span class="n">erg</span><span class="p">,</span>
+    <span class="n">kpc</span><span class="p">,</span>
+    <span class="n">nJy</span><span class="p">,</span>
+    <span class="n">pc</span><span class="p">,</span>
+    <span class="n">s</span><span class="p">,</span>
+    <span class="n">unyt_array</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">has_units</span>
@@ -1073,6 +1087,66 @@
     <span class="n">tau_norm</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tau_lam</span> <span class="o">/</span> <span class="n">tau_norm</span></div>
 
+
+
+<div class="viewcode-block" id="spatial_to_angular_at_z">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.spatial_to_angular_at_z">[docs]</a>
+<span class="k">def</span> <span class="nf">spatial_to_angular_at_z</span><span class="p">(</span><span class="n">spatial</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert spatial distance to angular distance at a specified redshift.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        spatial (unyt_quantity):</span>
+<span class="sd">            The spatial distance to convert.</span>
+<span class="sd">        cosmo (astropy.cosmology):</span>
+<span class="sd">            The cosmology object used to calculate angular diameter distance.</span>
+<span class="sd">        redshift (float):</span>
+<span class="sd">            The redshift of the source.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity</span>
+<span class="sd">            The converted angular distance in arcseconds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the conversion factor</span>
+    <span class="n">arcsec_per_kpc_at_z</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">cosmo</span><span class="o">.</span><span class="n">arcsec_per_kpc_proper</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">arcsecond</span> <span class="o">/</span> <span class="n">kpc</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Convert spatial to kpc</span>
+    <span class="n">spatial_kpc</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;kpc&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">spatial_kpc</span> <span class="o">*</span> <span class="n">arcsec_per_kpc_at_z</span></div>
+
+
+
+<div class="viewcode-block" id="angular_to_spatial_at_z">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.angular_to_spatial_at_z">[docs]</a>
+<span class="k">def</span> <span class="nf">angular_to_spatial_at_z</span><span class="p">(</span><span class="n">angular</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert angular distance to spatial distance at a specified redshift.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        angular (unyt_quantity):</span>
+<span class="sd">            The angular distance to convert.</span>
+<span class="sd">        cosmo (astropy.cosmology):</span>
+<span class="sd">            The cosmology object used to calculate angular diameter distance.</span>
+<span class="sd">        redshift (float):</span>
+<span class="sd">            The redshift of the source.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity</span>
+<span class="sd">            The converted spatial distance in kpc.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the conversion factor</span>
+    <span class="n">kpc_per_arcsec_at_z</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">arcsec_per_kpc_proper</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">kpc</span> <span class="o">/</span> <span class="n">arcsecond</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Convert angular to arcseconds</span>
+    <span class="n">angular_arcsec</span> <span class="o">=</span> <span class="n">angular</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;arcsecond&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">angular_arcsec</span> <span class="o">*</span> <span class="n">kpc_per_arcsec_at_z</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1105,7 +1179,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=b829792b"></script>
+</div><script src="../../_static/documentation_options.js?v=7d0917bc"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

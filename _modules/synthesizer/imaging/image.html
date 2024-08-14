@@ -318,6 +318,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../auto_examples/imaging/index.html">Imaging examples</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of Imaging examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/imaging/plot_aperture_sum.html">Get sum of image inside an aperture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/imaging/plot_image_addition.html">Image addition example</a></li>
 </ul>
 </li>
@@ -413,6 +414,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.grid.html">synthesizer.grid</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.html">synthesizer.imaging</a><input class="toctree-checkbox" id="toctree-checkbox-33" name="toctree-checkbox-33" role="switch" type="checkbox"/><label for="toctree-checkbox-33"><div class="visually-hidden">Toggle navigation of synthesizer.imaging</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.html">synthesizer.imaging.extensions</a><input class="toctree-checkbox" id="toctree-checkbox-34" name="toctree-checkbox-34" role="switch" type="checkbox"/><label for="toctree-checkbox-34"><div class="visually-hidden">Toggle navigation of synthesizer.imaging.extensions</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.circular_aperture.html">synthesizer.imaging.extensions.circular_aperture</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.image.html">synthesizer.imaging.extensions.image</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../../_autosummary/synthesizer.imaging.extensions.spectral_cube.html">synthesizer.imaging.extensions.spectral_cube</a></li>
 </ul>
@@ -1353,6 +1355,61 @@
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+<div class="viewcode-block" id="Image.get_signal_in_aperture">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.imaging.image.html#synthesizer.imaging.image.Image.get_signal_in_aperture">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_signal_in_aperture</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">aperture_radius</span><span class="p">,</span>
+        <span class="n">aperture_cent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sum of the image within an aperture.</span>
+
+<span class="sd">        This uses fractional pixel coverage to calculate the overlap between</span>
+<span class="sd">        the aperture and each pixel.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            aperture_radius (unyt_quantity, float)</span>
+<span class="sd">                The radius of the aperture.</span>
+<span class="sd">            aperture_cent (unyt_array, float)</span>
+<span class="sd">                The centre of the aperture (in pixel coordinates, i.e. the</span>
+<span class="sd">                centre is [npix/2, npix/2], top left is [0, 0], and bottom</span>
+<span class="sd">                right is [npix, npix]). If None then the centre is assumed to</span>
+<span class="sd">                be the centre of the image.</span>
+<span class="sd">            nthreads (int)</span>
+<span class="sd">                The number of threads to use for the calculation. Default is 1.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float</span>
+<span class="sd">                The sum of the image within the aperture.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert the aperture radius to the correct units</span>
+        <span class="n">aperture_radius</span> <span class="o">=</span> <span class="n">aperture_radius</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="o">.</span><span class="n">units</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># If the aperture centre isn&#39;t passed, assume it&#39;s the centre of the</span>
+        <span class="c1"># image</span>
+        <span class="k">if</span> <span class="n">aperture_cent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">aperture_cent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="kn">from</span> <span class="nn">synthesizer.imaging.extensions.circular_aperture</span> <span class="kn">import</span> <span class="p">(</span>
+            <span class="n">calculate_circular_overlap</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">calculate_circular_overlap</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">npix</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">aperture_radius</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">arr</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">aperture_cent</span><span class="p">),</span>
+                <span class="n">nthreads</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span>
+        <span class="p">)</span></div>
 </div>
 
 </pre></div>
@@ -1387,7 +1444,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=b829792b"></script>
+</div><script src="../../../_static/documentation_options.js?v=7d0917bc"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
