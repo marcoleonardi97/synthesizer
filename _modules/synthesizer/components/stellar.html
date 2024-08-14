@@ -522,6 +522,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">deprecation</span>
 
 
 <div class="viewcode-block" id="StarsComponent">
@@ -565,12 +566,42 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Define the photometry dictionaries to hold the stellar photometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># The common stellar attributes between particle and parametric stars</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ages</span> <span class="o">=</span> <span class="n">ages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metallicities</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the photometry fluxes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict</span>
+<span class="sd">                The photometry fluxes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">deprecation</span><span class="p">(</span>
+            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
+            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the photometry luminosities.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict</span>
+<span class="sd">                The photometry luminosities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">deprecation</span><span class="p">(</span>
+            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
+            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span>
 
 <div class="viewcode-block" id="StarsComponent.generate_lnu">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.generate_lnu">[docs]</a>
@@ -637,9 +668,9 @@
 
         <span class="k">return</span> <span class="n">young</span><span class="p">,</span> <span class="n">old</span>
 
-<div class="viewcode-block" id="StarsComponent.get_photo_luminosities">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_luminosities">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="StarsComponent.get_photo_lnu">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_lnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
 
@@ -650,22 +681,47 @@
 <span class="sd">                Are we talking?</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            photo_luminosities (dict)</span>
+<span class="sd">            photo_lnu (dict)</span>
 <span class="sd">                A dictionary of rest frame broadband luminosities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Loop over spectra in the component</span>
         <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
             <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span>
+                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span></div>
 
 
-<div class="viewcode-block" id="StarsComponent.get_photo_fluxes">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_fluxes">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;The `get_photo_luminosities` method is deprecated. Use &quot;</span>
+        <span class="s2">&quot;`get_photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
+
+<span class="sd">        Alias to get_photo_lnu.</span>
+
+<span class="sd">        Photometry is calculated in spectral luminosity density units.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (filters.FilterCollection)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the luminosity</span>
+<span class="sd">                photometry in each filter in filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StarsComponent.get_photo_fnu">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_fnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
 
@@ -682,12 +738,37 @@
         <span class="c1"># Loop over spectra in the component</span>
         <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
             <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span>
+                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span></div>
 
+
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;The `get_photo_fluxes` method is deprecated. Use &quot;</span>
+        <span class="s2">&quot;`get_photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
+
+<span class="sd">        Alias to get_photo_fnu.</span>
+
+<span class="sd">        Photometry is calculated in spectral flux density units.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (object)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the flux photometry</span>
+<span class="sd">                in each filter in filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
 <div class="viewcode-block" id="StarsComponent.plot_spectra">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.plot_spectra">[docs]</a>
@@ -958,12 +1039,12 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.clear_all_photometry">[docs]</a>
     <span class="k">def</span> <span class="nf">clear_all_photometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all photometry from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_luminosities&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_fluxes&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_lnu&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_fnu&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fnu</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
 <div class="viewcode-block" id="StarsComponent.clear_all_emissions">
@@ -1011,7 +1092,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=7d0917bc"></script>
+</div><script src="../../../_static/documentation_options.js?v=c93cfaf8"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

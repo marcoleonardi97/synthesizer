@@ -520,6 +520,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models.attenuation.igm</span> <span class="kn">import</span> <span class="n">Inoue14</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span><span class="p">,</span> <span class="n">plot_observed_spectra</span><span class="p">,</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">TableFormatter</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">deprecation</span>
 
 
 <div class="viewcode-block" id="BaseGalaxy">
@@ -574,8 +575,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Initialise the photometry dictionaries</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Attach the components</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="o">=</span> <span class="n">stars</span>
@@ -598,6 +599,36 @@
         <span class="c1"># Attach any additional attributes</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the photometry fluxes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict</span>
+<span class="sd">                The photometry fluxes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">deprecation</span><span class="p">(</span>
+            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
+            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the photometry luminosities.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict</span>
+<span class="sd">                The photometry luminosities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">deprecation</span><span class="p">(</span>
+            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
+            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -777,51 +808,83 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BaseGalaxy.get_photo_luminosities">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_luminosities">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseGalaxy.get_photo_lnu">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_lnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
+
+<span class="sd">        Photometry is calculated in spectral luminosity density units.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            filters (filters.FilterCollection)</span>
 <span class="sd">                A FilterCollection object.</span>
 <span class="sd">            verbose (bool)</span>
 <span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the luminosity</span>
+<span class="sd">                photometry in each filter in filters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get stellar photometry</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
             <span class="c1"># If we have particle spectra do that too (not applicable to</span>
             <span class="c1"># parametric Galaxy)</span>
             <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
         <span class="c1"># Get black hole photometry</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
             <span class="c1"># If we have particle spectra do that too (not applicable to</span>
             <span class="c1"># parametric Galaxy)</span>
             <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_luminosities</span><span class="p">(</span>
-                    <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
         <span class="c1"># Get the combined photometry</span>
         <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
             <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_luminosities</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span>
+                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BaseGalaxy.get_photo_fluxes">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_fluxes">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;The `get_photo_luminosities` method is deprecated. Use &quot;</span>
+        <span class="s2">&quot;`get_photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
+
+<span class="sd">        Alias to get_photo_lnu.</span>
+
+<span class="sd">        Photometry is calculated in spectral luminosity density units.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (filters.FilterCollection)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the luminosity</span>
+<span class="sd">                photometry in each filter in filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseGalaxy.get_photo_fnu">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.get_photo_fnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
+
+<span class="sd">        Photometry is calculated in spectral flux density units.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            filters (object)</span>
@@ -830,34 +893,60 @@
 <span class="sd">                Are we talking?</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            (dict)</span>
-<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the flux photometry</span>
+<span class="sd">                in each filter in filters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get stellar photometry</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
             <span class="c1"># If we have particle spectra do that too (not applicable to</span>
             <span class="c1"># parametric Galaxy)</span>
             <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
         <span class="c1"># Get black hole photometry</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
             <span class="c1"># If we have particle spectra do that too (not applicable to</span>
             <span class="c1"># parametric Galaxy)</span>
             <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">get_particle_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
         <span class="c1"># Get the combined photometry</span>
         <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
             <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span>
-                <span class="n">spectra</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span>
+                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">)</span></div>
 
+
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="s2">&quot;The `get_photo_fluxes` method is deprecated. Use &quot;</span>
+        <span class="s2">&quot;`get_photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
+
+<span class="sd">        Alias to get_photo_fnu.</span>
+
+<span class="sd">        Photometry is calculated in spectral flux density units.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filters (object)</span>
+<span class="sd">                A FilterCollection object.</span>
+<span class="sd">            verbose (bool)</span>
+<span class="sd">                Are we talking?</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PhotometryCollection</span>
+<span class="sd">                A PhotometryCollection object containing the flux photometry</span>
+<span class="sd">                in each filter in filters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BaseGalaxy.plot_spectra">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.base_galaxy.html#synthesizer.base_galaxy.BaseGalaxy.plot_spectra">[docs]</a>
@@ -1430,8 +1519,8 @@
 <span class="sd">        particle photometry if present.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Clear photometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">clear_all_photometry</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">black_holes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1490,7 +1579,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=7d0917bc"></script>
+</div><script src="../../_static/documentation_options.js?v=c93cfaf8"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

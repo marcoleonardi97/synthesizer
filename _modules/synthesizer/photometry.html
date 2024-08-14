@@ -515,7 +515,7 @@
 <span class="sd">This module contains a single class definition which acts as a container</span>
 <span class="sd">for photometry data. It should never be directly instantiated, instead</span>
 <span class="sd">internal methods that calculate photometry</span>
-<span class="sd">(e.g. Sed.get_photo_luminosities)</span>
+<span class="sd">(e.g. Sed.get_photo_lnu)</span>
 <span class="sd">return an instance of this class.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -544,9 +544,9 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        photometry (Quantity):</span>
 <span class="sd">            Quantity instance representing photometry data.</span>
-<span class="sd">        photo_luminosities (Quantity):</span>
+<span class="sd">        photo_lnu (Quantity):</span>
 <span class="sd">            Quantity instance representing photometry data in the rest frame.</span>
-<span class="sd">        photo_fluxes (Quantity):</span>
+<span class="sd">        photo_fnu (Quantity):</span>
 <span class="sd">            Quantity instance representing photometry data in the</span>
 <span class="sd">            observer frame.</span>
 <span class="sd">        filters (FilterCollection):</span>
@@ -559,8 +559,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define quantities (there has to be one for rest and observer frame)</span>
-    <span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">photo_lnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">photo_fnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -598,17 +598,17 @@
         <span class="n">photometry</span> <span class="o">=</span> <span class="n">unyt_array</span><span class="p">(</span><span class="n">photometry</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="n">photometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
 
         <span class="c1"># Get the dimensions of a flux for testing</span>
-        <span class="n">flux_dimensions</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="s2">&quot;photo_fluxes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="n">flux_dimensions</span> <span class="o">=</span> <span class="n">default_units</span><span class="p">[</span><span class="s2">&quot;photo_fnu&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span>
 
         <span class="c1"># Check if the photometry is flux or luminosity</span>
         <span class="k">if</span> <span class="n">photometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="n">flux_dimensions</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">photometry</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="n">photometry</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">photometry</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="n">photometry</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">photometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span>
 
         <span class="c1"># Construct a dict for the look up, importantly we here store</span>
         <span class="c1"># the values in photometry not _photometry meaning they have units.</span>
@@ -624,11 +624,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enable dictionary key look up syntax to extract specific photometry.</span>
 
-<span class="sd">        e.g. Sed.photo_luminosities[&quot;JWST/NIRCam.F150W&quot;].</span>
+<span class="sd">        e.g. Sed.photo_lnu[&quot;JWST/NIRCam.F150W&quot;].</span>
 
 <span class="sd">        NOTE: this will always return photometry with units. Unitless</span>
-<span class="sd">        photometry is accessible in array form via self._photo_luminosities</span>
-<span class="sd">        or self._photo_fluxes based on what frame is desired. For</span>
+<span class="sd">        photometry is accessible in array form via self._photo_lnu</span>
+<span class="sd">        or self._photo_fnu based on what frame is desired. For</span>
 <span class="sd">        internal use this should be fine and the UI (where this method</span>
 <span class="sd">        would be used) should always return with units.</span>
 
@@ -734,7 +734,7 @@
         <span class="n">table</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">sep</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-</span><span class="se">\n</span><span class="s2">&quot;</span>
 
         <span class="c1"># Create the centered title</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;PHOTOMETRY (LUMINOSITY)&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;|</span><span class="si">{</span><span class="s1">&#39;PHOTOMETRY (FLUX)&#39;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">tot_width</span><span class="p">)</span><span class="si">}</span><span class="s2">|&quot;</span>
@@ -887,7 +887,7 @@
         <span class="n">y_units</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">replacement</span><span class="p">,</span> <span class="n">y_units</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\frac&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="c1"># Label the x axis</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\lambda/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">x_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
@@ -895,7 +895,7 @@
             <span class="p">)</span>
 
         <span class="c1"># Label the y axis handling all possibilities</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$L/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$F/[\mathrm{&quot;</span> <span class="o">+</span> <span class="n">y_units</span> <span class="o">+</span> <span class="sa">r</span><span class="s2">&quot;}]$&quot;</span><span class="p">)</span>
@@ -938,7 +938,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=7d0917bc"></script>
+</div><script src="../../_static/documentation_options.js?v=c93cfaf8"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

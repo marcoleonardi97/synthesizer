@@ -522,7 +522,7 @@
 <span class="sd">    sed = Sed(lams, lnu)</span>
 <span class="sd">    sed.get_fnu(redshift)</span>
 <span class="sd">    sed.apply_attenutation(tau_v=0.7)</span>
-<span class="sd">    sed.get_photo_fluxes(filters)</span>
+<span class="sd">    sed.get_photo_fnu(filters)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">re</span>
@@ -574,10 +574,10 @@
 <span class="sd">            An optional descriptive string defining the Sed.</span>
 <span class="sd">        redshift (float)</span>
 <span class="sd">            The redshift of the Sed.</span>
-<span class="sd">        photo_luminosities (dict, float)</span>
+<span class="sd">        photo_lnu (dict, float)</span>
 <span class="sd">            The rest frame broadband photometry in arbitrary filters</span>
 <span class="sd">            (filter_code: photometry).</span>
-<span class="sd">        photo_fluxes (dict, float)</span>
+<span class="sd">        photo_fnu (dict, float)</span>
 <span class="sd">            The observed broadband photometry in arbitrary filters</span>
 <span class="sd">            (filter_code: photometry).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -655,8 +655,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Broadband photometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Creating Sed&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
@@ -1467,9 +1467,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span></div>
 
 
-<div class="viewcode-block" id="Sed.get_photo_luminosities">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_photo_luminosities">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.get_photo_lnu">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_photo_lnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate broadband luminosities using a FilterCollection object</span>
 
@@ -1480,12 +1480,12 @@
 <span class="sd">                Are we talking?</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            photo_luminosities (dict)</span>
+<span class="sd">            photo_lnu (dict)</span>
 <span class="sd">                A dictionary of rest frame broadband luminosities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Intialise result dictionary</span>
-        <span class="n">photo_luminosities</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Loop over filters</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
@@ -1500,19 +1500,17 @@
             <span class="c1"># Apply the filter transmission curve and store the resulting</span>
             <span class="c1"># luminosity</span>
             <span class="n">bb_lum</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span>
-            <span class="n">photo_luminosities</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
+            <span class="n">photo_lnu</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_lum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span>
 
         <span class="c1"># Create the photometry collection and store it in the object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span>
-            <span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_luminosities</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_lnu</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_luminosities</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span></div>
 
 
-<div class="viewcode-block" id="Sed.get_photo_fluxes">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_photo_fluxes">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Sed.get_photo_fnu">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_photo_fnu">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_photo_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate broadband fluxes using a FilterCollection object</span>
 
@@ -1538,7 +1536,7 @@
             <span class="p">)</span>
 
         <span class="c1"># Set up flux dictionary</span>
-        <span class="n">photo_fluxes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Loop over filters in filter collection</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
@@ -1552,12 +1550,12 @@
 
             <span class="c1"># Calculate and store the broadband flux in this filter</span>
             <span class="n">bb_flux</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_obsnu</span><span class="p">)</span>
-            <span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="o">.</span><span class="n">units</span>
+            <span class="n">photo_fnu</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb_flux</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="o">.</span><span class="n">units</span>
 
         <span class="c1"># Create the photometry collection and store it in the object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_fluxes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="n">PhotometryCollection</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="o">**</span><span class="n">photo_fnu</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span></div>
 
 
 <div class="viewcode-block" id="Sed.measure_colour">
@@ -1578,16 +1576,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Ensure fluxes exist</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="s2">&quot;Broadband fluxes not yet calculated, &quot;</span>
-                    <span class="s2">&quot;run `get_photo_fluxes` with a &quot;</span>
+                    <span class="s2">&quot;run `get_photo_fnu` with a &quot;</span>
                     <span class="s2">&quot;FilterCollection&quot;</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">f2</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">f1</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="Sed.measure_index">
@@ -2274,14 +2272,14 @@
         <span class="c1"># Loop over spectra plotting photometry and filter curves</span>
         <span class="k">for</span> <span class="n">sed</span> <span class="ow">in</span> <span class="n">spectra</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="c1"># Get the photometry</span>
-            <span class="n">sed</span><span class="o">.</span><span class="n">get_photo_fluxes</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+            <span class="n">sed</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 
             <span class="c1"># Plot the photometry for each filter</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
                 <span class="n">piv_lam</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pivwv</span><span class="p">()</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
                     <span class="n">piv_lam</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">),</span>
-                    <span class="n">sed</span><span class="o">.</span><span class="n">photo_fluxes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">],</span>
+                    <span class="n">sed</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">filter_code</span><span class="p">],</span>
                     <span class="n">zorder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -2582,7 +2580,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=7d0917bc"></script>
+</div><script src="../../_static/documentation_options.js?v=c93cfaf8"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
