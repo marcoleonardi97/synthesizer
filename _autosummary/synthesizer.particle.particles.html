@@ -341,6 +341,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/particle/plot_rotated_galaxy.html">Rotating particle distributions</a></li>
 </ul>
 </li>
 </ul>
@@ -465,6 +466,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="synthesizer.utils.html">synthesizer.utils</a><input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" role="switch" type="checkbox"/><label for="toctree-checkbox-39"><div class="visually-hidden">Toggle navigation of synthesizer.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.art.html">synthesizer.utils.art</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.ascii_table.html">synthesizer.utils.ascii_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.geometry.html">synthesizer.utils.geometry</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.integrate.html">synthesizer.utils.integrate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.plt.html">synthesizer.utils.plt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="synthesizer.utils.stats.html">synthesizer.utils.stats</a></li>
@@ -669,6 +671,21 @@ baryons). This is used to avoid log(0) errors.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.angular_momentum">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">angular_momentum</span></span><a class="headerlink" href="#synthesizer.particle.particles.Particles.angular_momentum" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the total angular momentum vector of the particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>unyt_array</dt><dd><p>The angular momentum vector of the particle system.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.calculate_centre_of_mass">
 <span class="sig-name descname"><span class="pre">calculate_centre_of_mass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.calculate_centre_of_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.calculate_centre_of_mass" title="Link to this definition">¶</a></dt>
@@ -681,24 +698,6 @@ and assigns the centre of mass to the <cite>centre</cite> attribute</p>
 <dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.centered_coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centered_coordinates</span></span><a class="headerlink" href="#synthesizer.particle.particles.Particles.centered_coordinates" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the coordinates centred on the geometric mean.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.convert_to_comoving_properties">
-<span class="sig-name descname"><span class="pre">convert_to_comoving_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.convert_to_comoving_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.convert_to_comoving_properties" title="Link to this definition">¶</a></dt>
-<dd><p>Convert physical coordinates and velocities to comoving.</p>
-<p>Note that redshift must be provided to perform this conversion.</p>
-<p>Since smoothing lengths are not universal quantities their existence is
-checked before trying to convert them.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.convert_to_physical_properties">
-<span class="sig-name descname"><span class="pre">convert_to_physical_properties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.convert_to_physical_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.convert_to_physical_properties" title="Link to this definition">¶</a></dt>
-<dd><p>Convert comoving coordinates and velocities to physical.</p>
-<p>Note that redshift must be provided to perform this conversion.</p>
-<p>Since smoothing lengths are not universal quantities their existence is
-checked before trying to convert them.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -998,10 +997,80 @@ which is set on initialisation of this particle object.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.rotate_edge_on">
+<span class="sig-name descname"><span class="pre">rotate_edge_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.rotate_edge_on"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.rotate_edge_on" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate the particle distribution to edge-on.</p>
+<p>This will rotate the particle distribution such that the angular
+momentum vector is aligned with the y-axis in an image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em>) – Whether to perform the rotation in place or return a new
+instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Particles</dt><dd><p>A new instance of the particles with rotated coordinates,
+if inplace is False.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.rotate_face_on">
+<span class="sig-name descname"><span class="pre">rotate_face_on</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.rotate_face_on"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.rotate_face_on" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate the particle distribution to face-on.</p>
+<p>This will rotate the particle distribution such that the angular
+momentum vector is aligned with the z-axis in an image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inplace</strong> (<em>bool</em>) – Whether to perform the rotation in place or return a new
+instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Particles</dt><dd><p>A new instance of the particles with rotated coordinates,
+if inplace is False.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="synthesizer.particle.particles.Particles.rotate_particles">
-<span class="sig-name descname"><span class="pre">rotate_particles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.rotate_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.rotate_particles" title="Link to this definition">¶</a></dt>
-<dd><p>Rotate the particle distribution.</p>
-<p>Not yet implemented.</p>
+<span class="sig-name descname"><span class="pre">rotate_particles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(0,</span> <span class="pre">'rad')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">unyt_quantity(0,</span> <span class="pre">'rad')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rot_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/synthesizer/particle/particles.html#Particles.rotate_particles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#synthesizer.particle.particles.Particles.rotate_particles" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate coordinates.</p>
+<p>This method can either use angles or a provided rotation matrix.</p>
+<p>When using angles phi is the rotation around the z-axis while theta
+is the rotation around the y-axis.</p>
+<p>This can both be done in place or return a new instance, by default
+this will be done in place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phi</strong> (<em>unyt_quantity</em>) – The angle in radians to rotate around the z-axis. If rot_matrix
+is defined this will be ignored.</p></li>
+<li><p><strong>theta</strong> (<em>unyt_quantity</em>) – The angle in radians to rotate around the y-axis. If rot_matrix
+is defined this will be ignored.</p></li>
+<li><p><strong>rot_matrix</strong> (<em>array-like</em><em>, </em><em>float</em>) – A 3x3 rotation matrix to apply to the coordinates
+instead of phi and theta.</p></li>
+<li><p><strong>inplace</strong> (<em>bool</em>) – Whether to perform the rotation in place or return a new
+instance.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Particles</dt><dd><p>A new instance of the particles with the rotated coordinates,
+if inplace is False.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1017,6 +1086,9 @@ which is set on initialisation of this particle object.</p>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute line of sight optical depths and compares the simple loop method with the complex tree method."><img alt="" src="../_images/sphx_glr_plot_get_los_attenutation_thumb.png" />
 <p><a class="reference internal" href="../auto_examples/particle/plot_get_los_attenutation.html#sphx-glr-auto-examples-particle-plot-get-los-attenutation-py"><span class="std std-ref">Plot line of sight optical depth calculations</span></a></p>
   <div class="sphx-glr-thumbnail-title">Plot line of sight optical depth calculations</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to rotate a particle distribution and a galaxy."><img alt="" src="../_images/sphx_glr_plot_rotated_galaxy_thumb.png" />
+<p><a class="reference internal" href="../auto_examples/particle/plot_rotated_galaxy.html#sphx-glr-auto-examples-particle-plot-rotated-galaxy-py"><span class="std std-ref">Rotating particle distributions</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Rotating particle distributions</div>
 </div></div></section>
 </section>
 
@@ -1091,10 +1163,9 @@ which is set on initialisation of this particle object.</p>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.metallicity_floor"><code class="docutils literal notranslate"><span class="pre">Particles.metallicity_floor</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.tau_v"><code class="docutils literal notranslate"><span class="pre">Particles.tau_v</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.radii"><code class="docutils literal notranslate"><span class="pre">Particles.radii</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.particles.Particles.angular_momentum"><code class="docutils literal notranslate"><span class="pre">Particles.angular_momentum</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.calculate_centre_of_mass"><code class="docutils literal notranslate"><span class="pre">Particles.calculate_centre_of_mass()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.centered_coordinates"><code class="docutils literal notranslate"><span class="pre">Particles.centered_coordinates</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.particles.Particles.convert_to_comoving_properties"><code class="docutils literal notranslate"><span class="pre">Particles.convert_to_comoving_properties()</span></code></a></li>
-<li><a class="reference internal" href="#synthesizer.particle.particles.Particles.convert_to_physical_properties"><code class="docutils literal notranslate"><span class="pre">Particles.convert_to_physical_properties()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.get_attr_radius"><code class="docutils literal notranslate"><span class="pre">Particles.get_attr_radius()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.get_flux_radius"><code class="docutils literal notranslate"><span class="pre">Particles.get_flux_radius()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.get_half_flux_radius"><code class="docutils literal notranslate"><span class="pre">Particles.get_half_flux_radius()</span></code></a></li>
@@ -1110,6 +1181,8 @@ which is set on initialisation of this particle object.</p>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.log10metallicities"><code class="docutils literal notranslate"><span class="pre">Particles.log10metallicities</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.particle_photo_fluxes"><code class="docutils literal notranslate"><span class="pre">Particles.particle_photo_fluxes</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.photo_luminosities"><code class="docutils literal notranslate"><span class="pre">Particles.photo_luminosities</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.particles.Particles.rotate_edge_on"><code class="docutils literal notranslate"><span class="pre">Particles.rotate_edge_on()</span></code></a></li>
+<li><a class="reference internal" href="#synthesizer.particle.particles.Particles.rotate_face_on"><code class="docutils literal notranslate"><span class="pre">Particles.rotate_face_on()</span></code></a></li>
 <li><a class="reference internal" href="#synthesizer.particle.particles.Particles.rotate_particles"><code class="docutils literal notranslate"><span class="pre">Particles.rotate_particles()</span></code></a></li>
 </ul>
 </li>
@@ -1125,7 +1198,7 @@ which is set on initialisation of this particle object.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3f038b60"></script>
+</div><script src="../_static/documentation_options.js?v=da3e1d1f"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

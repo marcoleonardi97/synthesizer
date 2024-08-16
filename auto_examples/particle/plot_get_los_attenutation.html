@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="API Reference" href="../../API.html" /><link rel="prev" title="Plot line of sight diagnostics" href="plot_los_spectra.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Rotating particle distributions" href="plot_rotated_galaxy.html" /><link rel="prev" title="Plot line of sight diagnostics" href="plot_los_spectra.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>Plot line of sight optical depth calculations - Synthesizer</title>
@@ -341,6 +341,7 @@
 <li class="toctree-l3"><a class="reference internal" href="plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_los_spectra.html">Plot line of sight diagnostics</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot line of sight optical depth calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_rotated_galaxy.html">Rotating particle distributions</a></li>
 </ul>
 </li>
 </ul>
@@ -465,6 +466,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.utils.html">synthesizer.utils</a><input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" role="switch" type="checkbox"/><label for="toctree-checkbox-39"><div class="visually-hidden">Toggle navigation of synthesizer.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.art.html">synthesizer.utils.art</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.ascii_table.html">synthesizer.utils.ascii_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.geometry.html">synthesizer.utils.geometry</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.integrate.html">synthesizer.utils.integrate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.plt.html">synthesizer.utils.plt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.stats.html">synthesizer.utils.stats</a></li>
@@ -521,15 +523,15 @@ to download the full example code.</p>
 <span id="sphx-glr-auto-examples-particle-plot-get-los-attenutation-py"></span><h1>Plot line of sight optical depth calculations<a class="headerlink" href="#plot-line-of-sight-optical-depth-calculations" title="Link to this heading">¶</a></h1>
 <p>This example shows how to compute line of sight optical depths and compares
 the simple loop method with the complex tree method.</p>
-<img src="../../_images/sphx_glr_plot_get_los_attenutation_001.png" srcset="../../_images/sphx_glr_plot_get_los_attenutation_001.png" alt="plot get los attenutation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
+<img src="../../_images/sphx_glr_plot_get_los_attenutation_001.png" srcset="../../_images/sphx_glr_plot_get_los_attenutation_001.png" alt="plot get los attenutation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:120: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
   self.calculate_integrated_gas_properties()
-/home/runner/work/synthesizer/synthesizer/examples/particle/plot_get_los_attenutation.py:136: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
+/home/runner/work/synthesizer/synthesizer/examples/particle/plot_get_los_attenutation.py:137: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
   loop_tau_v = galaxy.calculate_los_tau_v(
-/home/runner/work/synthesizer/synthesizer/examples/particle/plot_get_los_attenutation.py:146: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
+/home/runner/work/synthesizer/synthesizer/examples/particle/plot_get_los_attenutation.py:147: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
   tree_tau_v = galaxy.calculate_los_tau_v(
 LOS calculation with tree took 0.0005 seconds for nstar=100 and ngas=1000
 LOS calculation with loop took 0.0010 seconds for nstar=100 and ngas=1000
-Ratio in wallclock: Time_loop/Time_tree=2.2550
+Ratio in wallclock: Time_loop/Time_tree=2.0729
 Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
 </pre></div>
 </div>
@@ -541,6 +543,8 @@ Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span>
+
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.kernel_functions</span> <span class="kn">import</span> <span class="n">Kernel</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span><span class="p">,</span> <span class="n">ZDist</span>
@@ -549,7 +553,6 @@ Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
 <span class="kn">from</span> <span class="nn">synthesizer.particle.gas</span> <span class="kn">import</span> <span class="n">Gas</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.particles</span> <span class="kn">import</span> <span class="n">CoordinateGenerator</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.stars</span> <span class="kn">import</span> <span class="n">sample_sfhz</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span>
 
 
 <span class="k">def</span> <span class="nf">calculate_smoothing_lengths</span><span class="p">(</span><span class="n">positions</span><span class="p">,</span> <span class="n">num_neighbors</span><span class="o">=</span><span class="mi">56</span><span class="p">):</span>
@@ -711,7 +714,7 @@ Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.019 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.014 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-particle-plot-get-los-attenutation-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e68787cb28bedbfa9b2cf641dfb3279f/plot_get_los_attenutation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_get_los_attenutation.ipynb</span></code></a></p>
@@ -731,12 +734,12 @@ Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../API.html">
+          <a class="next-page" href="plot_rotated_galaxy.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API Reference</div>
+                <div class="title">Rotating particle distributions</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -775,7 +778,7 @@ Tree gave=3.73e-06 Loop gave=3.73e-06 Normalised residual=0.0000
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=3f038b60"></script>
+</div><script src="../../_static/documentation_options.js?v=da3e1d1f"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

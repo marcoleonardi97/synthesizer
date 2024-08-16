@@ -341,6 +341,7 @@
 <li class="toctree-l3"><a class="reference internal" href="plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Plot line of sight diagnostics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_rotated_galaxy.html">Rotating particle distributions</a></li>
 </ul>
 </li>
 </ul>
@@ -465,6 +466,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.utils.html">synthesizer.utils</a><input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" role="switch" type="checkbox"/><label for="toctree-checkbox-39"><div class="visually-hidden">Toggle navigation of synthesizer.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.art.html">synthesizer.utils.art</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.ascii_table.html">synthesizer.utils.ascii_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.geometry.html">synthesizer.utils.geometry</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.integrate.html">synthesizer.utils.integrate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.plt.html">synthesizer.utils.plt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.utils.stats.html">synthesizer.utils.stats</a></li>
@@ -521,9 +523,9 @@ to download the full example code.</p>
 <span id="sphx-glr-auto-examples-particle-plot-los-spectra-py"></span><h1>Plot line of sight diagnostics<a class="headerlink" href="#plot-line-of-sight-diagnostics" title="Link to this heading">¶</a></h1>
 <p>This example shows how to compute line of sight dust surface densities,
 and plots some diagnostics.</p>
-<img src="../../_images/sphx_glr_plot_los_spectra_001.png" srcset="../../_images/sphx_glr_plot_los_spectra_001.png" alt="plot los spectra" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:117: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
+<img src="../../_images/sphx_glr_plot_los_spectra_001.png" srcset="../../_images/sphx_glr_plot_los_spectra_001.png" alt="plot los spectra" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:120: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
   self.calculate_integrated_gas_properties()
-/home/runner/work/synthesizer/synthesizer/examples/particle/plot_los_spectra.py:134: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
+/home/runner/work/synthesizer/synthesizer/examples/particle/plot_los_spectra.py:135: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
   galaxy.calculate_los_tau_v(
 
 (&lt;Figure size 350x500 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{\\AA}]$&#39;, ylabel=&#39;$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$&#39;&gt;)
@@ -537,6 +539,8 @@ and plots some diagnostics.</p>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span>
+
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="n">TotalEmission</span>
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
@@ -547,7 +551,6 @@ and plots some diagnostics.</p>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.gas</span> <span class="kn">import</span> <span class="n">Gas</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.particles</span> <span class="kn">import</span> <span class="n">CoordinateGenerator</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.stars</span> <span class="kn">import</span> <span class="n">sample_sfhz</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DeJavu Serif&quot;</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Times New Roman&quot;</span><span class="p">]</span>
@@ -674,7 +677,7 @@ and plots some diagnostics.</p>
 <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.343 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.356 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-particle-plot-los-spectra-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/55829db956316681b8770a19f9f1c158/plot_los_spectra.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_los_spectra.ipynb</span></code></a></p>
@@ -738,7 +741,7 @@ and plots some diagnostics.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=3f038b60"></script>
+</div><script src="../../_static/documentation_options.js?v=da3e1d1f"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

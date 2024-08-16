@@ -340,6 +340,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_single_star_test.html">Compare Single star particle to instantaneous SFZH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_los_spectra.html">Plot line of sight diagnostics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_get_los_attenutation.html">Plot line of sight optical depth calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../auto_examples/particle/plot_rotated_galaxy.html">Rotating particle distributions</a></li>
 </ul>
 </li>
 </ul>
@@ -464,6 +465,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.html">synthesizer.utils</a><input class="toctree-checkbox" id="toctree-checkbox-39" name="toctree-checkbox-39" role="switch" type="checkbox"/><label for="toctree-checkbox-39"><div class="visually-hidden">Toggle navigation of synthesizer.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.art.html">synthesizer.utils.art</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.ascii_table.html">synthesizer.utils.ascii_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.geometry.html">synthesizer.utils.geometry</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.integrate.html">synthesizer.utils.integrate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.plt.html">synthesizer.utils.plt</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.utils.stats.html">synthesizer.utils.stats</a></li>
@@ -1109,6 +1111,8 @@
         <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Greys_r&quot;</span><span class="p">,</span>
         <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot an image.</span>
@@ -1127,6 +1131,10 @@
 <span class="sd">            tick_formatter (matplotlib.ticker.FuncFormatter)</span>
 <span class="sd">                An instance of the tick formatter for formatting the colorbar</span>
 <span class="sd">                ticks.</span>
+<span class="sd">            fig (matplotlib.pyplot.figure)</span>
+<span class="sd">                The figure object to plot on. If None a new figure is created.</span>
+<span class="sd">            ax (matplotlib.pyplot.figure.axis)</span>
+<span class="sd">                The axis object to plot on. If None a new axis is created.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.pyplot.figure</span>
@@ -1138,11 +1146,13 @@
         <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr</span>
 
         <span class="c1"># Set up the figure</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
 
         <span class="c1"># Create the axis and turn off the ticks and frame</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 
         <span class="c1"># Plot the image and remove the surrounding axis</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
@@ -1167,6 +1177,8 @@
         <span class="n">cbar_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tick_formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot a map.</span>
@@ -1191,6 +1203,10 @@
 <span class="sd">            tick_formatter (matplotlib.ticker.FuncFormatter)</span>
 <span class="sd">                An instance of the tick formatter for formatting the colorbar</span>
 <span class="sd">                ticks.</span>
+<span class="sd">            fig (matplotlib.pyplot.figure)</span>
+<span class="sd">                The figure object to plot on. If None a new figure is created.</span>
+<span class="sd">            ax (matplotlib.pyplot.figure.axis)</span>
+<span class="sd">                The axis object to plot on. If None a new axis is created.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.pyplot.figure</span>
@@ -1202,10 +1218,12 @@
         <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arr</span>
 
         <span class="c1"># Set up the figure</span>
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">))</span>
 
         <span class="c1"># Create the axis</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
         <span class="c1"># Plot the image and remove the surrounding axis</span>
         <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
@@ -1444,7 +1462,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=3f038b60"></script>
+</div><script src="../../../_static/documentation_options.js?v=da3e1d1f"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
