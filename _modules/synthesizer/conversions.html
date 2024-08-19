@@ -637,6 +637,49 @@
 
 
 
+<div class="viewcode-block" id="lnu_to_fnu">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.lnu_to_fnu">[docs]</a>
+<span class="k">def</span> <span class="nf">lnu_to_fnu</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="n">cosmo</span><span class="p">,</span> <span class="n">redshift</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert spectral luminosity density to spectral flux density.</span>
+
+<span class="sd">    The conversion is done using the formula:</span>
+
+<span class="sd">            F_nu = L_nu * (1 + z) / 4 / pi / D_L**2</span>
+
+<span class="sd">    The result will be in units of nJy.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lnu (unyt_quantity/unyt_array)</span>
+<span class="sd">            The spectral luminosity density to be converted to flux, can</span>
+<span class="sd">            either be a singular value or array.</span>
+<span class="sd">        cosmo (astropy.cosmology)</span>
+<span class="sd">            The cosmology object used to calculate luminosity distance.</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            The redshift of the rest frame.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        unyt_quantity/unyt_array</span>
+<span class="sd">            The converted spectral flux density.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        IncorrectUnits</span>
+<span class="sd">            If units are missing an error is raised.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure we have units</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lnu must be given with unyt units.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the luminosity distance (need to convert from astropy to unyt)</span>
+    <span class="n">lum_dist</span> <span class="o">=</span> <span class="n">cosmo</span><span class="o">.</span><span class="n">luminosity_distance</span><span class="p">(</span><span class="n">redshift</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="n">cm</span>
+
+    <span class="c1"># Calculate the flux in interim units</span>
+    <span class="n">fnu</span> <span class="o">=</span> <span class="n">lnu</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">lum_dist</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">fnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nJy</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="fnu_to_apparent_mag">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.conversions.html#synthesizer.conversions.fnu_to_apparent_mag">[docs]</a>
 <span class="k">def</span> <span class="nf">fnu_to_apparent_mag</span><span class="p">(</span><span class="n">fnu</span><span class="p">):</span>
@@ -1181,7 +1224,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=b34e7ab1"></script>
+</div><script src="../../_static/documentation_options.js?v=d0bb3323"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
