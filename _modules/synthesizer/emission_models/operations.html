@@ -525,6 +525,7 @@
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Template</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 
@@ -801,7 +802,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_lum_attenuated_model</span> <span class="o">=</span> <span class="n">lum_attenuated_model</span>
 
     <span class="k">def</span> <span class="nf">_generate_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">this_model</span><span class="p">,</span> <span class="n">emission_model</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">per_particle</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+        <span class="n">emission_model</span><span class="p">,</span>
+        <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+        <span class="n">per_particle</span><span class="p">,</span>
+        <span class="n">emitter</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate the spectra for a given model.</span>
@@ -817,6 +824,8 @@
 <span class="sd">                The wavelength grid to generate the spectra on.</span>
 <span class="sd">            per_particle (bool):</span>
 <span class="sd">                Are we generating per particle?</span>
+<span class="sd">            emitter (dict):</span>
+<span class="sd">                The emitter to generate the spectra for.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict:</span>
@@ -841,6 +850,12 @@
             <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                 <span class="n">lam</span><span class="p">,</span>
                 <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
+            <span class="c1"># If we have a template we need to generate the spectra</span>
+            <span class="c1"># for each model</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+                <span class="n">emitter</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -1241,7 +1256,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=ede2030e"></script>
+</div><script src="../../../_static/documentation_options.js?v=63fddab4"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

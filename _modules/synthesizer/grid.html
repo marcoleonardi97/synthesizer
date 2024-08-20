@@ -1669,61 +1669,55 @@
 <span class="sd">            bolometric luminosity.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># Define Quantities</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+    <span class="n">lnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;template&quot;</span><span class="p">,</span>
-        <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">lam</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
+        <span class="n">lnu</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">unify_with_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the Template.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            label (str)</span>
-<span class="sd">                The label for the model.</span>
-<span class="sd">            filename (str)</span>
-<span class="sd">                The filename (including full path) to a file containing the</span>
-<span class="sd">                template. The file should contain two columns with wavelength</span>
-<span class="sd">                and luminosity (lnu).</span>
 <span class="sd">            lam (array)</span>
 <span class="sd">                Wavelength array.</span>
 <span class="sd">            lnu (array)</span>
 <span class="sd">                Luminosity array.</span>
 <span class="sd">            fesc (float)</span>
 <span class="sd">                The escape fraction of the AGN.</span>
+<span class="sd">            unify_with_grid (Grid)</span>
+<span class="sd">                A grid object to unify the template with. This will ensure</span>
+<span class="sd">                the template has the same wavelength array as the grid.</span>
 <span class="sd">            **kwargs</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure we have been given units</span>
-        <span class="k">if</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;lam must be provided with units&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;lnu must be provided with units&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
-                <span class="s2">&quot;Not yet implemented! Feel free to implement and raise a &quot;</span>
-                <span class="s2">&quot;pull request. Guidance for contributing can be found at &quot;</span>
-                <span class="s2">&quot;https://github.com/flaresimulations/synthesizer/blob/main/&quot;</span>
-                <span class="s2">&quot;docs/CONTRIBUTING.md&quot;</span>
-            <span class="p">)</span>
+        <span class="c1"># It&#39;s convenient to have an sed object for the next steps</span>
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">lam</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># initialise a synthesizer Sed object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span>
+        <span class="c1"># Before we do anything, do we have a grid we need to unify with?</span>
+        <span class="k">if</span> <span class="n">unify_with_grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Interpolate the template Sed onto the grid wavelength array</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">get_resampled_sed</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="n">unify_with_grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
-            <span class="c1"># normalise</span>
-            <span class="c1"># TODO: add a method to Sed that does this.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span><span class="o">.</span><span class="n">value</span>
+        <span class="c1"># Attach the template now we&#39;ve done the interpolation (if needed)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lnu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">lam</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingArgument</span><span class="p">(</span>
-                <span class="s2">&quot;Either a filename or both lam and lnu must be provided!&quot;</span>
-            <span class="p">)</span>
+        <span class="c1"># Normalise, just in case</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span><span class="o">.</span><span class="n">value</span>
 
         <span class="c1"># Set the escape fraction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fesc</span> <span class="o">=</span> <span class="n">fesc</span>
@@ -1747,11 +1741,23 @@
                 <span class="s2">&quot;bolometric luminosity must be provided with units&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sed</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sed</span>
-            <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fesc</span><span class="p">)</span>
-        <span class="p">)</span></div>
+        <span class="c1"># Handle the dimensions of the bolometric luminosity</span>
+        <span class="k">if</span> <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fesc</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="n">Hz</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span>
+                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fesc</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sed</span></div>
 </div>
 
 </pre></div>
@@ -1786,7 +1792,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=ede2030e"></script>
+</div><script src="../../_static/documentation_options.js?v=63fddab4"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
