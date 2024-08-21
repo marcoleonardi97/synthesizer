@@ -359,6 +359,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -658,6 +659,7 @@
         <span class="n">covering_fraction_blr</span><span class="p">,</span>
         <span class="n">torus_emission_model</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the UnifiedAGN model.</span>
@@ -669,14 +671,18 @@
 <span class="sd">            covering_fraction_blr (float): The covering fraction of the BLR.</span>
 <span class="sd">            torus_emission_model (synthesizer.dust.EmissionModel): The dust</span>
 <span class="sd">                emission model to use for the torus.</span>
+<span class="sd">            label (str): The label for the model.</span>
+<span class="sd">            **kwargs: Any additional keyword arguments to pass to the</span>
+<span class="sd">                BlackHoleEmissionModel.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get the incident istropic disc emission model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc_incident_isotropic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_disc_incident_isotropic</span><span class="p">(</span>
             <span class="n">nlr_grid</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the incident model accounting for the geometry but unmasked</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc_incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_disc_incident</span><span class="p">(</span><span class="n">nlr_grid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc_incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_disc_incident</span><span class="p">(</span><span class="n">nlr_grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Get the transmitted disc emission models</span>
         <span class="p">(</span>
@@ -688,6 +694,7 @@
             <span class="n">blr_grid</span><span class="p">,</span>
             <span class="n">covering_fraction_nlr</span><span class="p">,</span>
             <span class="n">covering_fraction_blr</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the escaped disc emission model</span>
@@ -695,10 +702,11 @@
             <span class="n">nlr_grid</span><span class="p">,</span>
             <span class="n">covering_fraction_nlr</span><span class="p">,</span>
             <span class="n">covering_fraction_blr</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the disc emission model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">disc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_disc</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_disc</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Get the line regions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nlr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_line_regions</span><span class="p">(</span>
@@ -706,10 +714,11 @@
             <span class="n">blr_grid</span><span class="p">,</span>
             <span class="n">covering_fraction_nlr</span><span class="p">,</span>
             <span class="n">covering_fraction_blr</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the torus emission model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">torus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_torus</span><span class="p">(</span><span class="n">torus_emission_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">torus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_torus</span><span class="p">(</span><span class="n">torus_emission_model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Create the final model</span>
         <span class="n">BlackHoleEmissionModel</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -726,20 +735,22 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">disc_incident</span><span class="p">,</span>
             <span class="p">),</span>
             <span class="n">post_processing</span><span class="o">=</span><span class="p">(</span><span class="n">scale_by_incident_isotropic</span><span class="p">,),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_disc_incident_isotropic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_disc_incident_isotropic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the disc spectra assuming isotropic emission.&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;disc_incident_isotropic&quot;</span><span class="p">,</span>
             <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
             <span class="n">fixed_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cosine_inclination&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">model</span>
 
-    <span class="k">def</span> <span class="nf">_make_disc_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_disc_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the disc spectra.&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
@@ -748,6 +759,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">model</span>
@@ -758,6 +770,7 @@
         <span class="n">blr_grid</span><span class="p">,</span>
         <span class="n">covering_fraction_nlr</span><span class="p">,</span>
         <span class="n">covering_fraction_blr</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the disc transmitted spectra.&quot;&quot;&quot;</span>
         <span class="c1"># Make the line regions</span>
@@ -769,6 +782,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">blr</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="n">blr_grid</span><span class="p">,</span>
@@ -778,6 +792,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Combine the models</span>
@@ -787,6 +802,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">nlr</span><span class="p">,</span> <span class="n">blr</span><span class="p">,</span> <span class="n">model</span>
@@ -796,6 +812,7 @@
         <span class="n">grid</span><span class="p">,</span>
         <span class="n">covering_fraction_nlr</span><span class="p">,</span>
         <span class="n">covering_fraction_blr</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the disc escaped spectra.</span>
@@ -808,11 +825,12 @@
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;disc_escaped&quot;</span><span class="p">,</span>
             <span class="n">extract</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="p">(</span><span class="n">covering_fraction_nlr</span> <span class="o">+</span> <span class="n">covering_fraction_blr</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">model</span>
 
-    <span class="k">def</span> <span class="nf">_make_disc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_disc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the disc spectra.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;disc&quot;</span><span class="p">,</span>
@@ -820,6 +838,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_make_line_regions</span><span class="p">(</span>
@@ -828,6 +847,7 @@
         <span class="n">blr_grid</span><span class="p">,</span>
         <span class="n">covering_fraction_nlr</span><span class="p">,</span>
         <span class="n">covering_fraction_blr</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the line regions.&quot;&quot;&quot;</span>
         <span class="c1"># Make the line regions with fixed inclination</span>
@@ -840,6 +860,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">blr</span> <span class="o">=</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="n">blr_grid</span><span class="p">,</span>
@@ -850,16 +871,18 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;_torus_edgeon_cond&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">nlr</span><span class="p">,</span> <span class="n">blr</span>
 
-    <span class="k">def</span> <span class="nf">_make_torus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torus_emission_model</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_torus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">torus_emission_model</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the torus spectra.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">BlackHoleEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;torus&quot;</span><span class="p">,</span>
             <span class="n">generator</span><span class="o">=</span><span class="n">torus_emission_model</span><span class="p">,</span>
             <span class="n">lum_intrinsic_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">disc_incident_isotropic</span><span class="p">,</span>
             <span class="n">scale_by</span><span class="o">=</span><span class="s2">&quot;torus_fraction&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 </pre></div>
@@ -894,7 +917,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=5fa4622c"></script>

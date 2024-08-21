@@ -360,6 +360,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -525,8 +526,6 @@ to download the full example code.</p>
 and plots some diagnostics.</p>
 <img src="../../_images/sphx_glr_plot_los_spectra_001.png" srcset="../../_images/sphx_glr_plot_los_spectra_001.png" alt="plot los spectra" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:120: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
   self.calculate_integrated_gas_properties()
-/home/runner/work/synthesizer/synthesizer/examples/particle/plot_los_spectra.py:135: FutureWarning: calculate_los_tau_v is deprecated and will be removed in a future version.
-  galaxy.calculate_los_tau_v(
 
 (&lt;Figure size 350x500 with 1 Axes&gt;, &lt;Axes: xlabel=&#39;$\\lambda/[\\mathrm{\\AA}]$&#39;, ylabel=&#39;$L_{\\nu}/[\\mathrm{\\rm{erg} \\ / \\ \\rm{Hz \\cdot \\rm{s}}}]$&#39;&gt;)
 </pre></div>
@@ -591,6 +590,7 @@ and plots some diagnostics.</p>
     <span class="n">tau_v</span><span class="o">=</span><span class="s2">&quot;tau_v&quot;</span><span class="p">,</span>
     <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
     <span class="n">fesc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Define the grid (normally this would be defined by an SPS grid)</span>
@@ -660,7 +660,7 @@ and plots some diagnostics.</p>
 <span class="n">kernel_data</span> <span class="o">=</span> <span class="n">sph_kernel</span><span class="o">.</span><span class="n">get_kernel</span><span class="p">()</span>
 
 <span class="c1"># Calculate the tau_vs</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">calculate_los_tau_v</span><span class="p">(</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">get_stellar_los_tau_v</span><span class="p">(</span>
     <span class="n">kappa</span><span class="o">=</span><span class="mf">0.07</span><span class="p">,</span>
     <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
     <span class="n">force_loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -668,7 +668,7 @@ and plots some diagnostics.</p>
 
 <span class="c1"># Get the spectra (this will automatically use the tau_vs we just calculated</span>
 <span class="c1"># since the emission model has tau_v=&quot;tau_v&quot;)</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_spectra</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 <span class="c1"># Integrate the particle spectra</span>
 <span class="n">galaxy</span><span class="o">.</span><span class="n">integrate_particle_spectra</span><span class="p">()</span>
@@ -677,7 +677,7 @@ and plots some diagnostics.</p>
 <span class="n">galaxy</span><span class="o">.</span><span class="n">plot_spectra</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">combined_spectra</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stellar_spectra</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.353 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.358 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-particle-plot-los-spectra-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/55829db956316681b8770a19f9f1c158/plot_los_spectra.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_los_spectra.ipynb</span></code></a></p>
@@ -741,7 +741,7 @@ and plots some diagnostics.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

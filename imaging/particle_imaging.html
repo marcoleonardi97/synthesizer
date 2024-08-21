@@ -361,6 +361,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -565,15 +566,15 @@
 </div>
 <section id="Getting-the-photometry">
 <h2>Getting the photometry<a class="headerlink" href="#Getting-the-photometry" title="Link to this heading">¶</a></h2>
-<p>To make an image we need to generate spectra for each individual star particle. To do this we use the galaxy’s in built <code class="docutils literal notranslate"><span class="pre">generate_particle_spectra</span></code> method, and create <code class="docutils literal notranslate"><span class="pre">&quot;total&quot;</span></code> SEDs with both stellar and nebular contributions.</p>
+<p>To make an image we need to generate spectra for each individual star particle. To do this we use the galaxy’s in built <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method and pass a <code class="docutils literal notranslate"><span class="pre">per_particle</span></code> model. This will generate a spectrum for each particle in the galaxy.</p>
 <p>We can then calculate the photometry on these spectra by defining a filter collection, and calculating the luminosities.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate the stellar rest frame SEDs for all particles in erg / s / Hz</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">IncidentEmission</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
-<span class="n">sed</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_particle_spectra</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">IncidentEmission</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sed</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
 <span class="c1"># Calculate the observed SED in nJy</span>
 <span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">gal</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -596,7 +597,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;synthesizer.photometry.PhotometryCollection at 0x7fe7581dba30&gt;
+&lt;synthesizer.photometry.PhotometryCollection at 0x7f177cd99f30&gt;
 </pre></div></div>
 </div>
 <section id="Imaging">
@@ -846,7 +847,7 @@ behaviour can be achieved by omitting <code class="docutils literal notranslate"
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.010852813720703125
+Noisy images made, took: 0.010737895965576172
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -884,7 +885,7 @@ Noisy images made, took: 0.010852813720703125
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.005470991134643555
+Noisy images made, took: 0.005349874496459961
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -923,7 +924,7 @@ Noisy images made, took: 0.005470991134643555
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.1266944408416748
+Noisy images made, took: 0.12733936309814453
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -960,7 +961,7 @@ Noisy images made, took: 0.1266944408416748
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.2460644245147705
+Noisy images made, took: 0.24633359909057617
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1018,7 +1019,7 @@ Noisy images made, took: 0.2460644245147705
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Scaling to: 6.491328513071123e+25 -&gt; 3.0148770525436606e+27
+Scaling to: 6.4615501680047174e+25 -&gt; 3.0374781646574094e+27
 (200, 200, 3)
 </pre></div></div>
 </div>
@@ -1113,7 +1114,7 @@ Scaling to: 6.491328513071123e+25 -&gt; 3.0148770525436606e+27
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

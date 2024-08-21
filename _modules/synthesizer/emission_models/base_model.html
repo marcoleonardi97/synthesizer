@@ -359,6 +359,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -622,6 +623,49 @@
 <span class="sd">            A dictionary of component attributes/parameters which should be</span>
 <span class="sd">            fixed and thus ignore the value of the component attribute. This</span>
 <span class="sd">            should take the form {&lt;parameter_name&gt;: &lt;value&gt;}.</span>
+<span class="sd">        emitter (str):</span>
+<span class="sd">            The emitter this emission model acts on. Default is &quot;stellar&quot;.</span>
+<span class="sd">        apply_dust_to (EmissionModel):</span>
+<span class="sd">            The model to apply the dust curve to.</span>
+<span class="sd">        dust_curve (emission_models.attenuation.*):</span>
+<span class="sd">            The dust curve to apply.</span>
+<span class="sd">        tau_v (float/ndarray/str/tuple):</span>
+<span class="sd">            The optical depth to apply. Can be a float, ndarray, or a string</span>
+<span class="sd">            to a component attribute. Can also be a tuple combining any of</span>
+<span class="sd">            these.</span>
+<span class="sd">        generator (EmissionModel):</span>
+<span class="sd">            The emission generation model. This must define a get_spectra</span>
+<span class="sd">            method.</span>
+<span class="sd">        lum_intrinsic_model (EmissionModel):</span>
+<span class="sd">            The intrinsic model to use deriving the dust luminosity when</span>
+<span class="sd">            computing dust emission.</span>
+<span class="sd">        lum_attenuated_model (EmissionModel):</span>
+<span class="sd">            The attenuated model to use deriving the dust luminosity when</span>
+<span class="sd">            computing dust emission.</span>
+<span class="sd">        mask_attr (str):</span>
+<span class="sd">            The component attribute to mask on.</span>
+<span class="sd">        mask_thresh (unyt_quantity):</span>
+<span class="sd">            The threshold for the mask.</span>
+<span class="sd">        mask_op (str):</span>
+<span class="sd">            The operation to apply. Can be &quot;&lt;&quot;, &quot;&gt;&quot;, &quot;&lt;=&quot;, &quot;&gt;=&quot;, &quot;==&quot;, or &quot;!=&quot;.</span>
+<span class="sd">        fesc (float):</span>
+<span class="sd">            The escape fraction.</span>
+<span class="sd">        scale_by (list):</span>
+<span class="sd">            A list of attributes to scale the spectra by.</span>
+<span class="sd">        post_processing (list):</span>
+<span class="sd">            A list of post processing functions to apply to the emission after</span>
+<span class="sd">            it has been generated. Each function must take a dict containing</span>
+<span class="sd">            the spectra/lines, the emitters, and the emission model, and return</span>
+<span class="sd">            the same dict with the post processing applied.</span>
+<span class="sd">        save (bool):</span>
+<span class="sd">            A flag for whether the emission produced by this model should be</span>
+<span class="sd">            &quot;saved&quot;, i.e. attached to the emitter. If False, the emission will</span>
+<span class="sd">            be discarded after it has been used. Default is True.</span>
+<span class="sd">        per_particle (bool):</span>
+<span class="sd">            A flag for whether the emission produced by this model should be</span>
+<span class="sd">            &quot;per particle&quot;. If True, the spectra and lines will be stored per</span>
+<span class="sd">            particle. Integrated spectra are made automatically by summing the</span>
+<span class="sd">            per particle spectra. Default is False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define quantities</span>
@@ -649,6 +693,7 @@
         <span class="n">scale_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">post_processing</span><span class="o">=</span><span class="p">(),</span>
         <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">per_particle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -731,6 +776,11 @@
 <span class="sd">                be &quot;saved&quot;, i.e. attached to the emitter. If False, the</span>
 <span class="sd">                emission will be discarded after it has been used. Default is</span>
 <span class="sd">                True.</span>
+<span class="sd">            per_particle (bool):</span>
+<span class="sd">                A flag for whether the emission produced by this model should</span>
+<span class="sd">                be &quot;per particle&quot;. If True, the spectra and lines will be</span>
+<span class="sd">                stored per particle. Integrated spectra are made automatically</span>
+<span class="sd">                by summing the per particle spectra. Default is False.</span>
 <span class="sd">            **kwargs:</span>
 <span class="sd">                Any additional keyword arguments to store. These can be used</span>
 <span class="sd">                to store additional information needed by the model.</span>
@@ -754,6 +804,9 @@
 
         <span class="c1"># Attach which emitter we are working with</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_emitter</span> <span class="o">=</span> <span class="n">emitter</span>
+
+        <span class="c1"># Are we making per particle emission?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_per_particle</span> <span class="o">=</span> <span class="n">per_particle</span>
 
         <span class="c1"># Define the container which will hold mask information</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">masks</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1044,6 +1097,10 @@
 
             <span class="c1"># Report if the resulting emission will be saved</span>
             <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Save emission: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">_save</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Report if the resulting emission will be per particle</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">_per_particle</span><span class="p">:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;  Per particle emission: True&quot;</span><span class="p">)</span>
 
             <span class="c1"># Print any fixed parameters if there are any</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fixed_parameters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1453,6 +1510,43 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">set_emitter</span><span class="p">(</span><span class="n">emitter</span><span class="p">)</span>
+
+        <span class="c1"># Unpack the model now we&#39;re done</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">per_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the per particle flag.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_particle</span>
+
+<div class="viewcode-block" id="EmissionModel.set_per_particle">
+<a class="viewcode-back" href="../../../_autosummary/synthesizer.emission_models.base_model.html#synthesizer.emission_models.base_model.EmissionModel.set_per_particle">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_per_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">per_particle</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the per particle flag.</span>
+
+<span class="sd">        For per particle spectra we need all children to also be per particle.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            per_particle (bool):</span>
+<span class="sd">                Whether to set the per particle flag.</span>
+<span class="sd">            set_all (bool):</span>
+<span class="sd">                Whether to set the per particle flag on all models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set the per particle flag (but we don&#39;t want to set it on a</span>
+        <span class="c1"># galaxy model since they are never per particle by definition)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emitter</span> <span class="o">!=</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_per_particle</span> <span class="o">=</span> <span class="n">per_particle</span>
+
+        <span class="c1"># Set the per particle flag on all children</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="n">per_particle</span><span class="p">)</span>
+
+        <span class="c1"># If this model also has related spectra we&#39;d better make those</span>
+        <span class="c1"># per particle too or bad things will happen downstream</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">related_models</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="n">per_particle</span><span class="p">)</span>
 
         <span class="c1"># Unpack the model now we&#39;re done</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unpack_model</span><span class="p">()</span></div>
@@ -2211,6 +2305,9 @@
         <span class="c1"># know whether to include it in the legend</span>
         <span class="n">some_discarded</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># Define a flag for whether there are per_particle models</span>
+        <span class="n">some_per_particle</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="c1"># Plot the tree using Matplotlib</span>
         <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
 
@@ -2226,7 +2323,7 @@
 
             <span class="c1"># If the model isn&#39;t saved apply some transparency</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">save</span><span class="p">:</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.6</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.7</span>
                 <span class="n">some_discarded</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -2239,13 +2336,38 @@
                 <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
                     <span class="n">facecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span>
                     <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extract_labels</span>
-                    <span class="k">else</span> <span class="s2">&quot;square,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="k">else</span> <span class="s2">&quot;square,pad=0.5&quot;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span>
-                <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="c1"># If we have a per particle model overlay a hatched box. To make]</span>
+            <span class="c1"># this readable we need to overlay a box with a transparent face</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                <span class="n">some_per_particle</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                    <span class="n">x</span><span class="p">,</span>
+                    <span class="o">-</span><span class="n">y</span><span class="p">,</span>  <span class="c1"># Invert y-axis for bottom-to-top</span>
+                    <span class="n">node</span><span class="p">,</span>
+                    <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                    <span class="n">va</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">,</span>
+                    <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">facecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                        <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                        <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span>
+                        <span class="k">if</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extract_labels</span>
+                        <span class="k">else</span> <span class="s2">&quot;square,pad=0.5&quot;</span><span class="p">,</span>
+                        <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;//&quot;</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="n">fontsize</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Used a dashed outline for masked nodes</span>
             <span class="n">bbox</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">get_bbox_patch</span><span class="p">()</span>
@@ -2269,6 +2391,7 @@
                     <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span>
                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
                 <span class="p">)</span>
 
         <span class="c1"># Create legend elements</span>
@@ -2310,7 +2433,7 @@
                     <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span>
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Stellar&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;blackhole&quot;</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
@@ -2322,7 +2445,7 @@
                     <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;royalblue&quot;</span><span class="p">,</span>
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Black Hole&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;galaxy&quot;</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
@@ -2334,7 +2457,7 @@
                     <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;forestgreen&quot;</span><span class="p">,</span>
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Galaxy&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -2349,7 +2472,7 @@
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Masked&quot;</span><span class="p">,</span>
                     <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;dashed&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -2363,7 +2486,7 @@
                     <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span>
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Saved&quot;</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
             <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -2375,7 +2498,23 @@
                     <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Discarded&quot;</span><span class="p">,</span>
                     <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span>
-                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.3&quot;</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If we have per particle models include them in the legend</span>
+        <span class="k">if</span> <span class="n">some_per_particle</span><span class="p">:</span>
+            <span class="n">handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">mpatches</span><span class="o">.</span><span class="n">FancyBboxPatch</span><span class="p">(</span>
+                    <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+                    <span class="n">width</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                    <span class="n">height</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+                    <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Per Particle&quot;</span><span class="p">,</span>
+                    <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;//&quot;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                    <span class="n">boxstyle</span><span class="o">=</span><span class="s2">&quot;round,pad=0.5&quot;</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
@@ -2512,7 +2651,6 @@
     <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">emitters</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
         <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2520,6 +2658,7 @@
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">spectra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">particle_spectra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">_is_related</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -2534,8 +2673,6 @@
 <span class="sd">            emitters (Stars/BlackHoles):</span>
 <span class="sd">                The emitters to generate the spectra for in the form of a</span>
 <span class="sd">                dictionary, {&quot;stellar&quot;: &lt;emitter&gt;, &quot;blackhole&quot;: &lt;emitter&gt;}.</span>
-<span class="sd">            per_particle (bool):</span>
-<span class="sd">                Are we generating per particle?</span>
 <span class="sd">            dust_curves (dict):</span>
 <span class="sd">                An overide to the emisison model dust curves. Either:</span>
 <span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
@@ -2593,6 +2730,9 @@
 <span class="sd">            spectra (dict)</span>
 <span class="sd">                A dictionary of spectra to add to. This is used for recursive</span>
 <span class="sd">                calls to this function.</span>
+<span class="sd">            particle_spectra (dict)</span>
+<span class="sd">                A dictionary of particle spectra to add to. This is used for</span>
+<span class="sd">                recursive calls to this function.</span>
 <span class="sd">            _is_related (bool)</span>
 <span class="sd">                Are we generating related model spectra? If so we don&#39;t want</span>
 <span class="sd">                to apply any post processing functions or delete any spectra,</span>
@@ -2631,6 +2771,8 @@
         <span class="c1"># Make a spectra dictionary if we haven&#39;t got one yet</span>
         <span class="k">if</span> <span class="n">spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">particle_spectra</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">particle_spectra</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># We need to make sure the root is being saved, otherwise this is a bit</span>
         <span class="c1"># nonsensical.</span>
@@ -2642,11 +2784,11 @@
             <span class="p">)</span>
 
         <span class="c1"># Perform all extractions</span>
-        <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_spectra</span><span class="p">(</span>
+        <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_spectra</span><span class="p">(</span>
             <span class="n">emission_model</span><span class="p">,</span>
             <span class="n">emitters</span><span class="p">,</span>
-            <span class="n">per_particle</span><span class="p">,</span>
             <span class="n">spectra</span><span class="p">,</span>
+            <span class="n">particle_spectra</span><span class="p">,</span>
             <span class="n">verbose</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2661,20 +2803,24 @@
             <span class="c1"># tree</span>
             <span class="k">for</span> <span class="n">related_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">related_models</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">related_model</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
-                    <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="n">related_model</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span>
-                            <span class="n">emitters</span><span class="p">,</span>
-                            <span class="n">per_particle</span><span class="p">,</span>
-                            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-                            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-                            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-                            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-                            <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">,</span>
-                            <span class="n">_is_related</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="p">)</span>
+                    <span class="p">(</span>
+                        <span class="n">rel_spectra</span><span class="p">,</span>
+                        <span class="n">rel_particle_spectra</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">related_model</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span>
+                        <span class="n">emitters</span><span class="p">,</span>
+                        <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
+                        <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
+                        <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+                        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                        <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">,</span>
+                        <span class="n">particle_spectra</span><span class="o">=</span><span class="n">particle_spectra</span><span class="p">,</span>
+                        <span class="n">_is_related</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                     <span class="p">)</span>
+
+                    <span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_particle_spectra</span><span class="p">)</span>
+                    <span class="n">particle_spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_particle_spectra</span><span class="p">)</span>
 
             <span class="c1"># Skip models for a different emitters</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -2697,27 +2843,29 @@
 
             <span class="c1"># Are we doing a combination?</span>
             <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_combining</span><span class="p">:</span>
-                <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_spectra</span><span class="p">(</span>
+                <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_spectra</span><span class="p">(</span>
                     <span class="n">emission_model</span><span class="p">,</span>
                     <span class="n">spectra</span><span class="p">,</span>
+                    <span class="n">particle_spectra</span><span class="p">,</span>
                     <span class="n">this_model</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_dust_attenuating</span><span class="p">:</span>
-                <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_attenuate_spectra</span><span class="p">(</span>
+                <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_attenuate_spectra</span><span class="p">(</span>
                     <span class="n">this_model</span><span class="p">,</span>
                     <span class="n">spectra</span><span class="p">,</span>
+                    <span class="n">particle_spectra</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="p">,</span>
                     <span class="n">this_mask</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_dust_emitting</span> <span class="ow">or</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_generating</span><span class="p">:</span>
-                <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_spectra</span><span class="p">(</span>
+                <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_spectra</span><span class="p">(</span>
                     <span class="n">this_model</span><span class="p">,</span>
                     <span class="n">emission_model</span><span class="p">,</span>
                     <span class="n">spectra</span><span class="p">,</span>
+                    <span class="n">particle_spectra</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
-                    <span class="n">per_particle</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -2754,20 +2902,32 @@
                         <span class="p">)</span>
 
                     <span class="c1"># Scale the spectra by this attribute</span>
+                    <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                        <span class="n">particle_spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">*=</span> <span class="n">scaler_arr</span>
                     <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">scaler_arr</span>
 
                 <span class="k">elif</span> <span class="n">scaler</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
                     <span class="c1"># Compute the scaling</span>
-                    <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="n">spectra</span><span class="p">[</span><span class="n">scaler</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-                        <span class="o">/</span> <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-                    <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                    <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                        <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">particle_spectra</span><span class="p">[</span>
+                                <span class="n">scaler</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                            <span class="o">/</span> <span class="n">particle_spectra</span><span class="p">[</span>
+                                <span class="n">label</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">scaling</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">spectra</span><span class="p">[</span><span class="n">scaler</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                            <span class="o">/</span> <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">value</span>
 
                     <span class="c1"># Scale the spectra (handling 1D and 2D cases)</span>
-                    <span class="k">if</span> <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">scaling</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">scaling</span>
+                    <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                        <span class="n">particle_spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">*=</span> <span class="n">scaling</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="n">scaling</span>
+
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Can&#39;t scale spectra by </span><span class="si">{</span><span class="n">scaler</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -2779,6 +2939,8 @@
             <span class="c1"># Apply any post processing functions</span>
             <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_processing</span><span class="p">:</span>
                 <span class="n">spectra</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">particle_spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">particle_spectra</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">particle_spectra</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
             <span class="c1"># Loop over all models and delete those spectra if we aren&#39;t saving</span>
             <span class="c1"># them (we have to this after post processing incase the deleted</span>
@@ -2786,14 +2948,15 @@
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">save</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
                     <span class="k">del</span> <span class="n">spectra</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">per_particle</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">particle_spectra</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">particle_spectra</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">spectra</span>
+        <span class="k">return</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span>
 
     <span class="k">def</span> <span class="nf">_get_lines</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">line_ids</span><span class="p">,</span>
         <span class="n">emitters</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
         <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fesc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -2801,6 +2964,7 @@
         <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">lines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">particle_lines</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">_is_related</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -2817,8 +2981,6 @@
 <span class="sd">            emitters (Stars/BlackHoles):</span>
 <span class="sd">                The emitters to generate the lines for in the form of a</span>
 <span class="sd">                dictionary, {&quot;stellar&quot;: &lt;emitter&gt;, &quot;blackhole&quot;: &lt;emitter&gt;}.</span>
-<span class="sd">            per_particle (bool):</span>
-<span class="sd">                Are we generating lines per particle?</span>
 <span class="sd">            dust_curves (dict):</span>
 <span class="sd">                An overide to the emisison model dust curves. Either:</span>
 <span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
@@ -2876,6 +3038,9 @@
 <span class="sd">            lines (dict)</span>
 <span class="sd">                A dictionary of lines to add to. This is used for recursive</span>
 <span class="sd">                calls to this function.</span>
+<span class="sd">            particle_lines (dict)</span>
+<span class="sd">                A dictionary of particle lines to add to. This is used for</span>
+<span class="sd">                recursive calls to this function.</span>
 <span class="sd">            _is_related (bool)</span>
 <span class="sd">                Are we generating related model lines? If so we don&#39;t want</span>
 <span class="sd">                to apply any post processing functions or delete any lines,</span>
@@ -2904,6 +3069,8 @@
         <span class="c1"># If we haven&#39;t got a lines dictionary yet we&#39;ll make one</span>
         <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">particle_lines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">particle_lines</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># We need to make sure the root is being saved, otherwise this is a bit</span>
         <span class="c1"># nonsensical.</span>
@@ -2915,12 +3082,12 @@
             <span class="p">)</span>
 
         <span class="c1"># Perform all extractions</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_lines</span><span class="p">(</span>
+        <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_lines</span><span class="p">(</span>
             <span class="n">line_ids</span><span class="p">,</span>
             <span class="n">emission_model</span><span class="p">,</span>
             <span class="n">emitters</span><span class="p">,</span>
-            <span class="n">per_particle</span><span class="p">,</span>
             <span class="n">lines</span><span class="p">,</span>
+            <span class="n">particle_lines</span><span class="p">,</span>
             <span class="n">verbose</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2935,21 +3102,22 @@
             <span class="c1"># tree</span>
             <span class="k">for</span> <span class="n">related_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">related_models</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">related_model</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
-                    <span class="n">lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                        <span class="n">related_model</span><span class="o">.</span><span class="n">_get_lines</span><span class="p">(</span>
-                            <span class="n">line_ids</span><span class="p">,</span>
-                            <span class="n">emitters</span><span class="p">,</span>
-                            <span class="n">per_particle</span><span class="p">,</span>
-                            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-                            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-                            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-                            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-                            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-                            <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">,</span>
-                            <span class="n">_is_related</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="p">)</span>
+                    <span class="n">rel_lines</span><span class="p">,</span> <span class="n">rel_particle_lines</span> <span class="o">=</span> <span class="n">related_model</span><span class="o">.</span><span class="n">_get_lines</span><span class="p">(</span>
+                        <span class="n">line_ids</span><span class="p">,</span>
+                        <span class="n">emitters</span><span class="p">,</span>
+                        <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
+                        <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
+                        <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
+                        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                        <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">,</span>
+                        <span class="n">particle_lines</span><span class="o">=</span><span class="n">particle_lines</span><span class="p">,</span>
+                        <span class="n">_is_related</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                     <span class="p">)</span>
+
+                    <span class="n">lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_lines</span><span class="p">)</span>
+                    <span class="n">particle_lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_particle_lines</span><span class="p">)</span>
 
             <span class="c1"># Skip models for a different emitters</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -2972,29 +3140,31 @@
 
             <span class="c1"># Are we doing a combination?</span>
             <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_combining</span><span class="p">:</span>
-                <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_lines</span><span class="p">(</span>
+                <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_lines</span><span class="p">(</span>
                     <span class="n">line_ids</span><span class="p">,</span>
                     <span class="n">emission_model</span><span class="p">,</span>
                     <span class="n">lines</span><span class="p">,</span>
+                    <span class="n">particle_lines</span><span class="p">,</span>
                     <span class="n">this_model</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_dust_attenuating</span><span class="p">:</span>
-                <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_attenuate_lines</span><span class="p">(</span>
+                <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_attenuate_lines</span><span class="p">(</span>
                     <span class="n">line_ids</span><span class="p">,</span>
                     <span class="n">this_model</span><span class="p">,</span>
                     <span class="n">lines</span><span class="p">,</span>
+                    <span class="n">particle_lines</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="p">,</span>
                     <span class="n">this_mask</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_dust_emitting</span> <span class="ow">or</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_generating</span><span class="p">:</span>
-                <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_lines</span><span class="p">(</span>
+                <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_lines</span><span class="p">(</span>
                     <span class="n">line_ids</span><span class="p">,</span>
                     <span class="n">this_model</span><span class="p">,</span>
                     <span class="n">emission_model</span><span class="p">,</span>
                     <span class="n">lines</span><span class="p">,</span>
-                    <span class="n">per_particle</span><span class="p">,</span>
+                    <span class="n">particle_lines</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -3004,6 +3174,13 @@
                     <span class="k">continue</span>
                 <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">scaler</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                            <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">][</span>
+                                <span class="n">line_id</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">scaler</span><span class="p">)</span>
+                            <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">][</span>
+                                <span class="n">line_id</span>
+                            <span class="p">]</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">*=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">scaler</span><span class="p">)</span>
                         <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*=</span> <span class="nb">getattr</span><span class="p">(</span>
                             <span class="n">emitter</span><span class="p">,</span> <span class="n">scaler</span>
                         <span class="p">)</span>
@@ -3025,10 +3202,18 @@
                 <span class="c1"># conversion</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">])</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">per_particle</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">],</span> <span class="nb">dict</span>
+                <span class="p">):</span>
+                    <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">LineCollection</span><span class="p">(</span>
+                        <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+                    <span class="p">)</span>
 
             <span class="c1"># Apply any post processing functions</span>
             <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_processing</span><span class="p">:</span>
                 <span class="n">lines</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">particle_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">particle_lines</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">particle_lines</span><span class="p">,</span> <span class="n">emitters</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
             <span class="c1"># Loop over all models and delete those lines if we aren&#39;t saving</span>
             <span class="c1"># them (we have to this after post processing incase the deleted</span>
@@ -3036,8 +3221,10 @@
             <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_models</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">save</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
                     <span class="k">del</span> <span class="n">lines</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">per_particle</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">particle_lines</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">particle_lines</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">lines</span></div>
+        <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span></div>
 
 
 
@@ -3107,6 +3294,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_extracting</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;A GalaxyEmissionModel cannot be an extraction model.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Ensure we aren&#39;t trying to make a per particle galaxy emission</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;A GalaxyEmissionModel cannot be a per particle model.&quot;</span>
             <span class="p">)</span></div>
 
 </pre></div>
@@ -3141,7 +3334,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

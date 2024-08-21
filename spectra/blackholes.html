@@ -361,6 +361,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -681,7 +682,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b8386d0&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b839ae0&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b8fd750&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b9725f0&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b8d7280&gt;, &#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bc3b4f0&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bc3b970&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83b670&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b8393f0&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83bf10&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83b610&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83b6d0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83b100&gt;}
+{&#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a82c3f10&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f9f280&gt;, &#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a8143700&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f9d780&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f9f370&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a82ec0d0&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbbbb0&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbab30&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbbc10&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbb850&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fb9ae0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbbdc0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7fbae30&gt;}
 </pre></div></div>
 </div>
 </section>
@@ -714,18 +715,27 @@
 </pre></div>
 </div>
 </div>
-<p>To generate a spectra for each black hole (per–particle) we use the same emission model, but swap out the <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method (used for integrated spectra) with the <code class="docutils literal notranslate"><span class="pre">get_particle_spectra</span></code> method (only particle components have this method).</p>
+<p>To generate a spectra for each black hole (per particle) we use the same emission model, but we need to tell the model to produce a spectrum for each particle. This is done by setting the <code class="docutils literal notranslate"><span class="pre">per_particle</span></code> flag to <code class="docutils literal notranslate"><span class="pre">True</span></code> on the model.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra</span> <span class="o">=</span> <span class="n">blackholes</span><span class="o">.</span><span class="n">get_particle_spectra</span><span class="p">(</span><span class="n">dust_model</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dust_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>With that done we just call the same <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method on the component, and the particle spectra will be stored in the <code class="docutils literal notranslate"><span class="pre">particle_spectra</span></code> attribute of the component.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra</span> <span class="o">=</span> <span class="n">blackholes</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">dust_model</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Again, the returned spectra is the “dust_emission” spectra from the root of the model.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
@@ -748,13 +758,13 @@
 +---------------+-----------------------------------------------------------------+
 | nu (9244,)    | 1.00e+07 Hz -&gt; 2.31e+22 Hz (Mean: 8.51e+19 Hz)                  |
 +---------------+-----------------------------------------------------------------+
-| lnu (4, 9244) | 0.00e+00 erg/(Hz*s) -&gt; 1.59e+32 erg/(Hz*s) (Mean: 2.09e+30 erg) |
+| lnu (4, 9244) | 0.00e+00 erg/(Hz*s) -&gt; 6.91e+31 erg/(Hz*s) (Mean: 1.26e+30 erg) |
 +---------------+-----------------------------------------------------------------+
 </pre></div></div>
 </div>
 <p>While the spectra produced by <code class="docutils literal notranslate"><span class="pre">get_particle_spectra</span></code> are stored in a dictionary under the <code class="docutils literal notranslate"><span class="pre">particle_spectra</span></code> attribute.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">blackholes</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">)</span>
@@ -766,15 +776,15 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b69e4a0&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83a920&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83b2e0&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83ba30&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83ada0&gt;, &#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b83a4d0&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6d8310&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6d83a0&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6d8bb0&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6dba60&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6dbc40&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6d8370&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b6d86d0&gt;}
+{&#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a8080370&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a82c3e80&gt;, &#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d42b60&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da2aa0&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da3be0&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0580&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0130&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da03d0&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da00d0&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0280&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da10f0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da06a0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da2bc0&gt;}
 </pre></div></div>
 </div>
 <section id="Integrating-spectra">
 <h3>Integrating spectra<a class="headerlink" href="#Integrating-spectra" title="Link to this heading">¶</a></h3>
-<p>To get integrated spectra from the particle spectra we just generated, we can call the <code class="docutils literal notranslate"><span class="pre">integrate_particle_spectra</span></code> method. This method will sum the individual spectra and populate the <code class="docutils literal notranslate"><span class="pre">spectra</span></code> dictionary.</p>
+<p>The integrated spectra are automatically produced alongside per particle spectra. However, if we wanted to explictly get the integrated spectra from the particle spectra we just generated (for instance if we had made some modification after generation), we can call the <code class="docutils literal notranslate"><span class="pre">integrate_particle_spectra</span></code> method. This method will sum the individual spectra and populate the <code class="docutils literal notranslate"><span class="pre">spectra</span></code> dictionary.</p>
 <p>Note, we can also integrate individual spectra using the <code class="docutils literal notranslate"><span class="pre">Sed.sum()</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">blackholes</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
@@ -790,15 +800,15 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{}
-{&#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bbef2e0&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b8d6fb0&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b68bc70&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f620c147940&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bb25540&gt;, &#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bb24a60&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bc3b640&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b69f4f0&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b69dba0&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b705930&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f617b705570&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bc3b820&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f617bc3b700&gt;}
+{&#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a8277af0&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7dc0640&gt;, &#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d420e0&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da3a00&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da1000&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da2080&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da01c0&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0340&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da11b0&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da3910&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da13f0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0cd0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7da0160&gt;}
+{&#39;nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d2fd60&gt;, &#39;blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f043a0&gt;, &#39;disc_transmitted_nlr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a8277af0&gt;, &#39;disc_transmitted_blr&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d420e0&gt;, &#39;disc_escaped&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d78280&gt;, &#39;disc_incident_isotropic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7dc08e0&gt;, &#39;disc_incident&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7dc0640&gt;, &#39;disc_transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f9f3d0&gt;, &#39;disc&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7f9ff70&gt;, &#39;torus&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d2f8e0&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d2f7f0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d2f9d0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7f11a7d2faf0&gt;}
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_blackholes_21_1.png" src="../_images/spectra_blackholes_21_1.png" />
+<img alt="../_images/spectra_blackholes_23_1.png" src="../_images/spectra_blackholes_23_1.png" />
 </div>
 </div>
 </section>
@@ -808,10 +818,13 @@
 <p>As well as modifying a model explicitly, it’s also possible to overide the properties of a model at the point <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> is called. These modifications will not be remembered by the model afterwards. As it stands, this form of modification is supported for the <code class="docutils literal notranslate"><span class="pre">dust_curve</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_v</span></code>, <code class="docutils literal notranslate"><span class="pre">covering_fraction</span></code> and <code class="docutils literal notranslate"><span class="pre">masks</span></code>.</p>
 <p>Here we’ll demonstrate this by overiding the covering fractions to generate spectra for a range of <code class="docutils literal notranslate"><span class="pre">covering_fraction</span></code> values. This can either be done by passing a single number which will overide all covering fractions on every model (probably undesirable behaviour since this will set NLR and BLR covering fractions to be equal).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blackhole</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Since we now want integrated spectra lets remove the per particle flag</span>
+<span class="n">dust_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">blackhole</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
 <span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="k">for</span> <span class="n">fesc</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]:</span>
     <span class="n">blackhole</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">dust_model</span><span class="p">,</span> <span class="n">covering_fraction</span><span class="o">=</span><span class="n">fesc</span><span class="p">)</span>
@@ -821,7 +834,7 @@
 </div>
 <p>Or (more desirably) we can pass a dictionary mapping model labels to <code class="docutils literal notranslate"><span class="pre">fesc</span></code> values to target specific models. Notice that we have invoked the <code class="docutils literal notranslate"><span class="pre">clear_all_spectra</span></code> method to reset the spectra dictionary, we can also clear all emissions (including spectra, lines, and photometry if they are present) with the <code class="docutils literal notranslate"><span class="pre">clear_all_emissions</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">blackhole</span><span class="o">.</span><span class="n">clear_all_emissions</span><span class="p">()</span>
@@ -846,7 +859,7 @@
 </div>
 <p>To see the variation above we can pass the dictionary we populated with the varied spectra to the <code class="docutils literal notranslate"><span class="pre">plot_spectra</span></code> function (where the dictionary keys will be used as labels).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
@@ -856,7 +869,7 @@
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -869,7 +882,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_blackholes_27_1.png" src="../_images/spectra_blackholes_27_1.png" />
+<img alt="../_images/spectra_blackholes_29_1.png" src="../_images/spectra_blackholes_29_1.png" />
 </div>
 </div>
 </section>
@@ -951,7 +964,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

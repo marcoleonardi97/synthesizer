@@ -359,6 +359,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -550,7 +551,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">TableFormatter</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils.plt</span> <span class="kn">import</span> <span class="n">single_histxy</span>
-<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="Stars">
@@ -2108,8 +2109,10 @@
         <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
 
 
-<div class="viewcode-block" id="Stars.get_particle_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_particle_spectra">[docs]</a>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;is now just a wrapper &quot;</span>
+        <span class="s2">&quot;around get_spectra. It will be removed by v1.0.0.&quot;</span>
+    <span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_particle_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">emission_model</span><span class="p">,</span>
@@ -2122,6 +2125,9 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate stellar spectra as described by the emission model.</span>
+
+<span class="sd">        Note: Now deprecated in favour of get_spectra and emission models</span>
+<span class="sd">        knowing which spectra should be per particle.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            emission_model (EmissionModel):</span>
@@ -2170,10 +2176,10 @@
 <span class="sd">            appropriate spectra attribute of the component</span>
 <span class="sd">            (spectra/particle_spectra).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the spectra</span>
-        <span class="n">spectra</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stellar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">previous_per_part</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span>
+        <span class="n">emission_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">emission_model</span><span class="p">,</span>
             <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
             <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
@@ -2181,15 +2187,13 @@
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">emission_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="n">previous_per_part</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spectra</span>
 
-        <span class="c1"># Update the spectra dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="Stars.get_particle_lines">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars.get_particle_lines">[docs]</a>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;is now just a wrapper &quot;</span>
+        <span class="s2">&quot;around get_lines. It will be removed by v1.0.0.&quot;</span>
+    <span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_particle_lines</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">line_ids</span><span class="p">,</span>
@@ -2203,6 +2207,9 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generate stellar lines as described by the emission model.</span>
+
+<span class="sd">        Note: Now deprecated in favour of get_lines and emission models</span>
+<span class="sd">        knowing which lines should be per particle.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            line_ids (list):</span>
@@ -2254,11 +2261,11 @@
 <span class="sd">                A LineCollection object containing the lines defined by the</span>
 <span class="sd">                root model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the lines</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_lines</span><span class="p">(</span>
-            <span class="n">line_ids</span><span class="o">=</span><span class="n">line_ids</span><span class="p">,</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stellar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">previous_per_part</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span>
+        <span class="n">emission_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lines</span><span class="p">(</span>
+            <span class="n">line_ids</span><span class="p">,</span>
+            <span class="n">emission_model</span><span class="p">,</span>
             <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
             <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
@@ -2266,12 +2273,8 @@
             <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="c1"># Update the lines dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-</div>
+        <span class="n">emission_model</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="n">previous_per_part</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lines</span></div>
 
 
 
@@ -2373,7 +2376,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

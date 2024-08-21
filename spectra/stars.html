@@ -361,6 +361,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -647,7 +648,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ce97be0&gt;, &#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83cebb820&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83cebadd0&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ceba530&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ceba560&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83cebbca0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ceba230&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ceb97e0&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83cebbc40&gt;}
+{&#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60755600&gt;, &#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60779120&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a050&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077bbb0&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077bc70&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077bac0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077bc10&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a320&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60779660&gt;}
 </pre></div></div>
 </div>
 </section>
@@ -677,18 +678,27 @@
   out_arr = func(
 </pre></div></div>
 </div>
-<p>To generate a spectra for each star particle we use the same model, but swap out the <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method we used for integrated spectra with the <code class="docutils literal notranslate"><span class="pre">get_particle_spectra</span></code> method. Only particle components have this latter method.</p>
+<p>To generate a spectra for each star particle we use the same model, but we need to tell the model to produce a spectrum for each particle. This is done by setting the <code class="docutils literal notranslate"><span class="pre">per_particle</span></code> flag to <code class="docutils literal notranslate"><span class="pre">True</span></code> on the model.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra</span> <span class="o">=</span> <span class="n">stars</span><span class="o">.</span><span class="n">get_particle_spectra</span><span class="p">(</span><span class="n">pacman</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pacman</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>With that done we just call the same <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method on the component, and the particle spectra will be stored in the <code class="docutils literal notranslate"><span class="pre">particle_spectra</span></code> attribute of the component.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spectra</span> <span class="o">=</span> <span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">pacman</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Again, the returned spectra is the “total” spectra from the root of the model.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
@@ -717,7 +727,7 @@
 </div>
 <p>While the spectra produced by <code class="docutils literal notranslate"><span class="pre">get_particle_spectra</span></code> are stored in a dictionary under the <code class="docutils literal notranslate"><span class="pre">particle_spectra</span></code> attribute.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">)</span>
@@ -729,15 +739,15 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83ce971c0&gt;, &#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0d81570&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fa84c255810&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f1088b50&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f1088b80&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f1089f00&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0dc63b0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0dc47c0&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f1089ff0&gt;}
+{&#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03584eb0&gt;, &#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf151ee110&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf035aa290&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf035c0d00&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03586bc0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60779690&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a1a0&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077ab60&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a2f0&gt;}
 </pre></div></div>
 </div>
 <section id="Integrating-spectra">
 <h3>Integrating spectra<a class="headerlink" href="#Integrating-spectra" title="Link to this heading">¶</a></h3>
-<p>To get integrated spectra from the particle spectra we just generated, we can call the <code class="docutils literal notranslate"><span class="pre">integrate_particle_spectra</span></code> method. This method will sum the individual spectra, and populate the <code class="docutils literal notranslate"><span class="pre">spectra</span></code> dictionary.</p>
+<p>The integrated spectra are automatically produced alongside per particle spectra. However, if we wanted to explictly get the integrated spectra from the particle spectra we just generated (for instance if we had made some modification after generation), we can call the <code class="docutils literal notranslate"><span class="pre">integrate_particle_spectra</span></code> method. This method will sum the individual spectra, and populate the <code class="docutils literal notranslate"><span class="pre">spectra</span></code> dictionary.</p>
 <p>Note that we can also integrate individual spectra using the <code class="docutils literal notranslate"><span class="pre">`Sed.sum()</span></code> method &lt;../sed/sed.ipynb&gt;`__.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
@@ -753,15 +763,15 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{}
-{&#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0d829e0&gt;, &#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0dc55d0&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0dc5bd0&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0d82ce0&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f0f40d60&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f1089540&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f108a110&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fa7f108a0e0&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fa83cebb970&gt;}
+{&#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf151b6800&gt;, &#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf151edd20&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60757190&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03586ce0&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03586d70&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a7d0&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf607796f0&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a110&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077b5b0&gt;}
+{&#39;transmitted&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60779b40&gt;, &#39;nebular&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf035c2620&gt;, &#39;incident&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf151edd20&gt;, &#39;intrinsic&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf60757190&gt;, &#39;reprocessed&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03586ce0&gt;, &#39;attenuated&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf03586d70&gt;, &#39;dust_emission&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a7d0&gt;, &#39;emergent&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf607796f0&gt;, &#39;total&#39;: &lt;synthesizer.sed.Sed object at 0x7fbf6077a110&gt;}
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_stars_19_1.png" src="../_images/spectra_stars_19_1.png" />
+<img alt="../_images/spectra_stars_21_1.png" src="../_images/spectra_stars_21_1.png" />
 </div>
 </div>
 </section>
@@ -771,10 +781,13 @@
 <p>As well as modifying a model explicitly, it’s also possible to overide the properties of a model at the point <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> is called. These modifications will not be remembered by the model afterwards. As it stands, this form of modifications is supported for the <code class="docutils literal notranslate"><span class="pre">dust_curve</span></code>, <code class="docutils literal notranslate"><span class="pre">tau_v</span></code>, <code class="docutils literal notranslate"><span class="pre">fesc</span></code> and <code class="docutils literal notranslate"><span class="pre">masks</span></code>.</p>
 <p>Here we’ll demonstrate this by overiding the optical depths to generate spectra for a range of <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> values. This can either be done by passing a single number which will overide all optical depths on every model.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stars</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Since we now want integrated spectra lets remove the per particle flag</span>
+<span class="n">pacman</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">stars</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
 <span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="k">for</span> <span class="n">tau_v</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]:</span>
     <span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">pacman</span><span class="p">,</span> <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">)</span>
@@ -784,7 +797,7 @@
 </div>
 <p>Or we can pass a dictionary mapping model labels to <code class="docutils literal notranslate"><span class="pre">tau_v</span></code> values to target specific models. Notice that we have invoked the <code class="docutils literal notranslate"><span class="pre">clear_all_spectra</span></code> method to reset the spectra dictionary, we can also clear all emissions (including spectra, lines, and photometry if they are present) with the <code class="docutils literal notranslate"><span class="pre">clear_all_emissions</span></code> method.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stars</span><span class="o">.</span><span class="n">clear_all_emissions</span><span class="p">()</span>
@@ -797,7 +810,7 @@
 </div>
 <p>To see the variation above we can pass the dictionary we populated with the varied spectra to the <code class="docutils literal notranslate"><span class="pre">plot_spectra</span></code> function (where the dictionary keys will be used as labels).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
@@ -807,7 +820,7 @@
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -820,7 +833,7 @@
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/spectra_stars_25_1.png" src="../_images/spectra_stars_25_1.png" />
+<img alt="../_images/spectra_stars_27_1.png" src="../_images/spectra_stars_27_1.png" />
 </div>
 </div>
 </section>
@@ -899,7 +912,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

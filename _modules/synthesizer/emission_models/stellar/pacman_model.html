@@ -359,6 +359,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -635,6 +636,7 @@
         <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stellar_dust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the PacmanEmission model.</span>
@@ -653,6 +655,7 @@
 <span class="sd">            stellar_dust (bool): If True, the dust emission will be treated as</span>
 <span class="sd">                stellar emission, otherwise it will be treated as galaxy</span>
 <span class="sd">                emission.</span>
+<span class="sd">            **kwargs: Additional keyword arguments to pass to the models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Attach the grid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span>
@@ -672,26 +675,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">reprocessed</span>
 
         <span class="c1"># Make the child emission models</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_incident</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">transmitted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_transmitted</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_escaped</span><span class="p">()</span>  <span class="c1"># only if fesc &gt; 0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nebular</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nebular</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_reprocessed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incident</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_incident</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transmitted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_transmitted</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_escaped</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># only if fesc &gt; 0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nebular</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nebular</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_reprocessed</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_no_reprocessing</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_reprocessed</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_attenuated</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_attenuated</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_emission_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">emergent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_emergent</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_dust_emission</span><span class="p">(</span><span class="n">stellar_dust</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emergent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_emergent</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_dust_emission</span><span class="p">(</span>
+                <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
 
         <span class="c1"># Finally make the TotalEmission model, this is</span>
         <span class="c1"># dust_emission + emergent if dust_emission is not None, otherwise it</span>
         <span class="c1"># is just emergent</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_make_total</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_total</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the incident emission model.</span>
 
@@ -702,9 +707,9 @@
 <span class="sd">            StellarEmissionModel:</span>
 <span class="sd">                - incident</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">IncidentEmission</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">IncidentEmission</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_transmitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_transmitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the transmitted emission model.</span>
 
@@ -720,10 +725,13 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">TransmittedEmission</span><span class="p">(</span>
-            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span>
+            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_escaped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_escaped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the escaped emission model.</span>
 
@@ -750,10 +758,13 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">EscapedEmission</span><span class="p">(</span>
-            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;escaped&quot;</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span>
+            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;escaped&quot;</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_nebular</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_nebular</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># No spectra if grid hasn&#39;t been reprocessed</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -763,9 +774,10 @@
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
             <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc_ly_alpha</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># No spectra if grid hasn&#39;t been reprocessed</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -773,9 +785,10 @@
         <span class="k">return</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transmitted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nebular</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the intrinsic emission model for an un-reprocessed grid.</span>
 
@@ -788,34 +801,40 @@
 <span class="sd">                - intrinsic</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">IncidentEmission</span><span class="p">(</span>
-            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span> <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span>
+            <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
+            <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># If fesc is zero then the intrinsic emission is the same as the</span>
         <span class="c1"># reprocessed emission</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nebular</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmitted</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Otherwise, intrinsic = reprocessed + escaped</span>
         <span class="k">return</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_attenuated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_attenuated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;attenuated&quot;</span><span class="p">,</span>
             <span class="n">tau_v</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tau_v</span><span class="p">,</span>
             <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve</span><span class="p">,</span>
             <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_emergent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_emergent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># If fesc is zero the emergent spectra is just the attenuated spectra</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
@@ -824,24 +843,27 @@
                 <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve</span><span class="p">,</span>
                 <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">,</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Otherwise, emergent = attenuated + escaped</span>
             <span class="k">return</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_dust_emission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_dust_emission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">DustEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;dust_emission&quot;</span><span class="p">,</span>
             <span class="n">dust_emission_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_emission_model</span><span class="p">,</span>
             <span class="n">dust_lum_intrinsic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span><span class="p">,</span>
             <span class="n">dust_lum_attenuated</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dust_emission_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Define the related models</span>
             <span class="n">related_models</span> <span class="o">=</span> <span class="p">[</span>
@@ -871,6 +893,7 @@
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_emission</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">emergent</span><span class="p">),</span>
                 <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;galaxy&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># OK, total = emergent so we need to handle whether</span>
@@ -897,6 +920,7 @@
                     <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve</span><span class="p">,</span>
                     <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span><span class="p">,</span>
                     <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Otherwise, emergent = attenuated + escaped</span>
@@ -921,6 +945,8 @@
                     <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">label</span><span class="p">,</span>
                     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span><span class="p">),</span>
+                    <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
 
@@ -1041,6 +1067,7 @@
         <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stellar_dust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the PacmanEmission model.</span>
@@ -1067,6 +1094,7 @@
 <span class="sd">            stellar_dust (bool): If True, the dust emission will be treated as</span>
 <span class="sd">                stellar emission, otherwise it will be treated as galaxy</span>
 <span class="sd">                emission.</span>
+<span class="sd">            **kwargs: Additional keyword arguments to pass to the models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Attach the grid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span>
@@ -1096,46 +1124,46 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">young_incident</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_incident</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">incident</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_incident</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_incident</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_transmitted</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_transmitted</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">transmitted</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_transmitted</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_transmitted</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_escaped</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_escaped</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">escaped</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_escaped</span><span class="p">()</span>  <span class="c1"># only if fesc &gt; 0.0</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_escaped</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># only if fesc &gt; 0.0</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_nebular</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_nebular</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">nebular</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nebular</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_nebular</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_reprocessed</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_reprocessed</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reprocessed</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_reprocessed</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_reprocessed</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_intrinsic</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">old_intrinsic</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_no_reprocessing</span><span class="p">()</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_intrinsic</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">old_intrinsic</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">intrinsic</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_reprocessed</span><span class="p">()</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated_nebular</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated_ism</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">old_attenuated</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attenuated</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_attenuated</span><span class="p">()</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_attenuated</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission_ism</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission_birth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -1144,21 +1172,21 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_emergent</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">old_emergent</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">emergent</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_emergent</span><span class="p">()</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_emergent</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_dust_emission_birth</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_dust_emission_ism</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">young_dust_emission</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">old_dust_emission</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_dust_emission</span><span class="p">(</span><span class="n">stellar_dust</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_dust_emission</span><span class="p">(</span><span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Finally make the TotalEmission model, this is</span>
         <span class="c1"># dust_emission + emergent if dust_emission is not None, otherwise it</span>
         <span class="c1"># is just emergent</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_make_total</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_total</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_incident</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the incident emission model.</span>
 
@@ -1177,6 +1205,7 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;log10ages&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_incident</span> <span class="o">=</span> <span class="n">IncidentEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1184,15 +1213,17 @@
             <span class="n">mask_attr</span><span class="o">=</span><span class="s2">&quot;log10ages&quot;</span><span class="p">,</span>
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">incident</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_incident</span><span class="p">,</span> <span class="n">old_incident</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_incident</span><span class="p">,</span> <span class="n">old_incident</span><span class="p">,</span> <span class="n">incident</span>
 
-    <span class="k">def</span> <span class="nf">_make_transmitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_transmitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the transmitted emission model.</span>
 
@@ -1216,6 +1247,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_transmitted</span> <span class="o">=</span> <span class="n">TransmittedEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1224,15 +1256,17 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">transmitted</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;transmitted&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_transmitted</span><span class="p">,</span> <span class="n">old_transmitted</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_transmitted</span><span class="p">,</span> <span class="n">old_transmitted</span><span class="p">,</span> <span class="n">transmitted</span>
 
-    <span class="k">def</span> <span class="nf">_make_escaped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_escaped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the escaped emission model.</span>
 
@@ -1267,6 +1301,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_escaped</span> <span class="o">=</span> <span class="n">EscapedEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1275,15 +1310,17 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">escaped</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;escaped&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_escaped</span><span class="p">,</span> <span class="n">old_escaped</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_escaped</span><span class="p">,</span> <span class="n">old_escaped</span><span class="p">,</span> <span class="n">escaped</span>
 
-    <span class="k">def</span> <span class="nf">_make_nebular</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_nebular</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># No spectra if grid hasn&#39;t been reprocessed</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
@@ -1296,6 +1333,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc_ly_alpha</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_line_cont</span> <span class="o">=</span> <span class="n">LineContinuumEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1304,6 +1342,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc_ly_alpha</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Get the nebular continuum emission</span>
@@ -1314,6 +1353,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_neb_cont</span> <span class="o">=</span> <span class="n">NebularContinuumEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1322,6 +1362,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">young_nebular</span> <span class="o">=</span> <span class="n">NebularEmission</span><span class="p">(</span>
@@ -1334,6 +1375,7 @@
             <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc_ly_alpha</span><span class="p">,</span>
             <span class="n">linecont</span><span class="o">=</span><span class="n">young_line_cont</span><span class="p">,</span>
             <span class="n">nebular_continuum</span><span class="o">=</span><span class="n">young_neb_cont</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_nebular</span> <span class="o">=</span> <span class="n">NebularEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1345,15 +1387,17 @@
             <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc_ly_alpha</span><span class="p">,</span>
             <span class="n">linecont</span><span class="o">=</span><span class="n">old_line_cont</span><span class="p">,</span>
             <span class="n">nebular_continuum</span><span class="o">=</span><span class="n">old_neb_cont</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">nebular</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;nebular&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_nebular</span><span class="p">,</span> <span class="n">old_nebular</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_nebular</span><span class="p">,</span> <span class="n">old_nebular</span><span class="p">,</span> <span class="n">nebular</span>
 
-    <span class="k">def</span> <span class="nf">_make_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># No spectra if grid hasn&#39;t been reprocessed</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid_reprocessed</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
@@ -1361,19 +1405,22 @@
         <span class="n">young_reprocessed</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_reprocessed&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_transmitted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_nebular</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_reprocessed</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_reprocessed&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_transmitted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_nebular</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">reprocessed</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_reprocessed</span><span class="p">,</span> <span class="n">old_reprocessed</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_reprocessed</span><span class="p">,</span> <span class="n">old_reprocessed</span><span class="p">,</span> <span class="n">reprocessed</span>
 
-    <span class="k">def</span> <span class="nf">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_intrinsic_no_reprocessing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make the intrinsic emission model for an un-reprocessed grid.</span>
 
@@ -1394,6 +1441,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_intrinsic</span> <span class="o">=</span> <span class="n">IncidentEmission</span><span class="p">(</span>
             <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span>
@@ -1402,54 +1450,63 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">fesc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_intrinsic</span><span class="p">,</span> <span class="n">old_intrinsic</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_intrinsic</span><span class="p">,</span> <span class="n">old_intrinsic</span><span class="p">,</span> <span class="n">intrinsic</span>
 
-    <span class="k">def</span> <span class="nf">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_intrinsic_reprocessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># If fesc is zero then the intrinsic emission is the same as the</span>
         <span class="c1"># reprocessed emission</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">young_intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_nebular</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_transmitted</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">old_intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_nebular</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_transmitted</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_intrinsic</span><span class="p">,</span> <span class="n">old_intrinsic</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Otherwise, intrinsic = reprocessed + escaped</span>
             <span class="n">young_intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_reprocessed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_escaped</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">old_intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_reprocessed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_escaped</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;intrinsic&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_intrinsic</span><span class="p">,</span> <span class="n">old_intrinsic</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_intrinsic</span><span class="p">,</span> <span class="n">old_intrinsic</span><span class="p">,</span> <span class="n">intrinsic</span>
 
-    <span class="k">def</span> <span class="nf">_make_attenuated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_attenuated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">young_attenuated_nebular</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_attenuated_nebular&quot;</span><span class="p">,</span>
             <span class="n">tau_v</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tau_v_birth</span><span class="p">,</span>
             <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_birth</span><span class="p">,</span>
             <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">young_reprocessed</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">young_attenuated_ism</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_attenuated_ism&quot;</span><span class="p">,</span>
@@ -1457,6 +1514,7 @@
             <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
             <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">young_reprocessed</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">young_attenuated</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_attenuated&quot;</span><span class="p">,</span>
@@ -1464,6 +1522,7 @@
             <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
             <span class="n">apply_dust_to</span><span class="o">=</span><span class="n">young_attenuated_nebular</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_attenuated</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_attenuated&quot;</span><span class="p">,</span>
@@ -1471,10 +1530,12 @@
             <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
             <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">old_reprocessed</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">attenuated</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;attenuated&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_attenuated</span><span class="p">,</span> <span class="n">old_attenuated</span><span class="p">),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1485,7 +1546,7 @@
             <span class="n">attenuated</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_emergent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_emergent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># If fesc is zero the emergent spectra is just the attenuated spectra</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fesc</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="n">young_emergent</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
@@ -1494,6 +1555,7 @@
                 <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
                 <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated_nebular</span><span class="p">,</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">old_emergent</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">,</span>
@@ -1501,29 +1563,34 @@
                 <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
                 <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">old_intrinsic</span><span class="p">,</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">emergent</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_emergent</span><span class="p">,</span> <span class="n">old_emergent</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Otherwise, emergent = attenuated + escaped</span>
             <span class="n">young_emergent</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_escaped</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">old_emergent</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_escaped</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">emergent</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_emergent</span><span class="p">,</span> <span class="n">old_emergent</span><span class="p">),</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">young_emergent</span><span class="p">,</span> <span class="n">old_emergent</span><span class="p">,</span> <span class="n">emergent</span>
 
-    <span class="k">def</span> <span class="nf">_make_dust_emission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_dust_emission</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">young_dust_emission_birth</span> <span class="o">=</span> <span class="n">DustEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_dust_emission_birth&quot;</span><span class="p">,</span>
             <span class="n">dust_emission_model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dust_emission_birth</span><span class="p">,</span>
@@ -1533,6 +1600,7 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">young_dust_emission_ism</span> <span class="o">=</span> <span class="n">DustEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_dust_emission_ism&quot;</span><span class="p">,</span>
@@ -1543,11 +1611,13 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">young_dust_emission</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_dust_emission&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_dust_emission_birth</span><span class="p">,</span> <span class="n">young_dust_emission_ism</span><span class="p">),</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">old_dust_emission</span> <span class="o">=</span> <span class="n">DustEmission</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_dust_emission&quot;</span><span class="p">,</span>
@@ -1558,11 +1628,13 @@
             <span class="n">mask_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">age_pivot</span><span class="p">,</span>
             <span class="n">mask_op</span><span class="o">=</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dust_emission</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
             <span class="n">label</span><span class="o">=</span><span class="s2">&quot;dust_emission&quot;</span><span class="p">,</span>
             <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_dust_emission</span><span class="p">,</span> <span class="n">old_dust_emission</span><span class="p">),</span>
             <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">(</span>
@@ -1573,7 +1645,7 @@
             <span class="n">dust_emission</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">stellar_dust</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission_ism</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dust_emission_birth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -1583,11 +1655,13 @@
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_total&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_dust_emission</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_emergent</span><span class="p">),</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">old_total</span> <span class="o">=</span> <span class="n">EmissionModel</span><span class="p">(</span>
                 <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_total&quot;</span><span class="p">,</span>
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_dust_emission</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_emergent</span><span class="p">),</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Define the related models</span>
@@ -1636,6 +1710,7 @@
                 <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_total</span><span class="p">,</span> <span class="n">old_total</span><span class="p">),</span>
                 <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
                 <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span> <span class="k">if</span> <span class="n">stellar_dust</span> <span class="k">else</span> <span class="s2">&quot;galaxy&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># OK, total = emergent so we need to handle whether</span>
@@ -1648,6 +1723,7 @@
                     <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
                     <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">young_intrinsic</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">old_total</span> <span class="o">=</span> <span class="n">AttenuatedEmission</span><span class="p">(</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">,</span>
@@ -1655,6 +1731,7 @@
                     <span class="n">dust_curve</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dust_curve_ism</span><span class="p">,</span>
                     <span class="n">apply_dust_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">old_intrinsic</span><span class="p">,</span>
                     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;stellar&quot;</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Define the related models</span>
@@ -1691,6 +1768,7 @@
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">label</span><span class="p">,</span>
                     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_total</span><span class="p">,</span> <span class="n">old_total</span><span class="p">),</span>
                     <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
@@ -1700,10 +1778,12 @@
                 <span class="n">young_total</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;young_emergent&quot;</span><span class="p">,</span>
                     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">young_attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">young_escaped</span><span class="p">),</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">old_total</span> <span class="o">=</span> <span class="n">StellarEmissionModel</span><span class="p">(</span>
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;old_emergent&quot;</span><span class="p">,</span>
                     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">old_attenuated</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_escaped</span><span class="p">),</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Define the related models</span>
@@ -1743,6 +1823,7 @@
                     <span class="n">label</span><span class="o">=</span><span class="s2">&quot;emergent&quot;</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">label</span><span class="p">,</span>
                     <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">young_total</span><span class="p">,</span> <span class="n">old_total</span><span class="p">),</span>
                     <span class="n">related_models</span><span class="o">=</span><span class="n">related_models</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
 
@@ -1791,6 +1872,7 @@
         <span class="n">dust_emission_birth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stellar_dust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the PacmanEmission model.</span>
@@ -1815,6 +1897,7 @@
 <span class="sd">            stellar_dust (bool): If True, the dust emission will be treated as</span>
 <span class="sd">                stellar emission, otherwise it will be treated as galaxy</span>
 <span class="sd">                emission.</span>
+<span class="sd">            kwargs: Additional keyword arguments to pass to the models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call the parent constructor to intialise the model</span>
         <span class="n">BimodalPacmanEmission</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1829,6 +1912,7 @@
             <span class="n">dust_emission_birth</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
             <span class="n">stellar_dust</span><span class="o">=</span><span class="n">stellar_dust</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -1862,6 +1946,7 @@
         <span class="n">dust_curve</span><span class="p">,</span>
         <span class="n">dust_emission</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the ScreenEmission model.</span>
@@ -1875,6 +1960,7 @@
 <span class="sd">            label (str): The label for the total emission model. If None</span>
 <span class="sd">                this will be set to &quot;total&quot; or &quot;emergent&quot; if dust_emission is</span>
 <span class="sd">                None.</span>
+<span class="sd">            kwargs: Additional keyword arguments to pass to the models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Call the parent constructor to intialise the model</span>
         <span class="n">PacmanEmission</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1886,6 +1972,7 @@
             <span class="n">fesc</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
             <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
             <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 </pre></div>
@@ -1920,7 +2007,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -359,6 +359,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -570,8 +571,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">emission_model</span><span class="p">,</span>
         <span class="n">emitters</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
         <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">particle_spectra</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -583,10 +584,10 @@
 <span class="sd">                The emission model to extract from.</span>
 <span class="sd">            emitters (dict):</span>
 <span class="sd">                The emitters to extract the spectra for.</span>
-<span class="sd">            per_particle (bool):</span>
-<span class="sd">                Are we extracting per particle?</span>
 <span class="sd">            spectra (dict):</span>
 <span class="sd">                The dictionary to store the extracted spectra in.</span>
+<span class="sd">            particle_spectra (dict):</span>
+<span class="sd">                The dictionary to store the extracted particle spectra in.</span>
 <span class="sd">            verbose (bool):</span>
 <span class="sd">                Are we talking?</span>
 <span class="sd">            kwargs (dict):</span>
@@ -624,13 +625,13 @@
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">this_model</span><span class="o">.</span><span class="n">fixed_parameters</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
 
             <span class="c1"># Get the generator function</span>
-            <span class="k">if</span> <span class="n">per_particle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
                 <span class="n">generator_func</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">generate_particle_lnu</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">generator_func</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">generate_lnu</span>
 
             <span class="c1"># Get this base spectra</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
                 <span class="n">emission_model</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
                 <span class="n">generator_func</span><span class="p">(</span>
                     <span class="n">this_model</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
@@ -644,19 +645,27 @@
                 <span class="p">),</span>
             <span class="p">)</span>
 
+            <span class="c1"># Store the spectra in the right place (integrating if we</span>
+            <span class="c1"># need to)</span>
+            <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                <span class="n">particle_spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+
             <span class="c1"># Replace any fixed parameters</span>
             <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">prev_properties</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prev_properties</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">spectra</span>
+        <span class="k">return</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span>
 
     <span class="k">def</span> <span class="nf">_extract_lines</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">line_ids</span><span class="p">,</span>
         <span class="n">emission_model</span><span class="p">,</span>
         <span class="n">emitters</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
         <span class="n">lines</span><span class="p">,</span>
+        <span class="n">particle_lines</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -674,6 +683,8 @@
 <span class="sd">                Are we generating lines per particle?</span>
 <span class="sd">            lines (dict):</span>
 <span class="sd">                The dictionary to store the extracted lines in.</span>
+<span class="sd">            particle_lines (dict):</span>
+<span class="sd">                The dictionary to store the extracted particle lines in.</span>
 <span class="sd">            verbose (bool):</span>
 <span class="sd">                Are we talking?</span>
 <span class="sd">            kwargs (dict):</span>
@@ -712,18 +723,18 @@
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">this_model</span><span class="o">.</span><span class="n">fixed_parameters</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
 
             <span class="c1"># Get the generator function</span>
-            <span class="k">if</span> <span class="n">per_particle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
                 <span class="n">generator_func</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">generate_particle_line</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">generator_func</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">generate_line</span>
 
             <span class="c1"># Initialise the lines dictionary for this label</span>
-            <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">out_lines</span> <span class="o">=</span> <span class="p">{}</span>
 
             <span class="c1"># Loop over the line ids</span>
             <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
                 <span class="c1"># Get this base lines</span>
-                <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator_func</span><span class="p">(</span>
+                <span class="n">out_lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator_func</span><span class="p">(</span>
                     <span class="n">grid</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
                     <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
                     <span class="n">line_type</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">extract</span><span class="p">,</span>
@@ -735,11 +746,20 @@
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
 
+            <span class="c1"># Store the lines in the right place (integrating if we need to)</span>
+            <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                <span class="n">particle_lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">line_id</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">out_lines</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+
             <span class="c1"># Replace any fixed parameters</span>
             <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">prev_properties</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prev_properties</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="n">lines</span>
+        <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
     <span class="k">def</span> <span class="nf">_extract_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of an extraction model.&quot;&quot;&quot;</span>
@@ -806,8 +826,8 @@
         <span class="n">this_model</span><span class="p">,</span>
         <span class="n">emission_model</span><span class="p">,</span>
         <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">particle_spectra</span><span class="p">,</span>
         <span class="n">lam</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
         <span class="n">emitter</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -820,10 +840,10 @@
 <span class="sd">                The root emission model.</span>
 <span class="sd">            spectra (dict):</span>
 <span class="sd">                The dictionary of spectra.</span>
+<span class="sd">            particle_spectra (dict):</span>
+<span class="sd">                The dictionary of particle</span>
 <span class="sd">            lam (ndarray):</span>
 <span class="sd">                The wavelength grid to generate the spectra on.</span>
-<span class="sd">            per_particle (bool):</span>
-<span class="sd">                Are we generating per particle?</span>
 <span class="sd">            emitter (dict):</span>
 <span class="sd">                The emitter to generate the spectra for.</span>
 
@@ -833,38 +853,57 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Unpack what we need for dust emission</span>
         <span class="n">generator</span> <span class="o">=</span> <span class="n">this_model</span><span class="o">.</span><span class="n">generator</span>
+        <span class="n">per_particle</span> <span class="o">=</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span>
 
         <span class="c1"># Handle the dust emission case</span>
         <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">_is_dust_emitting</span><span class="p">:</span>
-            <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
-            <span class="n">attenuated</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_attenuated_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+            <span class="c1"># Get the right spectra</span>
+            <span class="k">if</span> <span class="n">per_particle</span><span class="p">:</span>
+                <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span>
+                <span class="p">]</span>
+                <span class="n">attenuated</span> <span class="o">=</span> <span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="n">this_model</span><span class="o">.</span><span class="n">lum_attenuated_model</span><span class="o">.</span><span class="n">label</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">intrinsic</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+                <span class="n">attenuated</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_attenuated_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
 
             <span class="c1"># Apply the dust emission model</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                 <span class="n">lam</span><span class="p">,</span>
                 <span class="n">intrinsic</span><span class="p">,</span>
                 <span class="n">attenuated</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># otherwise we are scaling by a single spectra</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                 <span class="n">lam</span><span class="p">,</span>
-                <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">],</span>
+                <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">per_particle</span>
+                <span class="k">else</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">],</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">Template</span><span class="p">):</span>
             <span class="c1"># If we have a template we need to generate the spectra</span>
             <span class="c1"># for each model</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                 <span class="n">emitter</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Otherwise we have a bog standard generation</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
+            <span class="n">sed</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span>
                 <span class="n">lam</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">spectra</span>
+        <span class="c1"># Store the spectra in the right place (integrating if we need to)</span>
+        <span class="k">if</span> <span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+
+        <span class="k">return</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span>
 
     <span class="k">def</span> <span class="nf">_generate_lines</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -872,7 +911,7 @@
         <span class="n">this_model</span><span class="p">,</span>
         <span class="n">emission_model</span><span class="p">,</span>
         <span class="n">lines</span><span class="p">,</span>
-        <span class="n">per_particle</span><span class="p">,</span>
+        <span class="n">particle_lines</span><span class="p">,</span>
         <span class="n">emitter</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -890,8 +929,8 @@
 <span class="sd">                The root emission model.</span>
 <span class="sd">            lines (dict):</span>
 <span class="sd">                The dictionary of lines.</span>
-<span class="sd">            per_particle (bool):</span>
-<span class="sd">                Are we generating lines per particle?</span>
+<span class="sd">            particle_lines (dict):</span>
+<span class="sd">                The dictionary of particle lines.</span>
 <span class="sd">            emitter (Stars/BlackHoles/Galaxy):</span>
 <span class="sd">                The emitter to generate the lines for.</span>
 
@@ -899,6 +938,9 @@
 <span class="sd">            dict:</span>
 <span class="sd">                The dictionary of lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Unpack what we need for dust emission</span>
+        <span class="n">per_particle</span> <span class="o">=</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span>
+
         <span class="c1"># Do we already have the spectra?</span>
         <span class="k">if</span> <span class="n">per_particle</span> <span class="ow">and</span> <span class="n">this_model</span><span class="o">.</span><span class="n">label</span> <span class="ow">in</span> <span class="n">emitter</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">:</span>
             <span class="n">spectra</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
@@ -912,7 +954,7 @@
 
         <span class="c1"># Now we have the spectra we can get the emission at each line</span>
         <span class="c1"># and include it</span>
-        <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
             <span class="c1"># Get the emission at this lines wavelength</span>
             <span class="n">lam</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">lum_intrinsic_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span>
@@ -923,14 +965,23 @@
             <span class="n">cont</span> <span class="o">=</span> <span class="n">spectra</span><span class="o">.</span><span class="n">get_lnu_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
             <span class="c1"># Create the line (luminoisty = continuum)</span>
-            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
+            <span class="n">out_lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
                 <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
                 <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
                 <span class="n">luminosity</span><span class="o">=</span><span class="mi">0</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
                 <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">lines</span>
+        <span class="c1"># Store the lines in the right place (integrating if we need to)</span>
+        <span class="k">if</span> <span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">line_id</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">out_lines</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+
+        <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
     <span class="k">def</span> <span class="nf">_generate_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a generation model.&quot;&quot;&quot;</span>
@@ -1004,6 +1055,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">this_model</span><span class="p">,</span>
         <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">particle_spectra</span><span class="p">,</span>
         <span class="n">emitter</span><span class="p">,</span>
         <span class="n">this_mask</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1015,6 +1067,8 @@
 <span class="sd">                The model defining the dust attenuation.</span>
 <span class="sd">            spectra (dict):</span>
 <span class="sd">                The dictionary of spectra.</span>
+<span class="sd">            particle_spectra (dict):</span>
+<span class="sd">                The dictionary of particle spectra.</span>
 <span class="sd">            emitter (Stars/BlackHoles):</span>
 <span class="sd">                The emitter to dust attenuate the spectra for.</span>
 <span class="sd">            this_mask (dict):</span>
@@ -1032,23 +1086,34 @@
             <span class="n">tau_v</span> <span class="o">*=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">tv</span>
 
         <span class="c1"># Get the spectra to apply dust to</span>
-        <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
 
         <span class="c1"># Otherwise, we are applying a dust curve (there&#39;s no</span>
         <span class="c1"># alternative)</span>
-        <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_dust_to</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">apply_dust_to</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
             <span class="n">tau_v</span><span class="p">,</span>
             <span class="n">dust_curve</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">dust_curve</span><span class="p">,</span>
             <span class="n">mask</span><span class="o">=</span><span class="n">this_mask</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">spectra</span>
+        <span class="c1"># Store the spectra in the right place (integrating if we need to)</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">sed</span>
+
+        <span class="k">return</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span>
 
     <span class="k">def</span> <span class="nf">_dust_attenuate_lines</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">line_ids</span><span class="p">,</span>
         <span class="n">this_model</span><span class="p">,</span>
         <span class="n">lines</span><span class="p">,</span>
+        <span class="n">particle_lines</span><span class="p">,</span>
         <span class="n">emitter</span><span class="p">,</span>
         <span class="n">this_mask</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1062,6 +1127,8 @@
 <span class="sd">                The model defining the dust attenuation.</span>
 <span class="sd">            lines (dict):</span>
 <span class="sd">                The dictionary of lines.</span>
+<span class="sd">            particle_lines (dict):</span>
+<span class="sd">                The dictionary of particle lines.</span>
 <span class="sd">            emitter (Stars/BlackHoles):</span>
 <span class="sd">                The emitter to dust attenuate the lines for.</span>
 <span class="sd">            this_mask (dict):</span>
@@ -1079,24 +1146,34 @@
             <span class="n">tau_v</span> <span class="o">*=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">tv</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">tv</span>
 
         <span class="c1"># Get the lines to apply dust to</span>
-        <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">particle_lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">apply_dust_to</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">apply_dust_to</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
 
         <span class="c1"># Create dictionary to hold the dust attenuated lines</span>
-        <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Loop over the line ids</span>
         <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
             <span class="c1"># Otherwise, we are applying a dust curve (there&#39;s no</span>
             <span class="c1"># alternative)</span>
-            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_dust_to</span><span class="p">[</span>
-                <span class="n">line_id</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
+            <span class="n">out_lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">apply_dust_to</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">apply_attenuation</span><span class="p">(</span>
                 <span class="n">tau_v</span><span class="p">,</span>
                 <span class="n">dust_curve</span><span class="o">=</span><span class="n">this_model</span><span class="o">.</span><span class="n">dust_curve</span><span class="p">,</span>
                 <span class="n">mask</span><span class="o">=</span><span class="n">this_mask</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">lines</span>
+        <span class="c1"># Store the lines in the right place (integrating if we need to)</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">line_id</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">out_lines</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+
+        <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
     <span class="k">def</span> <span class="nf">_attenuate_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a dust attenuation model.&quot;&quot;&quot;</span>
@@ -1135,7 +1212,13 @@
         <span class="c1"># Attach the models to combine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_combine</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combine</span><span class="p">)</span> <span class="k">if</span> <span class="n">combine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">combine</span>
 
-    <span class="k">def</span> <span class="nf">_combine_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emission_model</span><span class="p">,</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">this_model</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_combine_spectra</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">emission_model</span><span class="p">,</span>
+        <span class="n">spectra</span><span class="p">,</span>
+        <span class="n">particle_spectra</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Combine the extracted spectra.</span>
 
@@ -1145,6 +1228,8 @@
 <span class="sd">                wavelength grid.</span>
 <span class="sd">            spectra (dict):</span>
 <span class="sd">                The dictionary of spectra.</span>
+<span class="sd">            particle_spectra (dict):</span>
+<span class="sd">                The dictionary of particle spectra.</span>
 <span class="sd">            this_model (EmissionModel):</span>
 <span class="sd">                The model defining the combination.</span>
 
@@ -1153,18 +1238,47 @@
 <span class="sd">                The dictionary of spectra.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Create an empty spectra to add to</span>
-        <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
-            <span class="n">emission_model</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
-            <span class="n">lnu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span><span class="p">),</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+                <span class="n">emission_model</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="n">lnu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span>
+                    <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span>
+                <span class="n">emission_model</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span>
+                <span class="n">lnu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span><span class="p">),</span>
+            <span class="p">)</span>
 
         <span class="c1"># Combine the spectra</span>
         <span class="k">for</span> <span class="n">combine_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">:</span>
-            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+=</span> <span class="n">spectra</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+            <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+                <span class="n">particle_spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+=</span> <span class="n">particle_spectra</span><span class="p">[</span>
+                    <span class="n">combine_model</span><span class="o">.</span><span class="n">label</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">+=</span> <span class="n">spectra</span><span class="p">[</span>
+                    <span class="n">combine_model</span><span class="o">.</span><span class="n">label</span>
+                <span class="p">]</span><span class="o">.</span><span class="n">_lnu</span>
 
-        <span class="k">return</span> <span class="n">spectra</span>
+        <span class="c1"># If we made a per particle spectra we need to sum it and get the</span>
+        <span class="c1"># integrated spectra</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">spectra</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">particle_spectra</span><span class="p">[</span>
+                <span class="n">this_model</span><span class="o">.</span><span class="n">label</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_combine_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line_ids</span><span class="p">,</span> <span class="n">emission_model</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">this_model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span>
+
+    <span class="k">def</span> <span class="nf">_combine_lines</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">line_ids</span><span class="p">,</span>
+        <span class="n">emission_model</span><span class="p">,</span>
+        <span class="n">lines</span><span class="p">,</span>
+        <span class="n">particle_lines</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Combine the extracted lines.</span>
 
@@ -1176,6 +1290,8 @@
 <span class="sd">                wavelength grid.</span>
 <span class="sd">            lines (dict):</span>
 <span class="sd">                The dictionary of lines.</span>
+<span class="sd">            particle_lines (dict):</span>
+<span class="sd">                The dictionary of particle lines.</span>
 <span class="sd">            this_model (EmissionModel):</span>
 <span class="sd">                The model defining the combination.</span>
 
@@ -1183,8 +1299,14 @@
 <span class="sd">            dict:</span>
 <span class="sd">                The dictionary of lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Create dictionary to hold the combined lines</span>
-        <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Get the right out lines dict and create the right entry</span>
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Get the right exist lines dict</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">in_lines</span> <span class="o">=</span> <span class="n">particle_lines</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">in_lines</span> <span class="o">=</span> <span class="n">lines</span>
 
         <span class="c1"># Loop over lines copying over the first set of lines</span>
         <span class="k">for</span> <span class="n">line_id</span> <span class="ow">in</span> <span class="n">line_ids</span><span class="p">:</span>
@@ -1193,22 +1315,31 @@
             <span class="n">cont</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="c1"># Get the wavelength of the line</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span>
+            <span class="n">lam</span> <span class="o">=</span> <span class="n">in_lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">wavelength</span>
 
             <span class="c1"># Combine the lines</span>
             <span class="k">for</span> <span class="n">combine_model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">:</span>
-                <span class="n">lum</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span>
-                <span class="n">cont</span> <span class="o">+=</span> <span class="n">lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_continuum</span>
+                <span class="n">lum</span> <span class="o">+=</span> <span class="n">in_lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_luminosity</span>
+                <span class="n">cont</span> <span class="o">+=</span> <span class="n">in_lines</span><span class="p">[</span><span class="n">combine_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span><span class="o">.</span><span class="n">_continuum</span>
 
             <span class="c1"># Add the line to the dictionary</span>
-            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">][</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
+            <span class="n">out_lines</span><span class="p">[</span><span class="n">line_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span>
                 <span class="n">line_id</span><span class="o">=</span><span class="n">line_id</span><span class="p">,</span>
                 <span class="n">wavelength</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span>
                 <span class="n">luminosity</span><span class="o">=</span><span class="n">lum</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
                 <span class="n">continuum</span><span class="o">=</span><span class="n">cont</span> <span class="o">*</span> <span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">lines</span>
+        <span class="c1"># Store the lines in the right place (integrating if we need to)</span>
+        <span class="k">if</span> <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
+            <span class="n">particle_lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">line_id</span><span class="p">:</span> <span class="n">line</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">out_lines</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_lines</span>
+
+        <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
     <span class="k">def</span> <span class="nf">_combine_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a combination model.&quot;&quot;&quot;</span>
@@ -1256,7 +1387,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../../../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

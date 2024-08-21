@@ -361,6 +361,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -638,21 +639,21 @@
 |  Masks:                                                                                                |
 |    - ages &lt; 10 Myr                                                                                     |
 |--------------------------------------------------------------------------------------------------------|
-|  NEBULAR (stellar)                                                                                     |
-|--------------------------------------------------------------------------------------------------------|
-|Extraction model:                                                                                       |
-|  Grid: test_grid                                                                                       |
-|  Extract key: nebular                                                                                  |
-|  Escape fraction: 0.0                                                                                  |
-|  Save emission: True                                                                                   |
-|  Masks:                                                                                                |
-|    - ages &lt; 10 Myr                                                                                     |
-|--------------------------------------------------------------------------------------------------------|
 |  TRANSMITTED (stellar)                                                                                 |
 |--------------------------------------------------------------------------------------------------------|
 |Extraction model:                                                                                       |
 |  Grid: test_grid                                                                                       |
 |  Extract key: transmitted                                                                              |
+|  Escape fraction: 0.0                                                                                  |
+|  Save emission: True                                                                                   |
+|  Masks:                                                                                                |
+|    - ages &lt; 10 Myr                                                                                     |
+|--------------------------------------------------------------------------------------------------------|
+|  NEBULAR (stellar)                                                                                     |
+|--------------------------------------------------------------------------------------------------------|
+|Extraction model:                                                                                       |
+|  Grid: test_grid                                                                                       |
+|  Extract key: nebular                                                                                  |
 |  Escape fraction: 0.0                                                                                  |
 |  Save emission: True                                                                                   |
 |  Masks:                                                                                                |
@@ -669,7 +670,7 @@
 |  ATTENUATED (stellar)                                                                                  |
 |--------------------------------------------------------------------------------------------------------|
 |Dust attenuation model:                                                                                 |
-|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7f06f4e9acb0&gt;          |
+|  Dust curve: &lt;synthesizer.emission_models.attenuation.dust.PowerLaw object at 0x7f47b74c3e20&gt;          |
 |  Apply dust to: reprocessed                                                                            |
 |  Optical depth (tau_v): [0.67]                                                                         |
 |  Save emission: True                                                                                   |
@@ -764,6 +765,82 @@
 </pre></div></div>
 </div>
 </section>
+<section id="Generating-spectra-and-lines">
+<h2>Generating spectra and lines<a class="headerlink" href="#Generating-spectra-and-lines" title="Link to this heading">¶</a></h2>
+<p>We’ll cover this in greater detail in the <a class="reference internal" href="../spectra/spectra.html"><span class="doc">spectra docs</span></a> and the <a class="reference internal" href="../lines/lines.html"><span class="doc">lines docs</span></a>, but to generate an emission from an <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> you need to:</p>
+<ul class="simple">
+<li><p>Set up your model as shown in the other <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> docs.</p></li>
+<li><p>Set up an “emitter” (e.g. a component or galaxy containing components) as shown in the [component docs](../components/components.rst.</p></li>
+<li><p>Call the emitter’s <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method passing in your model.</p></li>
+</ul>
+<p>This will return the spectra/lines at the root of your emission model and store all generated spectra in the emitter.</p>
+<section id="Generating-emissions-for-each-particle">
+<h3>Generating emissions for each particle<a class="headerlink" href="#Generating-emissions-for-each-particle" title="Link to this heading">¶</a></h3>
+<p>To generate spectra for each particle in a component/galaxy we follow the exact same steps as above, but we need to set <code class="docutils literal notranslate"><span class="pre">per_particle=True</span></code> on our model. This can be done at model instantiation…</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a model for per particle emission</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">TotalEmission</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">dust_curve</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">tau_v</span><span class="o">=</span><span class="mf">0.67</span><span class="p">,</span>
+    <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/emission_models_model_usage_11_0.png" src="../_images/emission_models_model_usage_11_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 600x600 with 1 Axes&gt;, &lt;Axes: &gt;)
+</pre></div></div>
+</div>
+<p>Or by using the <code class="docutils literal notranslate"><span class="pre">set_per_particle</span></code> method on the model. This will set the model it is called from and any child models to generate spectra for each particle in the emitter. Below we’ll demonstrate this by making every model in the <code class="docutils literal notranslate"><span class="pre">total</span></code> model we made above to be integrated (<code class="docutils literal notranslate"><span class="pre">per_particle=False</span></code>) and then set some of the children to be per particle.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">total</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">total</span><span class="p">[</span><span class="s2">&quot;reprocessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">total</span><span class="p">[</span><span class="s2">&quot;escaped&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_per_particle</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">total</span><span class="o">.</span><span class="n">plot_emission_tree</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/emission_models_model_usage_13_0.png" src="../_images/emission_models_model_usage_13_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 600x600 with 1 Axes&gt;, &lt;Axes: &gt;)
+</pre></div></div>
+</div>
+<p>Notice how now the <code class="docutils literal notranslate"><span class="pre">&quot;total&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;attenuated&quot;</span></code> models don’t mention per particle emission while all others (which are children of <code class="docutils literal notranslate"><span class="pre">&quot;reprocessed&quot;</span></code>) have <code class="docutils literal notranslate"><span class="pre">Per</span> <span class="pre">particle</span> <span class="pre">emission:</span> <span class="pre">True</span></code> in their summary.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">per_particle=True</span></code> the model will generate a spectrum for each particle in the component/galaxy, for each individual model in your <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code>, and store these in the <code class="docutils literal notranslate"><span class="pre">particle_spectra</span></code> attribute. Note that integrated spectra will automatically be generated too and will be stored in the <code class="docutils literal notranslate"><span class="pre">spectra</span></code> attribute.</p>
+</section>
+</section>
 </section>
 
         </article>
@@ -834,6 +911,10 @@
 <li><a class="reference internal" href="#Printing-a-summary-of-an-EmissionModel">Printing a summary of an <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code></a></li>
 <li><a class="reference internal" href="#Plotting-an-EmissionModel">Plotting an <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code></a></li>
 <li><a class="reference internal" href="#Extracting-models">Extracting models</a></li>
+<li><a class="reference internal" href="#Generating-spectra-and-lines">Generating spectra and lines</a><ul>
+<li><a class="reference internal" href="#Generating-emissions-for-each-particle">Generating emissions for each particle</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -845,7 +926,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=63fddab4"></script>
+</div><script src="../_static/documentation_options.js?v=a39782a8"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
