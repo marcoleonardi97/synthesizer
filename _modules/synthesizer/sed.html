@@ -681,11 +681,11 @@
             <span class="n">sum_over</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
 
             <span class="c1"># Create a new sed object with the first Lnu dimension collapsed</span>
-            <span class="n">new_sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">sum_over</span><span class="p">))</span>
+            <span class="n">new_sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">sum_over</span><span class="p">))</span>
 
             <span class="c1"># If fnu exists, sum that too</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">new_sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">sum_over</span><span class="p">)</span>
+                <span class="n">new_sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fnu</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">sum_over</span><span class="p">)</span>
                 <span class="n">new_sed</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsnu</span>
                 <span class="n">new_sed</span><span class="o">.</span><span class="n">obslam</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obslam</span>
                 <span class="n">new_sed</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
@@ -1721,7 +1721,7 @@
             <span class="n">new_lam</span> <span class="o">=</span> <span class="n">rebin_1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">resample_factor</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
 
         <span class="c1"># Evaluate the function at the desired wavelengths</span>
-        <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+        <span class="n">new_spectra</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Instantiate the new Sed</span>
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">new_lam</span><span class="p">,</span> <span class="n">new_spectra</span><span class="p">)</span>
@@ -1733,6 +1733,14 @@
             <span class="n">sed</span><span class="o">.</span><span class="n">obsnu</span> <span class="o">=</span> <span class="n">sed</span><span class="o">.</span><span class="n">_nu</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span><span class="p">)</span>
             <span class="n">sed</span><span class="o">.</span><span class="n">fnu</span> <span class="o">=</span> <span class="n">spectres</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obslam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fnu</span><span class="p">)</span>
             <span class="n">sed</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span>
+
+        <span class="c1"># Clean up nans, we shouldn&#39;t get them but they do appear sometimes...</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span><span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_fnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_fnu</span><span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_nu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_nu</span><span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_obslam</span><span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_obsnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_obsnu</span><span class="p">)</span>
 
         <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Resampling Sed&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
@@ -2583,7 +2591,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=df82e05b"></script>
+</div><script src="../../_static/documentation_options.js?v=914cb0d6"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
