@@ -538,8 +538,32 @@
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 
+<span class="c1"># Define all the available files and their information</span>
+<span class="n">AVAILABLE_FILES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;test_grid.hdf5&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;bpass-2.2.1-bin_chabrier03-0.1,300.0_cloudy-c23.01-sps.hdf5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;ywu3dy73cdezohvytyb9k&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rlkey&quot;</span><span class="p">:</span> <span class="s2">&quot;05agbbdrmxytsc2x1x2jgh3xk&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;test_grid_agn-blr.hdf5&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;agnsed-limited_cloudy-c23.01-blr.hdf5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;4rnwbxnzwp3v0pmiju06h&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rlkey&quot;</span><span class="p">:</span> <span class="s2">&quot;rdqy9p7royyxnljtloh2a2zj7&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;test_grid_agn-nlr.hdf5&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;agnsed-limited_cloudy-c23.01-nlr.hdf5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;4dxp06jzv276pn8qxq1nx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rlkey&quot;</span><span class="p">:</span> <span class="s2">&quot;35tietcw2j40q4ad1guj2swg1&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;MW3.1.hdf5&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="s2">&quot;MW3.1.hdf5&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;jidw4cgtf95x3gjvw4hj6&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rlkey&quot;</span><span class="p">:</span> <span class="s2">&quot;z7sbb7z5253dt90ootr5hm5jv&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
 
-<span class="k">def</span> <span class="nf">_download_from_xcs_host</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">,</span> <span class="n">save_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">_download_from_xcs_host</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download the file from the XCS server.</span>
 
@@ -548,9 +572,6 @@
 <span class="sd">            The name of the file to download.</span>
 <span class="sd">        save_dir (str)</span>
 <span class="sd">            The directory in which to save the file.</span>
-<span class="sd">        save_filename (str)</span>
-<span class="sd">            The name to save the file as. If None, the file will be saved with</span>
-<span class="sd">            the same name as the download.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Define the base URL</span>
     <span class="n">xcs_url</span> <span class="o">=</span> <span class="p">(</span>
@@ -558,14 +579,10 @@
     <span class="p">)</span>
 
     <span class="c1"># Define the full URL</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="n">xcs_url</span> <span class="o">+</span> <span class="n">filename</span>
-
-    <span class="c1"># If we have no save file name then its the same as the download</span>
-    <span class="k">if</span> <span class="n">save_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">save_filename</span> <span class="o">=</span> <span class="n">filename</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">xcs_url</span> <span class="o">+</span> <span class="n">AVAILABLE_FILES</span><span class="p">[</span><span class="n">filename</span><span class="p">][</span><span class="s2">&quot;file&quot;</span><span class="p">]</span>
 
     <span class="c1"># Define the save path</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">save_filename</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="c1"># Download the file</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -588,42 +605,30 @@
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_download_from_dropbox</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">,</span>
-    <span class="n">db_id</span><span class="p">,</span>
-    <span class="n">save_dir</span><span class="p">,</span>
-    <span class="n">save_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<span class="p">):</span>
+<span class="k">def</span> <span class="nf">_download_from_dropbox</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download the file from the Dropbox server.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filename (str)</span>
 <span class="sd">            The name of the file to download.</span>
-<span class="sd">        db_id (str)</span>
-<span class="sd">            The Dropbox ID of the file.</span>
 <span class="sd">        save_dir (str)</span>
 <span class="sd">            The directory in which to save the file.</span>
-<span class="sd">        save_filename (str)</span>
-<span class="sd">            The name to save the file as. If None, the file will be saved with</span>
-<span class="sd">            the same name as the download.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Define the base URL</span>
     <span class="n">dropbox_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.dropbox.com/scl/fi/&quot;</span>
 
+    <span class="c1"># Unpack the file details for extraction</span>
+    <span class="n">file_details</span> <span class="o">=</span> <span class="n">AVAILABLE_FILES</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span>
+
     <span class="c1"># Define the full URL</span>
     <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dropbox_url</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">db_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;?rlkey=</span><span class="si">{</span><span class="n">db_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;st=</span><span class="si">{</span><span class="n">db_id</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;dl=1&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dropbox_url</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">file_details</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">file_details</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;?rlkey=</span><span class="si">{</span><span class="n">file_details</span><span class="p">[</span><span class="s1">&#39;rlkey&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&amp;dl=1&quot;</span>
     <span class="p">)</span>
-    <span class="c1"># url = &quot;https://www.dropbox.com/scl/fi/z6vbxpndmak7w83xt24x3/bpass-2.2.1-bin_chabrier03-0.1-300.0_cloudy-c23.01-sps.hdf5?rlkey=078fk0ttwpxg49yy60z0zzelh&amp;st=orpc20cw&amp;dl=1&quot;</span>
-
-    <span class="c1"># If we have no save file name then its the same as the download</span>
-    <span class="k">if</span> <span class="n">save_filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">save_filename</span> <span class="o">=</span> <span class="n">filename</span>
 
     <span class="c1"># Define the save path</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">save_filename</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="c1"># Download the file</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -649,8 +654,6 @@
 <span class="k">def</span> <span class="nf">_download</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">,</span>
     <span class="n">save_dir</span><span class="p">,</span>
-    <span class="n">save_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">db_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download the file at the given URL to the given path.</span>
@@ -660,26 +663,14 @@
 <span class="sd">            The name of the file to download.</span>
 <span class="sd">        save_dir (str)</span>
 <span class="sd">            The directory in which to save the file.</span>
-<span class="sd">        save_filename (str)</span>
-<span class="sd">            The name to save the file as. If None, the file will be saved with</span>
-<span class="sd">            the same name as the download.</span>
-<span class="sd">        db_id (str)</span>
-<span class="sd">            The Dropbox ID of the file. (Only needed to use the dropbox</span>
-<span class="sd">            fall back when the primary host fails.)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># If we don&#39;t have a dropbox alternative just use the primary, if it fails</span>
-    <span class="c1"># it fails</span>
-    <span class="k">if</span> <span class="n">db_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_download_from_xcs_host</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">,</span> <span class="n">save_filename</span><span class="p">)</span>
-        <span class="k">return</span>
-
     <span class="c1"># Try the primary host</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">_download_from_xcs_host</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">,</span> <span class="n">save_filename</span><span class="p">)</span>
+        <span class="n">_download_from_xcs_host</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">DownloadError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to download from primary host. Trying dropbox...&quot;</span><span class="p">)</span>
         <span class="c1"># If the primary host fails, try the dropbox alternative</span>
-        <span class="n">_download_from_dropbox</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">db_id</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">,</span> <span class="n">save_filename</span><span class="p">)</span>
+        <span class="n">_download_from_dropbox</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">save_dir</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="download_test_grids">
@@ -692,31 +683,13 @@
 <span class="sd">        destination (str)</span>
 <span class="sd">            The path to the destination directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Define the files to get</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;bpass-2.2.1-bin_chabrier03-0.1,300.0_cloudy-c23.01-sps.hdf5&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;agnsed-limited_cloudy-c23.01-blr.hdf5&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;agnsed-limited_cloudy-c23.01-nlr.hdf5&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Define the dropbox ids for each file (only used if we fall back on</span>
-    <span class="c1"># dropbox)</span>
-    <span class="n">db_ids</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;z6vbxpndmak7w83xt24x3&quot;</span><span class="p">,</span> <span class="s2">&quot;078fk0ttwpxg49yy60z0zzelh&quot;</span><span class="p">,</span> <span class="s2">&quot;3g8i5bnq&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;zjim8bpiquggs2yatxvsz&quot;</span><span class="p">,</span> <span class="s2">&quot;ce2ozz64kp4ii4hehejizakoq&quot;</span><span class="p">,</span> <span class="s2">&quot;z6ziagfc&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;cigwp1b6oplmmnu4e68ns&quot;</span><span class="p">,</span> <span class="s2">&quot;xhfz356nc2cjlivce9rx3k4y9&quot;</span><span class="p">,</span> <span class="s2">&quot;sv76rwoi&quot;</span><span class="p">),</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Define the file names the downloads will be saved as</span>
-    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Download each file</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span>
         <span class="s2">&quot;test_grid.hdf5&quot;</span><span class="p">,</span>
         <span class="s2">&quot;test_grid_agn-blr.hdf5&quot;</span><span class="p">,</span>
         <span class="s2">&quot;test_grid_agn-nlr.hdf5&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Download each file</span>
-    <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">outf</span><span class="p">,</span> <span class="n">db_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">out_files</span><span class="p">,</span> <span class="n">db_ids</span><span class="p">):</span>
-        <span class="n">_download</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">outf</span><span class="p">,</span> <span class="n">db_id</span><span class="p">)</span></div>
+    <span class="p">]:</span>
+        <span class="n">_download</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
 
 
 
@@ -731,12 +704,7 @@
 <span class="sd">            The path to the destination directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Download the stellar grid</span>
-    <span class="n">_download</span><span class="p">(</span>
-        <span class="s2">&quot;bpass-2.2.1-bin_chabrier03-0.1,300.0_cloudy-c23.01-sps.hdf5&quot;</span><span class="p">,</span>
-        <span class="n">destination</span><span class="p">,</span>
-        <span class="s2">&quot;test_grid.hdf5&quot;</span><span class="p">,</span>
-        <span class="p">(</span><span class="s2">&quot;z6vbxpndmak7w83xt24x3&quot;</span><span class="p">,</span> <span class="s2">&quot;078fk0ttwpxg49yy60z0zzelh&quot;</span><span class="p">,</span> <span class="s2">&quot;3g8i5bnq&quot;</span><span class="p">),</span>
-    <span class="p">)</span></div>
+    <span class="n">_download</span><span class="p">(</span><span class="s2">&quot;test_grid.hdf5&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
 
 
 
@@ -750,28 +718,9 @@
 <span class="sd">        destination (str)</span>
 <span class="sd">            The path to the destination directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Define the files to get</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;agnsed-limited_cloudy-c23.01-blr.hdf5&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;agnsed-limited_cloudy-c23.01-nlr.hdf5&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Define the dropbox ids for each file (only used if we fall back on</span>
-    <span class="c1"># dropbox)</span>
-    <span class="n">db_ids</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;zjim8bpiquggs2yatxvsz&quot;</span><span class="p">,</span> <span class="s2">&quot;ce2ozz64kp4ii4hehejizakoq&quot;</span><span class="p">,</span> <span class="s2">&quot;z6ziagfc&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;cigwp1b6oplmmnu4e68ns&quot;</span><span class="p">,</span> <span class="s2">&quot;xhfz356nc2cjlivce9rx3k4y9&quot;</span><span class="p">,</span> <span class="s2">&quot;sv76rwoi&quot;</span><span class="p">),</span>
-    <span class="p">]</span>
-
-    <span class="c1"># Define the file names the downloads will be saved as</span>
-    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;test_grid_agn-blr.hdf5&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;test_grid_agn-nlr.hdf5&quot;</span><span class="p">,</span>
-    <span class="p">]</span>
-
     <span class="c1"># Download each file</span>
-    <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">outf</span><span class="p">,</span> <span class="n">db_id</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">out_files</span><span class="p">,</span> <span class="n">db_ids</span><span class="p">):</span>
-        <span class="n">_download</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">outf</span><span class="p">,</span> <span class="n">db_id</span><span class="p">)</span></div>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;test_grid_agn-blr.hdf5&quot;</span><span class="p">,</span> <span class="s2">&quot;test_grid_agn-nlr.hdf5&quot;</span><span class="p">]:</span>
+        <span class="n">_download</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
 
 
 
@@ -786,12 +735,7 @@
 <span class="sd">            The path to the destination directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Download the dust grid</span>
-    <span class="n">_download</span><span class="p">(</span>
-        <span class="s2">&quot;MW3.1.hdf5&quot;</span><span class="p">,</span>
-        <span class="n">destination</span><span class="p">,</span>
-        <span class="s2">&quot;MW3.1.hdf5&quot;</span><span class="p">,</span>
-        <span class="p">(</span><span class="s2">&quot;7fzg4rvw9toeh2fgt6m78&quot;</span><span class="p">,</span> <span class="s2">&quot;7n4f135b36lq429ts8jsi4zx1&quot;</span><span class="p">,</span> <span class="s2">&quot;2tb1rfw7&quot;</span><span class="p">),</span>
-    <span class="p">)</span></div>
+    <span class="n">_download</span><span class="p">(</span><span class="s2">&quot;MW3.1.hdf5&quot;</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span></div>
 
 
 
@@ -966,7 +910,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=cb343ac1"></script>
+</div><script src="../../_static/documentation_options.js?v=f74d35ee"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
