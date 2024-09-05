@@ -1374,6 +1374,8 @@
 <a class="viewcode-back" href="../../_autosummary/synthesizer.filters.html#synthesizer.filters.FilterCollection.find_filter">[docs]</a>
     <span class="k">def</span> <span class="nf">find_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rest_frame_lam</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;pivot&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the filter containing the passed rest frame wavelength.</span>
+
 <span class="sd">        Takes a rest frame target wavelength and returns the filter that probes</span>
 <span class="sd">        that wavelength.</span>
 
@@ -1390,7 +1392,7 @@
 <span class="sd">                                 wavelength is returned.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            rest_frame_lam (float):</span>
+<span class="sd">            rest_frame_lam (unyt_quantity):</span>
 <span class="sd">                The wavelength to find the nearest filter to.</span>
 <span class="sd">            redshift (float):</span>
 <span class="sd">                The redshift of the observation. None for rest_frame, defaults</span>
@@ -1409,6 +1411,14 @@
 <span class="sd">                If the passed wavelength is out of range of any of the filters</span>
 <span class="sd">                then an error is thrown.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure the rest frame wavelength has units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rest_frame_lam</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+                <span class="s2">&quot;The rest_frame_lam must have units!&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Convert to the correct units</span>
+        <span class="n">rest_frame_lam</span> <span class="o">=</span> <span class="n">rest_frame_lam</span><span class="o">.</span><span class="n">in_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
 
         <span class="c1"># Are we working in a shifted frame or not?</span>
         <span class="k">if</span> <span class="n">redshift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1421,24 +1431,18 @@
 
         <span class="c1"># Which method are we using?</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;pivot&quot;</span><span class="p">:</span>
-            <span class="c1"># Calculate each filters pivot wavelength</span>
-            <span class="n">pivot_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pivot_lams</span>
-
             <span class="c1"># Find the index of the closest pivot wavelength to lam</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">pivot_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pivot_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
-            <span class="c1"># Calculate each filters mean wavelength</span>
-            <span class="n">mean_lams</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean_lams</span>
-
             <span class="c1"># Find the index of the closest mean wavelength to lam</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mean_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_lams</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))</span>
 
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;transmission&quot;</span><span class="p">:</span>
             <span class="c1"># Compute the transmission in each filter at lam</span>
             <span class="n">transmissions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-                <span class="n">transmissions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
+                <span class="n">transmissions</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
 
             <span class="c1"># Find the index of the filter with the peak transmission</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">transmissions</span><span class="p">)</span>
@@ -1454,7 +1458,7 @@
         <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">fcode</span><span class="p">]</span>
 
         <span class="c1"># Get the transmission</span>
-        <span class="n">transmission</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">t</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">lam</span><span class="p">))]</span>
 
         <span class="c1"># Ensure the transmission is non-zero at the desired wavelength</span>
         <span class="k">if</span> <span class="n">transmission</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2453,7 +2457,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=6ddde00c"></script>
+</div><script src="../../_static/documentation_options.js?v=3207e4eb"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
