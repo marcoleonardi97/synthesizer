@@ -536,7 +536,7 @@
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
 <span class="kn">from</span> <span class="nn">spectres</span> <span class="kn">import</span> <span class="n">spectres</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">unyt_array</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">eV</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
@@ -615,17 +615,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
         <span class="c1"># Set the wavelength</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>  <span class="c1"># \AA</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="s2">&quot;`lam` must be a unyt_array, list, list of &quot;</span>
-                    <span class="s2">&quot;lists, or N-d numpy array&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span>
 
         <span class="c1"># Calculate frequency</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nu</span> <span class="o">=</span> <span class="n">c</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span>
@@ -635,17 +625,7 @@
         <span class="k">if</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lnu</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">lnu</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="s2">&quot;`lnu` must be a unyt_array, list, list &quot;</span>
-                        <span class="s2">&quot;of lists, or N-d numpy array&quot;</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
 
         <span class="c1"># Prepare for bolometric luminosity calculation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1055,13 +1035,16 @@
         <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
         <span class="c1"># frequency. It&#39;s faster to just multiply by -1 than to reverse the</span>
         <span class="c1"># array.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="o">-</span><span class="n">integrate_last_axis</span><span class="p">(</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="o">-</span><span class="n">integrate_last_axis</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span>
             <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">,</span>
             <span class="n">method</span><span class="o">=</span><span class="n">integration_method</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating bolometric luminosity&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="c1"># Assign the integral to the bolometric luminosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">integral</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span></div>
 
@@ -2592,7 +2575,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=3207e4eb"></script>
+</div><script src="../../_static/documentation_options.js?v=0c7f06d6"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
