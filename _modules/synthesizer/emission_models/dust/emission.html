@@ -514,17 +514,35 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.emission_models.dust.emission</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module containing dust emission functionality&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;A module defining emission generation classes.</span>
+
+<span class="sd">This module provides classes for generating spectra from specific</span>
+<span class="sd">parametrisations. Each of these will return a normalised spectrum.</span>
+
+<span class="sd">Possible classes include:</span>
+<span class="sd">    - Blackbody: A simple blackbody spectrum.</span>
+<span class="sd">    - Greybody: A greybody spectrum.</span>
+<span class="sd">    - Casey12: A dust emission spectrum using the Casey (2012) model.</span>
+<span class="sd">    - IR_templates: A class to generates dust emission spectra using</span>
+<span class="sd">        the Draine and Li (2007) model.</span>
+
+<span class="sd">Example usage:</span>
+
+<span class="sd">        blackbody = Blackbody(temperature=20 * K)</span>
+<span class="sd">        greybody = Greybody(temperature=20 * K, emissivity=1.5)</span>
+<span class="sd">        casey12 = Casey12(temperature=20 * K, emissivity=1.5, alpha=2.0)</span>
+<span class="sd">        ir_templates = IR_templates(grid, mdust=1e6 * Msun)</span>
+<span class="sd">        ir_templates.dl07()</span>
+<span class="sd">        ir_templates.get_spectra(lam, intrinsic_sed=sed1, attenuated_sed=sed2)</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">fsolve</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Angstrom</span><span class="p">,</span>
     <span class="n">Hz</span><span class="p">,</span>
     <span class="n">K</span><span class="p">,</span>
     <span class="n">Lsun</span><span class="p">,</span>
@@ -546,6 +564,7 @@
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">planck</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils.util_funcs</span> <span class="kn">import</span> <span class="n">has_units</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
@@ -572,7 +591,7 @@
         <span class="n">cmb_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialises the base class for dust emission models.</span>
+<span class="sd">        Initialise the base class for dust emission models.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            temperature (float)</span>
@@ -581,43 +600,24 @@
 <span class="sd">                The multiplicative factor to account for</span>
 <span class="sd">                CMB heating at high-redshift</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="c1"># Attach the common attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cmb_factor</span> <span class="o">=</span> <span class="n">cmb_factor</span>
 
     <span class="k">def</span> <span class="nf">_lnu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A prototype private method used during integration. This should be</span>
-<span class="sd">        overloaded by child classes!</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate the unnormalised spectrum.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">UnimplementedFunctionality</span><span class="p">(</span>
             <span class="s2">&quot;EmissionBase should not be instantiated directly!&quot;</span>
             <span class="s2">&quot; Instead use one to child models (Blackbody, Greybody, Casey12).&quot;</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="EmissionBase.normalisation">
-<a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.EmissionBase.normalisation">[docs]</a>
-    <span class="k">def</span> <span class="nf">normalisation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Provide normalisation of _lnu by integrating the function from 8-&gt;1000</span>
-<span class="sd">        um.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span>
-            <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span>
-            <span class="n">c</span> <span class="o">/</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">um</span><span class="p">),</span>
-            <span class="n">full_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
-
-
 <div class="viewcode-block" id="EmissionBase.get_spectra">
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.EmissionBase.get_spectra">[docs]</a>
     <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">_lam</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
         <span class="n">intrinsic_sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">attenuated_sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -625,7 +625,7 @@
 <span class="sd">        Return the normalised lnu for the provided wavelength grid.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            _lam (float/array-like, float)</span>
+<span class="sd">            lam (float/array-like, float)</span>
 <span class="sd">                An array of wavelengths (expected in AA, global unit)</span>
 <span class="sd">            intrinsic_sed (Sed)</span>
 <span class="sd">                The intrinsic SED to scale with dust.</span>
@@ -635,7 +635,7 @@
         <span class="c1"># If we haven&#39;t been given spectra to scale with dust just return the</span>
         <span class="c1"># spectra</span>
         <span class="k">if</span> <span class="n">intrinsic_sed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attenuated_sed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">_lam</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="c1"># If we have been given spectra to scale with dust, we need to scale</span>
         <span class="c1"># the dust spectra to the bolometric luminosity of the input spectra</span>
@@ -669,45 +669,43 @@
         <span class="k">if</span> <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">_lam</span><span class="p">)</span><span class="o">.</span><span class="n">_lnu</span>
-                <span class="o">*</span> <span class="n">erg</span>
-                <span class="o">/</span> <span class="n">s</span>
-                <span class="o">/</span> <span class="n">Hz</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">lnu</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
                     <span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;erg/s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
                 <span class="p">)</span>
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">_lam</span><span class="p">)</span><span class="o">.</span><span class="n">_lnu</span>
-                <span class="o">*</span> <span class="n">erg</span>
-                <span class="o">/</span> <span class="n">s</span>
-                <span class="o">/</span> <span class="n">Hz</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">lnu</span>
             <span class="p">)</span>
 
         <span class="c1"># Create new Sed object containing dust emission spectra</span>
-        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="n">_lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">_lam</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">unyt_array</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sed</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">:</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sed</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the normalised lnu for the provided wavelength grid.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            _lam (float/array-like, float)</span>
+<span class="sd">            lam (float/array-like, float)</span>
 <span class="sd">                    An array of wavelengths (expected in AA, global unit)</span>
 
+<span class="sd">        Returns:</span>
+<span class="sd">            lnu (unyt_array)</span>
+<span class="sd">                The spectral luminosity density.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span>
+        <span class="c1"># Ensure we have units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Wavelength must be a given with units. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(type(lam)=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">lam</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
 
-        <span class="n">lnu</span> <span class="o">=</span> <span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalisation</span><span class="p">()</span>
+        <span class="c1"># Get frequencies</span>
+        <span class="n">nu</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">Hz</span><span class="p">)</span>
 
-        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">lnu</span><span class="p">)</span>
+        <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">(</span><span class="n">nu</span><span class="p">))</span>
 
         <span class="c1"># Normalise the spectrum</span>
         <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
@@ -721,7 +719,7 @@
 
 <div class="viewcode-block" id="EmissionBase.apply_cmb_heating">
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.EmissionBase.apply_cmb_heating">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply_cmb_heating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">apply_cmb_heating</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emissivity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the factor by which the CMB boosts the infrared luminosity.</span>
 
@@ -730,17 +728,17 @@
 <span class="sd">        Args:</span>
 <span class="sd">            emissivity (float)</span>
 <span class="sd">                The emissivity index in the FIR (no unit)</span>
-<span class="sd">            z (float)</span>
+<span class="sd">            redshift (float)</span>
 <span class="sd">                The redshift of the galaxy</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Temperature of CMB at z=0</span>
+        <span class="c1"># Temperature of CMB at redshift=0</span>
         <span class="n">_T_cmb_0</span> <span class="o">=</span> <span class="mf">2.73</span> <span class="o">*</span> <span class="n">K</span>
-        <span class="n">_T_cmb_z</span> <span class="o">=</span> <span class="n">_T_cmb_0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span>
+        <span class="n">_T_cmb_redshift</span> <span class="o">=</span> <span class="n">_T_cmb_0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">redshift</span><span class="p">)</span>
         <span class="n">_exp_factor</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">+</span> <span class="n">emissivity</span>
 
         <span class="n">_temperature</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="o">**</span><span class="n">_exp_factor</span>
-            <span class="o">+</span> <span class="n">_T_cmb_z</span><span class="o">**</span><span class="n">_exp_factor</span>
+            <span class="o">+</span> <span class="n">_T_cmb_redshift</span><span class="o">**</span><span class="n">_exp_factor</span>
             <span class="o">-</span> <span class="n">_T_cmb_0</span><span class="o">**</span><span class="n">_exp_factor</span>
         <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">_exp_factor</span><span class="p">)</span>
 
@@ -759,21 +757,29 @@
 <span class="k">class</span> <span class="nc">Blackbody</span><span class="p">(</span><span class="n">EmissionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to generate a blackbody emission spectrum.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        temperature (float)</span>
+<span class="sd">            The temperature of the dust.</span>
+<span class="sd">        cmb_heating (bool)</span>
+<span class="sd">            Option for adding heating by CMB.</span>
+<span class="sd">        redshift (float)</span>
+<span class="sd">            Redshift.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">temperature</span><span class="p">:</span> <span class="n">unyt_quantity</span>
     <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">temperature</span><span class="p">:</span> <span class="n">unyt_quantity</span><span class="p">,</span>
         <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A function to generate a simple blackbody spectrum.</span>
+<span class="sd">        Generate a simple blackbody spectrum.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            temperature (unyt_array)</span>
@@ -782,20 +788,20 @@
 <span class="sd">            cmb_heating (bool)</span>
 <span class="sd">                Option for adding heating by CMB</span>
 
-<span class="sd">            z (float)</span>
+<span class="sd">            redshift (float)</span>
 <span class="sd">                Redshift of the galaxy</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
-        <span class="c1"># emmissivity of true blackbody is 1</span>
+        <span class="c1"># Emmissivity of true blackbody is 1</span>
         <span class="n">emissivity</span> <span class="o">=</span> <span class="mf">1.0</span>
 
+        <span class="c1"># Are we adding heating by the CMB?</span>
         <span class="k">if</span> <span class="n">cmb_heating</span><span class="p">:</span>
-            <span class="c1"># calculate the factor by which the CMB boosts the</span>
+            <span class="c1"># Calculate the factor by which the CMB boosts the</span>
             <span class="c1"># infrared luminosity</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">temperature_z</span> <span class="o">=</span> <span class="n">temperature</span>
 
@@ -812,6 +818,17 @@
 <span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure we have units on nu</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Frequency must be a given with units. (type(nu)=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Ensure we have the correct units on nu</span>
+        <span class="k">if</span> <span class="n">nu</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">Hz</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Frequency must be given in Hz.&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span></div>
 
@@ -826,19 +843,16 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        emissivity (float)</span>
 <span class="sd">            The emissivity of the dust (dimensionless).</span>
-
 <span class="sd">        cmb_heating (bool)</span>
 <span class="sd">            Option for adding heating by CMB</span>
-
-<span class="sd">        z (float)</span>
+<span class="sd">        redshift (float)</span>
 <span class="sd">            Redshift of the galaxy</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">temperature</span><span class="p">:</span> <span class="n">unyt_quantity</span>
     <span class="n">emissivity</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -846,7 +860,7 @@
         <span class="n">temperature</span><span class="p">:</span> <span class="n">unyt_quantity</span><span class="p">,</span>
         <span class="n">emissivity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the dust emission model.</span>
@@ -854,24 +868,20 @@
 <span class="sd">        Args:</span>
 <span class="sd">            temperature (unyt_array)</span>
 <span class="sd">                The temperature of the dust.</span>
-
 <span class="sd">            emissivity (float)</span>
 <span class="sd">                The Emissivity (dimensionless).</span>
-
 <span class="sd">            cmb_heating (bool)</span>
 <span class="sd">                Option for adding heating by CMB</span>
-
-<span class="sd">            z (float)</span>
+<span class="sd">            redshift (float)</span>
 <span class="sd">                Redshift of the galaxy</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
+        <span class="c1"># Are we adding heating by the CMB?</span>
         <span class="k">if</span> <span class="n">cmb_heating</span><span class="p">:</span>
-            <span class="c1"># calculate the factor by which the CMB boosts the</span>
+            <span class="c1"># Calculate the factor by which the CMB boosts the</span>
             <span class="c1"># infrared luminosity</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">temperature_z</span> <span class="o">=</span> <span class="n">temperature</span>
 
@@ -891,8 +901,19 @@
 <span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Ensure we have units on nu</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Frequency must be a given with units. (type(nu)=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">nu</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">*</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span></div>
+        <span class="c1"># Ensure we have the correct units on nu</span>
+        <span class="k">if</span> <span class="n">nu</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">Hz</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+                <span class="s2">&quot;Frequency must be given in Hz.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">nu</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span> <span class="o">*</span> <span class="n">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span></div>
 
 
 
@@ -901,33 +922,26 @@
 <span class="k">class</span> <span class="nc">Casey12</span><span class="p">(</span><span class="n">EmissionBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class to generate a dust emission spectrum using the Casey (2012) model.</span>
+
 <span class="sd">    https://ui.adsabs.harvard.edu/abs/2012MNRAS.425.3094C/abstract</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        emissivity (float)</span>
 <span class="sd">            The emissivity of the dust (dimensionless).</span>
-
 <span class="sd">        alpha (float)</span>
 <span class="sd">            The power-law slope (dimensionless)  [good value = 2.0].</span>
-
 <span class="sd">        n_bb (float)</span>
 <span class="sd">            Normalisation of the blackbody component [default 1.0].</span>
-
 <span class="sd">        lam_0 (float)</span>
 <span class="sd">            Wavelength where the dust optical depth is unity.</span>
-
 <span class="sd">        lam_c (float)</span>
 <span class="sd">            The power law turnover wavelength.</span>
-
 <span class="sd">        n_pl (float)</span>
 <span class="sd">            The power law normalisation.</span>
-
 <span class="sd">        cmb_heating (bool)</span>
 <span class="sd">                Option for adding heating by CMB</span>
-
-<span class="sd">        z (float)</span>
+<span class="sd">        redshift (float)</span>
 <span class="sd">            Redshift of the galaxy</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">temperature</span><span class="p">:</span> <span class="n">unyt_quantity</span>
@@ -936,7 +950,7 @@
     <span class="n">N_bb</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">lam_0</span><span class="p">:</span> <span class="n">unyt_quantity</span>
     <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span>
 
     <span class="nd">@accepts</span><span class="p">(</span><span class="n">temperature</span><span class="o">=</span><span class="n">temperature_dim</span><span class="p">)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -947,42 +961,36 @@
         <span class="n">N_bb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
         <span class="n">lam_0</span><span class="p">:</span> <span class="n">unyt_quantity</span> <span class="o">=</span> <span class="mf">200.0</span> <span class="o">*</span> <span class="n">um</span><span class="p">,</span>
         <span class="n">cmb_heating</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">redshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the dust emission model.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            lam (unyt_array)</span>
 <span class="sd">                The wavelengths at which to calculate the emission.</span>
-
 <span class="sd">            temperature (unyt_array)</span>
 <span class="sd">                The temperature of the dust.</span>
-
 <span class="sd">            emissivity (float)</span>
 <span class="sd">                The emissivity (dimensionless) [good value = 1.6].</span>
-
 <span class="sd">            alpha (float)</span>
 <span class="sd">                The power-law slope (dimensionless)  [good value = 2.0].</span>
-
 <span class="sd">            n_bb (float)</span>
 <span class="sd">                Normalisation of the blackbody component [default 1.0].</span>
-
 <span class="sd">            lam_0 (float)</span>
 <span class="sd">                Wavelength where the dust optical depth is unity.</span>
-
 <span class="sd">            cmb_heating (bool)</span>
 <span class="sd">                Option for adding heating by CMB</span>
-
-<span class="sd">            z (float)</span>
+<span class="sd">            redshift (float)</span>
 <span class="sd">                Redshift of the galaxy</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">EmissionBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
 
+        <span class="c1"># Are we adding heating by the CMB?</span>
         <span class="k">if</span> <span class="n">cmb_heating</span><span class="p">:</span>
-            <span class="c1"># calculate the factor by which the CMB boosts the</span>
+            <span class="c1"># Calculate the factor by which the CMB boosts the</span>
             <span class="c1"># infrared luminosity</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">apply_cmb_heating</span><span class="p">(</span><span class="n">emissivity</span><span class="o">=</span><span class="n">emissivity</span><span class="p">,</span> <span class="n">redshift</span><span class="o">=</span><span class="n">redshift</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">temperature_z</span> <span class="o">=</span> <span class="n">temperature</span>
 
@@ -1007,7 +1015,6 @@
 
         <span class="c1"># See Casey+2012, Table 1 for the expression</span>
         <span class="c1"># Missing factors of lam_c and c in some places</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">n_pl</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span>
             <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="n">emissivity</span><span class="p">)))</span>
@@ -1029,11 +1036,11 @@
 <span class="sd">                The unnormalised spectral luminosity density.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Essential, when using scipy.integrate, since</span>
-        <span class="c1"># the integration limits are passed unitless</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
-            <span class="n">nu</span> <span class="o">*=</span> <span class="n">Hz</span>
+        <span class="c1"># Ensure we have units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Frequency must be a given with units. (type(nu)=</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">nu</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Define a function to calcualate the power-law component.</span>
         <span class="k">def</span> <span class="nf">_power_law</span><span class="p">(</span><span class="n">lam</span><span class="p">:</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1045,9 +1052,14 @@
 <span class="sd">                    The wavelengths at which to calculate lnu.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_pl</span>
-                <span class="o">*</span> <span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span>
-                <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">n_pl</span>
+                    <span class="o">*</span> <span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">))</span>
+                    <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">lam</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam_c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                <span class="o">*</span> <span class="n">erg</span>
+                <span class="o">/</span> <span class="n">s</span>
+                <span class="o">/</span> <span class="n">Hz</span>
             <span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">_blackbody</span><span class="p">(</span><span class="n">lam</span><span class="p">:</span> <span class="n">unyt_array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">unyt_array</span><span class="p">:</span>
@@ -1059,10 +1071,15 @@
 <span class="sd">                    The wavelengths at which to calculate lnu.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span><span class="p">)))</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
-                <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lam</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">N_bb</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">lam_0</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">emissivity</span><span class="p">)))</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">lam</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span>
+                    <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">lam</span> <span class="o">*</span> <span class="n">kb</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">value</span>
+                <span class="o">*</span> <span class="n">erg</span>
+                <span class="o">/</span> <span class="n">s</span>
+                <span class="o">/</span> <span class="n">Hz</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">_power_law</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span> <span class="o">+</span> <span class="n">_blackbody</span><span class="p">(</span><span class="n">c</span> <span class="o">/</span> <span class="n">nu</span><span class="p">)</span></div>
@@ -1201,7 +1218,7 @@
         <span class="n">umins</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">umin</span>
         <span class="n">alphas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">alpha</span>
 
-        <span class="c1"># default Umax=1e7</span>
+        <span class="c1"># Default Umax=1e7</span>
         <span class="n">umax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e7</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">MH</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1209,7 +1226,7 @@
                 <span class="s2">&quot;No hydrogen gas mass provided, assuming a&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;dust-to-gas ratio of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dgr</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="c1"># calculate MH: Mass in hydrogen gas</span>
+            <span class="c1"># Calculate MH: Mass in hydrogen gas</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">MH</span> <span class="o">=</span> <span class="mf">0.74</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdust</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dgr</span>
 
         <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">umin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">==</span> <span class="mf">2.0</span><span class="p">):</span>
@@ -1253,18 +1270,18 @@
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.IR_templates.get_spectra">[docs]</a>
     <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">_lam</span><span class="p">,</span>
+        <span class="n">lam</span><span class="p">,</span>
         <span class="n">intrinsic_sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">attenuated_sed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dust_components</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the lnu for the provided wavelength grid</span>
+<span class="sd">        Return the lnu for the provided wavelength grid.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            _lam (float/array-like, float)</span>
-<span class="sd">                    An array of wavelengths (expected in AA, global unit)</span>
+<span class="sd">            lam (float/array-like, float)</span>
+<span class="sd">                    An array of wavelengths.</span>
 <span class="sd">            intrinsic_sed (Sed)</span>
 <span class="sd">                The intrinsic SED to scale with dust.</span>
 <span class="sd">            attenuated_sed (Sed)</span>
@@ -1273,7 +1290,7 @@
 <span class="sd">                    If True, returns the constituent dust components</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="c1"># Calculate the dust luminosity</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">==</span> <span class="s2">&quot;DL07&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using the Draine &amp; Li 2007 dust models&quot;</span><span class="p">)</span>
@@ -1296,12 +1313,13 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="si">}</span><span class="s2"> not a valid model!&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_lam</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lam</span> <span class="o">=</span> <span class="n">_lam</span> <span class="o">*</span> <span class="n">Angstrom</span>
+        <span class="c1"># Ensure wavelengths have units</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+                <span class="s2">&quot;Wavelength must be a given with units.&quot;</span>
+            <span class="p">)</span>
 
-        <span class="c1"># interpret the dust spectra for the given</span>
+        <span class="c1"># Interpret the dust spectra for the given</span>
         <span class="c1"># wavelength range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">interp_spectra</span><span class="p">(</span><span class="n">new_lam</span><span class="o">=</span><span class="n">lam</span><span class="p">)</span>
         <span class="n">lnu_old</span> <span class="o">=</span> <span class="p">(</span>
@@ -1338,11 +1356,12 @@
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.u_mean_magdis12">[docs]</a>
 <span class="k">def</span> <span class="nf">u_mean_magdis12</span><span class="p">(</span><span class="n">mdust</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ldust</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p0</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the mean radiation field heating the dust.</span>
+
 <span class="sd">    P0 value obtained from stacking analysis in Magdis+12</span>
 <span class="sd">    For alpha=2.0</span>
 <span class="sd">    https://ui.adsabs.harvard.edu/abs/2012ApJ...760....6M/abstract</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="n">ldust</span> <span class="o">/</span> <span class="p">(</span><span class="n">p0</span> <span class="o">*</span> <span class="n">mdust</span><span class="p">)</span></div>
 
 
@@ -1351,9 +1370,10 @@
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.u_mean">[docs]</a>
 <span class="k">def</span> <span class="nf">u_mean</span><span class="p">(</span><span class="n">umin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">umax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the mean radiation field heating the dust.</span>
+
 <span class="sd">    For fixed alpha=2.0, get &lt;U&gt; for Draine and Li model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="n">umin</span> <span class="o">+</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">umax</span> <span class="o">/</span> <span class="n">umin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
         <span class="n">umin</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">umax</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">)</span></div>
@@ -1364,9 +1384,10 @@
 <a class="viewcode-back" href="../../../../_autosummary/synthesizer.emission_models.dust.emission.html#synthesizer.emission_models.dust.emission.solve_umin">[docs]</a>
 <span class="k">def</span> <span class="nf">solve_umin</span><span class="p">(</span><span class="n">umin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">umax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">u_avg</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solve for Umin in the Draine and Li model.</span>
+
 <span class="sd">    For fixed alpha=2.0, equation to solve to &lt;U&gt; in Draine and Li</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="n">u_mean</span><span class="p">(</span><span class="n">umin</span><span class="p">,</span> <span class="n">umax</span><span class="p">,</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">-</span> <span class="n">u_avg</span></div>
 
 </pre></div>
@@ -1401,7 +1422,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=fe2891ad"></script>
+</div><script src="../../../../_static/documentation_options.js?v=cea0dbb4"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=5fa4622c"></script>

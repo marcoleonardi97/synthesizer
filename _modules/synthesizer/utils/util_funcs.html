@@ -523,7 +523,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">c</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">kb</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">import</span> <span class="nn">unyt.physical_constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
@@ -531,25 +532,48 @@
 
 <div class="viewcode-block" id="planck">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.utils.util_funcs.html#synthesizer.utils.util_funcs.planck">[docs]</a>
-<span class="k">def</span> <span class="nf">planck</span><span class="p">(</span><span class="n">nu</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">planck</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Planck&#39;s law.</span>
+<span class="sd">    Compute the planck distribution for a given frequency and temperature.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        nu (unyt_array/array-like, float)</span>
-<span class="sd">            The frequencies at which to calculate the distribution.</span>
-<span class="sd">        temperature  (float/array-like, float)</span>
-<span class="sd">            The dust temperature. Either a single value or the same size</span>
-<span class="sd">            as nu.</span>
+<span class="sd">    This function computes the spectral radiance of a black body at a given</span>
+<span class="sd">    frequency and temperature using Planck&#39;s law. The spectral radiance is</span>
+<span class="sd">    then converted to spectral luminosity density assuming a luminosity</span>
+<span class="sd">    distance of 10 pc.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        frequency (float or unyt_quantity): Frequency of the radiation in Hz.</span>
+<span class="sd">        temperature (float or unyt_quantity): Temperature in Kelvin.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        array-like, float</span>
-<span class="sd">            The values of the distribution at nu.</span>
+<span class="sd">        unyt_quantity: Spectral luminosity density in erg/s/Hz.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure we have unyt quantities</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">frequency</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="s2">&quot;Frequency must have units (e.g. Hz) to calculate Planck&#39;s law.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">temperature</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
+            <span class="s2">&quot;Temperature must have units (e.g. K) to calculate Planck&#39;s law.&quot;</span>
+        <span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">h</span> <span class="o">*</span> <span class="p">(</span><span class="n">nu</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span><span class="o">**-</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
-        <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">nu</span> <span class="o">/</span> <span class="p">(</span><span class="n">kb</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">))</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
-    <span class="p">)</span></div>
+    <span class="c1"># Ensure frequency is in Hz and temperature is in K</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">frequency</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Hz&quot;</span><span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;K&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Planck&#39;s law: B(ν, T) = (2*h*ν^3) / (c^2 * (exp(hν / kT) - 1))</span>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">frequency</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">kb</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
+    <span class="n">spectral_radiance</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">h</span> <span class="o">*</span> <span class="n">frequency</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">const</span><span class="o">.</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">exponent</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Convert from spectral radiance density to spectral luminosity density,</span>
+    <span class="c1"># here we&#39;ll assume a luminosity distance of 10 pc</span>
+    <span class="n">lnu</span> <span class="o">=</span> <span class="n">spectral_radiance</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">*</span> <span class="n">pc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># Convert the result to erg/s/Hz and return</span>
+    <span class="k">return</span> <span class="n">lnu</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span></div>
 
 
 
@@ -557,8 +581,9 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.utils.util_funcs.html#synthesizer.utils.util_funcs.has_units">[docs]</a>
 <span class="k">def</span> <span class="nf">has_units</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Check whether the passed variable has units, i.e. is a unyt_quanity or</span>
-<span class="sd">    unyt_array.</span>
+<span class="sd">    Check whether the passed variable has units.</span>
+
+<span class="sd">    This will check the argument is a unyt_quanity or unyt_array.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        x (generic variable)</span>
@@ -568,7 +593,6 @@
 <span class="sd">        bool</span>
 <span class="sd">            True if the variable has units, False otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="c1"># Do the check</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">)):</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -869,7 +893,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=fe2891ad"></script>
+</div><script src="../../../_static/documentation_options.js?v=cea0dbb4"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
