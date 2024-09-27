@@ -550,7 +550,7 @@
     <span class="n">wavelength_to_rgba</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils.integrate</span> <span class="kn">import</span> <span class="n">integrate_last_axis</span>
-<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="Sed">
@@ -593,7 +593,6 @@
     <span class="n">fnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">obsnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">obslam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
-    <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -632,9 +631,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span> <span class="o">=</span> <span class="n">lnu</span>
-
-        <span class="c1"># Prepare for bolometric luminosity calculation</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Redshift of the SED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redshift</span> <span class="o">=</span> <span class="mi">0</span>
@@ -963,6 +959,48 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">shape</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bolometric_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the bolometric luminosity of the SED with units.</span>
+
+<span class="sd">        This will integrate the SED using the trapezium method over the</span>
+<span class="sd">        final axis (which is always the wavelength axis) for an arbitrary</span>
+<span class="sd">        number of dimensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bolometric_luminosity (unyt_array)</span>
+<span class="sd">                The bolometric luminosity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the bolometric luminosity using the trapezium rule.</span>
+        <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
+        <span class="c1"># frequency. It&#39;s faster to just multiply by -1 than to reverse the</span>
+        <span class="c1"># array.</span>
+        <span class="n">integral</span> <span class="o">=</span> <span class="o">-</span><span class="n">integrate_last_axis</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nu</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Return the bolometric luminosity with units</span>
+        <span class="k">return</span> <span class="n">integral</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_bolometric_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the bolometric luminosity of the SED without units.</span>
+
+<span class="sd">        This will integrate the SED using the trapezium method over the</span>
+<span class="sd">        final axis (which is always the wavelength axis) for an arbitrary</span>
+<span class="sd">        number of dimensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bolometric_luminosity (float)</span>
+<span class="sd">                The bolometric luminosity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span><span class="o">.</span><span class="n">value</span>
+
 <div class="viewcode-block" id="Sed.get_lnu_at_nu">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_lnu_at_nu">[docs]</a>
     <span class="k">def</span> <span class="nf">get_lnu_at_nu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1007,8 +1045,11 @@
         <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)(</span><span class="n">lam</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span></div>
 
 
-<div class="viewcode-block" id="Sed.measure_bolometric_luminosity">
-<a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_bolometric_luminosity">[docs]</a>
+    <span class="nd">@deprecated</span><span class="p">(</span>
+        <span class="n">message</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Deprecated in favour of bolometric_luminosity propery method&quot;</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_bolometric_luminosity</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
@@ -1035,11 +1076,8 @@
 <span class="sd">                If `integration_method` is an incompatible option an error</span>
 <span class="sd">                is raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
-        <span class="c1"># Don&#39;t duplicate the calculation if we already have it</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># Calculate the bolometric luminosity</span>
         <span class="c1"># NOTE: the integration is done &quot;backwards&quot; when integrating over</span>
@@ -1053,11 +1091,7 @@
         <span class="p">)</span>
         <span class="n">toc</span><span class="p">(</span><span class="s2">&quot;Calculating bolometric luminosity&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
 
-        <span class="c1"># Assign the integral to the bolometric luminosity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">integral</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bolometric_luminosity</span></div>
-
+        <span class="k">return</span> <span class="n">integral</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lnu</span><span class="o">.</span><span class="n">units</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">nu</span><span class="o">.</span><span class="n">units</span>
 
 <div class="viewcode-block" id="Sed.measure_window_luminosity">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>
@@ -2587,7 +2621,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=aa113c4e"></script>
+</div><script src="../../_static/documentation_options.js?v=79317d90"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

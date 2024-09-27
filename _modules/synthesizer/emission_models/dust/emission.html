@@ -641,10 +641,6 @@
         <span class="c1"># the dust spectra to the bolometric luminosity of the input spectra</span>
         <span class="c1"># and then add the input spectra to the dust spectra</span>
         <span class="k">elif</span> <span class="n">intrinsic_sed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attenuated_sed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Measure bolometric luminosities</span>
-            <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-            <span class="n">attenuated_sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-
             <span class="c1"># Calculate the bolometric dust luminosity as the difference</span>
             <span class="c1"># between the intrinsic and attenuated</span>
             <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
@@ -655,7 +651,6 @@
         <span class="c1"># If we only have the intrinsic SED, we can just scale the emission</span>
         <span class="k">elif</span> <span class="n">intrinsic_sed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Measure bolometric luminosity</span>
-            <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
             <span class="n">bolometric_luminosity</span> <span class="o">=</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -708,9 +703,7 @@
         <span class="n">sed</span> <span class="o">=</span> <span class="n">Sed</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_lnu</span><span class="p">(</span><span class="n">nu</span><span class="p">))</span>
 
         <span class="c1"># Normalise the spectrum</span>
-        <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
-            <span class="n">sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
-        <span class="p">)</span>
+        <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sed</span><span class="o">.</span><span class="n">_bolometric_luminosity</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># Apply heating due to CMB, if applicable</span>
         <span class="n">sed</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmb_factor</span>
@@ -1303,8 +1296,8 @@
                 <span class="c1"># Calculate the bolometric dust luminosity as the difference</span>
                 <span class="c1"># between the intrinsic and attenuated</span>
                 <span class="n">ldust</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
-                    <span class="o">-</span> <span class="n">attenuated_sed</span><span class="o">.</span><span class="n">measure_bolometric_luminosity</span><span class="p">()</span>
+                    <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
+                    <span class="o">-</span> <span class="n">attenuated_sed</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
                 <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ldust</span> <span class="o">=</span> <span class="n">ldust</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;Lsun&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dl07</span><span class="p">()</span>
@@ -1422,7 +1415,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=aa113c4e"></script>
+</div><script src="../../../../_static/documentation_options.js?v=79317d90"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=5fa4622c"></script>
