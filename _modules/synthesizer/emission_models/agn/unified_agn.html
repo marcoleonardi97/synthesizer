@@ -554,14 +554,9 @@
 <span class="sd">        emitters (dict): The emitters used to generate the emission.</span>
 <span class="sd">        model (UnifiedAGN): The Unified AGN model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># Handle lines and spectra differently</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">emission</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">emission</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">Sed</span><span class="p">):</span>
-        <span class="c1"># Get the isotropic bolometric luminosity</span>
-        <span class="n">emission</span><span class="p">[</span><span class="s2">&quot;disc_incident_isotropic&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">bolometric_luminosity</span>
-        <span class="n">isotropic_bolo_lum</span> <span class="o">=</span> <span class="n">emission</span><span class="p">[</span>
-            <span class="s2">&quot;disc_incident_isotropic&quot;</span>
-        <span class="p">]</span><span class="o">.</span><span class="n">_bolometric_luminosity</span>
-
         <span class="c1"># Scale the spectra</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="n">emission</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Get the model</span>
@@ -575,7 +570,7 @@
             <span class="n">emitter</span> <span class="o">=</span> <span class="n">emitters</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">emitter</span><span class="p">]</span>
 
             <span class="c1"># Get the scaling</span>
-            <span class="n">scaling</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">_bolometric_luminosity</span> <span class="o">/</span> <span class="n">isotropic_bolo_lum</span>
+            <span class="n">scaling</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">_bolometric_luminosity</span>
 
             <span class="c1"># Scale the spectra</span>
             <span class="k">if</span> <span class="n">spectra</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">scaling</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -591,6 +586,16 @@
                 <span class="n">spectra</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">=</span> <span class="n">spectra</span><span class="o">.</span><span class="n">_lnu</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">scaling</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
+        <span class="n">disc_bolometric_luminosity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">emitters</span><span class="p">[</span><span class="s2">&quot;blackhole&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;disc_incident_isotropic&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">_bolometric_luminosity</span>
+        <span class="p">)</span>
+        <span class="n">blackhole_bolometric_luminosity</span> <span class="o">=</span> <span class="n">emitters</span><span class="p">[</span>
+            <span class="s2">&quot;blackhole&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">_bolometric_luminosity</span>
+        <span class="n">scaling</span> <span class="o">=</span> <span class="n">blackhole_bolometric_luminosity</span> <span class="o">/</span> <span class="n">disc_bolometric_luminosity</span>
+
         <span class="c1"># Loop over the different emissions</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">line_collection</span> <span class="ow">in</span> <span class="n">emission</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Get the model</span>
@@ -603,16 +608,11 @@
             <span class="c1"># Get the emitter</span>
             <span class="n">emitter</span> <span class="o">=</span> <span class="n">emitters</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">emitter</span><span class="p">]</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="n">line_collection</span><span class="p">)</span>
+            <span class="c1"># Get the scaling</span>
+            <span class="n">scaling</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">_bolometric_luminosity</span>
 
             <span class="c1"># Loop over the lines</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">line_collection</span><span class="p">:</span>
-                <span class="c1"># Get the continuum of the isotropic disc emission</span>
-                <span class="n">isotropic_continuum</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">_continuum</span>
-
-                <span class="c1"># Get the scaling</span>
-                <span class="n">scaling</span> <span class="o">=</span> <span class="n">emitter</span><span class="o">.</span><span class="n">_bolometric_luminosity</span> <span class="o">/</span> <span class="n">isotropic_continuum</span>
-
                 <span class="c1"># Scale the line</span>
                 <span class="n">line</span><span class="o">.</span><span class="n">_luminosity</span> <span class="o">*=</span> <span class="n">scaling</span>
                 <span class="n">line</span><span class="o">.</span><span class="n">_continuum</span> <span class="o">*=</span> <span class="n">scaling</span>
@@ -911,7 +911,7 @@
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=cd1f6e8c"></script>
+</div><script src="../../../../_static/documentation_options.js?v=b0458ca7"></script>
     <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/scripts/furo.js?v=5fa4622c"></script>
