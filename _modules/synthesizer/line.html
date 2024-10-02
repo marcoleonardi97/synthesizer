@@ -356,6 +356,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.ascii_table.html">synthesizer.ascii_table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
@@ -533,11 +534,11 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Angstrom</span><span class="p">,</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">s</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span><span class="p">,</span> <span class="n">line_ratios</span>
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span><span class="p">,</span> <span class="n">standard_to_vacuum</span>
-<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">accepts</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecation</span>
 
 
@@ -1135,21 +1136,23 @@
     <span class="n">luminosity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">flux</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
+    <span class="nd">@accepts</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span>
+        <span class="n">luminosity</span><span class="o">=</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+        <span class="n">continuum</span><span class="o">=</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="o">*</span><span class="n">lines</span><span class="p">,</span>
         <span class="n">line_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">wavelength</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">luminosity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">continuum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">combine_lines</span><span class="o">=</span><span class="p">(),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the Line object.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            lines (Line)</span>
-<span class="sd">                Any number of Line objects to combine into a single Line. If</span>
-<span class="sd">                these are passed all other kwargs are ignored.</span>
 <span class="sd">            line_id (str)</span>
 <span class="sd">                The id of the line. If creating a &gt;=doublet the line id will be</span>
 <span class="sd">                derived while combining lines. This will not be used if lines</span>
@@ -1163,6 +1166,9 @@
 <span class="sd">            continuum (unyt_quantity)</span>
 <span class="sd">                The continuum at the line. This will not be used if</span>
 <span class="sd">                lines are passed.</span>
+<span class="sd">            combine_lines (tuple, Line)</span>
+<span class="sd">                Any number of Line objects to combine into a single Line. If</span>
+<span class="sd">                these are passed all other kwargs are ignored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Flag deprecation of list and tuple ids</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
@@ -1174,7 +1180,7 @@
         <span class="c1"># We need to check which version of the inputs we&#39;ve been given, 3</span>
         <span class="c1"># values describing a single line or a set of lines to combine?</span>
         <span class="k">if</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">combine_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="ow">and</span> <span class="n">line_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">wavelength</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">luminosity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -1186,8 +1192,8 @@
                 <span class="n">luminosity</span><span class="p">,</span>
                 <span class="n">continuum</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_make_line_from_lines</span><span class="p">(</span><span class="o">*</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">combine_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_line_from_lines</span><span class="p">(</span><span class="n">combine_lines</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
                 <span class="s2">&quot;A Line needs either its wavelength, luminosity, and continuum&quot;</span>
@@ -1196,7 +1202,9 @@
 
         <span class="c1"># Initialise an attribute to hold any individual lines used to make</span>
         <span class="c1"># this one.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">individual_lines</span> <span class="o">=</span> <span class="n">lines</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">individual_lines</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">combine_lines</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">combine_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="c1"># Initialise the flux (populated by get_flux when called)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flux</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1217,6 +1225,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the equivalent width.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuum_llam</span>
 
+    <span class="nd">@accepts</span><span class="p">(</span>
+        <span class="n">wavelength</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span>
+        <span class="n">luminosity</span><span class="o">=</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+        <span class="n">continuum</span><span class="o">=</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">def</span> <span class="nf">_make_line_from_values</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">line_id</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">luminosity</span><span class="p">,</span> <span class="n">continuum</span>
     <span class="p">):</span>
@@ -1233,35 +1246,18 @@
 <span class="sd">            continuum (unyt_quantity)</span>
 <span class="sd">                The continuum of the line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Ensure we have units</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wavelength</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
-                <span class="s2">&quot;Wavelength, luminosity, and continuum must all have units. &quot;</span>
-                <span class="s2">&quot;Wavelength units missing...&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">luminosity</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
-                <span class="s2">&quot;Wavelength, luminosity, and continuum must all have units. &quot;</span>
-                <span class="s2">&quot;Luminosity units missing...&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">continuum</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_quantity</span><span class="p">,</span> <span class="n">unyt_array</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
-                <span class="s2">&quot;Wavelength, luminosity, and continuum must all have units. &quot;</span>
-                <span class="s2">&quot;Continuum units missing...&quot;</span>
-            <span class="p">)</span>
-
         <span class="c1"># Set the line attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">wavelength</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">=</span> <span class="n">luminosity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span> <span class="o">=</span> <span class="n">continuum</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">get_line_id</span><span class="p">(</span><span class="n">line_id</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_make_line_from_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">lines</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_make_line_from_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a line by combining other lines.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            lines (Line)</span>
+<span class="sd">            lines (tuple, Line)</span>
 <span class="sd">                Any number of Line objects to combine into a single line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Ensure we&#39;ve been handed lines</span>
@@ -1274,9 +1270,9 @@
 
         <span class="c1"># Combine the Line attributes (units are guaranteed here since the</span>
         <span class="c1"># quantities are coming directly from a Line)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">_wavelength</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">_luminosity</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">_continuum</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">wavelength</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">luminosity</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">continuum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">continuum</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
         <span class="c1"># Derive the line id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">get_line_id</span><span class="p">([</span><span class="n">line</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">])</span>
@@ -1340,7 +1336,7 @@
 <span class="sd">            (Line)</span>
 <span class="sd">                New instance of Line containing both lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">combine_lines</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">second_line</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Line.sum">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.Line.sum">[docs]</a>
@@ -1387,7 +1383,7 @@
 
 <div class="viewcode-block" id="Line.combine">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.line.html#synthesizer.line.Line.combine">[docs]</a>
-    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">lines</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Combine this line with an arbitrary number of other lines.</span>
 
@@ -1411,7 +1407,7 @@
                 <span class="s2">&quot;continuum&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">lines</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">combine_lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Line.apply_attenuation">
@@ -1467,7 +1463,7 @@
                 <span class="p">)</span>
 
         <span class="c1"># Compute the transmission</span>
-        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wavelength</span><span class="p">)</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wavelength</span><span class="p">)</span>
 
         <span class="c1"># Apply the transmision</span>
         <span class="n">att_lum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">luminosity</span>
@@ -1519,7 +1515,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1ed73b47"></script>
+</div><script src="../../_static/documentation_options.js?v=4fbc2340"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

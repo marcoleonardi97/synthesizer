@@ -48,9 +48,9 @@ galaxy.
     Angular momentum before rotation: [-1.00567885e+26 -2.20430946e+25  4.19491538e+28] Msun*km**2/s
     Rotating stars by phi=269.3947684040967 degree, theta=156.37630149658568 degree
     Angular momentum after rotation: [ 1.68294228e+28  1.00795118e+26 -3.84252843e+28] Msun*km**2/s
-    Angular momentum of face-on stars: [ 2.14705883e+13  2.21818442e+11 -4.19492802e+28] Msun*km**2/s
-    Angular momentum of edge-on stars: [4.19492802e+28 2.20022341e+11 2.13852735e+13] Msun*km**2/s
-    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:120: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
+    Angular momentum of face-on stars: [ 2.13735988e+13  1.07766045e+11 -4.19492802e+28] Msun*km**2/s
+    Angular momentum of edge-on stars: [4.19492802e+28 1.08664095e+11 2.13771910e+13] Msun*km**2/s
+    /home/runner/work/synthesizer/synthesizer/src/synthesizer/particle/galaxy.py:122: RuntimeWarning: Star forming gas particle mask not provided, setting sf_gas_mass and sf_gas_metallicity to `None`
       self.calculate_integrated_gas_properties()
     Rotating galaxy by phi=245.64543353442713 degree, theta=23.225201431032307 degree
 
@@ -67,7 +67,7 @@ galaxy.
     import matplotlib.pyplot as plt
     import numpy as np
     from scipy.spatial import cKDTree
-    from unyt import Myr, degree, kpc
+    from unyt import Msun, Myr, degree, km, kpc, s
 
     from synthesizer.kernel_functions import Kernel
     from synthesizer.particle import CoordinateGenerator, Galaxy, Gas, Stars
@@ -120,16 +120,16 @@ galaxy.
     disk_velocities[:, 0] = -vrot * np.sin(angles)  # Tangential velocity in x
     disk_velocities[:, 1] = vrot * np.cos(angles)  # Tangential velocity in y
     bulge_velocities = np.random.normal(0, sigma_bulge, size=(n_bulge, 3))
-    velocities = np.vstack([disk_velocities, bulge_velocities])
+    velocities = np.vstack([disk_velocities, bulge_velocities]) * km / s
 
 
     # Define the other properties we'll need
-    masses = np.ones(n_disk + n_bulge) * 1e6
+    masses = np.ones(n_disk + n_bulge) * 1e6 * Msun
     ages = np.random.rand(n_disk + n_bulge) * 100 * Myr
     metallicities = np.random.rand(n_disk + n_bulge) * 0.02
     initial_masses = masses.copy()
     redshift = 0.0
-    centre = np.array([0.0, 0.0, 0.0])
+    centre = np.array([0.0, 0.0, 0.0]) * kpc
     smoothing_lengths = calculate_smoothing_lengths(coords) * kpc
 
     # We'll start by simply using some stars
@@ -190,9 +190,9 @@ galaxy.
             [0, 0, 30.0],  # Larger spread in z direction
         ]
     )
-    gas_coords = CoordinateGenerator.generate_3D_gaussian(ngas, cov=gas_cov)
-    gas_velocities = np.random.normal(0, 50, size=(ngas, 3))
-    gas_masses = np.ones(ngas) * 1e6
+    gas_coords = CoordinateGenerator.generate_3D_gaussian(ngas, cov=gas_cov) * kpc
+    gas_velocities = np.random.normal(0, 50, size=(ngas, 3)) * km / s
+    gas_masses = np.ones(ngas) * 1e6 * Msun
     gas_metallcities = np.random.rand(ngas) * 0.02
     gas = Gas(
         gas_masses,
@@ -309,7 +309,7 @@ galaxy.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.753 seconds)
+   **Total running time of the script:** (0 minutes 2.747 seconds)
 
 
 .. _sphx_glr_download_auto_examples_particle_plot_rotated_galaxy.py:

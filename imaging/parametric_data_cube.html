@@ -358,6 +358,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.ascii_table.html">synthesizer.ascii_table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
@@ -527,7 +528,7 @@
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">kpc</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">Msun</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="n">IntrinsicEmission</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
@@ -545,7 +546,7 @@
 <span class="c1"># Define the grid</span>
 <span class="n">grid_name</span> <span class="o">=</span> <span class="s2">&quot;test_grid&quot;</span>
 <span class="n">grid_dir</span> <span class="o">=</span> <span class="s2">&quot;../../../tests/test_grid/&quot;</span>
-<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">600</span><span class="p">))</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">grid_name</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="n">grid_dir</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">)</span>
 
 <span class="c1"># Define the SFH and metallicity distribution</span>
 <span class="n">metal_dist</span> <span class="o">=</span> <span class="n">ZDist</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.015</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.005</span><span class="p">)</span>
@@ -566,7 +567,7 @@
     <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span>
     <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span>
     <span class="n">morphology</span><span class="o">=</span><span class="n">morph</span><span class="p">,</span>
-    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.0</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.0</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Initialise a parametric Galaxy for the bulge</span>
@@ -591,7 +592,7 @@
     <span class="n">sf_hist</span><span class="o">=</span><span class="n">sfh</span><span class="p">,</span>
     <span class="n">metal_dist</span><span class="o">=</span><span class="n">metal_dist</span><span class="p">,</span>
     <span class="n">morphology</span><span class="o">=</span><span class="n">morph</span><span class="p">,</span>
-    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.5</span><span class="p">,</span>
+    <span class="n">initial_mass</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mf">9.5</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Initialise a parametric Galaxy for the disk</span>
@@ -782,7 +783,7 @@ Data cube spatial width is 30.00 kpc with a 0.15 kpc spaxel resolution
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1ed73b47"></script>
+</div><script src="../_static/documentation_options.js?v=4fbc2340"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

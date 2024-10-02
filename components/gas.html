@@ -358,6 +358,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.ascii_table.html">synthesizer.ascii_table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
@@ -530,7 +531,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Mpc</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer.particle</span> <span class="kn">import</span> <span class="n">Gas</span>
 
@@ -562,9 +563,9 @@
 +-----------------------+------------------------------------------------------+
 | masses (1000,)        | 1.00e+06 Msun -&gt; 1.00e+06 Msun (Mean: 1.00e+06 Msun) |
 +-----------------------+------------------------------------------------------+
-| metallicities (1000,) | 1.21e-05 -&gt; 2.00e-02 (Mean: 1.00e-02)                |
+| metallicities (1000,) | 5.00e-06 -&gt; 1.99e-02 (Mean: 9.88e-03)                |
 +-----------------------+------------------------------------------------------+
-| dust_masses (1000,)   | 3.64e+00 Msun -&gt; 6.00e+03 Msun (Mean: 3.01e+03 Msun) |
+| dust_masses (1000,)   | 1.50e+00 Msun -&gt; 5.98e+03 Msun (Mean: 2.97e+03 Msun) |
 +-----------------------+------------------------------------------------------+
 </pre></div></div>
 </div>
@@ -573,8 +574,8 @@
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_3045/1285897597.py:6: RuntimeWarning: Neither dust mass nor dust to metal ratio provided. Assuming dust to metal ratio = 0.3
-  gas = Gas(
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/units.py:667: RuntimeWarning: Neither dust mass nor dust to metal ratio provided. Assuming dust to metal ratio = 0.3
+  return func(*args, **kwargs)
 </pre></div></div>
 </div>
 <p>Like all other components, a <code class="docutils literal notranslate"><span class="pre">Gas</span></code> object also supports a number of predefined kwargs including (but not limited to) <code class="docutils literal notranslate"><span class="pre">velocities</span></code>, <code class="docutils literal notranslate"><span class="pre">coordinates</span></code>, <code class="docutils literal notranslate"><span class="pre">smoothing_lengths</span></code> and <code class="docutils literal notranslate"><span class="pre">dust_masses</span></code> or <code class="docutils literal notranslate"><span class="pre">dust_to_metal_ratio</span></code>. In addition, you can also provide custom kwargs to store arbitrary properties (below we’ll intialise with some HII properties).</p>
@@ -586,9 +587,9 @@
     <span class="n">masses</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
     <span class="n">metallicities</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.02</span><span class="p">,</span>
     <span class="n">dust_to_metal_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
-    <span class="n">coordinates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="n">centre</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
-    <span class="n">hii_mass</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="o">*</span> <span class="n">Msun</span><span class="o">.</span><span class="n">in_base</span><span class="p">(</span><span class="s2">&quot;galactic&quot;</span><span class="p">),</span>
+    <span class="n">coordinates</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
+    <span class="n">centre</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">Mpc</span><span class="p">,</span>
+    <span class="n">hii_mass</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="o">*</span> <span class="n">Msun</span><span class="p">,</span>
     <span class="n">hii_metallicity</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.02</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">gas</span><span class="p">)</span>
@@ -613,19 +614,19 @@
 +-------------------------+------------------------------------------------------+
 | dust_to_metal_ratio     | 0.25                                                 |
 +-------------------------+------------------------------------------------------+
-| coordinates (1000, 3)   | 1.72e-05 Mpc -&gt; 1.00e+00 Mpc (Mean: 4.95e-01 Mpc)    |
+| coordinates (1000, 3)   | 2.68e-05 Mpc -&gt; 1.00e+00 Mpc (Mean: 5.00e-01 Mpc)    |
 +-------------------------+------------------------------------------------------+
 | masses (1000,)          | 1.00e+06 Msun -&gt; 1.00e+06 Msun (Mean: 1.00e+06 Msun) |
 +-------------------------+------------------------------------------------------+
-| centre                  | [0.50359125 0.50691591 0.50014175] Mpc               |
+| centre                  | [0.48805716 0.49798646 0.47803999] Mpc               |
 +-------------------------+------------------------------------------------------+
-| metallicities (1000,)   | 1.03e-05 -&gt; 2.00e-02 (Mean: 9.99e-03)                |
+| metallicities (1000,)   | 2.69e-05 -&gt; 2.00e-02 (Mean: 9.86e-03)                |
 +-------------------------+------------------------------------------------------+
-| dust_masses (1000,)     | 2.58e+00 Msun -&gt; 5.00e+03 Msun (Mean: 2.50e+03 Msun) |
+| dust_masses (1000,)     | 6.73e+00 Msun -&gt; 5.00e+03 Msun (Mean: 2.46e+03 Msun) |
 +-------------------------+------------------------------------------------------+
-| hii_mass (1000,)        | 2.83e+00 Msun -&gt; 9.98e+03 Msun (Mean: 5.09e+03 Msun) |
+| hii_mass (1000,)        | 2.25e+30 kg -&gt; 1.99e+34 kg (Mean: 1.01e+34 kg)       |
 +-------------------------+------------------------------------------------------+
-| hii_metallicity (1000,) | 1.47e-05 -&gt; 2.00e-02 (Mean: 9.97e-03)                |
+| hii_metallicity (1000,) | 6.10e-06 -&gt; 2.00e-02 (Mean: 1.01e-02)                |
 +-------------------------+------------------------------------------------------+
 </pre></div></div>
 </div>
@@ -652,7 +653,7 @@ explicitly, the dust-to-metal ratio is calculated but ignored in all future calc
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.4950580199752094 Mpc
+0.48519920878134765 Mpc
 </pre></div></div>
 </div>
 <p>Or use an aribtrary attribute for the radius weight. Here we’ll use the dust masses for a “half dust mass radius”.</p>
@@ -670,7 +671,7 @@ explicitly, the dust-to-metal ratio is calculated but ignored in all future calc
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.49406586071235176 Mpc
+0.48449012234475086 Mpc
 </pre></div></div>
 </div>
 <p>We can also compute radii for different fractions by passing the fraction we want to calculate a radius for.</p>
@@ -689,7 +690,7 @@ explicitly, the dust-to-metal ratio is calculated but ignored in all future calc
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.36085498729626386 Mpc 0.5937372988075369 Mpc
+0.3561609694000544 Mpc 0.5945188046245885 Mpc
 </pre></div></div>
 </div>
 </section>
@@ -768,7 +769,7 @@ explicitly, the dust-to-metal ratio is calculated but ignored in all future calc
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1ed73b47"></script>
+</div><script src="../_static/documentation_options.js?v=4fbc2340"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

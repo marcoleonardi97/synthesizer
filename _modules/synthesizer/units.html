@@ -356,6 +356,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.ascii_table.html">synthesizer.ascii_table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
@@ -541,6 +542,8 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Angstrom</span><span class="p">,</span>
     <span class="n">Hz</span><span class="p">,</span>
@@ -558,7 +561,9 @@
     <span class="n">unyt_quantity</span><span class="p">,</span>
     <span class="n">yr</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">unyt.exceptions</span> <span class="kn">import</span> <span class="n">UnitConversionError</span>
 
+<span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 <span class="c1"># Define an importable dictionary with the default unit system</span>
@@ -1005,6 +1010,198 @@
         <span class="c1"># Set the attribute</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">private_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
+
+
+<div class="viewcode-block" id="has_units">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.units.html#synthesizer.units.has_units">[docs]</a>
+<span class="k">def</span> <span class="nf">has_units</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check whether the passed variable has units.</span>
+
+<span class="sd">    This will check the argument is a unyt_quanity or unyt_array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (generic variable)</span>
+<span class="sd">            The variables to check.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if the variable has units, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Do the check</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_check_arg</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check the units of an argument.</span>
+
+<span class="sd">    This function is used to check the units of an argument passed to</span>
+<span class="sd">    a function. If the units are missing or incompatible an error will be</span>
+<span class="sd">    raised. If the units don&#39;t match the defined units in units then the values</span>
+<span class="sd">    will be converted to the correct units.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        units (dict)</span>
+<span class="sd">            The dictionary of units defined in the accepts decorator.</span>
+<span class="sd">        name (str)</span>
+<span class="sd">            The name of the argument.</span>
+<span class="sd">        value (generic variable)</span>
+<span class="sd">            The value of the argument.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        generic variable</span>
+<span class="sd">            The value of the argument with the correct units.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        MissingUnits</span>
+<span class="sd">            If the argument is missing units.</span>
+<span class="sd">        IncorrectUnits</span>
+<span class="sd">            If the argument has incompatible units.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If the argument is None just skip it, its an optional argument that</span>
+    <span class="c1"># hasn&#39;t been passed... or the user has somehow managed to pass None</span>
+    <span class="c1"># which is sufficently weird to cause an obvious error elsewhere</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Early exit if the argument isn&#39;t in the units dictionary</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="c1"># Handle the unyt_array/unyt_quantity cases</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">unyt_array</span><span class="p">,</span> <span class="n">unyt_quantity</span><span class="p">)):</span>
+        <span class="c1"># We know we have units but are they compatible?</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="k">except</span> <span class="n">UnitConversionError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> passed with incompatible units. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2"> (or equivalent) but &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Otherwise the value is in the expected units</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+    <span class="c1"># Handle the list/tuple case</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="c1"># Ensure the value is mutable</span>
+        <span class="n">converted</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># Loop over the elements of the argument checking</span>
+        <span class="c1"># they have units and those units are compatible</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="c1"># Are we missing units on the passed argument?</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is missing units! Expected&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;to be in </span><span class="si">{</span><span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="s2">&quot;(or equivalent).&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Convert to the expected units</span>
+            <span class="k">elif</span> <span class="n">v</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_check_arg</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">UnitConversionError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">@</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2"> passed with &quot;</span>
+                        <span class="s2">&quot;incompatible units. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="s2">&quot; (or equivalent) but &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">units</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Otherwise the value is in the expected units</span>
+                <span class="n">converted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">converted</span>
+
+    <span class="c1"># If None of these were true then we haven&#39;t got units.</span>
+    <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is missing units! Expected to &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;be in </span><span class="si">{</span><span class="n">units</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2"> (or equivalent).&quot;</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="accepts">
+<a class="viewcode-back" href="../../_autosummary/synthesizer.units.html#synthesizer.units.accepts">[docs]</a>
+<span class="k">def</span> <span class="nf">accepts</span><span class="p">(</span><span class="o">**</span><span class="n">units</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check arguments passed to the wrapped function have compatible units.</span>
+
+<span class="sd">    This decorator will cross check any of the arguments passed to the wrapped</span>
+<span class="sd">    function with the units defined in this decorators kwargs. If units are</span>
+<span class="sd">    not compatible or are missing an error will be raised. If the units don&#39;t</span>
+<span class="sd">    match the defined units in units then the values will be converted to the</span>
+<span class="sd">    correct units.</span>
+
+<span class="sd">    This is inspired by the accepts decorator in the unyt package, but includes</span>
+<span class="sd">    Synthesizer specific errors and conversion functionality.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        **units</span>
+<span class="sd">            The keyword arguments defined with this decorator. Each takes the</span>
+<span class="sd">            form of argument=unit_for_argument. In reality this is a</span>
+<span class="sd">            dictionary of the form {&quot;variable&quot;: unyt.unit}.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        function</span>
+<span class="sd">            The wrapped function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">check_accepts</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check arguments passed to the wrapped function have compatible units.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (function)</span>
+<span class="sd">                The function to be wrapped.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            function</span>
+<span class="sd">                The wrapped function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">arg_names</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__code__</span><span class="o">.</span><span class="n">co_varnames</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Handle all the arguments passed to the wrapped function.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                *args</span>
+<span class="sd">                    The arguments passed to the wrapped function.</span>
+<span class="sd">                **kwargs</span>
+<span class="sd">                    The keyword arguments passed to the wrapped function.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                The result of the wrapped function.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="c1"># Convert the positional arguments to a list (it must be mutable</span>
+            <span class="c1"># for what comes next)</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+            <span class="c1"># Check the positional arguments</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">arg_names</span><span class="p">,</span> <span class="n">args</span><span class="p">)):</span>
+                <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_check_arg</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="c1"># Check the keyword arguments</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_check_arg</span><span class="p">(</span><span class="n">units</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapped</span>
+
+    <span class="k">return</span> <span class="n">check_accepts</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -1037,7 +1234,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1ed73b47"></script>
+</div><script src="../../_static/documentation_options.js?v=4fbc2340"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>

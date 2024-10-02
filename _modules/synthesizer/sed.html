@@ -356,6 +356,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.abundances.reference_abundance_patterns.html">synthesizer.abundances.reference_abundance_patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.ascii_table.html">synthesizer.ascii_table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
@@ -543,10 +544,9 @@
 <span class="kn">from</span> <span class="nn">synthesizer.conversions</span> <span class="kn">import</span> <span class="n">lnu_to_llam</span>
 <span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
 <span class="kn">from</span> <span class="nn">synthesizer.photometry</span> <span class="kn">import</span> <span class="n">PhotometryCollection</span>
-<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span>
+<span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">accepts</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TableFormatter</span><span class="p">,</span>
-    <span class="n">has_units</span><span class="p">,</span>
     <span class="n">rebin_1d</span><span class="p">,</span>
     <span class="n">wavelength_to_rgba</span><span class="p">,</span>
 <span class="p">)</span>
@@ -595,6 +595,7 @@
     <span class="n">obsnu</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
     <span class="n">obslam</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">()</span>
 
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="n">erg</span> <span class="o">/</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">lnu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise a new spectral energy distribution object.</span>
@@ -609,12 +610,6 @@
 <span class="sd">            description (string)</span>
 <span class="sd">                An optional descriptive string defining the Sed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Ensure we have units</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;lam must have units.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lnu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lnu</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">MissingUnits</span><span class="p">(</span><span class="s2">&quot;lnu must have units.&quot;</span><span class="p">)</span>
-
         <span class="n">start</span> <span class="o">=</span> <span class="n">tic</span><span class="p">()</span>
 
         <span class="c1"># Set the description</span>
@@ -1004,6 +999,7 @@
 
 <div class="viewcode-block" id="Sed.get_lnu_at_nu">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_lnu_at_nu">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">nu</span><span class="o">=</span><span class="n">Hz</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_lnu_at_nu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return lnu with units at a provided frequency using 1d interpolation.</span>
@@ -1026,6 +1022,7 @@
 
 <div class="viewcode-block" id="Sed.get_lnu_at_lam">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.get_lnu_at_lam">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_lnu_at_lam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return lnu at a provided wavelength.</span>
@@ -1096,6 +1093,7 @@
 
 <div class="viewcode-block" id="Sed.measure_window_luminosity">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_luminosity">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_window_luminosity</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
@@ -1144,6 +1142,7 @@
 
 <div class="viewcode-block" id="Sed.measure_window_lnu">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_window_lnu">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_window_lnu</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
@@ -1215,6 +1214,7 @@
 
 <div class="viewcode-block" id="Sed.measure_break">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_break">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">blue</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span> <span class="n">red</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure a spectral break (e.g. the Balmer break) using two windows.</span>
@@ -1340,8 +1340,12 @@
 
 <div class="viewcode-block" id="Sed.measure_beta">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_beta">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_beta</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mf">1250.0</span><span class="p">,</span> <span class="mf">3000.0</span><span class="p">),</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">window</span><span class="o">=</span><span class="p">(</span><span class="mf">1250.0</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">,</span> <span class="mf">3000.0</span> <span class="o">*</span> <span class="n">angstrom</span><span class="p">),</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">integration_method</span><span class="o">=</span><span class="s2">&quot;trapz&quot;</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure the UV continuum slope (beta).</span>
@@ -1622,6 +1626,7 @@
 
 <div class="viewcode-block" id="Sed.measure_index">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.measure_index">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">feature</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span> <span class="n">blue</span><span class="o">=</span><span class="n">angstrom</span><span class="p">,</span> <span class="n">red</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">measure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">blue</span><span class="p">,</span> <span class="n">red</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Measure an absorption feature index.</span>
@@ -1832,7 +1837,7 @@
                 <span class="p">)</span>
 
         <span class="c1"># Compute the transmission</span>
-        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span><span class="p">)</span>
+        <span class="n">transmission</span> <span class="o">=</span> <span class="n">dust_curve</span><span class="o">.</span><span class="n">get_transmission</span><span class="p">(</span><span class="n">tau_v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
         <span class="c1"># Get a copy of the rest frame spectra, we need to avoid</span>
         <span class="c1"># modifying the original</span>
@@ -1852,6 +1857,7 @@
 
 <div class="viewcode-block" id="Sed.calculate_ionising_photon_production_rate">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.Sed.calculate_ionising_photon_production_rate">[docs]</a>
+    <span class="nd">@accepts</span><span class="p">(</span><span class="n">ionisation_energy</span><span class="o">=</span><span class="n">eV</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">calculate_ionising_photon_production_rate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">ionisation_energy</span><span class="o">=</span><span class="mf">13.6</span> <span class="o">*</span> <span class="n">eV</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span>
     <span class="p">):</span>
@@ -2488,6 +2494,7 @@
 
 <div class="viewcode-block" id="get_attenuation_at_lam">
 <a class="viewcode-back" href="../../_autosummary/synthesizer.sed.html#synthesizer.sed.get_attenuation_at_lam">[docs]</a>
+<span class="nd">@accepts</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">angstrom</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_attenuation_at_lam</span><span class="p">(</span><span class="n">lam</span><span class="p">,</span> <span class="n">intrinsic_sed</span><span class="p">,</span> <span class="n">attenuated_sed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate attenuation at a given wavelength</span>
@@ -2505,11 +2512,6 @@
 <span class="sd">        float/array-like, float</span>
 <span class="sd">            The attenuation at the passed wavelength/s in magnitudes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># Enusre we have units</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_units</span><span class="p">(</span><span class="n">lam</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">IncorrectUnits</span><span class="p">(</span><span class="s2">&quot;lam must be given with unyt units.&quot;</span><span class="p">)</span>
-
     <span class="c1"># Ensure lam is in the same units as the sed</span>
     <span class="k">if</span> <span class="n">lam</span><span class="o">.</span><span class="n">units</span> <span class="o">!=</span> <span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">:</span>
         <span class="n">lam</span> <span class="o">=</span> <span class="n">lam</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">intrinsic_sed</span><span class="o">.</span><span class="n">lam</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
@@ -2622,7 +2624,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=1ed73b47"></script>
+</div><script src="../../_static/documentation_options.js?v=4fbc2340"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
