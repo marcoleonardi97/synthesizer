@@ -360,8 +360,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -520,21 +520,23 @@
 
 <span class="sd">The class defined here should never be instantiated directly, there are only</span>
 <span class="sd">ever instantiated by the parametric/particle child classes.</span>
+<span class="sd">BlackholesComponent is a child class of Component.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">cm</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">synthesizer.components.component</span> <span class="kn">import</span> <span class="n">Component</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
-<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">accepts</span>
-<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">deprecation</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">TableFormatter</span>
+<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">warn</span>
 
 
 <div class="viewcode-block" id="BlackholesComponent">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent">[docs]</a>
-<span class="k">class</span> <span class="nc">BlackholesComponent</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">BlackholesComponent</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The parent class for stellar components of a galaxy.</span>
 
@@ -682,15 +684,8 @@
 <span class="sd">                Any other parameter for the emission models can be provided as</span>
 <span class="sd">                kwargs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Initialise spectra</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Initialise lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Intialise the photometry dictionaries</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Initialise the parent class</span>
+        <span class="n">Component</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;BlackHoles&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Save the black hole properties</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mass</span> <span class="o">=</span> <span class="n">mass</span>
@@ -725,10 +720,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">theta_torus</span> <span class="o">=</span> <span class="n">theta_torus</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">torus_fraction</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_torus</span> <span class="o">/</span> <span class="p">(</span><span class="mi">90</span> <span class="o">*</span> <span class="n">deg</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_torus_edgeon_cond</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inclination</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_torus</span>
-
-        <span class="c1"># Set any of the extra attribute provided as kwargs</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
         <span class="c1"># Check to make sure that both accretion rate and bolometric luminosity</span>
         <span class="c1"># haven&#39;t been provided because that could be confusing.</span>
@@ -796,51 +787,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cosine_inclination</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">inclination</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;radian&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
             <span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the photometry fluxes.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                The photometry fluxes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">deprecation</span><span class="p">(</span>
-            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
-            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the photometry luminosities.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                The photometry luminosities.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">deprecation</span><span class="p">(</span>
-            <span class="s2">&quot;The `photo_luminosities` attribute is deprecated. Use &quot;</span>
-            <span class="s2">&quot;`photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span>
-
-    <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This method is a prototype for generating the arguments for spectra</span>
-<span class="sd">        generation from AGN grids. It is redefined on the child classes to</span>
-<span class="sd">        handle the different attributes of parametric and particle cases.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;_prepare_sed_args should be overloaded by child classes:</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`particle.BlackHoles`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`parametric.BlackHole`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;You should not be seeing this!!!&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
 
 <div class="viewcode-block" id="BlackholesComponent.generate_lnu">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.generate_lnu">[docs]</a>
@@ -1047,47 +993,6 @@
             <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">combine_lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a basic summary of the BlackHoles object.</span>
-
-<span class="sd">        Returns a string containing the total mass formed and lists of the</span>
-<span class="sd">        available SEDs, lines, and images.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">            str</span>
-<span class="sd">                Summary string containing the total mass formed and lists</span>
-<span class="sd">                of the available SEDs, lines, and images.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Define the width to print within</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="mi">80</span>
-        <span class="n">pstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="n">width</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="s2">&quot;SUMMARY OF BLACKHOLE&quot;</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="c1"># pstr += get_centred_art(Art.blackhole, width) + &quot;\n&quot;</span>
-
-        <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;Number of blackholes: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mass</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-
-        <span class="k">for</span> <span class="n">attribute_id</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s2">&quot;mass&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;accretion_rate&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;accretion_rate_eddington&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;bolometric_luminosity&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;eddington_ratio&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;bb_temperature&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;eddington_luminosity&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;spin&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;epsilon&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;inclination&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;cosine_inclination&quot;</span><span class="p">,</span>
-        <span class="p">]:</span>
-            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">attr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-                <span class="n">pstr</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">attribute_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">attr</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span>
-
-        <span class="k">return</span> <span class="n">pstr</span>
-
 <div class="viewcode-block" id="BlackholesComponent.calculate_bolometric_luminosity">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.calculate_bolometric_luminosity">[docs]</a>
     <span class="k">def</span> <span class="nf">calculate_bolometric_luminosity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1179,393 +1084,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">accretion_rate_eddington</span></div>
 
 
-<div class="viewcode-block" id="BlackholesComponent.get_photo_lnu">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.get_photo_lnu">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
+<span class="sd">        Return a string representation of the particle object.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            photo_lnu (dict)</span>
-<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
+<span class="sd">            table (str)</span>
+<span class="sd">                A string representation of the particle object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span>
-                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
-            <span class="p">)</span>
+        <span class="c1"># Intialise the table formatter</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">TableFormatter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span></div>
-
-
-    <span class="nd">@deprecated</span><span class="p">(</span>
-        <span class="s2">&quot;The `get_photo_luminosities` method is deprecated. Use &quot;</span>
-        <span class="s2">&quot;`get_photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
-    <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
-
-<span class="sd">        Alias to get_photo_lnu.</span>
-
-<span class="sd">        Photometry is calculated in spectral luminosity density units.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            PhotometryCollection</span>
-<span class="sd">                A PhotometryCollection object containing the luminosity</span>
-<span class="sd">                photometry in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-
-<div class="viewcode-block" id="BlackholesComponent.get_photo_fnu">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.get_photo_fnu">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (object)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            (dict)</span>
-<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span>
-                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span></div>
-
-
-    <span class="nd">@deprecated</span><span class="p">(</span>
-        <span class="s2">&quot;The `get_photo_fluxes` method is deprecated. Use &quot;</span>
-        <span class="s2">&quot;`get_photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
-    <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
-
-<span class="sd">        Alias to get_photo_fnu.</span>
-
-<span class="sd">        Photometry is calculated in spectral flux density units.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (object)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            PhotometryCollection</span>
-<span class="sd">                A PhotometryCollection object containing the flux photometry</span>
-<span class="sd">                in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-
-<div class="viewcode-block" id="BlackholesComponent.plot_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.plot_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">spectra_to_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
-        <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
-        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plots either specific spectra (specified via spectra_to_plot) or all</span>
-<span class="sd">        spectra on the child Stars object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            spectra_to_plot (string/list, string)</span>
-<span class="sd">                The specific spectra to plot.</span>
-<span class="sd">                    - If None all spectra are plotted.</span>
-<span class="sd">                    - If a list of strings each specifc spectra is plotted.</span>
-<span class="sd">                    - If a single string then only that spectra is plotted.</span>
-<span class="sd">            show (bool)</span>
-<span class="sd">                Flag for whether to show the plot or just return the</span>
-<span class="sd">                figure and axes.</span>
-<span class="sd">            ylimits (tuple)</span>
-<span class="sd">                The limits to apply to the y axis. If not provided the limits</span>
-<span class="sd">                will be calculated with the lower limit set to 1000 (100)</span>
-<span class="sd">                times less than the peak of the spectrum for rest_frame</span>
-<span class="sd">                (observed) spectra.</span>
-<span class="sd">            xlimits (tuple)</span>
-<span class="sd">                The limits to apply to the x axis. If not provided the optimal</span>
-<span class="sd">                limits are found based on the ylimits.</span>
-<span class="sd">            figsize (tuple)</span>
-<span class="sd">                Tuple with size 2 defining the figure size.</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                arguments to the `sed.plot_spectra` method called from this</span>
-<span class="sd">                wrapper</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            fig (matplotlib.pyplot.figure)</span>
-<span class="sd">                The matplotlib figure object for the plot.</span>
-<span class="sd">            ax (matplotlib.axes)</span>
-<span class="sd">                The matplotlib axes object containing the plotted data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Handling whether we are plotting all spectra, specific spectra, or</span>
-        <span class="c1"># a single spectra</span>
-        <span class="k">if</span> <span class="n">spectra_to_plot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_to_plot</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">plot_spectra</span><span class="p">(</span>
-            <span class="n">spectra</span><span class="p">,</span>
-            <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
-            <span class="n">ylimits</span><span class="o">=</span><span class="n">ylimits</span><span class="p">,</span>
-            <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
-            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
-            <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.get_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.get_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">emission_model</span><span class="p">,</span>
-        <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">covering_fraction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate black hole spectra as described by the emission model.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            emission_model (EmissionModel):</span>
-<span class="sd">                The emission model to use.</span>
-<span class="sd">            dust_curves (dict):</span>
-<span class="sd">                An override to the emission model dust curves. Either:</span>
-<span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
-<span class="sd">                      models should be used.</span>
-<span class="sd">                    - A single dust curve to apply to all emission models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: &lt;dust_curve instance&gt;}</span>
-<span class="sd">                      to use a specific dust curve instance with particular</span>
-<span class="sd">                      properties.</span>
-<span class="sd">            tau_v (dict):</span>
-<span class="sd">                An override to the dust model optical depth. Either:</span>
-<span class="sd">                    - None, indicating the tau_v defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the optical depth for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;tau_v&gt;)}</span>
-<span class="sd">                      to use a specific optical depth with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an attribute</span>
-<span class="sd">                      of the component as the optical depth.</span>
-<span class="sd">            fesc (dict):</span>
-<span class="sd">                An override to the emission model escape fraction. Either:</span>
-<span class="sd">                    - None, indicating the fesc defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the escape fraction for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;fesc&gt;)}</span>
-<span class="sd">                      to use a specific escape fraction with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an</span>
-<span class="sd">                      attribute of the component as the escape fraction.</span>
-<span class="sd">            mask (dict):</span>
-<span class="sd">                An override to the emission model mask. Either:</span>
-<span class="sd">                    - None, indicating the mask defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: {&quot;attr&quot;: attr,</span>
-<span class="sd">                      &quot;thresh&quot;: thresh, &quot;op&quot;: op}} to add a specific mask to</span>
-<span class="sd">                      a particular model.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                Any additional keyword arguments to pass to the generator</span>
-<span class="sd">                function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                A dictionary of spectra which can be attached to the</span>
-<span class="sd">                appropriate spectra attribute of the component</span>
-<span class="sd">                (spectra/particle_spectra)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the spectra</span>
-        <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;blackhole&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-            <span class="n">fesc</span><span class="o">=</span><span class="n">covering_fraction</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Update the spectra dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
-
-        <span class="c1"># If we have particle spectra update the particle_spectra dictionary</span>
-        <span class="c1"># too</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">particle_spectra</span><span class="p">)</span>
-
-        <span class="c1"># Return the spectra the user wants</span>
-        <span class="k">if</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.get_lines">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.get_lines">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">line_ids</span><span class="p">,</span>
-        <span class="n">emission_model</span><span class="p">,</span>
-        <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">covering_fraction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate stellar lines as described by the emission model.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            line_ids (list):</span>
-<span class="sd">                A list of line_ids. Doublets can be specified as a nested list</span>
-<span class="sd">                or using a comma (e.g. &#39;OIII4363,OIII4959&#39;).</span>
-<span class="sd">            emission_model (EmissionModel):</span>
-<span class="sd">                The emission model to use.</span>
-<span class="sd">            dust_curves (dict):</span>
-<span class="sd">                An override to the emission model dust curves. Either:</span>
-<span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
-<span class="sd">                      models should be used.</span>
-<span class="sd">                    - A single dust curve to apply to all emission models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: &lt;dust_curve instance&gt;}</span>
-<span class="sd">                      to use a specific dust curve instance with particular</span>
-<span class="sd">                      properties.</span>
-<span class="sd">            tau_v (dict):</span>
-<span class="sd">                An override to the dust model optical depth. Either:</span>
-<span class="sd">                    - None, indicating the tau_v defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the optical depth for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;tau_v&gt;)}</span>
-<span class="sd">                      to use a specific optical depth with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an attribute</span>
-<span class="sd">                      of the component as the optical depth.</span>
-<span class="sd">            fesc (dict):</span>
-<span class="sd">                An override to the emission model escape fraction. Either:</span>
-<span class="sd">                    - None, indicating the fesc defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the escape fraction for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;fesc&gt;)}</span>
-<span class="sd">                      to use a specific escape fraction with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an</span>
-<span class="sd">                      attribute of the component as the escape fraction.</span>
-<span class="sd">            mask (dict):</span>
-<span class="sd">                An override to the emission model mask. Either:</span>
-<span class="sd">                    - None, indicating the mask defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: {&quot;attr&quot;: attr,</span>
-<span class="sd">                      &quot;thresh&quot;: thresh, &quot;op&quot;: op}} to add a specific mask to</span>
-<span class="sd">                      a particular model.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                Any additional keyword arguments to pass to the generator</span>
-<span class="sd">                function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            LineCollection</span>
-<span class="sd">                A LineCollection object containing the lines defined by the</span>
-<span class="sd">                root model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the lines</span>
-        <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_lines</span><span class="p">(</span>
-            <span class="n">line_ids</span><span class="o">=</span><span class="n">line_ids</span><span class="p">,</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;blackhole&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-            <span class="n">fesc</span><span class="o">=</span><span class="n">covering_fraction</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Update the lines dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-
-        <span class="c1"># Update the particle lines dictionary if it exists</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_lines&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">particle_lines</span><span class="p">)</span>
-
-        <span class="c1"># Return the lines the user wants</span>
-        <span class="k">if</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.clear_all_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.clear_all_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all spectra from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.clear_all_lines">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.clear_all_lines">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all lines from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_lines&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.clear_all_photometry">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.clear_all_photometry">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_photometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all photometry from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_lnu&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_fnu&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fnu</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="BlackholesComponent.clear_all_emissions">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.blackhole.html#synthesizer.components.blackhole.BlackholesComponent.clear_all_emissions">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_emissions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clear all emissions from the component.</span>
-
-<span class="sd">        This clears all spectra, lines, and photometry.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_lines</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_photometry</span><span class="p">()</span></div>
-</div>
+        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="s2">&quot;Black Holes&quot;</span><span class="p">)</span></div>
 
 </pre></div>
         </article>
@@ -1599,7 +1129,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

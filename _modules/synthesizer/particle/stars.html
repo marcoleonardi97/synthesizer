@@ -360,8 +360,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -545,14 +545,13 @@
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">Mpc</span><span class="p">,</span> <span class="n">Msun</span><span class="p">,</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">yr</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">synthesizer.components</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
+<span class="kn">from</span> <span class="nn">synthesizer.components.stellar</span> <span class="kn">import</span> <span class="n">StarsComponent</span>
 <span class="kn">from</span> <span class="nn">synthesizer.extensions.timers</span> <span class="kn">import</span> <span class="n">tic</span><span class="p">,</span> <span class="n">toc</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">SFH</span>
 <span class="kn">from</span> <span class="nn">synthesizer.parametric</span> <span class="kn">import</span> <span class="n">Stars</span> <span class="k">as</span> <span class="n">Para_Stars</span>
 <span class="kn">from</span> <span class="nn">synthesizer.particle.particles</span> <span class="kn">import</span> <span class="n">Particles</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">accepts</span>
-<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">TableFormatter</span>
 <span class="kn">from</span> <span class="nn">synthesizer.utils.plt</span> <span class="kn">import</span> <span class="n">single_histxy</span>
 <span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">warn</span>
 
@@ -561,8 +560,10 @@
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.particle.stars.html#synthesizer.particle.stars.Stars">[docs]</a>
 <span class="k">class</span> <span class="nc">Stars</span><span class="p">(</span><span class="n">Particles</span><span class="p">,</span> <span class="n">StarsComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The base Stars class. This contains all data a collection of stars could</span>
-<span class="sd">    contain. It inherits from the base Particles class holding attributes and</span>
+<span class="sd">    The base Stars class.</span>
+
+<span class="sd">    This contains all data a collection of stars could contain. It inherits</span>
+<span class="sd">    from the base Particles class holding attributes and</span>
 <span class="sd">    methods common to all particle types.</span>
 
 <span class="sd">    The Stars class can be handed to methods elsewhere to pass information</span>
@@ -713,15 +714,9 @@
             <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Stars&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">)</span>
+        <span class="n">StarsComponent</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ages</span><span class="p">,</span> <span class="n">metallicities</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># Ensure initial masses is an accepted type to avoid</span>
-        <span class="c1"># issues when masking</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_masses</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
-                <span class="s2">&quot;Initial mass should be numpy or unyt array.&quot;</span>
-            <span class="p">)</span>
-
+        <span class="c1"># Ensure we don&#39;t have negative ages</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ages</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ages</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">InconsistentArguments</span><span class="p">(</span>
@@ -732,10 +727,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_masses</span> <span class="o">=</span> <span class="n">initial_masses</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ages</span> <span class="o">=</span> <span class="n">ages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metallicities</span>
-
-        <span class="c1"># Set the extra keyword arguments</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
         <span class="c1"># Set the optional keyword arguments</span>
 
@@ -770,17 +761,6 @@
         <span class="c1"># parametric galaxy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sfzh</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">log10ages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return stellar particle ages in log (base 10).</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            log10ages (array)</span>
-<span class="sd">                log10 stellar ages</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ages</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">_check_star_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Sanitizes the inputs ensuring all arguments agree and are compatible.</span>
@@ -800,19 +780,6 @@
                         <span class="s2">&quot;Inconsistent stellar array sizes! (nparticles=</span><span class="si">%d</span><span class="s2">, &quot;</span>
                         <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">=</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparticles</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a string representation of the stars object.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            table (str)</span>
-<span class="sd">                A string representation of the particle object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Intialise the table formatter</span>
-        <span class="n">formatter</span> <span class="o">=</span> <span class="n">TableFormatter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="s2">&quot;Stars&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_prepare_sed_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2433,7 +2400,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

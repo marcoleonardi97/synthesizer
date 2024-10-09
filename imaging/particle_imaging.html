@@ -362,8 +362,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -535,9 +535,11 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">astropy.cosmology</span> <span class="kn">import</span> <span class="n">Planck18</span> <span class="k">as</span> <span class="n">cosmo</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
-<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">angstrom</span>
+<span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Hz</span><span class="p">,</span> <span class="n">erg</span><span class="p">,</span> <span class="n">kpc</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">angstrom</span><span class="p">,</span> <span class="n">kelvin</span>
 
-<span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="n">IncidentEmission</span>
+<span class="kn">from</span> <span class="nn">synthesizer.emission_models</span> <span class="kn">import</span> <span class="n">BimodalPacmanEmission</span><span class="p">,</span> <span class="n">IncidentEmission</span>
+<span class="kn">from</span> <span class="nn">synthesizer.emission_models.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
+<span class="kn">from</span> <span class="nn">synthesizer.emission_models.dust.emission</span> <span class="kn">import</span> <span class="n">Blackbody</span>
 <span class="kn">from</span> <span class="nn">synthesizer.filters</span> <span class="kn">import</span> <span class="n">FilterCollection</span> <span class="k">as</span> <span class="n">Filters</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
 <span class="kn">from</span> <span class="nn">synthesizer.kernel_functions</span> <span class="kn">import</span> <span class="n">Kernel</span>
@@ -554,7 +556,7 @@
     <span class="n">snap_name</span><span class="o">=</span><span class="s2">&quot;camels_snap.hdf5&quot;</span><span class="p">,</span>
     <span class="n">group_name</span><span class="o">=</span><span class="s2">&quot;camels_subhalo.hdf5&quot;</span><span class="p">,</span>
     <span class="n">physical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -575,32 +577,46 @@
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate the stellar rest frame SEDs for all particles in erg / s / Hz</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">IncidentEmission</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the stellar pacman model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">BimodalPacmanEmission</span><span class="p">(</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">tau_v_ism</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">tau_v_birth</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">dust_curve_ism</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">1.3</span><span class="p">),</span>
+    <span class="n">dust_curve_birth</span><span class="o">=</span><span class="n">PowerLaw</span><span class="p">(</span><span class="n">slope</span><span class="o">=-</span><span class="mf">0.7</span><span class="p">),</span>
+    <span class="c1"># dust_emission_ism=Blackbody(temperature=100 * kelvin),</span>
+    <span class="c1"># dust_emission_birth=Blackbody(temperature=30 * kelvin),</span>
+    <span class="n">fesc</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">fesc_ly_alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">per_particle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># And use it to generate the spectra</span>
 <span class="n">sed</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-<span class="c1"># Calculate the observed SED in nJy</span>
-<span class="n">sed</span><span class="o">.</span><span class="n">get_fnu</span><span class="p">(</span><span class="n">cosmo</span><span class="p">,</span> <span class="n">gal</span><span class="o">.</span><span class="n">redshift</span><span class="p">,</span> <span class="n">igm</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="c1"># Get the observed spectra</span>
+<span class="n">gal</span><span class="o">.</span><span class="n">get_observed_spectra</span><span class="p">(</span><span class="n">cosmo</span><span class="p">)</span>
 
+<span class="c1"># Set up the filter collection for imaging</span>
 <span class="n">filter_codes</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;JWST/NIRCam.F090W&quot;</span><span class="p">,</span>
     <span class="s2">&quot;JWST/NIRCam.F150W&quot;</span><span class="p">,</span>
     <span class="s2">&quot;JWST/NIRCam.F200W&quot;</span><span class="p">,</span>
 <span class="p">]</span>
-
 <span class="n">filters</span> <span class="o">=</span> <span class="n">Filters</span><span class="p">(</span><span class="n">filter_codes</span><span class="p">,</span> <span class="n">new_lam</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span>
 
-<span class="n">gal</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="s2">&quot;incident&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+<span class="n">gal</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
+<div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-&lt;synthesizer.photometry.PhotometryCollection at 0x7fac6c9b1cc0&gt;
+/home/runner/work/synthesizer/synthesizer/src/synthesizer/emission_models/operations.py:123: RuntimeWarning: Age mask has filtered out all particles
+  generator_func(
 </pre></div></div>
 </div>
 <section id="Imaging">
@@ -645,20 +661,20 @@ Image width is 30.00 kpc with 0.15 kpc resolution
 
 <span class="c1"># Get the image</span>
 <span class="n">hist_imgs</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">get_images_luminosity</span><span class="p">(</span>
-    <span class="n">resolution</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">emission_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
     <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;hist&quot;</span><span class="p">,</span>
-    <span class="n">stellar_photometry</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
-    <span class="n">blackhole_photometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># You can limit to a single image, otherwise all are made</span>
+    <span class="n">limit_to</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Get the image</span>
 <span class="n">smooth_imgs</span> <span class="o">=</span> <span class="n">gal</span><span class="o">.</span><span class="n">get_images_luminosity</span><span class="p">(</span>
     <span class="n">resolution</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+    <span class="n">emission_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
     <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
-    <span class="n">stellar_photometry</span><span class="o">=</span><span class="s2">&quot;incident&quot;</span><span class="p">,</span>
-    <span class="n">blackhole_photometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">kernel</span><span class="o">=</span><span class="n">kernel_data</span><span class="p">,</span>
     <span class="n">kernel_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="p">)</span>
@@ -850,7 +866,7 @@ behaviour can be achieved by omitting <code class="docutils literal notranslate"
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.010635852813720703
+Noisy images made, took: 0.010374784469604492
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -888,7 +904,7 @@ Noisy images made, took: 0.010635852813720703
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.004899263381958008
+Noisy images made, took: 0.005097389221191406
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -927,7 +943,7 @@ Noisy images made, took: 0.004899263381958008
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.12467336654663086
+Noisy images made, took: 0.12555384635925293
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -964,7 +980,7 @@ Noisy images made, took: 0.12467336654663086
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Noisy images made, took: 0.24140644073486328
+Noisy images made, took: 0.24167799949645996
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1022,7 +1038,7 @@ Noisy images made, took: 0.24140644073486328
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Scaling to: 7.582874283696859e+25 -&gt; 3.048882788642872e+27
+Scaling to: 6.7245901974059175e+25 -&gt; 4.0975882950250106e+27
 (200, 200, 3)
 </pre></div></div>
 </div>
@@ -1031,6 +1047,34 @@ Scaling to: 7.582874283696859e+25 -&gt; 3.048882788642872e+27
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/imaging_particle_imaging_23_1.png" src="../_images/imaging_particle_imaging_23_1.png" />
+</div>
+</div>
+</section>
+<section id="Unknown-Pleasures">
+<h3>Unknown Pleasures<a class="headerlink" href="#Unknown-Pleasures" title="Link to this heading">¶</a></h3>
+<p>This functionality needs very little explanation. If you like Joy Division you already know.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">psf_imgs</span><span class="p">[</span><span class="s2">&quot;JWST/NIRCam.F200W&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">plot_unknown_pleasures</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 800x800 with 1 Axes&gt;, &lt;Axes: &gt;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/imaging_particle_imaging_25_1.png" src="../_images/imaging_particle_imaging_25_1.png" />
 </div>
 </div>
 </section>
@@ -1104,6 +1148,7 @@ Scaling to: 7.582874283696859e+25 -&gt; 3.048882788642872e+27
 <li><a class="reference internal" href="#Noise-from-an-aperture-depth">Noise from an aperture depth</a></li>
 <li><a class="reference internal" href="#Noise-from-point-source-depth">Noise from point source depth</a><ul>
 <li><a class="reference internal" href="#Making-an-RGB-image">Making an RGB image</a></li>
+<li><a class="reference internal" href="#Unknown-Pleasures">Unknown Pleasures</a></li>
 </ul>
 </li>
 </ul>
@@ -1117,7 +1162,7 @@ Scaling to: 7.582874283696859e+25 -&gt; 3.048882788642872e+27
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

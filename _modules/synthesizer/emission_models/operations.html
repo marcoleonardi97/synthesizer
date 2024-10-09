@@ -360,8 +360,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -530,6 +530,9 @@
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
 <span class="kn">from</span> <span class="nn">synthesizer.grid</span> <span class="kn">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">synthesizer.imaging.image_collection</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_generate_image_collection_generic</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">synthesizer.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">Sed</span>
 
@@ -767,6 +770,76 @@
                 <span class="nb">setattr</span><span class="p">(</span><span class="n">emitter</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prev_properties</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
+
+    <span class="k">def</span> <span class="nf">_extract_images</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="p">,</span>
+        <span class="n">do_flux</span><span class="p">,</span>
+        <span class="n">emitters</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+        <span class="n">limit_to</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create images for all the extraction keys.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float):</span>
+<span class="sd">                The resolution of the images.</span>
+<span class="sd">            fov (float):</span>
+<span class="sd">                The field of view of the images.</span>
+<span class="sd">            img_type (str):</span>
+<span class="sd">                The type of image to generate.</span>
+<span class="sd">            do_flux (bool):</span>
+<span class="sd">                Are we generating flux images?</span>
+<span class="sd">            emitters (dict):</span>
+<span class="sd">                The emitters to generate the images for.</span>
+<span class="sd">            images (dict):</span>
+<span class="sd">                The dictionary to store the images in.</span>
+<span class="sd">            kernel (str):</span>
+<span class="sd">                The kernel to use when generating images.</span>
+<span class="sd">            kernel_threshold (float):</span>
+<span class="sd">                The threshold to use when generating images.</span>
+<span class="sd">            nthreads (int):</span>
+<span class="sd">                The number of threads to use when generating images.</span>
+<span class="sd">            limit_to (str):</span>
+<span class="sd">                Limit the images to a specific model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                The dictionary of image collections.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Loop over the extraction keys</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># If we are limiting to a specific model, skip all others</span>
+            <span class="k">if</span> <span class="n">limit_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">limit_to</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Get the model</span>
+            <span class="n">this_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_models</span><span class="p">[</span><span class="n">label</span><span class="p">]</span>
+
+            <span class="c1"># Get the emitter</span>
+            <span class="n">emitter</span> <span class="o">=</span> <span class="n">emitters</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">emitter</span><span class="p">]</span>
+
+            <span class="c1"># Store the resulting image collection</span>
+            <span class="n">images</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">_generate_image_collection_generic</span><span class="p">(</span>
+                <span class="n">resolution</span><span class="p">,</span>
+                <span class="n">fov</span><span class="p">,</span>
+                <span class="n">img_type</span><span class="p">,</span>
+                <span class="n">do_flux</span><span class="p">,</span>
+                <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">,</span>
+                <span class="n">kernel</span><span class="p">,</span>
+                <span class="n">kernel_threshold</span><span class="p">,</span>
+                <span class="n">nthreads</span><span class="p">,</span>
+                <span class="n">label</span><span class="p">,</span>
+                <span class="n">emitter</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">images</span>
 
     <span class="k">def</span> <span class="nf">_extract_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of an extraction model.&quot;&quot;&quot;</span>
@@ -1029,6 +1102,65 @@
 
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
+    <span class="k">def</span> <span class="nf">_generate_images</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="p">,</span>
+        <span class="n">do_flux</span><span class="p">,</span>
+        <span class="n">emitter</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an image for a generation key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float):</span>
+<span class="sd">                The resolution of the images.</span>
+<span class="sd">            fov (float):</span>
+<span class="sd">                The field of view of the images.</span>
+<span class="sd">            this_model (EmissionModel):</span>
+<span class="sd">                The model to generate the images for.</span>
+<span class="sd">            img_type (str):</span>
+<span class="sd">                The type of image to generate.</span>
+<span class="sd">            do_flux (bool):</span>
+<span class="sd">                Are we generating flux images?</span>
+<span class="sd">            emitter (dict):</span>
+<span class="sd">                The emitter to generate the images for.</span>
+<span class="sd">            images (dict):</span>
+<span class="sd">                The dictionary to store the images in.</span>
+<span class="sd">            kernel (str):</span>
+<span class="sd">                The kernel to use when generating images.</span>
+<span class="sd">            kernel_threshold (float):</span>
+<span class="sd">                The threshold to use when generating images.</span>
+<span class="sd">            nthreads (int):</span>
+<span class="sd">                The number of threads to use when generating images.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                The dictionary of image collections now containing the</span>
+<span class="sd">                generated images.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Store the resulting image collection</span>
+        <span class="n">images</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">_generate_image_collection_generic</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="p">,</span>
+            <span class="n">img_type</span><span class="p">,</span>
+            <span class="n">do_flux</span><span class="p">,</span>
+            <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">emitter</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">images</span>
+
     <span class="k">def</span> <span class="nf">_generate_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a generation model.&quot;&quot;&quot;</span>
         <span class="c1"># Create a list to hold the summary</span>
@@ -1219,6 +1351,65 @@
 
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
+    <span class="k">def</span> <span class="nf">_attenuate_images</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="p">,</span>
+        <span class="n">do_flux</span><span class="p">,</span>
+        <span class="n">emitter</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an image for an attenuation key.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            resolution (float):</span>
+<span class="sd">                The resolution of the images.</span>
+<span class="sd">            fov (float):</span>
+<span class="sd">                The field of view of the images.</span>
+<span class="sd">            this_model (EmissionModel):</span>
+<span class="sd">                The model to generate the images for.</span>
+<span class="sd">            img_type (str):</span>
+<span class="sd">                The type of image to generate.</span>
+<span class="sd">            do_flux (bool):</span>
+<span class="sd">                Are we generating flux images?</span>
+<span class="sd">            emitter (dict):</span>
+<span class="sd">                The emitter to generate the images for.</span>
+<span class="sd">            images (dict):</span>
+<span class="sd">                The dictionary to store the images in.</span>
+<span class="sd">            kernel (str):</span>
+<span class="sd">                The kernel to use when generating images.</span>
+<span class="sd">            kernel_threshold (float):</span>
+<span class="sd">                The threshold to use when generating images.</span>
+<span class="sd">            nthreads (int):</span>
+<span class="sd">                The number of threads to use when generating images.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict:</span>
+<span class="sd">                The dictionary of image collections now containing the</span>
+<span class="sd">                generated images.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Store the resulting image collection</span>
+        <span class="n">images</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">_generate_image_collection_generic</span><span class="p">(</span>
+            <span class="n">resolution</span><span class="p">,</span>
+            <span class="n">fov</span><span class="p">,</span>
+            <span class="n">img_type</span><span class="p">,</span>
+            <span class="n">do_flux</span><span class="p">,</span>
+            <span class="n">this_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="p">,</span>
+            <span class="n">kernel_threshold</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="p">,</span>
+            <span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">emitter</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">images</span>
+
     <span class="k">def</span> <span class="nf">_attenuate_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a dust attenuation model.&quot;&quot;&quot;</span>
         <span class="c1"># Create a list to hold the summary</span>
@@ -1393,6 +1584,66 @@
 
         <span class="k">return</span> <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span>
 
+    <span class="k">def</span> <span class="nf">_combine_images</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">images</span><span class="p">,</span>
+        <span class="n">this_model</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="p">,</span>
+        <span class="n">fov</span><span class="p">,</span>
+        <span class="n">img_type</span><span class="p">,</span>
+        <span class="n">do_flux</span><span class="p">,</span>
+        <span class="n">emitters</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">kernel_threshold</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combine the images by addition.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            emission_model (EmissionModel):</span>
+<span class="sd">                The root emission model.</span>
+<span class="sd">            images (dict):</span>
+<span class="sd">                The dictionary of images.</span>
+<span class="sd">            this_model (EmissionModel):</span>
+<span class="sd">                The model defining the combination.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the image for each model we are combining</span>
+        <span class="n">combine_labels</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">combine_images</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">this_model</span><span class="o">.</span><span class="n">combine</span><span class="p">:</span>
+            <span class="c1"># If the image hasn&#39;t been made try to generate it</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">images</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">_generate_image_collection_generic</span><span class="p">(</span>
+                    <span class="n">resolution</span><span class="p">,</span>
+                    <span class="n">fov</span><span class="p">,</span>
+                    <span class="n">img_type</span><span class="p">,</span>
+                    <span class="n">do_flux</span><span class="p">,</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">,</span>
+                    <span class="n">kernel</span><span class="p">,</span>
+                    <span class="n">kernel_threshold</span><span class="p">,</span>
+                    <span class="n">nthreads</span><span class="p">,</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                    <span class="n">emitters</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">emitter</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">img</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+            <span class="n">combine_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">combine_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+        <span class="c1"># Get the first image to add to</span>
+        <span class="n">out_image</span> <span class="o">=</span> <span class="n">combine_images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Combine the images</span>
+        <span class="c1"># Again, we have a problem if any don&#39;t exist</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">combine_images</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">out_image</span> <span class="o">+=</span> <span class="n">img</span>
+
+        <span class="c1"># Store the image</span>
+        <span class="n">images</span><span class="p">[</span><span class="n">this_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_image</span>
+
+        <span class="k">return</span> <span class="n">images</span>
+
     <span class="k">def</span> <span class="nf">_combine_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a summary of a combination model.&quot;&quot;&quot;</span>
         <span class="c1"># Create a list to hold the summary</span>
@@ -1439,7 +1690,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>

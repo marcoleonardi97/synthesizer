@@ -362,8 +362,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -533,6 +533,7 @@
     <span class="n">DustEmission</span><span class="p">,</span>
     <span class="n">PacmanEmission</span><span class="p">,</span>
     <span class="n">UnifiedAGN</span><span class="p">,</span>
+    <span class="n">GalaxyEmissionModel</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models.attenuation</span> <span class="kn">import</span> <span class="n">PowerLaw</span>
 <span class="kn">from</span> <span class="nn">synthesizer.emission_models.dust.emission</span> <span class="kn">import</span> <span class="n">Greybody</span>
@@ -633,50 +634,12 @@
 </pre></div>
 </div>
 </div>
-<p>Now generate the stellar spectra:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the model</span>
-<span class="n">pacman</span> <span class="o">=</span> <span class="n">PacmanEmission</span><span class="p">(</span>
-    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
-    <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-    <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
-    <span class="n">dust_emission</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Get the spectra</span>
-<span class="n">stars</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">pacman</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: overflow encountered in exp
-  out_arr = func(np.asarray(inp), out=out_func, **kwargs)
-/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/unyt/array.py:1949: RuntimeWarning: overflow encountered in multiply
-  out_arr = func(
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-&lt;synthesizer.sed.Sed at 0x7fa18b83dc90&gt;
-</pre></div></div>
-</div>
 </section>
 <section id="The-blackholes">
 <h3>The blackholes<a class="headerlink" href="#The-blackholes" title="Link to this heading">¶</a></h3>
 <p>Let’s define the properties of our blackholes. We don’t need to define the morphology since blackholes automatically assume a <code class="docutils literal notranslate"><span class="pre">PointSource</span></code> geometry.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">black_hole</span> <span class="o">=</span> <span class="n">BlackHole</span><span class="p">(</span>
@@ -688,14 +651,26 @@
 </pre></div>
 </div>
 </div>
-<p>Next, let’s define the black hole emission model and generate the spectra.</p>
+</section>
+<section id="The-Emission-Model">
+<h3>The Emission Model<a class="headerlink" href="#The-Emission-Model" title="Link to this heading">¶</a></h3>
+<p>Define the emission model including contributions from the stars and blackholes.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the NLR and BLR grids</span>
 <span class="n">nlr_grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="s2">&quot;test_grid_agn-nlr&quot;</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="s2">&quot;../../../tests/test_grid&quot;</span><span class="p">)</span>
 <span class="n">blr_grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="s2">&quot;test_grid_agn-blr&quot;</span><span class="p">,</span> <span class="n">grid_dir</span><span class="o">=</span><span class="s2">&quot;../../../tests/test_grid&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get the model</span>
+<span class="n">pacman</span> <span class="o">=</span> <span class="n">PacmanEmission</span><span class="p">(</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;stellar_total&quot;</span><span class="p">,</span>
+    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+    <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
+    <span class="n">dust_curve</span><span class="o">=</span><span class="n">dust_curve</span><span class="p">,</span>
+    <span class="n">dust_emission</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="c1"># Get the model</span>
 <span class="n">uni_agn</span> <span class="o">=</span> <span class="n">UnifiedAGN</span><span class="p">(</span>
@@ -704,6 +679,7 @@
     <span class="n">covering_fraction_nlr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">covering_fraction_blr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">torus_emission_model</span><span class="o">=</span><span class="n">Greybody</span><span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="n">kelvin</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;agn_intrinsic&quot;</span>
 <span class="p">)</span>
 
 <span class="c1"># Include attenuation and dust emission</span>
@@ -712,17 +688,20 @@
     <span class="n">apply_dust_to</span><span class="o">=</span><span class="n">uni_agn</span><span class="p">,</span>
     <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;blackhole&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;agn_attenuated&quot;</span>
 <span class="p">)</span>
 <span class="n">dust_model</span> <span class="o">=</span> <span class="n">DustEmission</span><span class="p">(</span>
-    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;agn_dust_emission&quot;</span><span class="p">,</span>
     <span class="n">dust_emission_model</span><span class="o">=</span><span class="n">dust_emission_model</span><span class="p">,</span>
     <span class="n">dust_lum_intrinsic</span><span class="o">=</span><span class="n">uni_agn</span><span class="p">,</span>
     <span class="n">dust_lum_attenuated</span><span class="o">=</span><span class="n">att_model</span><span class="p">,</span>
     <span class="n">emitter</span><span class="o">=</span><span class="s2">&quot;blackhole&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="c1"># Get the spectra assuming this emission model</span>
-<span class="n">spectra</span> <span class="o">=</span> <span class="n">black_hole</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">dust_model</span><span class="p">)</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">GalaxyEmissionModel</span><span class="p">(</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
+    <span class="n">combine</span><span class="o">=</span><span class="p">(</span><span class="n">dust_model</span><span class="p">,</span> <span class="n">pacman</span><span class="p">),</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -731,7 +710,7 @@
 <h3>The Galaxy<a class="headerlink" href="#The-Galaxy" title="Link to this heading">¶</a></h3>
 <p>Now that we have our components we can pass them to create an instance of a <code class="docutils literal notranslate"><span class="pre">Galaxy</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialise Galaxy object</span>
@@ -752,14 +731,43 @@
 +---------------+------------------------------------------------------------------------+
 | galaxy_type   | &#39;Parametric&#39;                                                           |
 +---------------+------------------------------------------------------------------------+
-| stars         | &lt;synthesizer.parametric.stars.Stars object at 0x7fa1d59be950&gt;          |
+| stars         | &lt;synthesizer.parametric.stars.Stars object at 0x7f86d46c66b0&gt;          |
 +---------------+------------------------------------------------------------------------+
-| black_holes   | &lt;synthesizer.parametric.blackholes.BlackHole object at 0x7fa18b83e440&gt; |
+| black_holes   | &lt;synthesizer.parametric.blackholes.BlackHole object at 0x7f86893f54e0&gt; |
 +---------------+------------------------------------------------------------------------+
 | name          | &#39;parametric galaxy&#39;                                                    |
 +---------------+------------------------------------------------------------------------+
 | sfzh (51, 13) | 0.00e+00 -&gt; 5.01e+08 (Mean: 1.51e+07)                                  |
 +---------------+------------------------------------------------------------------------+
+</pre></div></div>
+</div>
+<p>And now we can get the spectra by passing the <code class="docutils literal notranslate"><span class="pre">EmissionModel</span></code> to the <code class="docutils literal notranslate"><span class="pre">get_spectra</span></code> method.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span><span class="o">.</span><span class="n">get_spectra</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/unyt/array.py:1824: RuntimeWarning: overflow encountered in exp
+  out_arr = func(np.asarray(inp), out=out_func, **kwargs)
+/opt/hostedtoolcache/Python/3.10.15/x64/lib/python3.10/site-packages/unyt/array.py:1949: RuntimeWarning: overflow encountered in multiply
+  out_arr = func(
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;synthesizer.sed.Sed at 0x7f86893f7df0&gt;
 </pre></div></div>
 </div>
 <p>Now we have a galaxy with spectra isolated to the components. To get the combined “total”, “emergent”, and “intrinsic” spectra from all components we can call the <code class="docutils literal notranslate"><span class="pre">galaxy.get_spectra_combined</span></code>.</p>
@@ -800,7 +808,7 @@
 </section>
 <section id="Images">
 <h2>Images<a class="headerlink" href="#Images" title="Link to this heading">¶</a></h2>
-<p>To make iamges we need filters to define the photometry. For details see the <a class="reference internal" href="../filters/filters.html"><span class="doc">filter</span></a> and <a class="reference internal" href="../imaging/imaging.html"><span class="doc">imaging</span></a> docs.</p>
+<p>To make images we need filters to define the photometry. For details see the <a class="reference internal" href="../filters/filters.html"><span class="doc">filter</span></a> and <a class="reference internal" href="../imaging/imaging.html"><span class="doc">imaging</span></a> docs.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -815,15 +823,15 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get photometry</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">stars</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
-<span class="n">galaxy</span><span class="o">.</span><span class="n">black_holes</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="s2">&quot;total&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
 
 <span class="c1"># Make images</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">galaxy</span><span class="o">.</span><span class="n">get_images_luminosity</span><span class="p">(</span>
     <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
-    <span class="n">stellar_photometry</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
-    <span class="n">blackhole_photometry</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
     <span class="n">fov</span><span class="o">=</span><span class="n">fov</span><span class="p">,</span>
+    <span class="n">emission_model</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+    <span class="n">img_type</span><span class="o">=</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span>
+    <span class="n">limit_to</span><span class="o">=</span><span class="s2">&quot;total&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Make and plot an rgb image</span>
@@ -901,6 +909,7 @@
 <li><a class="reference internal" href="#Diffuse-ISM-dust">Diffuse ISM dust</a><ul>
 <li><a class="reference internal" href="#The-Stars">The Stars</a></li>
 <li><a class="reference internal" href="#The-blackholes">The blackholes</a></li>
+<li><a class="reference internal" href="#The-Emission-Model">The Emission Model</a></li>
 <li><a class="reference internal" href="#The-Galaxy">The Galaxy</a></li>
 </ul>
 </li>
@@ -917,7 +926,7 @@
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>

@@ -360,8 +360,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.base_galaxy.html">synthesizer.base_galaxy</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../_autosummary/synthesizer.components.html">synthesizer.components</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of synthesizer.components</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.blackhole.html">synthesizer.components.blackhole</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.component.html">synthesizer.components.component</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.stellar.html">synthesizer.components.stellar</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../_autosummary/synthesizer.components.unified_agn.html">synthesizer.components.unified_agn</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../_autosummary/synthesizer.conversions.html">synthesizer.conversions</a></li>
@@ -516,24 +516,25 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for synthesizer.components.stellar</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;A module for particle and parametric stars.</span>
+<span></span><span class="sd">&quot;&quot;&quot;A module defining general functionality for particle and parametric stars.</span>
 
 <span class="sd">This should never be directly instantiated. Instead it is the parent class for</span>
-<span class="sd">particle.Stars and parametric.Stars and contains attributes</span>
-<span class="sd">and methods common between them.</span>
+<span class="sd">particle.Stars and parametric.Stars and contains attributes and methods</span>
+<span class="sd">common between them. StarsComponent is a child class of Component.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">Myr</span><span class="p">,</span> <span class="n">unyt_quantity</span>
 
 <span class="kn">from</span> <span class="nn">synthesizer</span> <span class="kn">import</span> <span class="n">exceptions</span>
-<span class="kn">from</span> <span class="nn">synthesizer.sed</span> <span class="kn">import</span> <span class="n">plot_spectra</span>
+<span class="kn">from</span> <span class="nn">synthesizer.components.component</span> <span class="kn">import</span> <span class="n">Component</span>
 <span class="kn">from</span> <span class="nn">synthesizer.units</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">accepts</span>
-<span class="kn">from</span> <span class="nn">synthesizer.warnings</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">deprecation</span>
+<span class="kn">from</span> <span class="nn">synthesizer.utils</span> <span class="kn">import</span> <span class="n">TableFormatter</span>
 
 
 <div class="viewcode-block" id="StarsComponent">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent">[docs]</a>
-<span class="k">class</span> <span class="nc">StarsComponent</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">StarsComponent</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The parent class for stellar components of a galaxy.</span>
 
@@ -543,7 +544,11 @@
 <span class="sd">    This should never be instantiated directly.</span>
 
 <span class="sd">    Attributes:</span>
-
+<span class="sd">        ages (Quantity)</span>
+<span class="sd">            The age of each stellar particle/bin (particle/parametric).</span>
+<span class="sd">        metallicities (Quantity)</span>
+<span class="sd">            The metallicity of each stellar particle/bin</span>
+<span class="sd">            (particle/parametric).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Define quantities</span>
@@ -554,6 +559,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ages</span><span class="p">,</span>
         <span class="n">metallicities</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the StellarComponent.</span>
@@ -565,84 +571,47 @@
 <span class="sd">                The metallicity of each stellar particle/bin</span>
 <span class="sd">                (particle/parametric).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># Define the spectra dictionary to hold the stellar spectra</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Define the line dictionary to hold the stellar emission lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="c1"># Define the photometry dictionaries to hold the stellar photometry</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Initialise the parent class</span>
+        <span class="n">Component</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Stars&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># The common stellar attributes between particle and parametric stars</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ages</span> <span class="o">=</span> <span class="n">ages</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span> <span class="o">=</span> <span class="n">metallicities</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">log10ages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the photometry fluxes.</span>
+<span class="sd">        Return stellar particle ages in log (base 10).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                The photometry fluxes.</span>
+<span class="sd">            log10ages (array)</span>
+<span class="sd">                log10 stellar ages</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">deprecation</span><span class="p">(</span>
-            <span class="s2">&quot;The `photo_fluxes` attribute is deprecated. Use &quot;</span>
-            <span class="s2">&quot;`photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ages</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">log10metallicities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get the photometry luminosities.</span>
+<span class="sd">        Return stellar particle metallicities in log (base 10).</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                The photometry luminosities.</span>
+<span class="sd">            log10metallicities (array)</span>
+<span class="sd">                log10 stellar metallicities</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">deprecation</span><span class="p">(</span>
-            <span class="s2">&quot;The `photo_luminosities` attribute is deprecated. Use &quot;</span>
-            <span class="s2">&quot;`photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metallicities</span><span class="p">)</span>
 
-<div class="viewcode-block" id="StarsComponent.generate_lnu">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.generate_lnu">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This method is a prototype for generating spectra from SPS grids. It is</span>
-<span class="sd">        redefined on the child classes.</span>
+<span class="sd">        Return a string representation of the stars object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            table (str)</span>
+<span class="sd">                A string representation of the particle object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;generate_lnu should be overloaded by child classes:</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`particle.Stars`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`parametric.Stars`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;You should not be seeing this!!!&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
+        <span class="c1"># Intialise the table formatter</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">TableFormatter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="StarsComponent.generate_line">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.generate_line">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This method is a prototype for generating lines from SPS grids. It is</span>
-<span class="sd">        redefined on the child classes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;generate_line should be overloaded by child classes:</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`particle.Stars`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`parametric.Stars`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;You should not be seeing this!!!&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="s2">&quot;Stars&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_check_young_old_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">young</span><span class="p">,</span> <span class="n">old</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -673,411 +642,7 @@
                     <span class="s2">&quot;young must be a unyt_quantity (i.e. a value with units)&quot;</span>
                 <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">young</span><span class="p">,</span> <span class="n">old</span>
-
-<div class="viewcode-block" id="StarsComponent.get_photo_lnu">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_lnu">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_lnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            photo_lnu (dict)</span>
-<span class="sd">                A dictionary of rest frame broadband luminosities.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span>
-                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span></div>
-
-
-    <span class="nd">@deprecated</span><span class="p">(</span>
-        <span class="s2">&quot;The `get_photo_luminosities` method is deprecated. Use &quot;</span>
-        <span class="s2">&quot;`get_photo_lnu` instead. Will be removed in v1.0.0&quot;</span>
-    <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_photo_luminosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate luminosity photometry using a FilterCollection object.</span>
-
-<span class="sd">        Alias to get_photo_lnu.</span>
-
-<span class="sd">        Photometry is calculated in spectral luminosity density units.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (filters.FilterCollection)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            PhotometryCollection</span>
-<span class="sd">                A PhotometryCollection object containing the luminosity</span>
-<span class="sd">                photometry in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_lnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-
-<div class="viewcode-block" id="StarsComponent.get_photo_fnu">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_photo_fnu">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_photo_fnu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (object)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            (dict)</span>
-<span class="sd">                A dictionary of fluxes in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Loop over spectra in the component</span>
-        <span class="k">for</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
-            <span class="c1"># Create the photometry collection and store it in the object</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra</span><span class="p">]</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span>
-                <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span>
-            <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span></div>
-
-
-    <span class="nd">@deprecated</span><span class="p">(</span>
-        <span class="s2">&quot;The `get_photo_fluxes` method is deprecated. Use &quot;</span>
-        <span class="s2">&quot;`get_photo_fnu` instead. Will be removed in v1.0.0&quot;</span>
-    <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_photo_fluxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate flux photometry using a FilterCollection object.</span>
-
-<span class="sd">        Alias to get_photo_fnu.</span>
-
-<span class="sd">        Photometry is calculated in spectral flux density units.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filters (object)</span>
-<span class="sd">                A FilterCollection object.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            PhotometryCollection</span>
-<span class="sd">                A PhotometryCollection object containing the flux photometry</span>
-<span class="sd">                in each filter in filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_photo_fnu</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
-
-<div class="viewcode-block" id="StarsComponent.plot_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.plot_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">plot_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">spectra_to_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">ylimits</span><span class="o">=</span><span class="p">(),</span>
-        <span class="n">xlimits</span><span class="o">=</span><span class="p">(),</span>
-        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Plots either specific spectra (specified via spectra_to_plot) or all</span>
-<span class="sd">        spectra on the child Stars object.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            spectra_to_plot (string/list, string)</span>
-<span class="sd">                The specific spectra to plot.</span>
-<span class="sd">                    - If None all spectra are plotted.</span>
-<span class="sd">                    - If a list of strings each specifc spectra is plotted.</span>
-<span class="sd">                    - If a single string then only that spectra is plotted.</span>
-<span class="sd">            show (bool)</span>
-<span class="sd">                Flag for whether to show the plot or just return the</span>
-<span class="sd">                figure and axes.</span>
-<span class="sd">            ylimits (tuple)</span>
-<span class="sd">                The limits to apply to the y axis. If not provided the limits</span>
-<span class="sd">                will be calculated with the lower limit set to 1000 (100) times</span>
-<span class="sd">                less than the peak of the spectrum for rest_frame (observed)</span>
-<span class="sd">                spectra.</span>
-<span class="sd">            xlimits (tuple)</span>
-<span class="sd">                The limits to apply to the x axis. If not provided the optimal</span>
-<span class="sd">                limits are found based on the ylimits.</span>
-<span class="sd">            figsize (tuple)</span>
-<span class="sd">                Tuple with size 2 defining the figure size.</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                Arguments to the `sed.plot_spectra` method called from this</span>
-<span class="sd">                wrapper.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            fig (matplotlib.pyplot.figure)</span>
-<span class="sd">                The matplotlib figure object for the plot.</span>
-<span class="sd">            ax (matplotlib.axes)</span>
-<span class="sd">                The matplotlib axes object containing the plotted data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Handling whether we are plotting all spectra, specific spectra, or</span>
-        <span class="c1"># a single spectra</span>
-        <span class="k">if</span> <span class="n">spectra_to_plot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra_to_plot</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">spectra_to_plot</span><span class="p">}</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">spectra_to_plot</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">plot_spectra</span><span class="p">(</span>
-            <span class="n">spectra</span><span class="p">,</span>
-            <span class="n">show</span><span class="o">=</span><span class="n">show</span><span class="p">,</span>
-            <span class="n">ylimits</span><span class="o">=</span><span class="n">ylimits</span><span class="p">,</span>
-            <span class="n">xlimits</span><span class="o">=</span><span class="n">xlimits</span><span class="p">,</span>
-            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
-            <span class="n">draw_legend</span><span class="o">=</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.get_mask">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_mask">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">thresh</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This method is a prototype for generating masks for a stellar</span>
-<span class="sd">        component. It is redefined on the child classes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;get_masks should be overloaded by child classes:</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`particle.Particles`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;`parametric.Stars`</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot;You should not be seeing this!!!&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.get_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_spectra</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">emission_model</span><span class="p">,</span>
-        <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">fesc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate stellar spectra as described by the emission model.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            emission_model (EmissionModel):</span>
-<span class="sd">                The emission model to use.</span>
-<span class="sd">            dust_curves (dict):</span>
-<span class="sd">                An override to the emission model dust curves. Either:</span>
-<span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
-<span class="sd">                      models should be used.</span>
-<span class="sd">                    - A single dust curve to apply to all emission models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: &lt;dust_curve instance&gt;}</span>
-<span class="sd">                      to use a specific dust curve instance with particular</span>
-<span class="sd">                      properties.</span>
-<span class="sd">            tau_v (dict):</span>
-<span class="sd">                An override to the dust model optical depth. Either:</span>
-<span class="sd">                    - None, indicating the tau_v defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the optical depth for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;tau_v&gt;)}</span>
-<span class="sd">                      to use a specific optical depth with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an attribute</span>
-<span class="sd">                      of the component as the optical depth.</span>
-<span class="sd">            fesc (dict):</span>
-<span class="sd">                An override to the emission model escape fraction. Either:</span>
-<span class="sd">                    - None, indicating the fesc defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the escape fraction for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;fesc&gt;)}</span>
-<span class="sd">                      to use a specific escape fraction with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an</span>
-<span class="sd">                      attribute of the component as the escape fraction.</span>
-<span class="sd">            mask (dict):</span>
-<span class="sd">                An override to the emission model mask. Either:</span>
-<span class="sd">                    - None, indicating the mask defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: {&quot;attr&quot;: attr,</span>
-<span class="sd">                      &quot;thresh&quot;: thresh, &quot;op&quot;: op}} to add a specific mask to</span>
-<span class="sd">                      a particular model.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                Any additional keyword arguments to pass to the generator</span>
-<span class="sd">                function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict</span>
-<span class="sd">                A dictionary of spectra which can be attached to the</span>
-<span class="sd">                appropriate spectra attribute of the component</span>
-<span class="sd">                (spectra/particle_spectra)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the spectra</span>
-        <span class="n">spectra</span><span class="p">,</span> <span class="n">particle_spectra</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_spectra</span><span class="p">(</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stellar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Update the spectra dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span>
-
-        <span class="c1"># Update the particle_spectra dictionary if it exists</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">particle_spectra</span><span class="p">)</span>
-
-        <span class="c1"># Return the spectra the user wants</span>
-        <span class="k">if</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.get_lines">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.get_lines">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_lines</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">line_ids</span><span class="p">,</span>
-        <span class="n">emission_model</span><span class="p">,</span>
-        <span class="n">dust_curves</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tau_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">fesc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generate stellar lines as described by the emission model.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            line_ids (list):</span>
-<span class="sd">                A list of line_ids. Doublets can be specified as a nested list</span>
-<span class="sd">                or using a comma (e.g. &#39;OIII4363,OIII4959&#39;).</span>
-<span class="sd">            emission_model (EmissionModel):</span>
-<span class="sd">                The emission model to use.</span>
-<span class="sd">            dust_curves (dict):</span>
-<span class="sd">                An override to the emission model dust curves. Either:</span>
-<span class="sd">                    - None, indicating the dust_curves defined on the emission</span>
-<span class="sd">                      models should be used.</span>
-<span class="sd">                    - A single dust curve to apply to all emission models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: &lt;dust_curve instance&gt;}</span>
-<span class="sd">                      to use a specific dust curve instance with particular</span>
-<span class="sd">                      properties.</span>
-<span class="sd">            tau_v (dict):</span>
-<span class="sd">                An override to the dust model optical depth. Either:</span>
-<span class="sd">                    - None, indicating the tau_v defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the optical depth for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;tau_v&gt;)}</span>
-<span class="sd">                      to use a specific optical depth with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an attribute</span>
-<span class="sd">                      of the component as the optical depth.</span>
-<span class="sd">            fesc (dict):</span>
-<span class="sd">                An override to the emission model escape fraction. Either:</span>
-<span class="sd">                    - None, indicating the fesc defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A float to use as the escape fraction for all models.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: float(&lt;fesc&gt;)}</span>
-<span class="sd">                      to use a specific escape fraction with a particular</span>
-<span class="sd">                      model or {&lt;label&gt;: str(&lt;attribute&gt;)} to use an</span>
-<span class="sd">                      attribute of the component as the escape fraction.</span>
-<span class="sd">            mask (dict):</span>
-<span class="sd">                An override to the emission model mask. Either:</span>
-<span class="sd">                    - None, indicating the mask defined on the emission model</span>
-<span class="sd">                      should be used.</span>
-<span class="sd">                    - A dictionary of the form {&lt;label&gt;: {&quot;attr&quot;: attr,</span>
-<span class="sd">                      &quot;thresh&quot;: thresh, &quot;op&quot;: op}} to add a specific mask to</span>
-<span class="sd">                      a particular model.</span>
-<span class="sd">            verbose (bool)</span>
-<span class="sd">                Are we talking?</span>
-<span class="sd">            kwargs (dict)</span>
-<span class="sd">                Any additional keyword arguments to pass to the generator</span>
-<span class="sd">                function.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            LineCollection</span>
-<span class="sd">                A LineCollection object containing the lines defined by the</span>
-<span class="sd">                root model.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Get the lines</span>
-        <span class="n">lines</span><span class="p">,</span> <span class="n">particle_lines</span> <span class="o">=</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">_get_lines</span><span class="p">(</span>
-            <span class="n">line_ids</span><span class="o">=</span><span class="n">line_ids</span><span class="p">,</span>
-            <span class="n">emitters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;stellar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="p">},</span>
-            <span class="n">dust_curves</span><span class="o">=</span><span class="n">dust_curves</span><span class="p">,</span>
-            <span class="n">tau_v</span><span class="o">=</span><span class="n">tau_v</span><span class="p">,</span>
-            <span class="n">fesc</span><span class="o">=</span><span class="n">fesc</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Update the lines dictionary</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-
-        <span class="c1"># Update the particle_lines dictionary if it exists</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_lines&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">particle_lines</span><span class="p">)</span>
-
-        <span class="c1"># Return the lines the user wants</span>
-        <span class="k">if</span> <span class="n">emission_model</span><span class="o">.</span><span class="n">per_particle</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="n">emission_model</span><span class="o">.</span><span class="n">label</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.clear_all_spectra">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.clear_all_spectra">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all spectra from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_spectra&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_spectra</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.clear_all_lines">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.clear_all_lines">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all lines from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_lines&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_lines</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.clear_all_photometry">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.clear_all_photometry">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_photometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all photometry from the component.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">photo_fnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_lnu&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_lnu</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;particle_photo_fnu&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">particle_photo_fnu</span> <span class="o">=</span> <span class="p">{}</span></div>
-
-
-<div class="viewcode-block" id="StarsComponent.clear_all_emissions">
-<a class="viewcode-back" href="../../../_autosummary/synthesizer.components.stellar.html#synthesizer.components.stellar.StarsComponent.clear_all_emissions">[docs]</a>
-    <span class="k">def</span> <span class="nf">clear_all_emissions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clear all emissions from the component.</span>
-
-<span class="sd">        This clears all spectra, lines, and photometry.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_spectra</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_lines</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clear_all_photometry</span><span class="p">()</span></div>
-</div>
+        <span class="k">return</span> <span class="n">young</span><span class="p">,</span> <span class="n">old</span></div>
 
 </pre></div>
         </article>
@@ -1111,7 +676,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=4fbc2340"></script>
+</div><script src="../../../_static/documentation_options.js?v=4aa187ae"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
