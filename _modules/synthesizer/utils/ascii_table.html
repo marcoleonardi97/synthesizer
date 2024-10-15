@@ -534,8 +534,10 @@
 <span class="sd">    # Example usage</span>
 <span class="sd">    example = Example()</span>
 <span class="sd">    formatter = TableFormatter(example)</span>
-<span class="sd">    print(formatter.generate_table())</span>
+<span class="sd">    print(formatter.get_table())</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">unyt</span> <span class="kn">import</span> <span class="n">unyt_array</span>
@@ -562,8 +564,40 @@
 <span class="sd">            obj (object):</span>
 <span class="sd">                The object to be formatted into a table.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Attach the object</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span>
+
+        <span class="c1"># Get the object&#39;s attributes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c1"># Update with property attributes</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)):</span>
+            <span class="c1"># Skip non-properties</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">member</span><span class="p">,</span> <span class="nb">property</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Skip if the property is already in the Attributes</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Add the property to the attributes but some can fail if</span>
+            <span class="c1"># certain information is missing so we need to catch the</span>
+            <span class="c1"># exception and continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># If the user interrupts the process, raise the Exception</span>
+                <span class="c1"># regardless</span>
+                <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># Remove any private Attributes that aren&#39;t Quantities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">}</span>
 
 <div class="viewcode-block" id="TableFormatter.format_array">
 <a class="viewcode-back" href="../../../_autosummary/synthesizer.utils.ascii_table.html#synthesizer.utils.ascii_table.TableFormatter.format_array">[docs]</a>
@@ -744,7 +778,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">formatted_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">formatted_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">formatted_values</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -842,7 +876,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=9e97fc14"></script>
+</div><script src="../../../_static/documentation_options.js?v=6f1ad983"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
