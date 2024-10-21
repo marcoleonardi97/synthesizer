@@ -1896,18 +1896,27 @@
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lam</span>
         <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">llam</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">/</span> <span class="n">h</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">erg</span> <span class="o">/</span> <span class="n">Hz</span><span class="p">)</span> <span class="o">/</span> <span class="n">c</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span> <span class="o">/</span> <span class="n">s</span><span class="p">))</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="c1"># Get value of luminosity at ionisation wavelength</span>
-        <span class="n">ionisation_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span>
-            <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
-        <span class="p">)</span>
-
         <span class="c1"># Restrict arrays to ionisation regime</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">ionisation_mask</span><span class="p">]</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ionisation_mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ionisation_mask</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">ionisation_mask</span><span class="p">]</span>
 
-        <span class="c1"># Add ionisation wavelength and luminosity values</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">ionisation_y</span><span class="p">)</span>
+        <span class="c1"># Add a final data point at the ionising energy to ensure full</span>
+        <span class="c1"># coverage.</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">ionisation_wavelength</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">angstrom</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">y_</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y_</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="n">y</span>
+            <span class="p">)</span>
+            <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="p">)</span>
 
         <span class="n">ion_photon_prod_rate</span> <span class="o">=</span> <span class="n">integrate_last_axis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">)</span> <span class="o">/</span> <span class="n">s</span>
 
@@ -2630,7 +2639,7 @@
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=d7e7b9ea"></script>
+</div><script src="../../_static/documentation_options.js?v=c3505759"></script>
     <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
