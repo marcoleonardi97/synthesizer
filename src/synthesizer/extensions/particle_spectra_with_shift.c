@@ -3,6 +3,7 @@
  * Calculates weights on an arbitrary dimensional grid given the mass.
  *****************************************************************************/
 /* C includes */
+//
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
