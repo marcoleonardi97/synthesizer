@@ -866,7 +866,7 @@ class Stars(Particles, StarsComponent):
         else:
             aperture_mask = np.ones(self.nparticles, dtype=bool)
 
-        from ..extension.particle_spectra import compute_particle_seds
+        from ..extensions.particle_spectra import compute_particle_seds
         from ..extensions.integrated_spectra import compute_integrated_sed
 
         # Prepare the arguments for the C function.
