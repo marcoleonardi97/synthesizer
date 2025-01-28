@@ -287,7 +287,7 @@ class Component(ABC):
                     - A dictionary of the form {<label>: {"attr": attr,
                       "thresh": thresh, "op": op}} to add a specific mask to
                       a particular model.
-            shift (bool):
+            vel_shift (bool):
                 Flags whether to apply doppler shift to the spectra.
             verbose (bool)
                 Are we talking?
