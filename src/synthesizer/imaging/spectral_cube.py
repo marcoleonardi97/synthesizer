@@ -493,6 +493,91 @@ class SpectralCube:
             "docs/CONTRIBUTING.md"
         )
 
+    def save_to_hdf5(self, filename, format=None, overwrite=False,
+                     include_metadata=True, **kwargs):
+        
+        """Save the spectral data cube to a hdf5 file.
+    
+        This method saves the 3D data cube to a file in various formats.
+        Supported formats include FITS, HDF5, and NumPy arrays.
+    
+        Args:
+            filename (str):
+                The name of the file to save the data cube to.
+            overwrite (bool, optional):
+                Whether to overwrite the file if it already exists.
+                Default is False.
+            include_metadata (bool, optional):
+                Whether to include metadata like wavelengths, resolution,
+                field of view, and units. Default is True.
+            **kwargs:
+                Additional keyword arguments passed to the underlying save function.
+    
+        Returns:
+            None
+    
+        Raises:
+            ValueError:
+                If the data cube hasn't been generated yet or if the format
+                is not supported.
+            ImportError:
+                If the required dependencies are not available.
+            IOError:
+                If the file exists and overwrite is False.
+        """
+        import os
+
+        if self.arr is None:
+            raise ValueError(
+                "The data cube hasn't been generated yet. Please call "
+                "get_data_cube_hist or get_data_cube_smoothed first."
+            )
+
+        # Make sure that the format is hdf5
+        ext = os.path.splitext(filename)[1].lower()
+        if ext not in [".hdf5", ".h5"]:
+            filename = filename + ".hdf5"
+    
+        # Handle overwrite
+        if os.path.exists(filename) and not overwrite:
+            raise IOError(
+                f"The file {filename} already exists. Set overwrite=True to overwrite."
+            )
+        
+        try:
+            import h5py  
+        except ImportError:
+            raise ImportError(
+                "The h5py package is required to save as HDF5. "
+                "Please install it with 'pip install h5py'."
+            )
+    
+        with h5py.File(filename, 'w') as f:
+            dset = f.create_dataset('data_cube', data=self.arr, **kwargs)
+            dset.attrs['units'] = str(self.units)
+            
+            if include_metadata:
+                metadata = f.create_group('metadata')
+                metadata.attrs['resolution_value'] = float(self.resolution.value)
+                metadata.attrs['resolution_units'] = str(self.resolution.units)
+                
+                # Save FOV
+                if hasattr(self.fov, "__len__") and len(self.fov) > 1:
+                    metadata.attrs['fov_x_value'] = float(self.fov[0].value)
+                    metadata.attrs['fov_y_value'] = float(self.fov[1].value)
+                    metadata.attrs['fov_units'] = str(self.fov.units)
+                else:
+                    metadata.attrs['fov_value'] = float(self.fov.value)
+                    metadata.attrs['fov_units'] = str(self.fov.units)
+                    
+                # Save quantity if available
+                if self.quantity is not None:
+                    metadata.attrs['quantity'] = self.quantity
+                    
+                # Save wavelength information
+                wavelength = f.create_dataset('wavelength', data=self.lam.value)
+                wavelength.attrs['units'] = str(self.lam.units)
+    
     def animate_data_cube(
         self,
         show=False,
@@ -611,3 +696,96 @@ class SpectralCube:
             plt.close(fig)
 
         return anim
+
+
+
+@classmethod
+def load_from_hdf5(cls, filename):
+    """Load a spectral data cube from an HDF5 file.
+
+    Args:
+        filename (str): The name of the file to load from.
+
+    Returns:
+        SpectralCube: A new SpectralCube instance.
+    """
+    try:
+        import h5py
+    except ImportError:
+        raise ImportError(
+            "The h5py package is required to load HDF5 files. "
+            "Please install it with 'pip install h5py'."
+        )
+    
+    from unyt import unyt_quantity, unyt_array
+    
+    with h5py.File(filename, 'r') as f:
+        # Get the data cube
+        data = f['data_cube'][:]
+        
+        units_str = f['data_cube'].attrs.get('units', '')
+        
+        # Get metadata if available
+        if 'metadata' in f:
+            metadata = f['metadata']
+            
+            # Extract resolution
+            resolution_value = metadata.attrs.get('resolution_value', 1.0)
+            resolution_units = metadata.attrs.get('resolution_units', 'arcsec')
+            
+            # Extract FOV
+            if 'fov_value' in metadata.attrs:
+                fov_value = metadata.attrs['fov_value']
+            elif 'fov_x_value' in metadata.attrs and 'fov_y_value' in metadata.attrs:
+                fov_value = (metadata.attrs['fov_x_value'], metadata.attrs['fov_y_value'])
+            else:
+                fov_value = 1.0
+                
+            fov_units = metadata.attrs.get('fov_units', 'arcsec')
+            
+            quantity = metadata.attrs.get('quantity')
+        else:
+            # Default values if metadata not found
+            resolution_value = 1.0
+            resolution_units = 'arcsec'
+            fov_value = 1.0
+            fov_units = 'arcsec'
+            quantity = None
+        
+        if 'wavelength' in f:
+            wavelength_values = f['wavelength'][:]
+            wavelength_units = f['wavelength'].attrs.get('units', 'angstrom')
+        else:
+            # Default wavelength array if not found
+            wavelength_values = np.arange(data.shape[2])
+            wavelength_units = 'angstrom'
+        
+        resolution = unyt_quantity(resolution_value, resolution_units)
+        wavelength = unyt_array(wavelength_values, wavelength_units)
+        
+        if isinstance(fov_value, tuple):
+            fov = unyt_array(fov_value, fov_units)
+        else:
+            fov = unyt_quantity(fov_value, fov_units)
+        
+        # Try to parse the units string
+        try:
+            from unyt import Unit
+            units = Unit(units_str)
+        except:
+            # Default to dimensionless if units can't be parsed
+            from unyt import dimensionless
+            units = dimensionless
+        
+        # Create the cube
+        cube = cls(
+            resolution=resolution,
+            lam=wavelength,
+            fov=fov,
+        )
+        
+        cube.arr = data
+        cube.units = units
+        cube.quantity = quantity
+        
+        return cube
