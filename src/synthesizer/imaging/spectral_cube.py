@@ -697,95 +697,95 @@ class SpectralCube:
 
         return anim
 
-
-
-@classmethod
-def load_from_hdf5(cls, filename):
-    """Load a spectral data cube from an HDF5 file.
-
-    Args:
-        filename (str): The name of the file to load from.
-
-    Returns:
-        SpectralCube: A new SpectralCube instance.
-    """
-    try:
-        import h5py
-    except ImportError:
-        raise ImportError(
-            "The h5py package is required to load HDF5 files. "
-            "Please install it with 'pip install h5py'."
-        )
     
-    from unyt import unyt_quantity, unyt_array
     
-    with h5py.File(filename, 'r') as f:
-        # Get the data cube
-        data = f['data_cube'][:]
-        
-        units_str = f['data_cube'].attrs.get('units', '')
-        
-        # Get metadata if available
-        if 'metadata' in f:
-            metadata = f['metadata']
-            
-            # Extract resolution
-            resolution_value = metadata.attrs.get('resolution_value', 1.0)
-            resolution_units = metadata.attrs.get('resolution_units', 'arcsec')
-            
-            # Extract FOV
-            if 'fov_value' in metadata.attrs:
-                fov_value = metadata.attrs['fov_value']
-            elif 'fov_x_value' in metadata.attrs and 'fov_y_value' in metadata.attrs:
-                fov_value = (metadata.attrs['fov_x_value'], metadata.attrs['fov_y_value'])
-            else:
-                fov_value = 1.0
-                
-            fov_units = metadata.attrs.get('fov_units', 'arcsec')
-            
-            quantity = metadata.attrs.get('quantity')
-        else:
-            # Default values if metadata not found
-            resolution_value = 1.0
-            resolution_units = 'arcsec'
-            fov_value = 1.0
-            fov_units = 'arcsec'
-            quantity = None
-        
-        if 'wavelength' in f:
-            wavelength_values = f['wavelength'][:]
-            wavelength_units = f['wavelength'].attrs.get('units', 'angstrom')
-        else:
-            # Default wavelength array if not found
-            wavelength_values = np.arange(data.shape[2])
-            wavelength_units = 'angstrom'
-        
-        resolution = unyt_quantity(resolution_value, resolution_units)
-        wavelength = unyt_array(wavelength_values, wavelength_units)
-        
-        if isinstance(fov_value, tuple):
-            fov = unyt_array(fov_value, fov_units)
-        else:
-            fov = unyt_quantity(fov_value, fov_units)
-        
-        # Try to parse the units string
+    @classmethod
+    def load_from_hdf5(cls, filename):
+        """Load a spectral data cube from an HDF5 file.
+    
+        Args:
+            filename (str): The name of the file to load from.
+    
+        Returns:
+            SpectralCube: A new SpectralCube instance.
+        """
         try:
-            from unyt import Unit
-            units = Unit(units_str)
-        except:
-            # Default to dimensionless if units can't be parsed
-            from unyt import dimensionless
-            units = dimensionless
+            import h5py
+        except ImportError:
+            raise ImportError(
+                "The h5py package is required to load HDF5 files. "
+                "Please install it with 'pip install h5py'."
+            )
         
-        # Create the cube
-        cube = cls(
-            resolution=resolution,
-            lam=wavelength,
-            fov=fov,
-        )
+        from unyt import unyt_quantity, unyt_array
         
-        cube.arr = data
-        cube.units = units
-        cube.quantity = quantity
-        
-        return cube
+        with h5py.File(filename, 'r') as f:
+            # Get the data cube
+            data = f['data_cube'][:]
+            
+            units_str = f['data_cube'].attrs.get('units', '')
+            
+            # Get metadata if available
+            if 'metadata' in f:
+                metadata = f['metadata']
+                
+                # Extract resolution
+                resolution_value = metadata.attrs.get('resolution_value', 1.0)
+                resolution_units = metadata.attrs.get('resolution_units', 'arcsec')
+                
+                # Extract FOV
+                if 'fov_value' in metadata.attrs:
+                    fov_value = metadata.attrs['fov_value']
+                elif 'fov_x_value' in metadata.attrs and 'fov_y_value' in metadata.attrs:
+                    fov_value = (metadata.attrs['fov_x_value'], metadata.attrs['fov_y_value'])
+                else:
+                    fov_value = 1.0
+                    
+                fov_units = metadata.attrs.get('fov_units', 'arcsec')
+                
+                quantity = metadata.attrs.get('quantity')
+            else:
+                # Default values if metadata not found
+                resolution_value = 1.0
+                resolution_units = 'arcsec'
+                fov_value = 1.0
+                fov_units = 'arcsec'
+                quantity = None
+            
+            if 'wavelength' in f:
+                wavelength_values = f['wavelength'][:]
+                wavelength_units = f['wavelength'].attrs.get('units', 'angstrom')
+            else:
+                # Default wavelength array if not found
+                wavelength_values = np.arange(data.shape[2])
+                wavelength_units = 'angstrom'
+            
+            resolution = unyt_quantity(resolution_value, resolution_units)
+            wavelength = unyt_array(wavelength_values, wavelength_units)
+            
+            if isinstance(fov_value, tuple):
+                fov = unyt_array(fov_value, fov_units)
+            else:
+                fov = unyt_quantity(fov_value, fov_units)
+            
+            # Try to parse the units string
+            try:
+                from unyt import Unit
+                units = Unit(units_str)
+            except:
+                # Default to dimensionless if units can't be parsed
+                from unyt import dimensionless
+                units = dimensionless
+            
+            # Create the cube
+            cube = cls(
+                resolution=resolution,
+                lam=wavelength,
+                fov=fov,
+            )
+            
+            cube.arr = data
+            cube.units = units
+            cube.quantity = quantity
+            
+            return cube
